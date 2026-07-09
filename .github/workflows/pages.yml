@@ -1,0 +1,76 @@
+name: Deploy MIB Terminal
+
+# Publishes this repo's root as https://mibterminal.com via GitHub Pages.
+# Self-enabling: on first run it creates the Pages site (branch deploy if
+# the API allows it, workflow deploy otherwise) and sets the custom domain.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure Pages site exists + custom domain
+        id: pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          H="Authorization: Bearer ${GH_TOKEN}"
+          A="Accept: application/vnd.github+json"
+          base="https://api.github.com/repos/${GITHUB_REPOSITORY}/pages"
+          CODE=$(curl -s -o g.json -w "%{http_code}" -H "$H" -H "$A" "$base")
+          echo "GET /pages -> HTTP $CODE"; cat g.json; echo
+          if [ "$CODE" = "404" ]; then
+            echo "== creating Pages site (legacy branch deploy, main root) =="
+            curl -s -o c1.json -w "HTTP %{http_code}\n" -X POST -H "$H" -H "$A" \
+              -d '{"build_type":"legacy","source":{"branch":"main","path":"/"}}' "$base"
+            cat c1.json; echo
+            CODE=$(curl -s -o g.json -w "%{http_code}" -H "$H" -H "$A" "$base")
+            if [ "$CODE" = "404" ]; then
+              echo "== legacy create failed — trying workflow build type =="
+              curl -s -o c2.json -w "HTTP %{http_code}\n" -X POST -H "$H" -H "$A" \
+                -d '{"build_type":"workflow"}' "$base"
+              cat c2.json; echo
+              CODE=$(curl -s -o g.json -w "%{http_code}" -H "$H" -H "$A" "$base")
+            fi
+          fi
+          echo "== set custom domain =="
+          curl -s -o d.json -w "HTTP %{http_code}\n" -X PUT -H "$H" -H "$A" \
+            -d '{"cname":"mibterminal.com"}' "$base"
+          cat d.json; echo
+          echo "== final =="
+          CODE=$(curl -s -o f.json -w "%{http_code}" -H "$H" -H "$A" "$base")
+          echo "HTTP $CODE"; cat f.json; echo
+          BT=$(jq -r '.build_type // "none"' f.json 2>/dev/null || echo none)
+          echo "build_type=$BT" >> "$GITHUB_OUTPUT"
+          if [ "$BT" = "legacy" ]; then
+            echo "== request a branch build =="
+            curl -s -o b.json -w "HTTP %{http_code}\n" -X POST -H "$H" -H "$A" "$base/builds"
+            cat b.json; echo
+          fi
+
+      - name: Upload site artifact
+        if: steps.pages.outputs.build_type == 'workflow'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        if: steps.pages.outputs.build_type == 'workflow'
+        id: deployment
+        uses: actions/deploy-pages@v4
