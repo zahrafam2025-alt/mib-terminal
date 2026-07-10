@@ -1,101 +1,32 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
+<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MIB Terminal — Weekly Archive</title>
-<meta property="og:title" content="MIB Terminal — Weekly Archive">
-<meta name="description" content="Archive of the free MIB weekly brief — the market&#x27;s week, explained in plain English.">
+<title>MIB Terminal — archive</title>
 <link rel="icon" href="../favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="MARKET INTELLIGENCE BRIEF">
-<meta property="og:description" content="Archive of the free MIB weekly brief — the market&#x27;s week, explained in plain English.">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://mibterminal.com/archive/">
-<meta property="og:url" content="https://mibterminal.com/archive/">
-<meta property="og:image" content="https://mibterminal.com/og.png">
-<meta name="twitter:image" content="https://mibterminal.com/og.png">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: rgb(9,20,38);
-    background-image:
-      linear-gradient(rgb(24,42,68) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(24,42,68) 1px, transparent 1px);
-    background-size: 48px 48px;
-    color: rgb(244,247,250);
-    font: 17px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    padding: 24px 16px 64px;
-  }
-  .wrap { max-width: 780px; margin: 0 auto; }
-  header { display: flex; align-items: baseline; gap: 14px; padding: 8px 0 14px; }
-  .mark { font-weight: 800; font-size: 30px; letter-spacing: 1px; }
-  .mark b { color: rgb(233,185,73); }
-  .brand { color: rgb(150,168,190); font: 12px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-           letter-spacing: 2px; text-transform: uppercase; }
-  .stamp { margin-left: auto; color: rgb(150,168,190);
-           font: 12px/1 ui-monospace, Menlo, Consolas, monospace; }
-  .card { background: rgb(14,28,51); border: 1px solid rgb(24,42,68); border-radius: 14px;
-          padding: 28px 26px; box-shadow: 0 12px 40px rgba(0,0,0,.35); }
-  h2 { color: rgb(233,185,73); font: 700 13px/1 ui-monospace, Menlo, Consolas, monospace;
-       letter-spacing: 2.5px; text-transform: uppercase; margin: 26px 0 10px;
-       padding-top: 4px; }
-  h2:first-child { margin-top: 0; }
-  p { margin: 8px 0; }
-  .muted { color: rgb(150,168,190); font-size: 14px; }
-  ul { list-style: none; margin: 6px 0; }
-  li { margin: 7px 0; padding-left: 18px; position: relative; }
-  li::before { content: "▸"; position: absolute; left: 0; color: rgb(233,185,73); }
-  hr { border: 0; border-top: 1px solid rgb(24,42,68); margin: 20px 0; }
-  strong { color: rgb(244,247,250); }
-  em { color: rgb(150,168,190); font-style: normal; }
-  .btn { display: block; text-align: center; margin: 26px auto 0; max-width: 420px;
-         background: rgb(233,185,73); color: rgb(9,20,38); font-weight: 800; text-decoration: none;
-         padding: 15px 22px; border-radius: 999px; }
-  footer { text-align: center; color: rgb(150,168,190); font-size: 12.5px; margin-top: 26px; }
-  footer a { color: rgb(150,168,190); }
-  nav { display: flex; gap: 10px; margin: 0 0 14px; }
-  nav a { color: rgb(150,168,190); text-decoration: none; border: 1px solid rgb(24,42,68);
-          border-radius: 999px; padding: 6px 16px;
-          font: 700 12px/1 ui-monospace, Menlo, Consolas, monospace;
-          letter-spacing: 2px; }
-  nav a.on { color: rgb(9,20,38); background: rgb(233,185,73); border-color: rgb(233,185,73); }
-  .hero { text-align: center; padding: 30px 8px 26px; }
-  .hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.15;
-             letter-spacing: -0.5px; margin-bottom: 14px; }
-  .hero .lead { color: rgb(150,168,190); max-width: 620px; margin: 0 auto 6px;
-                font-size: 17px; }
-  .hero .lead strong { color: rgb(233,185,73); }
-  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
-             margin: 20px 0 6px; }
-  .cta-row .btn { display: inline-block; margin: 0; }
-  .btn.ghost { background: transparent; color: rgb(233,185,73);
-               border: 1px solid rgb(233,185,73); }
-  .hero .proof { color: rgb(150,168,190); font: 12px/1.7 ui-monospace, Menlo, Consolas,
-                 monospace; letter-spacing: 1px; text-transform: uppercase;
-                 margin-top: 12px; }
-  .arch-list a { color: rgb(244,247,250); text-decoration: none; }
-  .arch-list a:hover { color: rgb(233,185,73); }
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header>
-    <span class="mark">MIB<b>▮</b></span>
-    <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
-    <span class="stamp">2026-07-10 08:40 UTC</span>
-  </header>
-<nav><a  href="../">TODAY</a><a  href="../weekly.html">THE WEEK</a><a class="on" href="../archive/">ARCHIVE</a></nav>
-
-  <div class="card">
-<h2>THE WEEKLY ARCHIVE</h2>
-<p>The first weekly brief lands this Sunday.</p>
-<a class="btn" href="https://t.me/mibterminal">Join the free channel &rarr;</a>
-  </div>
-  <footer>
-    @mib.terminal · Educational market commentary — not investment advice.
-  </footer>
-</div>
-</body>
-</html>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:rgb(9,20,38);
+  background-image:linear-gradient(rgb(24,42,68) 1px,transparent 1px),
+  linear-gradient(90deg,rgb(24,42,68) 1px,transparent 1px);
+  background-size:48px 48px; color:rgb(244,247,250);
+  font:17px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  padding:24px 16px 64px; }
+.top { max-width:760px; margin:0 auto 18px; display:flex; align-items:baseline; gap:14px; }
+.logo { font-size:28px; font-weight:800; } .logo span { color:#f5c542; }
+.kick { font-family:ui-monospace,Menlo,monospace; letter-spacing:3px; color:#8fa3bf; font-size:12px; }
+.tabs { max-width:760px; margin:0 auto 22px; display:flex; gap:10px; font-family:ui-monospace,Menlo,monospace; font-size:13px; letter-spacing:2px; }
+.tabs a { color:#c7d2e0; text-decoration:none; border:1px solid rgb(44,66,98); border-radius:40px; padding:6px 16px; }
+.tabs a.on { background:#f5c542; color:rgb(9,20,38); border-color:#f5c542; font-weight:700; }
+.card { max-width:760px; margin:0 auto; background:rgba(13,27,49,.92); border-radius:16px; padding:24px 26px; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+.card a { display:block; color:#f5c542; text-decoration:none; padding:10px 4px; border-bottom:1px solid rgb(34,54,84); font-family:ui-monospace,Menlo,monospace; letter-spacing:1px; }
+.card a:last-child { border-bottom:0; }
+.note { color:#8fa3bf; font-size:14px; margin-top:16px; }
+</style></head><body>
+<div class="top"><div class="logo">MIB<span>▌</span></div>
+<div class="kick">TERMINAL · ARCHIVE</div></div>
+<div class="tabs"><a href="../">TODAY</a><a href="../weekly.html">THE WEEK</a><a class="on" href="./">ARCHIVE</a><a href="/members/">MEMBERS</a></div>
+<div class="card">
+<a href="2026-07-10.html">📊 2026-07-10 — daily teaser</a>
+<a href="2026-07-09.html">📊 2026-07-09 — daily teaser</a>
+<div class="note">Teasers only — the full daily brief is for members.
+<a href="/members/" style="display:inline;color:#f5c542;border:0;padding:0">Log in →</a></div>
+</div></body></html>
