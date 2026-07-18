@@ -89,6 +89,8 @@
   }
   @media (max-width: 1500px) { header.masthead .brand { display: none; } }
   header.masthead > * { pointer-events: auto; }
+  .home { display: inline-flex; align-items: center; gap: 12px;
+          text-decoration: none; color: inherit; }
   .mark { font: 800 22px/1 var(--sans); letter-spacing: 1px; }
   .mark b { color: var(--gold); }
   .brand {
@@ -259,10 +261,12 @@
   <div id="vignette" aria-hidden="true"></div>
 
   <header class="masthead">
-    <span class="mark">MIB<b>▮</b></span>
-    <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
+    <a class="home" href="../index.html" aria-label="MARKET INTELLIGENCE BRIEF — home">
+      <span class="mark">MIB<b>▮</b></span>
+      <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
+    </a>
 <nav class="menu" aria-label="Site"><a href="../">Today</a><a href="../weekly.html">The Week</a><a class="on" href="../archive/">Archive</a><a href="https://mibterminal.com/subscribe">Members</a><a href="https://t.me/mibterminal">Free Telegram</a><a class="cta" href="https://mibterminal.com/subscribe">Get the daily brief</a></nav>
-    <span class="stamp">2026-07-18 16:45 UTC</span>
+    <span class="stamp">2026-07-18 17:25 UTC</span>
     <span class="tier-badge public">FREE PREVIEW</span>
     <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
       <i></i><i></i>
