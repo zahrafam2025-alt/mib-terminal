@@ -254,6 +254,17 @@
     #hero-art.alive .art { animation: none; }
     .menu-overlay, .menu-overlay a, .btn, .subscribe-fab { transition: none; }
   }
+
+  .lang-toggle { display: inline-flex; gap: 2px; align-items: center;
+    border: 1px solid var(--panel-line); border-radius: 999px; padding: 2px;
+    background: rgba(9,20,38,.5); }
+  .lang-toggle button { appearance: none; border: 0; cursor: pointer;
+    background: transparent; color: var(--muted);
+    font: 700 11px/1 var(--mono); letter-spacing: 1px; padding: 6px 10px;
+    border-radius: 999px; transition: color .2s, background .2s; }
+  .lang-toggle button.on { color: var(--bg-deep); background: var(--gold); }
+  @media (hover:hover){ .lang-toggle button:not(.on):hover{ color: var(--ink);} }
+
 </style>
 </head>
 <body>
@@ -265,9 +276,10 @@
       <span class="mark">MIB<b>▮</b></span>
       <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
     </a>
-<nav class="menu" aria-label="Site"><a href="../">Today</a><a href="../weekly.html">The Week</a><a class="on" href="../archive/">Archive</a><a href="https://mibterminal.com/subscribe">Members</a><a href="https://t.me/mibterminal">Free Telegram</a><a class="cta" href="https://mibterminal.com/subscribe">Get the daily brief</a></nav>
-    <span class="stamp">2026-07-18 17:25 UTC</span>
-    <span class="tier-badge public">FREE PREVIEW</span>
+<nav class="menu" aria-label="Site"><a href="../" data-i18n="Aujourd’hui">Today</a><a href="../weekly.html" data-i18n="La Semaine">The Week</a><a class="on" href="../archive/" data-i18n="Archives">Archive</a><a href="https://mibterminal.com/subscribe" data-i18n="Abonnés">Members</a><a href="https://t.me/mibterminal" data-i18n="Telegram gratuit">Free Telegram</a><a class="cta" href="https://mibterminal.com/subscribe" data-i18n="Recevez le brief">Get the daily brief</a></nav>
+    <span class="stamp">2026-07-19 20:51 UTC</span>
+    <span class="tier-badge public" data-i18n="APERÇU GRATUIT">FREE PREVIEW</span>
+    <span class="lang-toggle" role="group" aria-label="Language / Langue"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="fr">FR</button></span>
     <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
       <i></i><i></i>
     </button>
@@ -283,13 +295,13 @@
 <li><a href="2026-07-17.html">Week of 2026-07-17 — the market's week in plain English</a></li>
 <li><a href="2026-07-11.html">Week of 2026-07-11 — the market's week in plain English</a></li>
 </ul>
-      <div class="cta-row"><a class="btn" href="https://mibterminal.com/subscribe">Get the daily brief — before the bell &rarr;</a></div>
+      <div class="cta-row"><a class="btn" data-i18n="Recevez le brief quotidien — avant l’ouverture →" href="https://mibterminal.com/subscribe">Get the daily brief — before the bell &rarr;</a></div>
       <footer class="colophon">
-        @mib.terminal · Educational market commentary — not investment advice.
+        @mib.terminal · <span data-i18n="Commentaire de marché éducatif — pas un conseil en investissement.">Educational market commentary — not investment advice.</span>
       </footer>
     </div>
   </main>
-<a class="subscribe-fab" href="https://mibterminal.com/subscribe">Unlock the full brief — free daily &rarr;</a>
+<a class="subscribe-fab" data-i18n="Débloquez le brief complet — gratuit chaque jour →" href="https://mibterminal.com/subscribe">Unlock the full brief — free daily &rarr;</a>
   <script>
     // burger + overlay, mirroring the homepage's buildMenu wiring; the
     // overlay links are cloned from the masthead menu so both stay one list
@@ -317,5 +329,34 @@
       });
     })();
   </script>
+<script>
+(function(){
+  var KEY="mib_lang", LANGS=["en","fr"];
+  function apply(l){
+    if(LANGS.indexOf(l)<0) l="en";
+    document.documentElement.setAttribute("lang", l);
+    document.querySelectorAll("[data-i18n]").forEach(function(e){
+      if(e.getAttribute("data-en")===null) e.setAttribute("data-en", e.textContent);
+      e.textContent = (l==="fr") ? e.getAttribute("data-i18n") : e.getAttribute("data-en");
+    });
+    document.querySelectorAll("[data-lang]").forEach(function(e){
+      var show = e.getAttribute("data-lang")===l;
+      e.hidden = !show; e.style.display = show ? "" : "none";
+    });
+    document.querySelectorAll("[data-lang-btn]").forEach(function(b){
+      b.classList.toggle("on", b.getAttribute("data-lang-btn")===l);
+    });
+    try{ localStorage.setItem(KEY, l); }catch(_){}
+  }
+  var init="en"; try{ init=localStorage.getItem(KEY)||"en"; }catch(_){}
+  document.addEventListener("click", function(ev){
+    var b=ev.target.closest && ev.target.closest("[data-lang-btn]");
+    if(b){ ev.preventDefault(); apply(b.getAttribute("data-lang-btn")); }
+  });
+  if(document.readyState==="loading")
+    document.addEventListener("DOMContentLoaded", function(){ apply(init); });
+  else apply(init);
+})();
+</script>
 </body>
 </html>

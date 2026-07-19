@@ -254,6 +254,17 @@
     #hero-art.alive .art { animation: none; }
     .menu-overlay, .menu-overlay a, .btn, .subscribe-fab { transition: none; }
   }
+
+  .lang-toggle { display: inline-flex; gap: 2px; align-items: center;
+    border: 1px solid var(--panel-line); border-radius: 999px; padding: 2px;
+    background: rgba(9,20,38,.5); }
+  .lang-toggle button { appearance: none; border: 0; cursor: pointer;
+    background: transparent; color: var(--muted);
+    font: 700 11px/1 var(--mono); letter-spacing: 1px; padding: 6px 10px;
+    border-radius: 999px; transition: color .2s, background .2s; }
+  .lang-toggle button.on { color: var(--bg-deep); background: var(--gold); }
+  @media (hover:hover){ .lang-toggle button:not(.on):hover{ color: var(--ink);} }
+
 </style>
 </head>
 <body>
@@ -265,9 +276,10 @@
       <span class="mark">MIB<b>▮</b></span>
       <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
     </a>
-<nav class="menu" aria-label="Site"><a href="../">Today</a><a href="../weekly.html">The Week</a><a class="on" href="../archive/">Archive</a><a href="https://mibterminal.com/subscribe">Members</a><a href="https://t.me/mibterminal">Free Telegram</a><a class="cta" href="https://mibterminal.com/subscribe">Get the daily brief</a></nav>
+<nav class="menu" aria-label="Site"><a href="../" data-i18n="Aujourd’hui">Today</a><a href="../weekly.html" data-i18n="La Semaine">The Week</a><a class="on" href="../archive/" data-i18n="Archives">Archive</a><a href="https://mibterminal.com/subscribe" data-i18n="Abonnés">Members</a><a href="https://t.me/mibterminal" data-i18n="Telegram gratuit">Free Telegram</a><a class="cta" href="https://mibterminal.com/subscribe" data-i18n="Recevez le brief">Get the daily brief</a></nav>
     <span class="stamp">2026-07-11</span>
-    <span class="tier-badge public">FREE PREVIEW</span>
+    <span class="tier-badge public" data-i18n="APERÇU GRATUIT">FREE PREVIEW</span>
+    <span class="lang-toggle" role="group" aria-label="Language / Langue"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="fr">FR</button></span>
     <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
       <i></i><i></i>
     </button>
@@ -316,7 +328,7 @@
     .wk-health { gap: 16px; } .wk-gauge { flex-basis: 100%; text-align: center; }
   }
 </style>
-<div class="hero"><h1>The Week Beneath the Surface</h1><p class="lead">MIB Weekly Intelligence · <strong>Jul 06 – Jul 11</strong> · 6 trading days. What the tape was doing under the headlines — merged, ranked and read as one week.</p></div>
+<div class="hero"><h1>The Week Beneath the Surface</h1><p class="lead">MIB Weekly Intelligence · <strong>Jul 06 – Jul 11</strong> · 6 trading days. What the market was doing under the headlines — merged, ranked and read as one week.</p></div>
 <h2>📈 The Week in One Chart</h2>
 <p class="muted">If you only looked at one chart this week, it should be this one.</p>
 <p><strong>Share of all gains carried by just 3 names</strong></p>
@@ -365,7 +377,7 @@
 <p>On 4 of 6 readings this week the broad market refused to confirm the index — at the worst point only 22% of stocks were rising while the index held its ground.</p>
 <h2>What Died / What Was Born</h2>
 <div class="wk-trans"><div class="wk-tr"><span class="wk-tr-what">Fear gauge (VIX)</span><span class="wk-tr-a">16.3</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">15.0</span></div><div class="wk-tr"><span class="wk-tr-what">Market stress</span><span class="wk-tr-a">50</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">46</span></div><div class="wk-tr"><span class="wk-tr-what">Stocks rising</span><span class="wk-tr-a">50%</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">48%</span></div><div class="wk-tr"><span class="wk-tr-what">Leading sector</span><span class="wk-tr-a">Energy</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">Real Estate</span></div><div class="wk-tr"><span class="wk-tr-what">Top-3 share of gains</span><span class="wk-tr-a">44%</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">35%</span></div></div>
-<p class="muted">Faded from the tape: Microsoft (MSFT) Layoffs, Strait of Hormuz partially reopened after US-Iran MOU (June 17) but Israel-Lebanon strikes risk re-closing the strait; Iran funeral week (Jul 4-9) with hardline successor Mojtaba Khamenei raising tail risk of renewed escalation and oil supply disruption.</p>
+<p class="muted">Faded from view: Microsoft (MSFT) Layoffs, Strait of Hormuz partially reopened after US-Iran MOU (June 17) but Israel-Lebanon strikes risk re-closing the strait; Iran funeral week (Jul 4-9) with hardline successor Mojtaba Khamenei raising tail risk of renewed escalation and oil supply disruption.</p>
 <p class="muted">Newly born: Delta Air Lines (DAL) Q2 FY2026 Earnings, PepsiCo (PEP) Q2 FY2026 Earnings.</p>
 <h2>Next Week&#x27;s Test</h2>
 <ul><li><strong>Tue Jul 14</strong> — JPMorgan Chase (JPM) Q2 FY2026 Earnings (cons. EPS $5.44)</li><li><strong>Tue Jul 14</strong> — Bank of America (BAC) Q2 FY2026 Earnings (cons. EPS $1.13)</li><li><strong>Tue Jul 14</strong> — Goldman Sachs (GS) Q2 FY2026 Earnings (cons. EPS $14.46)</li><li><strong>Tue Jul 14</strong> — Wells Fargo (WFC) Q2 FY2026 Earnings (cons. EPS $1.73)</li><li><strong>Tue Jul 14</strong> — Citigroup (C) Q2 FY2026 Earnings (cons. EPS $2.76)</li></ul>
@@ -374,13 +386,13 @@
 <p>Our health read sits at 37/100 (divergent): the market isn&#x27;t broken, but it&#x27;s working through friction. The tell for the week ahead is simple — do more stocks start joining the move, or do the few leaders keep carrying it alone?</p>
 <h2>In Plain English</h2>
 <ul><li><strong>EPS</strong> — earnings per share — a company&#x27;s profit divided by its share count; the number Wall Street forecasts and compares against.</li><li><strong>cons.</strong> — &#x27;consensus&#x27; — the average analyst forecast. Markets move on the RESULT vs this expectation, not the result alone.</li><li><strong>MOU</strong> — memorandum of understanding: a preliminary, NON-binding agreement. A step toward a deal, not a signed treaty, so it can still fall apart.</li><li><strong>VIX</strong> — the market&#x27;s &#x27;fear gauge&#x27;. Higher = traders expect bigger swings; ~20 is the long-run average.</li><li><strong>CPI</strong> — the headline inflation reading (consumer price index) — moves rate expectations and therefore stocks and bonds.</li><li><strong>guidance</strong> — a company&#x27;s own forecast for next quarter — often moves the stock more than the actual results.</li><li><strong>breadth</strong> — how many stocks are participating in a move; narrow breadth means a few names are masking a weak market underneath.</li><li><strong>rotation</strong> — money moving from one sector into another rather than leaving the market — tells you what leadership is forming.</li></ul>
-      <div class="cta-row"><a class="btn" href="https://mibterminal.com/subscribe">Get the daily brief — before the bell &rarr;</a></div>
+      <div class="cta-row"><a class="btn" data-i18n="Recevez le brief quotidien — avant l’ouverture →" href="https://mibterminal.com/subscribe">Get the daily brief — before the bell &rarr;</a></div>
       <footer class="colophon">
-        @mib.terminal · Educational market commentary — not investment advice.
+        @mib.terminal · <span data-i18n="Commentaire de marché éducatif — pas un conseil en investissement.">Educational market commentary — not investment advice.</span>
       </footer>
     </div>
   </main>
-<a class="subscribe-fab" href="https://mibterminal.com/subscribe">Unlock the full brief — free daily &rarr;</a>
+<a class="subscribe-fab" data-i18n="Débloquez le brief complet — gratuit chaque jour →" href="https://mibterminal.com/subscribe">Unlock the full brief — free daily &rarr;</a>
   <script>
     // burger + overlay, mirroring the homepage's buildMenu wiring; the
     // overlay links are cloned from the masthead menu so both stay one list
@@ -408,5 +420,34 @@
       });
     })();
   </script>
+<script>
+(function(){
+  var KEY="mib_lang", LANGS=["en","fr"];
+  function apply(l){
+    if(LANGS.indexOf(l)<0) l="en";
+    document.documentElement.setAttribute("lang", l);
+    document.querySelectorAll("[data-i18n]").forEach(function(e){
+      if(e.getAttribute("data-en")===null) e.setAttribute("data-en", e.textContent);
+      e.textContent = (l==="fr") ? e.getAttribute("data-i18n") : e.getAttribute("data-en");
+    });
+    document.querySelectorAll("[data-lang]").forEach(function(e){
+      var show = e.getAttribute("data-lang")===l;
+      e.hidden = !show; e.style.display = show ? "" : "none";
+    });
+    document.querySelectorAll("[data-lang-btn]").forEach(function(b){
+      b.classList.toggle("on", b.getAttribute("data-lang-btn")===l);
+    });
+    try{ localStorage.setItem(KEY, l); }catch(_){}
+  }
+  var init="en"; try{ init=localStorage.getItem(KEY)||"en"; }catch(_){}
+  document.addEventListener("click", function(ev){
+    var b=ev.target.closest && ev.target.closest("[data-lang-btn]");
+    if(b){ ev.preventDefault(); apply(b.getAttribute("data-lang-btn")); }
+  });
+  if(document.readyState==="loading")
+    document.addEventListener("DOMContentLoaded", function(){ apply(init); });
+  else apply(init);
+})();
+</script>
 </body>
 </html>
