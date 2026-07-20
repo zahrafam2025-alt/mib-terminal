@@ -113,6 +113,15 @@ header.masthead {
    keep the MIB mark, drop the wordmark below ultra-wide */
 @media (max-width: 1500px) { header.masthead .brand { display: none; } }
 header.masthead > * { pointer-events: auto; }
+.lang-toggle { display: inline-flex; gap: 2px; align-items: center;
+  border: 1px solid var(--panel-line); border-radius: 999px; padding: 2px;
+  background: rgba(9,20,38,.5); }
+.lang-toggle button { appearance: none; border: 0; cursor: pointer;
+  background: transparent; color: var(--muted);
+  font: 700 11px/1 var(--mono); letter-spacing: 1px; padding: 6px 10px;
+  border-radius: 999px; transition: color .2s, background .2s; }
+.lang-toggle button.on { color: var(--bg-deep); background: var(--gold); }
+@media (hover:hover){ .lang-toggle button:not(.on):hover{ color: var(--ink); } }
 .mark { font: 800 22px/1 var(--sans); letter-spacing: 1px; }
 .mark b { color: var(--gold); }
 .brand {

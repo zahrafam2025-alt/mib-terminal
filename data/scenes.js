@@ -3,8 +3,8 @@ window.MIB_SCENES = {
   "byScene": {
     "story": {
       "src": "assets/scenes/story.jpg",
-      "credit": "U.S. Navy photo by Photographer's Mate 2nd Class Samuel W. Shavers · Wikimedia Commons · Public domain",
-      "source": "real-fallback"
+      "credit": "AI-generated (FLUX) from today's brief",
+      "source": "flux"
     },
     "tape": {
       "src": "assets/scenes/tape.jpg",
@@ -13,8 +13,18 @@ window.MIB_SCENES = {
     },
     "money": {
       "src": "assets/scenes/money.jpg",
-      "credit": "Unknown authorUnknown author · Wikimedia Commons · Public domain",
-      "source": "real-fallback"
+      "credit": "AI-generated (FLUX) from today's brief",
+      "source": "flux"
+    },
+    "changed": {
+      "src": "assets/scenes/changed.jpg",
+      "credit": "AI-generated (FLUX) from today's brief",
+      "source": "flux"
+    },
+    "disconnect": {
+      "src": "assets/scenes/disconnect.jpg",
+      "credit": "AI-generated (FLUX) from today's brief",
+      "source": "flux"
     },
     "drivers": {
       "src": "assets/scenes/drivers.jpg",
@@ -36,6 +46,11 @@ window.MIB_SCENES = {
       "credit": "Gary Todd from Xinzheng, China · Wikimedia Commons · CC0",
       "source": "real"
     },
+    "crypto": {
+      "src": "assets/scenes/crypto.jpg",
+      "credit": "AI-generated (FLUX) from today's brief",
+      "source": "flux"
+    },
     "semis": {
       "src": "assets/scenes/semis.jpg",
       "credit": "Rsparks3 · Wikimedia Commons · CC0",
@@ -43,8 +58,8 @@ window.MIB_SCENES = {
     },
     "crossasset": {
       "src": "assets/scenes/crossasset.jpg",
-      "credit": "United States Post Office Department. · Wikimedia Commons · Public domain",
-      "source": "real-fallback"
+      "credit": "AI-generated (FLUX) from today's brief",
+      "source": "flux"
     },
     "plain": {
       "src": "assets/scenes/plain.jpg",
@@ -73,5 +88,5 @@ window.MIB_SCENES = {
     "plain",
     "close"
   ],
-  "mood": "neutral"
+  "mood": "off"
 };
