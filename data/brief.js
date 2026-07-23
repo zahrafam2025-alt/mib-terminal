@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-07-23T08:59:04Z",
     "date": "2026-07-23",
-    "built_at": "2026-07-23 09:02 UTC",
+    "built_at": "2026-07-23 11:21 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -124,10 +124,10 @@ window.MIB_BRIEF = {
     ]
   },
   "i18n_fr": {
-    "Beneath a flat index, the tape is quietly rotting — just 22% of stocks are advancing, down sharply from yesterday, and 14 of 19 sectors are red. The top 3 leaders account for 72% of the gains, so a handful of defensive names are masking broad weakness. Watch breadth: back above 40% advancing would ease the warning.": "Sous un indice plat, le marché se dégrade discrètement — seulement 22% des actions progressent, en forte baisse par rapport à hier, et 14 secteurs sur 19 sont dans le rouge. Les 3 principaux leaders représentent 72% des gains, ce qui signifie qu'une poignée de valeurs défensives masque une faiblesse généralisée. À surveiller : un retour au-dessus de 40% de titres en hausse atténuerait ce signal d'alerte.",
-    "Alphabet crushed it — earnings of $9.11 a share versus $2.87 expected, powered by cloud sales up 82% and an $514B order backlog. Yet the stock slipped after hours: $44B in AI spending turned cash flow negative, and investors are now questioning whether that spending pays off.": "Alphabet a frappé fort — un bénéfice de 9,11$ par action contre 2,87$ attendus, porté par des ventes cloud en hausse de 82% et un carnet de commandes de 514 milliards de dollars. Pourtant, l'action a reculé après la clôture : les 44 milliards de dollars de dépenses en IA ont fait passer les flux de trésorerie en territoire négatif, et les investisseurs se demandent désormais si ces dépenses seront rentables.",
-    "Tape looks calm on the surface, but only 22% of names are advancing — participation is quietly deteriorating under the index.": "Le marché semble calme en surface, mais seulement 22% des valeurs progressent — la participation se dégrade discrètement sous l'indice.",
-    "@mib.terminal · Educational market commentary — not investment advice.": "@mib.terminal · Commentaire de marché à visée éducative — ne constitue pas un conseil en investissement.",
+    "Beneath a flat index, the tape is quietly rotting — just 22% of stocks are advancing, down sharply from yesterday, and 14 of 19 sectors are red. The top 3 leaders account for 72% of the gains, so a handful of defensive names are masking broad weakness. Watch breadth: back above 40% advancing would ease the warning.": "Sous un indice stable, le marché pourrit tranquillement — seulement 22 % des actions progressent, en forte baisse par rapport à hier, et 14 secteurs sur 19 sont dans le rouge. Les 3 principaux leaders représentent 72 % des gains, ce qui signifie qu'une poignée de valeurs défensives masque une faiblesse généralisée. Surveillez la largeur de marché : un retour au-dessus de 40 % d'actions en hausse atténuerait le signal d'alerte.",
+    "Alphabet crushed it — earnings of $9.11 a share versus $2.87 expected, powered by cloud sales up 82% and an $514B order backlog. Yet the stock slipped after hours: $44B in AI spending turned cash flow negative, and investors are now questioning whether that spending pays off.": "Alphabet a frappé fort — un bénéfice de 9,11 $ par action contre 2,87 $ attendus, porté par des ventes cloud en hausse de 82 % et un carnet de commandes de 514 milliards $. Pourtant, le titre a reculé après la clôture : les 44 milliards $ dépensés dans l'IA ont fait passer le cash-flow en territoire négatif, et les investisseurs se demandent désormais si ces dépenses seront rentables.",
+    "Tape looks calm on the surface, but only 22% of names are advancing — participation is quietly deteriorating under the index.": "En surface, le marché semble calme, mais seulement 22 % des valeurs progressent — la participation se dégrade discrètement sous l'indice.",
+    "@mib.terminal · Educational market commentary — not investment advice.": "@mib.terminal · Commentaire de marché à visée pédagogique — ne constitue pas un conseil en investissement.",
     "24 analysed · 288 screened · 16 no data · feeds healthy": "24 analysées · 288 passées au crible · 16 sans données · flux opérationnels",
     "WHERE MONEY IS MOVING": "OÙ VA L'ARGENT",
     "WHAT TO WATCH NEXT": "À SURVEILLER ENSUITE",
