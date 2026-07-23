@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-07-23T11:42:27Z",
     "date": "2026-07-23",
-    "built_at": "2026-07-23 11:45 UTC",
+    "built_at": "2026-07-23 11:48 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -124,13 +124,13 @@ window.MIB_BRIEF = {
     ]
   },
   "i18n_fr": {
-    "Surface calm, weak underneath: the index is flat but only 23% of stocks are rising and the top 3 names drive 72% of the gains. That gap is the real signal — this is a narrow, defensive tape leaning on utilities and materials. Breadth clearing back above 40% would say the fear is fading; until then, treat strength as thin.": "Calme en surface, faiblesse en dessous : l'indice est stable mais seulement 23 % des actions progressent, et les 3 premières valeurs concentrent 72 % des gains. Cet écart est le vrai signal — c'est un marché étroit et défensif, appuyé sur les services publics et les matériaux. Un retour de la largeur au-dessus de 40 % signalerait un reflux de la peur ; en attendant, il faut voir cette force comme superficielle.",
-    "Oil is running the tape. Brent near $96 after a 12th straight night of US strikes on Iran is pushing money into energy stocks and out of everything rate-sensitive.": "Le pétrole mène la danse. Le Brent proche de 96 $ après une 12e nuit consécutive de frappes américaines sur l'Iran pousse les capitaux vers les valeurs énergétiques et hors de tout ce qui est sensible aux taux.",
-    "Tape looks calm on the surface, but only 23% of names are advancing — participation is quietly deteriorating under the index.": "Le marché semble calme en surface, mais seulement 23 % des valeurs progressent — la participation se dégrade discrètement sous l'indice.",
-    "@mib.terminal · Educational market commentary — not investment advice.": "@mib.terminal · Commentaire de marché à visée pédagogique — pas un conseil en investissement.",
+    "Surface calm, weak underneath: the index is flat but only 23% of stocks are rising and the top 3 names drive 72% of the gains. That gap is the real signal — this is a narrow, defensive tape leaning on utilities and materials. Breadth clearing back above 40% would say the fear is fading; until then, treat strength as thin.": "Calme en surface, faiblesse en dessous : l'indice est stable mais seulement 23 % des actions sont en hausse et les 3 premières valeurs génèrent 72 % des gains. Cet écart est le vrai signal — c'est une tendance étroite et défensive, appuyée sur les services publics et les matériaux. Un retour de la largeur de marché au-dessus de 40 % indiquerait que la peur s'estompe ; jusque-là, il faut considérer cette vigueur comme fragile.",
+    "Oil is running the tape. Brent near $96 after a 12th straight night of US strikes on Iran is pushing money into energy stocks and out of everything rate-sensitive.": "Le pétrole mène la danse. Le Brent proche de 96 $ après une 12e nuit consécutive de frappes américaines sur l'Iran pousse l'argent vers les valeurs énergétiques et hors de tout ce qui est sensible aux taux.",
+    "Tape looks calm on the surface, but only 23% of names are advancing — participation is quietly deteriorating under the index.": "Le marché paraît calme en surface, mais seulement 23 % des valeurs progressent — la participation se détériore discrètement sous l'indice.",
+    "@mib.terminal · Educational market commentary — not investment advice.": "@mib.terminal · Commentaire de marché à but éducatif — ne constitue pas un conseil en investissement.",
     "32 analysed · 287 screened · 19 no data · feeds healthy": "32 analysées · 287 passées au crible · 19 sans données · flux opérationnels",
     "WHERE MONEY IS MOVING": "OÙ VA L'ARGENT",
-    "THE CONSENSUS VIEW": "LE CONSENSUS DU MARCHÉ",
+    "THE CONSENSUS VIEW": "LE CONSENSUS",
     "WHAT TO WATCH NEXT": "À SURVEILLER ENSUITE",
     "WHAT'S DRIVING IT": "CE QUI EXPLIQUE CE MOUVEMENT",
     "IN PLAIN ENGLISH": "EN CLAIR",

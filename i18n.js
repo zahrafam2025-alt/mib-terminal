@@ -155,6 +155,14 @@
     [/^consensus:\s+(.+)$/i, "consensus : $1"]
   ];
 
+  // mirror of app.js firstSentence() — the hero headline renders only the
+  // FIRST SENTENCE of the story teaser/lede, so the full-string map entry
+  // never exact-matches it
+  function firstSentence(t) {
+    var m = String(t || "").match(/^.*?[.!?](?=\s|$)/);
+    return m ? m[0] : String(t || "");
+  }
+
   function buildMap() {
     var m = {}, k;
     for (k in CHROME) if (CHROME.hasOwnProperty(k)) m[k] = CHROME[k];
@@ -162,6 +170,15 @@
       var fr = window.MIB_BRIEF && window.MIB_BRIEF.i18n_fr;
       if (fr) for (k in fr) if (fr.hasOwnProperty(k)) m[k] = fr[k];
     } catch (_) {}
+    // derived entries: first sentence of every prose pair (hero headline)
+    var fs, k2;
+    for (k in m) if (m.hasOwnProperty(k)) {
+      fs = firstSentence(k);
+      if (fs && fs !== k && m[fs] === undefined) {
+        k2 = firstSentence(m[k]);
+        if (k2) m[fs] = k2;
+      }
+    }
     return m;
   }
   var MAP = buildMap();
