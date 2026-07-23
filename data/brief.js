@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-07-22T06:41:22Z",
     "date": "2026-07-22",
-    "built_at": "2026-07-22 08:47 UTC",
+    "built_at": "2026-07-23 08:47 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -124,6 +124,19 @@ window.MIB_BRIEF = {
       "IN PLAIN ENGLISH"
     ]
   },
-  "i18n_fr": {}
+  "i18n_fr": {
+    "Healthier underneath than the flat indices suggest: 54% of stocks advancing and 14 of 19 sectors green, with leadership only moderately concentrated (top 3 sectors ~35%). The number that matters is that cyclical stocks barely edge defensives (+0.042) — conviction is real but shallow. A clean break above 60% breadth would confirm broad appetite; a fade below 50% signals the AI bounce is narrow.": "La situation est plus saine en coulisses que ne le laissent penser des indices figés : 54% des actions progressent et 14 des 19 secteurs sont dans le vert, avec un leadership seulement modérément concentré (les 3 premiers secteurs pèsent ~35%). Le chiffre qui compte vraiment, c'est que les valeurs cycliques ne devancent que de justesse les défensives (+0,042) — la conviction est bien réelle, mais superficielle. Un franchissement net au-dessus de 60% de largeur de marché confirmerait un appétit généralisé ; une rechute sous 50% signalerait que le rebond lié à l'IA reste étroit.",
+    "Chip stocks came roaring back: the big semiconductor fund (SMH) jumped 4.52% on renewed excitement about AI spending, even as war between the US and Iran flared up again and pushed oil near $90 a barrel. Money is chasing growth despite the geopolitical smoke.": "Les valeurs des semi-conducteurs ont fait un retour en force : le grand fonds sectoriel (SMH) a bondi de 4,52% grâce à un regain d'enthousiasme pour les dépenses liées à l'IA, et ce malgré la reprise des tensions entre les États-Unis et l'Iran, qui a poussé le pétrole près de 90$ le baril. Les capitaux courent après la croissance, même sous le brouillard géopolitique.",
+    "Mixed, two-sided tape — roughly half the market advancing with no decisive conviction either way. (54% of tracked instruments advancing, 14/19 sectors green, top-3 names 35% of upside). Watch the 50% breadth line for the next directional tell.": "Une séance mitigée et équilibrée — environ la moitié du marché progresse, sans conviction décisive dans un sens ou dans l'autre. (54% des instruments suivis en hausse, 14/19 secteurs dans le vert, les 3 premières valeurs représentant 35% de la hausse). Surveillez le seuil des 50% de largeur de marché pour le prochain signal directionnel.",
+    "@mib.terminal · Educational market commentary — not investment advice.": "@mib.terminal · Commentaire de marché à but éducatif — ne constitue pas un conseil en investissement.",
+    "33 analysed · 295 screened · 8 no data · feeds healthy": "33 analysées · 295 passées au crible · 8 sans données · flux fonctionnels",
+    "WHERE MONEY IS MOVING": "OÙ VA L'ARGENT",
+    "WHAT TO WATCH NEXT": "À SURVEILLER ENSUITE",
+    "THE CONSENSUS VIEW": "LE CONSENSUS DU MARCHÉ",
+    "WHAT'S DRIVING IT": "CE QUI EXPLIQUE CE MOUVEMENT",
+    "IN PLAIN ENGLISH": "EN CLAIR",
+    "THE DISCONNECT": "LE DÉCALAGE",
+    "WHAT CHANGED": "CE QUI A CHANGÉ"
+  }
 };
 window.MIB_PROD = 1;
