@@ -28,6 +28,18 @@
     "Get the daily brief →": "Recevez le brief →",
     "Get the daily brief — before the bell →":
       "Recevez le brief — avant l’ouverture →",
+    "Get the free daily brief": "Recevez le brief gratuit",
+    "Get the free daily brief →": "Recevez le brief gratuit →",
+    "Get the free daily brief — before the bell →":
+      "Recevez le brief gratuit — avant l’ouverture →",
+    "Get it free on Telegram →": "Gratuit sur Telegram →",
+    "Premium": "Premium", "MIB Premium": "MIB Premium",
+    "Coming soon": "Bientôt disponible",
+    "FREE · FULL BRIEF": "GRATUIT · BRIEF COMPLET",
+    "Tomorrow the market tells a different story. Read it here, free, every morning.":
+      "Demain, le marché raconte une autre histoire. Lisez-la ici, gratuitement, chaque matin.",
+    "Premium is on the way. Today's brief stays free, every trading morning — this is what compounds on top of it.":
+      "Premium arrive bientôt. Le brief du jour reste gratuit, chaque matin de bourse — voici ce qui s’y ajoute et se cumule.",
     "MEMBER": "ABONNÉ", "PUBLIC": "PUBLIC", "MEMBERS": "ABONNÉS",
     "MEMBER VIEW": "VUE ABONNÉ",
     "FREE PREVIEW": "APERÇU GRATUIT",
@@ -44,7 +56,7 @@
     "STEP INSIDE TODAY’S MARKET": "ENTREZ DANS LE MARCHÉ DU JOUR",
     "Unlock the full brief — free daily →":
       "Débloquez le brief complet — gratuit chaque jour →",
-    "DEMO DATA": "DONNÉES DÉMO", "preview": "aperçu",
+    "DEMO DATA": "DONNÉES DÉMO", "preview": "aperçu", "free": "gratuit",
     // homepage section labels (app.js literals, both cases)
     "TODAY'S STORY": "L’HISTOIRE DU JOUR", "TODAY’S STORY": "L’HISTOIRE DU JOUR",
     "Today's Story": "L’histoire du jour", "Today’s Story": "L’histoire du jour",

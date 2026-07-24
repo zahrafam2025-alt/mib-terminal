@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /members/
 
 Sitemap: https://mibterminal.com/sitemap.xml

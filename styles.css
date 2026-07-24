@@ -556,21 +556,35 @@ ul.obs li:last-child { border-bottom: 0; }
 .gloss b { color: var(--gold); font: 700 12.5px/1 var(--mono); letter-spacing: 1px; display: block; margin-bottom: 8px; text-transform: uppercase; }
 .gloss span { color: var(--muted); font-size: 14.5px; }
 
-/* ── locked scenes (public tier) ─────────────────────────── */
-.locked-wall { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
-.locked-row {
-  display: flex; align-items: center; gap: 16px;
-  padding: 20px 26px; border: 1px solid var(--panel-line); border-radius: 12px;
-  background: var(--panel); color: var(--muted);
-  font: 700 13px/1 var(--mono); letter-spacing: 3px;
-  position: relative; overflow: hidden;
+/* ── premium placeholder (public tier) ───────────────────── */
+#premium .premium-eyebrow {
+  color: var(--gold); font: 700 11px/1 var(--mono); letter-spacing: 3px;
+  text-transform: uppercase; margin-top: 6px;
 }
-.locked-row::after {
-  content: ""; position: absolute; inset: 0;
-  background: repeating-linear-gradient(-45deg, transparent 0 14px, rgba(88,116,152,.05) 14px 28px);
+.premium-tagline {
+  color: var(--muted); font: 400 clamp(17px,2.2vw,20px)/1.5 var(--serif);
+  max-width: 60ch; margin: 14px 0 8px;
 }
-.locked-row .lock { color: var(--gold); }
-.locked-note { margin-top: 26px; color: var(--muted); font-size: 15.5px; max-width: 56ch; }
+.premium-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  margin-top: 26px;
+}
+@media (max-width: 640px) { .premium-grid { grid-template-columns: 1fr; } }
+.premium-card {
+  padding: 18px 20px; border: 1px solid var(--panel-line); border-radius: 12px;
+  background: var(--panel); position: relative; overflow: hidden;
+}
+.premium-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(-45deg, transparent 0 16px, rgba(88,116,152,.04) 16px 32px);
+}
+.premium-card b {
+  color: var(--ink); font: 700 12.5px/1.3 var(--mono); letter-spacing: .6px;
+  display: block; margin-bottom: 8px; text-transform: uppercase;
+  position: relative; z-index: 1;
+}
+.premium-card span { color: var(--muted); font-size: 14.5px; position: relative; z-index: 1; }
+.premium-note { margin-top: 26px; color: var(--faint); font-size: 15px; max-width: 56ch; }
 
 /* ── close / CTA ─────────────────────────────────────────── */
 #close { text-align: center; flex-direction: column; justify-content: center; }
@@ -645,7 +659,7 @@ footer.colophon .warn { color: var(--down); }
 /* panels stay solid so data reads on any photo */
 .photo-mode .panel, .photo-mode .driver, .photo-mode .watch-card,
 .photo-mode .stat, .photo-mode .gloss, .photo-mode .coin,
-.photo-mode .regime-chip, .photo-mode .locked-row { background: rgba(9,18,34,.86); }
+.photo-mode .regime-chip, .photo-mode .premium-card { background: rgba(9,18,34,.86); }
 .photo-mode .prose p, .photo-mode .hero-headline, .photo-mode .consensus-item,
 .photo-mode .desk-body, .photo-mode .tl-item, .photo-mode .cal-narration .item,
 .photo-mode ul.obs li, .photo-mode .kicker, .photo-mode .hero-date {
@@ -681,7 +695,7 @@ footer.colophon .warn { color: var(--down); }
 .world-3d .gloss,
 .world-3d .coin,
 .world-3d .regime-chip,
-.world-3d .locked-row { background: rgba(9, 18, 34, .82); }
+.world-3d .premium-card { background: rgba(9, 18, 34, .82); }
 
 /* ── reduced motion: everything lands instantly ──────────── */
 @media (prefers-reduced-motion: reduce) {

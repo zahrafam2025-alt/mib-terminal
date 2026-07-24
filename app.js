@@ -506,9 +506,8 @@
     date.appendChild(document.createTextNode("  ·  published before the US open"));
     S.inner.appendChild(rv(date, 0));
 
-    var headSrc = TIER === "public"
-      ? (B.sections.story && B.sections.story.teaser) || ""
-      : (B.sections.story && B.sections.story.lede) || "";
+    // both tiers now carry the full brief — the headline is always the lede
+    var headSrc = (B.sections.story && B.sections.story.lede) || "";
     var head = firstSentence(headSrc);
     var h1 = el("h1", "hero-headline" + (head.length > 130 ? " long" : ""), head);
     S.inner.appendChild(rv(h1, 1));
@@ -966,30 +965,28 @@
     main.appendChild(S.sec);
   }
 
-  /* — public-tier scenes — */
-  function buildPublicStory(main) {
-    var st = B.sections.story || {};
-    var S = scene("story", "Today's Story");
-    S.inner.appendChild(prose([st.teaser]));
-    if (st.missed) S.inner.appendChild(rv(aside("What most are missing", st.missed), 2));
-    main.appendChild(S.sec);
-  }
-
-  function buildLocked(main) {
-    var locked = B.sections.locked || [];
-    if (!locked.length) return;
-    var S = scene("members", "Members Read The Rest");
-    var wall = el("div", "locked-wall");
-    locked.forEach(function (name, i) {
-      var row = el("div", "locked-row");
-      row.appendChild(el("span", "lock", "🔒"));
-      row.appendChild(el("span", "", name));
-      wall.appendChild(rv(row, i + 1));
+  /* — premium placeholder (public tier) —
+     The full brief above is free forever. This scene is the ROADMAP for the
+     new paid offering: features that accumulate value over time (history,
+     search, alerts, dashboards) rather than today's read behind a wall.
+     Placeholder only — nothing here is wired up yet. */
+  function buildPremium(main) {
+    var p = B.premium;
+    if (!p || !(p.features && p.features.length)) return;
+    var S = scene("premium", p.title || "MIB Premium", { rail: "PREMIUM" });
+    if (p.eyebrow) S.inner.appendChild(rv(el("div", "premium-eyebrow", p.eyebrow), 1));
+    if (p.tagline) S.inner.appendChild(rv(el("p", "premium-tagline", p.tagline), 2));
+    var grid = el("div", "premium-grid");
+    p.features.forEach(function (f, i) {
+      var card = el("div", "premium-card");
+      card.appendChild(el("b", "", f.name || ""));
+      if (f.detail) card.appendChild(el("span", "", f.detail));
+      grid.appendChild(rv(card, (i % 6) + 1));
     });
-    S.inner.appendChild(wall);
-    S.inner.appendChild(rv(el("p", "locked-note",
-      "The full drivers, what's mispriced, the risk that flips the day, and " +
-      "the watchlist — every trading morning, before the bell."), locked.length + 1));
+    S.inner.appendChild(grid);
+    S.inner.appendChild(rv(el("p", "premium-note",
+      "Premium is on the way. Today's brief stays free, every trading " +
+      "morning — this is what compounds on top of it."), p.features.length + 1));
     main.appendChild(S.sec);
   }
 
@@ -1001,12 +998,12 @@
     S.inner.appendChild(rv(el("div", "end-mark", "MIB ▮"), 0));
     S.inner.appendChild(rv(el("h2", "",
       TIER === "public"
-        ? "Tomorrow the market tells a different story. Members step inside it first."
+        ? "Tomorrow the market tells a different story. Read it here, free, every morning."
         : "Tomorrow the market tells a different story. This page will too."), 1));
     var row = el("div", "cta-row");
     var cta = B.cta || {};
     if (cta.subscribe_url) {
-      var a = el("a", "btn primary", "Get the daily brief — before the bell →");
+      var a = el("a", "btn primary", "Get the free daily brief — before the bell →");
       a.href = cta.subscribe_url; row.appendChild(a);
     }
     if (cta.channel_url) {
@@ -1014,7 +1011,7 @@
       a2.href = cta.channel_url; row.appendChild(a2);
     }
     if (!row.children.length) {
-      var span = el("span", "btn ghost", "Get the daily brief — before the bell →");
+      var span = el("span", "btn ghost", "Get the free daily brief — before the bell →");
       row.appendChild(span);
     }
     S.inner.appendChild(rv(row, 2));
@@ -1031,7 +1028,7 @@
   var main = document.querySelector("main");
 
   document.querySelector(".stamp").textContent =
-    (B.meta.generated_at || "") + (TIER === "public" ? " · preview" : "");
+    (B.meta.generated_at || "") + (TIER === "public" ? " · free" : "");
 
   /* site menu — the same destinations the current product exposes.
      Links come from the manifest (env-configured, like the production
@@ -1074,15 +1071,21 @@
     var tag = el("span", "demo-tag", "DEMO DATA");
     document.querySelector("header.masthead").appendChild(tag);
   }
-  // make the tier unmistakable, and keep a subscribe action on the free page
+  // the full brief is free — badge says so; the floating action now promotes
+  // FREE distribution (the daily read is the marketing engine), not a paywall
   var tierTag = el("span", "tier-badge " + TIER,
-    TIER === "public" ? "FREE PREVIEW" : "MEMBER VIEW");
+    TIER === "public" ? "FREE · FULL BRIEF" : "MEMBER VIEW");
   document.querySelector("header.masthead").appendChild(tierTag);
   if (TIER === "public") {
     var ctaCfg = B.cta || {};
-    var fab = el("a", "subscribe-fab", "Unlock the full brief — free daily →");
-    fab.href = ctaCfg.subscribe_url || ctaCfg.channel_url || "#";
-    document.body.appendChild(fab);
+    var fabHref = ctaCfg.channel_url || ctaCfg.subscribe_url || "";
+    if (fabHref) {
+      var fab = el("a", "subscribe-fab",
+        ctaCfg.channel_url ? "Get it free on Telegram →"
+                           : "Get the free daily brief →");
+      fab.href = fabHref;
+      document.body.appendChild(fab);
+    }
   }
 
   // per-scene photography (photo mode) supersedes the single hero-art layer
@@ -1107,11 +1110,10 @@
   }
 
   buildHero(main);
-  if (TIER === "public") {
-    buildPublicStory(main);
-    buildTape(main);
-    buildLocked(main);
-  } else {
+  // The full daily brief is public now — every reader gets every section.
+  // The public build additionally closes with the Premium placeholder (the
+  // new paid offering); the member build stays the gated mirror.
+  {
     buildStory(main);
     buildTape(main);
     buildMoney(main);
@@ -1122,6 +1124,7 @@
     buildWatchlist(main);
     buildDesks(main);
     buildGlossary(main);
+    if (TIER === "public") buildPremium(main);
   }
   buildClose(main);
 
