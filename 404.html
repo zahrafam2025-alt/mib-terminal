@@ -145,24 +145,6 @@
     nav.menu, header.masthead .stamp { display: none; }
     .menu-toggle { display: flex; }
   }
-  .tier-badge {
-    font: 700 10px/1 var(--mono); letter-spacing: 1.5px;
-    border-radius: 3px; padding: 3px 8px; border: 1px solid var(--panel-line);
-  }
-  .tier-badge.public { color: var(--gold); border-color: var(--gold-dk); }
-
-  .subscribe-fab {
-    position: fixed; left: 50%; bottom: 22px; translate: -50% 0; z-index: 44;
-    background: var(--gold); color: var(--bg-deep); text-decoration: none;
-    font: 800 13px/1 var(--sans); letter-spacing: .2px;
-    padding: 15px 26px; border-radius: 999px;
-    box-shadow: 0 14px 40px rgba(233, 185, 73, .3);
-    transition: transform .4s var(--ease);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .subscribe-fab:hover { transform: translate(-50%, -2px); }
-  }
-  @media (max-width: 620px) { .subscribe-fab { font-size: 12px; padding: 13px 18px; } }
 
   /* ── content in open space (homepage scene scaffolding) ───── */
   main { position: relative; z-index: 10;
@@ -252,7 +234,7 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     #hero-art.alive .art { animation: none; }
-    .menu-overlay, .menu-overlay a, .btn, .subscribe-fab { transition: none; }
+    .menu-overlay, .menu-overlay a, .btn { transition: none; }
   }
 
   .lang-toggle { display: inline-flex; gap: 2px; align-items: center;
@@ -277,8 +259,7 @@
       <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
     </a>
 <nav class="menu" aria-label="Site"><a class="on" href="./" data-i18n="Aujourd’hui">Today</a><a href="weekly.html" data-i18n="La Semaine">The Week</a><a href="archive/" data-i18n="Archives">Archive</a></nav>
-    <span class="stamp">2026-07-24 11:50 UTC</span>
-    <span class="tier-badge public" data-i18n="APERÇU GRATUIT">FREE PREVIEW</span>
+    <span class="stamp">2026-07-24 15:01 UTC</span>
     <span class="lang-toggle" role="group" aria-label="Language / Langue"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="fr">FR</button></span>
     <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
       <i></i><i></i>
