@@ -532,6 +532,17 @@
     main.appendChild(S.sec);
   }
 
+  /* — MiB Market Health (daily indicator, right after the hero) — */
+  function buildHealth(main) {
+    var h = B.health_html;
+    if (!h) return;
+    var S = scene("health", "MiB Market Health", { rail: "HEALTH" });
+    var box = el("div", "health-embed");
+    box.innerHTML = h;   /* trusted, self-generated inline SVG + CSS */
+    S.inner.appendChild(rv(box, 1));
+    main.appendChild(S.sec);
+  }
+
   /* — member scenes — */
   function buildStory(main) {
     var st = B.sections.story || {};
@@ -1000,21 +1011,7 @@
       TIER === "public"
         ? "Tomorrow the market tells a different story. Read it here, free, every morning."
         : "Tomorrow the market tells a different story. This page will too."), 1));
-    var row = el("div", "cta-row");
-    var cta = B.cta || {};
-    if (cta.subscribe_url) {
-      var a = el("a", "btn primary", "Get the free daily brief — before the bell →");
-      a.href = cta.subscribe_url; row.appendChild(a);
-    }
-    if (cta.channel_url) {
-      var a2 = el("a", "btn " + (cta.subscribe_url ? "ghost" : "primary"), "Join the free channel →");
-      a2.href = cta.channel_url; row.appendChild(a2);
-    }
-    if (!row.children.length) {
-      var span = el("span", "btn ghost", "Get the free daily brief — before the bell →");
-      row.appendChild(span);
-    }
-    S.inner.appendChild(rv(row, 2));
+    // No CTA row — no Telegram/Whop/subscribe links anywhere on the site.
     var foot = el("footer", "colophon");
     foot.appendChild(el("div", (B.footer && B.footer.degraded) ? "warn" : "", (B.footer && B.footer.stats) || ""));
     foot.appendChild(el("div", "", (B.footer && B.footer.disclaimer) || ""));
@@ -1028,7 +1025,7 @@
   var main = document.querySelector("main");
 
   document.querySelector(".stamp").textContent =
-    (B.meta.generated_at || "") + (TIER === "public" ? " · free" : "");
+    (B.meta.generated_at || "");
 
   /* site menu — the same destinations the current product exposes.
      Links come from the manifest (env-configured, like the production
@@ -1071,22 +1068,8 @@
     var tag = el("span", "demo-tag", "DEMO DATA");
     document.querySelector("header.masthead").appendChild(tag);
   }
-  // the full brief is free — badge says so; the floating action now promotes
-  // FREE distribution (the daily read is the marketing engine), not a paywall
-  var tierTag = el("span", "tier-badge " + TIER,
-    TIER === "public" ? "FREE · FULL BRIEF" : "MEMBER VIEW");
-  document.querySelector("header.masthead").appendChild(tierTag);
-  if (TIER === "public") {
-    var ctaCfg = B.cta || {};
-    var fabHref = ctaCfg.channel_url || ctaCfg.subscribe_url || "";
-    if (fabHref) {
-      var fab = el("a", "subscribe-fab",
-        ctaCfg.channel_url ? "Get it free on Telegram →"
-                           : "Get the free daily brief →");
-      fab.href = fabHref;
-      document.body.appendChild(fab);
-    }
-  }
+  // No tier badge and no floating subscribe/paywall action — the full brief
+  // is simply the free public page. (Premium is paused until it's built.)
 
   // per-scene photography (photo mode) supersedes the single hero-art layer
   var photoMode = !!(window.MIB_SCENES && (window.MIB_SCENES.order || []).length);
@@ -1110,9 +1093,8 @@
   }
 
   buildHero(main);
+  buildHealth(main);
   // The full daily brief is public now — every reader gets every section.
-  // The public build additionally closes with the Premium placeholder (the
-  // new paid offering); the member build stays the gated mirror.
   {
     buildStory(main);
     buildTape(main);
@@ -1124,7 +1106,7 @@
     buildWatchlist(main);
     buildDesks(main);
     buildGlossary(main);
-    if (TIER === "public") buildPremium(main);
+    // Premium placeholder paused until there's a real premium offer.
   }
   buildClose(main);
 
