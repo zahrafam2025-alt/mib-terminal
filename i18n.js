@@ -57,6 +57,8 @@
     "Unlock the full brief — free daily →":
       "Débloquez le brief complet — gratuit chaque jour →",
     "DEMO DATA": "DONNÉES DÉMO", "preview": "aperçu", "free": "gratuit",
+    // scrolling ticker band chrome
+    "DELAYED": "DIFFÉRÉ", "MARKETS": "MARCHÉS",
     // homepage section labels (app.js literals, both cases)
     "TODAY'S STORY": "L’HISTOIRE DU JOUR", "TODAY’S STORY": "L’HISTOIRE DU JOUR",
     "Today's Story": "L’histoire du jour", "Today’s Story": "L’histoire du jour",

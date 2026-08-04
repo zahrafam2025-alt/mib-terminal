@@ -63,6 +63,11 @@
 
   <main></main>
 
+  <!-- Bloomberg-style scrolling band: near-live delayed prices + today's news.
+       Populated by ticker.js from window.MIB_TICKER (worker feed + build-time
+       fallback) and window.MIB_BRIEF; hidden until it has something to show. -->
+  <div id="ticker" aria-label="Market ticker" hidden></div>
+
   <div class="tier-switch" aria-label="Prototype view switch">
     <a data-tier="member" href="?">MEMBER</a>
     <a data-tier="public" href="?tier=public">PUBLIC</a>
@@ -70,9 +75,13 @@
 
   <!-- daily real-photo backdrops (concept/fetch_scenes.py); optional -->
   <script src="data/scenes.js" onerror="void 0"></script>
+  <!-- near-live ticker feed config + build-time fallback (concept/build.py) -->
+  <script src="data/ticker.js" onerror="void 0"></script>
   <script src="vendor/three.min.js"></script>
   <script src="world3d.js"></script>
   <script src="app.js"></script>
+  <!-- scrolling ticker banner — additive overlay, loads after the renderer -->
+  <script src="ticker.js" onerror="void 0"></script>
   <!-- EN/FR language switch — additive overlay, loads after the renderer -->
   <script src="i18n.js" onerror="void 0"></script>
 </body>
