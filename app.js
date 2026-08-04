@@ -524,8 +524,8 @@
     }
     S.inner.appendChild(rv(chip, 2));
 
-    var tick = snapshotRow("ticker-row");
-    if (tick) S.inner.appendChild(rv(tick, 3));
+    // (the hero index snapshot now lives in the top ticker band — removed here
+    // to avoid duplicating prices in the middle of the brief)
 
     var cue = el("div", "scroll-cue", "STEP INSIDE TODAY'S MARKET");
     S.sec.appendChild(cue);
