@@ -136,13 +136,13 @@
 
     // price row
     var pWrap = el("div", "tick-row tick-prices");
-    pWrap.appendChild(el("span", "tick-tag", "DELAYED"));
+    pWrap.appendChild(el("span", "tick-tag", "MARKETS"));
     priceRow = el("div", "tick-marquee");
     pWrap.appendChild(priceRow);
 
     // news row
     var nWrap = el("div", "tick-row tick-news");
-    nWrap.appendChild(el("span", "tick-tag alt", "MARKETS"));
+    nWrap.appendChild(el("span", "tick-tag alt", "HEADLINES"));
     newsRow = el("div", "tick-marquee");
     nWrap.appendChild(newsRow);
 

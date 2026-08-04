@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-08-03T17:08:22Z",
     "date": "2026-08-03",
-    "built_at": "2026-08-04 17:58 UTC",
+    "built_at": "2026-08-04 18:10 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -77,7 +77,7 @@ window.MIB_BRIEF = {
   "footer": {
     "stats": "16 analysed · 253 screened · 54 no data · feeds healthy",
     "degraded": false,
-    "disclaimer": "@mib.terminal · Educational market commentary — not investment advice."
+    "disclaimer": "@mib.terminal · Educational market commentary — not investment advice. Market prices delayed ~15 min."
   },
   "sections": {
     "story": {

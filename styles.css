@@ -714,14 +714,14 @@ footer.colophon .warn { color: var(--down); }
 :root { --ticker-h: 60px; }
 
 #ticker {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 44;
+  position: fixed; left: 0; right: 0; top: 0; z-index: 44;
   display: flex; flex-direction: column;
-  background: linear-gradient(180deg, rgba(6, 13, 26, .84), rgba(6, 13, 26, .96));
+  background: linear-gradient(180deg, rgba(6, 13, 26, .96), rgba(6, 13, 26, .9));
   -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  border-top: 1px solid var(--panel-line);
+  border-bottom: 1px solid var(--panel-line);
   font: 600 12px/1 var(--mono);
   overflow: hidden;
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, .34);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .34);
 }
 #ticker[hidden] { display: none; }
 
@@ -773,10 +773,9 @@ footer.colophon .warn { color: var(--down); }
   flex: 0 0 auto; opacity: .85;
 }
 
-/* lift the bottom-anchored chrome above the bar so nothing is covered */
-body.has-ticker .tier-switch,
-body.has-ticker .subscribe-fab { bottom: calc(22px + var(--ticker-h)); }
-body.has-ticker main { padding-bottom: calc(var(--ticker-h) + 6px); }
+/* ticker sits at the very top; push the masthead + progress line below it */
+body.has-ticker header.masthead { top: var(--ticker-h); }
+body.has-ticker #scroll-progress { top: var(--ticker-h); }
 
 @media (max-width: 620px) {
   :root { --ticker-h: 54px; }
