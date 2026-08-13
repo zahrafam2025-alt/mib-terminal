@@ -106,6 +106,14 @@
     "(Healthcare)": "(Santé)", "(Utilities)": "(Services publics)",
     // MiB Market Health gauge (member home + weekly)
     "MiB MARKET HEALTH": "SANTÉ DU MARCHÉ MiB",
+    // scene titles + rail labels + inline asides hardcoded in app.js (never in
+    // the manifest, so they translate ONLY from here — case must match exactly)
+    "MiB Market Health": "Santé du marché MiB",
+    "HEALTH": "SANTÉ", "CLOSE": "CLÔTURE",
+    "Continuity": "Continuité", "Coverage note": "Note de couverture",
+    "Chart Read": "Analyse graphique", "Cross-Asset": "Inter-actifs",
+    "Breadth coverage is reduced this run — read participation with care.":
+      "La couverture de l’ampleur est réduite aujourd’hui — lisez la participation avec prudence.",
     "Participation": "Participation", "Breadth": "Ampleur",
     "Leadership": "Leadership", "Risk Appetite": "Appétit pour le risque",
     "Cross Asset": "Cohérence des actifs",

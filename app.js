@@ -952,6 +952,32 @@
       }
       main.appendChild(S2.sec);
     }
+    if (dk.chart_read) {
+      var SC = scene("chartread", "Chart Read");
+      if (dk.chart_read.body) SC.inner.appendChild(rv(el("p", "desk-body", dk.chart_read.body), 1));
+      var lv = dk.chart_read.levels || {};
+      var row = el("div", "level-row");
+      Object.keys(lv).slice(0, 4).forEach(function (sym) {
+        var t = lv[sym] || {};
+        if (t.price == null) return;
+        var chip = el("div", "level-chip");
+        chip.appendChild(el("b", "", sym));
+        chip.appendChild(el("span", "px", Number(t.price).toLocaleString()));
+        var lo = t.range_low, hi = t.range_high, pos = t.range_pos_pct;
+        if (lo != null && hi != null) {
+          chip.appendChild(el("span", "lvl",
+            Number(lo).toLocaleString() + " – " + Number(hi).toLocaleString()
+            + (pos != null ? " (" + pos + "%)" : "")));
+        } else if (t.nearest_support != null) {
+          chip.appendChild(el("span", "lvl", "sup " + Number(t.nearest_support).toLocaleString()));
+        } else if (t.nearest_resistance != null) {
+          chip.appendChild(el("span", "lvl", "res " + Number(t.nearest_resistance).toLocaleString()));
+        }
+        row.appendChild(chip);
+      });
+      if (row.children.length) SC.inner.appendChild(rv(row, 2));
+      main.appendChild(SC.sec);
+    }
     if (dk.cross_asset) {
       var S3 = scene("crossasset", "Cross-Asset");
       S3.inner.appendChild(rv(el("p", "desk-body", dk.cross_asset.body), 1));
