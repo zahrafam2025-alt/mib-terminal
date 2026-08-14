@@ -29,7 +29,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="alternate" type="application/rss+xml" title="MIB Terminal — Daily Brief" href="/feed.xml">
-<link rel="stylesheet" href="styles.css?v=202608131307">
+<link rel="stylesheet" href="styles.css?v=202608141249">
 <script>
   // Tier loader (prototype affordance): ?tier=public renders the exact surface
   // production's daily preview exposes; default is the member experience.
@@ -38,7 +38,7 @@
     var tier = new URLSearchParams(location.search).get("tier") === "public"
       ? "public" : "member";
     document.write('<script src="data/' +
-      (tier === "public" ? "brief_public.js?v=202608131307" : "brief.js?v=202608131307") + '"><\/script>');
+      (tier === "public" ? "brief_public.js?v=202608141249" : "brief.js?v=202608141249") + '"><\/script>');
   })();
 </script>
 </head>
@@ -74,15 +74,15 @@
   </div>
 
   <!-- daily real-photo backdrops (concept/fetch_scenes.py); optional -->
-  <script src="data/scenes.js?v=202608131307" onerror="void 0"></script>
+  <script src="data/scenes.js?v=202608141249" onerror="void 0"></script>
   <!-- near-live ticker feed config + build-time fallback (concept/build.py) -->
-  <script src="data/ticker.js?v=202608131307" onerror="void 0"></script>
-  <script src="vendor/three.min.js?v=202608131307"></script>
-  <script src="world3d.js?v=202608131307"></script>
-  <script src="app.js?v=202608131307"></script>
+  <script src="data/ticker.js?v=202608141249" onerror="void 0"></script>
+  <script src="vendor/three.min.js?v=202608141249"></script>
+  <script src="world3d.js?v=202608141249"></script>
+  <script src="app.js?v=202608141249"></script>
   <!-- scrolling ticker banner — additive overlay, loads after the renderer -->
-  <script src="ticker.js?v=202608131307" onerror="void 0"></script>
+  <script src="ticker.js?v=202608141249" onerror="void 0"></script>
   <!-- EN/FR language switch — additive overlay, loads after the renderer -->
-  <script src="i18n.js?v=202608131307" onerror="void 0"></script>
+  <script src="i18n.js?v=202608141249" onerror="void 0"></script>
 </body>
 </html>
