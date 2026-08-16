@@ -562,7 +562,7 @@ ul.obs li:last-child { border-bottom: 0; }
 .snapshot-strip .t { color: var(--muted); display: flex; gap: 8px; }
 
 /* chart-read: mini sparkline cards */
-.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 16px; margin-top: 32px; }
 .chart-card { border: 1px solid var(--panel-line); border-radius: 12px;
   background: rgba(9,20,38,.4); padding: 14px 16px; }
