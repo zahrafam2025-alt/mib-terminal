@@ -88,5 +88,5 @@ window.MIB_SCENES = {
     "plain",
     "close"
   ],
-  "mood": "on"
+  "mood": "neutral"
 };
