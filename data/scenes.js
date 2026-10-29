@@ -8,7 +8,7 @@ window.MIB_SCENES = {
     },
     "tape": {
       "src": "assets/scenes/tape.jpg",
-      "credit": "Thomas J. O'Halloran · Wikimedia Commons · Public domain",
+      "credit": "Carol M. Highsmith · Wikimedia Commons · Public domain",
       "source": "real"
     },
     "money": {
@@ -43,8 +43,8 @@ window.MIB_SCENES = {
     },
     "watchlist": {
       "src": "assets/scenes/watchlist.jpg",
-      "credit": "Gary Todd from Xinzheng, China · Wikimedia Commons · CC0",
-      "source": "real"
+      "credit": "AI-generated (FLUX) from today's brief",
+      "source": "flux"
     },
     "crypto": {
       "src": "assets/scenes/crypto.jpg",

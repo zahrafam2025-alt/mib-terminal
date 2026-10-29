@@ -237,16 +237,6 @@
     .menu-overlay, .menu-overlay a, .btn { transition: none; }
   }
 
-  .lang-toggle { display: inline-flex; gap: 2px; align-items: center;
-    border: 1px solid var(--panel-line); border-radius: 999px; padding: 2px;
-    background: rgba(9,20,38,.5); }
-  .lang-toggle button { appearance: none; border: 0; cursor: pointer;
-    background: transparent; color: var(--muted);
-    font: 700 11px/1 var(--mono); letter-spacing: 1px; padding: 6px 10px;
-    border-radius: 999px; transition: color .2s, background .2s; }
-  .lang-toggle button.on { color: var(--bg-deep); background: var(--gold); }
-  @media (hover:hover){ .lang-toggle button:not(.on):hover{ color: var(--ink);} }
-
 </style>
 </head>
 <body>
@@ -259,8 +249,8 @@
       <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
     </a>
 <nav class="menu" aria-label="Site"><a class="on" href="./" data-i18n="Aujourd’hui">Today</a><a href="weekly.html" data-i18n="La Semaine">The Week</a><a href="archive/" data-i18n="Archives">Archive</a></nav>
-    <span class="stamp">2026-10-28 17:47 UTC</span>
-    <span class="lang-toggle" role="group" aria-label="Language / Langue"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="fr">FR</button></span>
+    <span class="stamp">2026-10-29 17:59 UTC</span>
+    
     <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
       <i></i><i></i>
     </button>
@@ -307,34 +297,6 @@
       });
     })();
   </script>
-<script>
-(function(){
-  var KEY="mib_lang", LANGS=["en","fr"];
-  function apply(l){
-    if(LANGS.indexOf(l)<0) l="en";
-    document.documentElement.setAttribute("lang", l);
-    document.querySelectorAll("[data-i18n]").forEach(function(e){
-      if(e.getAttribute("data-en")===null) e.setAttribute("data-en", e.textContent);
-      e.textContent = (l==="fr") ? e.getAttribute("data-i18n") : e.getAttribute("data-en");
-    });
-    document.querySelectorAll("[data-lang]").forEach(function(e){
-      var show = e.getAttribute("data-lang")===l;
-      e.hidden = !show; e.style.display = show ? "" : "none";
-    });
-    document.querySelectorAll("[data-lang-btn]").forEach(function(b){
-      b.classList.toggle("on", b.getAttribute("data-lang-btn")===l);
-    });
-    try{ localStorage.setItem(KEY, l); }catch(_){}
-  }
-  var init="en"; try{ init=localStorage.getItem(KEY)||"en"; }catch(_){}
-  document.addEventListener("click", function(ev){
-    var b=ev.target.closest && ev.target.closest("[data-lang-btn]");
-    if(b){ ev.preventDefault(); apply(b.getAttribute("data-lang-btn")); }
-  });
-  if(document.readyState==="loading")
-    document.addEventListener("DOMContentLoaded", function(){ apply(init); });
-  else apply(init);
-})();
-</script>
+
 </body>
 </html>

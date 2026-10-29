@@ -318,8 +318,20 @@
     });
   }
 
+  // The French edition is a paid add-on (MIB_FRENCH=1 at build time). Without
+  // the day's content map the switch would translate only the menus, so the
+  // page stays English and shows no EN|FR switch at all.
+  function hasContentMap() {
+    try {
+      var fr = window.MIB_BRIEF && window.MIB_BRIEF.i18n_fr, k;
+      if (fr) for (k in fr) if (fr.hasOwnProperty(k)) return true;
+    } catch (_) {}
+    return false;
+  }
+
   function boot() {
     try {
+      if (!hasContentMap()) return;
       MAP = buildMap();          // manifest may have loaded after us
       rebuildPhrases();
       mountToggle();
