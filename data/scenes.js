@@ -13,18 +13,18 @@ window.MIB_SCENES = {
     },
     "money": {
       "src": "assets/scenes/money.jpg",
-      "credit": "AI-generated (FLUX) from today's brief",
-      "source": "flux"
+      "credit": "Carol M. Highsmith · Wikimedia Commons · Public domain",
+      "source": "real-neutral"
     },
     "changed": {
       "src": "assets/scenes/changed.jpg",
-      "credit": "AI-generated (FLUX) from today's brief",
-      "source": "flux"
+      "credit": "Carol M. Highsmith · Wikimedia Commons · Public domain",
+      "source": "real-neutral"
     },
     "disconnect": {
       "src": "assets/scenes/disconnect.jpg",
-      "credit": "AI-generated (FLUX) from today's brief",
-      "source": "flux"
+      "credit": "Carol M. Highsmith · Wikimedia Commons · Public domain",
+      "source": "real-neutral"
     },
     "drivers": {
       "src": "assets/scenes/drivers.jpg",
@@ -43,13 +43,13 @@ window.MIB_SCENES = {
     },
     "watchlist": {
       "src": "assets/scenes/watchlist.jpg",
-      "credit": "AI-generated (FLUX) from today's brief",
-      "source": "flux"
+      "credit": "Gary Todd from Xinzheng, China · Wikimedia Commons · CC0",
+      "source": "real"
     },
     "crypto": {
       "src": "assets/scenes/crypto.jpg",
-      "credit": "AI-generated (FLUX) from today's brief",
-      "source": "flux"
+      "credit": "Carol M. Highsmith · Wikimedia Commons · Public domain",
+      "source": "real-neutral"
     },
     "semis": {
       "src": "assets/scenes/semis.jpg",
@@ -58,8 +58,8 @@ window.MIB_SCENES = {
     },
     "crossasset": {
       "src": "assets/scenes/crossasset.jpg",
-      "credit": "AI-generated (FLUX) from today's brief",
-      "source": "flux"
+      "credit": "Carol M. Highsmith · Wikimedia Commons · Public domain",
+      "source": "real-neutral"
     },
     "plain": {
       "src": "assets/scenes/plain.jpg",
