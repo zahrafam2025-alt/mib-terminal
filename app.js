@@ -1130,7 +1130,7 @@
     buildWatchlist(main);
     buildDesks(main);
     buildGlossary(main);
-    // Premium placeholder paused until there's a real premium offer.
+    buildPremium(main);      // "subscriber news, coming soon" (2026-11-02)
   }
   buildClose(main);
 
