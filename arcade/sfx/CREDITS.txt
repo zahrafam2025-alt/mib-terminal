@@ -1,0 +1,12 @@
+MIB ARCADE sound credits (the public site's sounds; free licences, from opengameart.org)
+
+Gunshots (pistol, rifles, sniper, shotgun, muskets): "Gunshot Sounds" by Tabasco, recordings by Vincent Sevedge,
+  Creative Commons Attribution 3.0 (CC BY 3.0) - https://opengameart.org/content/gunshot-sounds
+Reloads: "Gun reload sounds" by SpringySpringo, CC0 - https://opengameart.org/content/gun-reload-sounds
+Explosions, cannons, rocket: "25 CC0 bang / firework SFX" by rubberduck, CC0 - https://opengameart.org/node/92774
+Cannon fire: "Cannon fire" by thimras, CC0 - https://opengameart.org/content/cannon-fire
+Swords, swings, interface, metal, wood, water: "RPG Sound Pack" by artisticdude, CC0 - https://opengameart.org/content/rpg-sound-pack
+Footsteps, cloth, chop, knife, latches: "50 RPG sound effects" by Kenney (kenney.nl), CC0 - https://opengameart.org/content/50-rpg-sound-effects
+Blades, coins, stones, gem: "80 CC0 RPG SFX" by rubberduck, CC0 - https://opengameart.org/content/80-cc0-rpg-sfx
+
+The sounds were cut, mixed to mono and converted to WAV for the games.
