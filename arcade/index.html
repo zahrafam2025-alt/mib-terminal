@@ -31,6 +31,7 @@ button:hover { border-color:var(--a); }
 <script src="touch.js"></script>
 <script src="net.js"></script>
 <script src="racer.js"></script>
+<script src="goal.js"></script>
 <script src="city.js"></script>
 <script>
 "use strict";
@@ -592,6 +593,7 @@ const GAMES = [
   { id: "racer2", name: "GP DUEL · 2P", sub: "red vs blue at Spa, split screen", make: () => Racer(true), col: "#a855f7", quiet: true },
   { id: "sumo", name: "SUMO · 2P", sub: "letters vs arrows, push them out", make: Sumo, col: "#f5b83d" },
   { id: "city", name: "CHAOS CITY", sub: "top-down city, no limits", make: () => City(), col: "#fb923c", quiet: true },
+  { id: "goal", name: "GOAL RUSH", sub: "2 v 2 football, bots or online", make: () => Goal(), col: "#22c55e" },
   { id: "strike", name: "STRIKE & DEFUSE", sub: "3D tactical shooter, bots or LAN", href: ARC.page("strike"), col: "#eab308" },
   { id: "empire", name: "CORSICAN EMPIRE", sub: "build, gather, conquer: bots or LAN", href: ARC.page("empire"), col: "#38bdf8" },
 ];
@@ -636,27 +638,27 @@ function tick(dt = STEP) {
 function drawMenu() {
   rect(0, 0, W, H, "#0d1020");
   for (let i = 0; i < 40; i++) rect((i * 97 + menuT * 20 * (1 + i % 3)) % W, (i * 53) % H, 2, 2, "#26304a");
-  txt("MIB ARCADE", W / 2, 40, 26, "#f2f4f8", "center"); txt("by MoonxZara", W / 2, 56, 11, "#a78bfa", "center"); txt("pick a game: 1-9, 0 or click   ·   O: PLAY ONLINE, up to 4 players, split screen", W / 2, 72, 11, "#8a90a2", "center");
+  txt("MIB ARCADE", W / 2, 40, 26, "#f2f4f8", "center"); txt("by MoonxZara", W / 2, 56, 11, "#a78bfa", "center"); txt("pick a game: 1-9, 0 or click  ·  O: play online, up to 4", W / 2, 72, 10, "#8a90a2", "center");
   GAMES.forEach((d, i) => {
     const [x, y] = cardAt(i), two = (best[d.id === "racer2" ? "duel" : "sumo"]) || {};
     rect(x, y, CARD_W, CARD_H, "#141827"); rect(x, y, CARD_W, 4, d.col);
-    txt(String((i + 1) % 10), x + 8, y + 28, 20, d.col);
+    txt(i < 10 ? String((i + 1) % 10) : "", x + 8, y + 28, 20, d.col);
     const twoLines = d.name.length > 12 && d.name.includes(" ");
     if (twoLines) { const [a, ...b] = d.name.split(" "); txt(a, x + 8, y + 47, 11); txt(b.join(" "), x + 8, y + 59, 11); }
     else txt(d.name, x + 8, y + 52, d.name.length > 9 ? 9 : d.name.length > 7 ? 11 : 13);
-    cx.font = "10.5px Segoe UI, sans-serif"; cx.fillStyle = "#8a90a2"; cx.textAlign = "left";
+    cx.font = "8.5px Segoe UI, sans-serif"; cx.fillStyle = "#8a90a2"; cx.textAlign = "left";
     const words = d.sub.split(" "); let line = "", ly = y + (twoLines ? 74 : 70);
-    words.forEach((w) => { if ((line + w).length > 14) { cx.fillText(line, x + 8, ly); line = ""; ly += 13; } line += w + " "; }); cx.fillText(line, x + 8, ly);
+    words.forEach((w) => { if ((line + w).length > 13) { cx.fillText(line, x + 8, ly); line = ""; ly += 10; } line += w + " "; }); cx.fillText(line, x + 8, ly);
     txt(d.id === "sumo" || d.id === "racer2" ? `RED ${two.p1 || 0}·BLUE ${two.p2 || 0}` : d.id === "spa" && bestOf("spa", "lap_ms") ? `LAP ${(bestOf("spa", "lap_ms") / 1000).toFixed(1)}s`
       : d.id === "city" ? `BEST $${bestOf("city")}` : d.href ? `WINS ${bestOf(d.id, "wins")}` : `BEST ${bestOf(d.id)}`, x + 8, y + CARD_H - 9, 9, "#f5b83d");
   });
 }
-const CARD_W = 86, CARD_H = 124, cardAt = (i) => [10 + (i % 5) * 94, 84 + Math.floor(i / 5) * 134];
+const CARD_W = 72, CARD_H = 124, cardAt = (i) => [7 + (i % 6) * 78, 84 + Math.floor(i / 6) * 134];
 function draw() {
   if (!cur) drawMenu();
   else {
     cur.draw();
-    if (ON && ON.live && cur.id !== "spa" && ON.players.length > 1) drawSplit();
+    if (ON && ON.live && cur.id !== "spa" && cur.id !== "goal" && ON.players.length > 1) drawSplit();
     if (paused) banner(["PAUSED"], "P to continue · Esc menu");
     if (cur.over && !cur.race && !cur.own) banner(["GAME OVER", `${cur.score}${cur.score > 0 && cur.score >= bestOf(cur.id) ? "  NEW BEST!" : ""}`], "Space play again · Esc menu");
   }
@@ -681,7 +683,7 @@ document.getElementById("snd").onclick = () => { audioStart(); setSound(!sound);
 document.getElementById("pauseBtn").onclick = () => { if (cur && cur.id !== "sumo") paused = !paused; screenEl.focus(); };
 document.getElementById("menuBtn").onclick = () => { menu(); screenEl.focus(); };
 
-const ONLINE_GAMES = [["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
+const ONLINE_GAMES = [["goal", "GOAL RUSH · 2 v 2 football"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
 const realRandom = Math.random;
 const seeded = (a) => () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 let ON = null;
@@ -731,12 +733,14 @@ function onlineName() {
 function onMsg(m, from) {
   if (!ON) return;
   if (ON.host && from) {
+    if (m.t === "in") { if (ON.live && cur && cur.netInput) cur.netInput(from, m); return; }
     if (m.t === "st" || m.t === "fr") ON.net.send("*", Object.assign({}, m, { from }));
     else return;
   }
   if (!ON.host && m.from !== undefined) from = m.from;
   if (from === ON.me) return;
   if (m.t === "lobby") { ON.players = m.players; ON.game = m.game; drawRoom(); }
+  else if (m.t === "wait") { $o("oMsg").textContent = "A round is being played: you are in for the next one (the host presses START)."; }
   else if (m.t === "go") startOnline(m);
   else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); }
   else if (m.t === "fr") {
@@ -754,12 +758,15 @@ $o("oHost").onclick = () => {
   ON = { host: true, me: 0, code: "", players: [{ id: 0, name }], game: $o("oGame").value, live: false, frames: new Map(), scores: new Map() };
   ON.net = Net.host("hub", name, {
     hello: (m) => { ON.code = m.room; drawRoom(); },
-    join: (m) => { if (ON.players.length >= 4) return; ON.players.push({ id: m.id, name: m.name }); lobbyOut(); },
+    join: (m) => {
+      if (ON.players.length >= 4) return; ON.players.push({ id: m.id, name: m.name }); lobbyOut();
+      if (ON.live) ON.net.send(m.id, { from: 0, t: "wait" });
+    },
     leave: (m) => { ON.players = ON.players.filter((q) => q.id !== m.id); ON.frames.delete(m.id); ON.scores.delete(m.id); lobbyOut(); },
     msg: (m, from) => onMsg(m, from),
     error: (m) => { $o("oMsg").textContent = "Could not open a room: " + m.why; },
     fail: () => { $o("oMsg").textContent = "Could not reach the game server. Try again."; },
-    close: () => { if (ON && ON.host) { ON = null; showOnline("oMain"); } },
+    close: () => { if (ON && ON.host) { ON = null; Math.random = realRandom; if (cur) { engineSet(false); cur = null; } showOnline("oMain"); $o("oMsg").textContent = ""; alert("The connection to the game server was lost. Host a new game."); } },
   });
   showOnline("oRoom");
 };
@@ -785,7 +792,7 @@ function joinOnline(room) {
     error: (m) => { $o("oJMsg").textContent = "Could not join: " + m.why; ON = null; },
     fail: () => { $o("oJMsg").textContent = "Could not reach the game server. Try again."; ON = null; },
     closed: () => { alert("The host left the game."); leaveOnline(); },
-    close: () => { if (ON && !ON.host) leaveOnline(); },
+    close: () => { if (ON && !ON.host) { leaveOnline(); $o("oJMsg").textContent = "The connection to the game was lost. Join again."; } },
   });
 }
 function leaveOnline() {
@@ -803,7 +810,8 @@ function startOnline(m) {
   ON.players = m.players; ON.game = m.game; ON.live = true; ON.frames.clear(); ON.scores.clear();
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
-  if (m.game === "spa") {
+  if (m.game === "goal") { cur = Goal({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = cur.help; }
+  else if (m.game === "spa") {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
     music(null); document.getElementById("help").textContent = cur.help;
   } else start(m.game);
@@ -812,7 +820,7 @@ function startOnline(m) {
 const onSnap = document.createElement("canvas"); onSnap.width = 960; onSnap.height = 720;
 const onSmall = document.createElement("canvas"); onSmall.width = 320; onSmall.height = 240;
 setInterval(() => {
-  if (!ON || !ON.live || !cur || cur.id === "spa" || ON.players.length < 2) return;
+  if (!ON || !ON.live || !cur || cur.id === "spa" || cur.id === "goal" || ON.players.length < 2) return;
   onSmall.getContext("2d").drawImage(onSnap, 0, 0, 320, 240);
   osend({ t: "fr", img: onSmall.toDataURL("image/jpeg", 0.55), score: cur.score || 0, over: !!cur.over });
 }, 140);
@@ -842,7 +850,7 @@ function askName() {
   const b = document.getElementById("nameBtn"); if (b) b.textContent = n ? "name: " + n : "pick a name";
   screenEl.focus();
 }
-const BOARD_ROWS = [["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
+const BOARD_ROWS = [["goal", "best", "GOAL RUSH"], ["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
   ["strike", "wins", "STRIKE & DEFUSE · matches won"], ["empire", "wins", "CORSICAN EMPIRE · wins"], ["city", "best", "CHAOS CITY"], ["blocks", "best", "BLOCKS"],
   ["rocks", "best", "ROCKS"], ["snake", "best", "SNAKE"], ["jump", "best", "JUMP"]];
 function showBoard() {
