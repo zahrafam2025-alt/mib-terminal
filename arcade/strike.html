@@ -941,7 +941,8 @@ function myTick(dt) {
   FX.punch = (FX.punch || 0) * Math.exp(-dt * 10);
   if (!p || !p.alive) return;
   const frozen = W.state === "freeze" || W.state === "end" || W.state === "over" || W.state === "done";
-  const f = (keys.has("KeyW") ? 1 : 0) - (keys.has("KeyS") ? 1 : 0), s = (keys.has("KeyD") ? 1 : 0) - (keys.has("KeyA") ? 1 : 0);
+  let f = (keys.has("KeyW") ? 1 : 0) - (keys.has("KeyS") ? 1 : 0), s = (keys.has("KeyD") ? 1 : 0) - (keys.has("KeyA") ? 1 : 0);
+  if (window.TMOVE) { f = TMOVE.f; s = TMOVE.s; }
   p.crouch = keys.has("KeyC") || !!p.box;
   if (!p.crouch && hits(p)) p.crouch = true;
   p.walk = keys.has("ShiftLeft"); p.use = keys.has("KeyE");
@@ -1133,23 +1134,66 @@ function frameBody(dt) {
 }
 requestAnimationFrame(frame);
 if (window.TouchPad && TouchPad.on) (() => {
-  const T = TouchPad, sens = () => parseFloat(localStorage.getItem("strike-sens")) || 1;
+  const T = TouchPad, opt = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } };
+  const sens = () => parseFloat(opt("strike-tsens", "1")) || 1, assistOn = () => opt("strike-assist", "on") === "on", autoOn = () => opt("strike-autofire", "off") === "on";
+  let slow = 1, fireHeld = false, moving = false;
   const look = T.zone({ inset: "0", display: "none" }), left = T.zone({ left: "0", top: "0", bottom: "0", width: "40%", display: "none" });
   const MOVE = ["KeyW", "KeyS", "KeyA", "KeyD", "ShiftLeft"];
   T.stick(left, (x, y) => {
     MOVE.forEach((c) => keys.delete(c));
-    const m = Math.hypot(x, y); if (m < 0.3) return;
-    if (y < -0.38) keys.add("KeyW"); if (y > 0.38) keys.add("KeyS"); if (x < -0.38) keys.add("KeyA"); if (x > 0.38) keys.add("KeyD"); if (m < 0.75) keys.add("ShiftLeft");
-  }, () => MOVE.forEach((c) => keys.delete(c)));
-  T.drag(look, (dx, dy) => {
+    const m = Math.hypot(x, y); moving = m >= 0.25;
+    window.TMOVE = moving ? { f: -y, s: x } : null;
+    if (moving && m < 0.75) keys.add("ShiftLeft");
+  }, () => { MOVE.forEach((c) => keys.delete(c)); window.TMOVE = null; moving = false; });
+  const lookBy = (dx, dy) => {
     if (!ME || !ME.alive || FX.buy) return;
-    const s = (ME.scoped ? 0.0022 : 0.006) * sens();
-    ME.yaw = wrapA(ME.yaw - dx * s); ME.pitch = clamp(ME.pitch - dy * s, -1.5, 1.5);
-  }, (e) => { if (FX.buy || (ME && !ME.alive)) glc.dispatchEvent(new MouseEvent("mousedown", { clientX: e.clientX, clientY: e.clientY, button: 0, bubbles: true })); });
+    const k = (ME.scoped ? 0.0022 : 0.006) * sens() * slow;
+    ME.yaw = wrapA(ME.yaw - dx * k); ME.pitch = clamp(ME.pitch - dy * k, -1.5, 1.5);
+  };
+  T.drag(look, (dx, dy) => lookBy(dx, dy), (e) => { if (FX.buy || (ME && !ME.alive)) glc.dispatchEvent(new MouseEvent("mousedown", { clientX: e.clientX, clientY: e.clientY, button: 0, bubbles: true })); });
   const btns = [], key = (c) => T.key(c);
   const B = (label, pos, size, down, up) => { const b = T.button(label, pos, size, down, up); b.style.display = "none"; btns.push(b); return b; };
   const hold = (label, pos, size, code) => { const k = key(code); return B(label, pos, size, () => { audio(); k.down(); }, k.up); };
-  B("FIRE", { right: 22, bottom: 100 }, 96, () => { audio(); mouseDown = true; FX.fired = false; }, () => { mouseDown = false; });
+  const fireB = B("FIRE", { right: 22, bottom: 100 }, 96, (e) => { audio(); mouseDown = true; FX.fired = false; fireHeld = true; fireB._x = e.clientX; fireB._y = e.clientY; }, () => { mouseDown = false; fireHeld = false; });
+  fireB.addEventListener("pointermove", (e) => { if (!fireHeld) return; lookBy(e.clientX - fireB._x, e.clientY - fireB._y); fireB._x = e.clientX; fireB._y = e.clientY; });
+  let lastT = performance.now(), autoT = 0;
+  const assist = () => {
+    requestAnimationFrame(assist);
+    const now = performance.now(), dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+    slow = 1;
+    if (!ME || !ME.alive || !W || FX.buy || mode === "menu" || !$("#menu").classList.contains("hide")) return;
+    const o = [ME.x, eyeY(ME), ME.z]; let best = null;
+    for (const q of W.players) {
+      if (!q.alive || q.team === ME.team || q.box) continue;
+      const tx = q.x - o[0], ty = q.y + (q.crouch ? 0.85 : 1.25) - o[1], tz = q.z - o[2], dist = Math.hypot(tx, ty, tz);
+      if (dist < 0.5 || dist > 60) continue;
+      const yaw = Math.atan2(-tx, -tz), pitch = Math.atan2(ty, Math.hypot(tx, tz)), dyaw = wrapA(yaw - ME.yaw), dp = pitch - ME.pitch, ang = Math.hypot(dyaw, dp);
+      const cone = Math.max(0.06, Math.min(0.2, 1.6 / dist));
+      if (ang > cone || (best && ang >= best.ang)) continue;
+      const d = [tx / dist, ty / dist, tz / dist], wall = rayWorld(o, d, dist);
+      if (wall && wall.t < dist - 0.4) continue;
+      const hd = Math.hypot(tx, tz), top = Math.atan2(q.y + (q.crouch ? 1.2 : 1.8) - o[1], hd), foot = Math.atan2(q.y + 0.1 - o[1], hd);
+      best = { ang, dyaw, dp, dist, onBody: Math.abs(dyaw) < Math.atan(0.34 / hd) && ME.pitch < top && ME.pitch > foot };
+    }
+    if (best && assistOn()) {
+      slow = best.ang < 0.08 ? 0.45 : 0.75;
+      if (moving || fireHeld) { const k = Math.min(1, dt * 4); ME.yaw = wrapA(ME.yaw + best.dyaw * k); ME.pitch = clamp(ME.pitch + best.dp * k, -1.5, 1.5); }
+    }
+    if (autoOn() && !fireHeld) {
+      const w = WPN[wpnOf(ME)] || {};
+      if (best && best.onBody && wpnOf(ME) !== "nade") { mouseDown = true; autoT -= dt; if (!w.auto && autoT <= 0) { FX.fired = false; autoT = Math.max(0.12, w.rate || 0.2); } }
+      else mouseDown = false;
+    }
+  };
+  requestAnimationFrame(assist);
+  const row = document.createElement("div"); row.className = "row";
+  row.innerHTML = `<label>Look speed<select id="tSens"><option value="0.6">slow</option><option value="1">normal</option><option value="1.5">fast</option><option value="2.2">very fast</option></select></label>
+    <label>Aim assist<select id="tAssist"><option value="on">on</option><option value="off">off</option></select></label>
+    <label>Auto-fire<select id="tAuto"><option value="off">off</option><option value="on">on: shoots when on target</option></select></label>`;
+  $("#pMain .row").after(row);
+  for (const [id, k, d] of [["tSens", "strike-tsens", "1"], ["tAssist", "strike-assist", "on"], ["tAuto", "strike-autofire", "off"]]) {
+    const el = $("#" + id); el.value = opt(k, d); el.onchange = () => { try { localStorage.setItem(k, el.value); } catch (e) {} };
+  }
   hold("JUMP", { right: 132, bottom: 28 }, 64, "Space");
   hold("DUCK", { right: 210, bottom: 18 }, 58, "KeyC");
   hold("R", { right: 132, bottom: 112 }, 54, "KeyR");

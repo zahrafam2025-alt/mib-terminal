@@ -41,7 +41,7 @@ const rnd = (a, b) => a + Math.random() * (b - a), rint = (a, b) => Math.floor(r
 const pick = (xs) => xs[Math.floor(Math.random() * xs.length)];
 
 const keys = new Set(), hit = new Set();
-const GAME_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "Enter", "Slash", "KeyW", "KeyA", "KeyS", "KeyD", "KeyF", "KeyX", "KeyZ", "Escape", "KeyP", "KeyM",
+const GAME_KEYS = new Set(["KeyO", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "Enter", "Slash", "KeyW", "KeyA", "KeyS", "KeyD", "KeyF", "KeyX", "KeyZ", "Escape", "KeyP", "KeyM",
   "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Numpad1", "Numpad2", "Numpad3", "Numpad4", "Numpad5", "Numpad6", "Numpad7", "ShiftLeft", "ShiftRight"]);
 addEventListener("keydown", (e) => {
   if (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
@@ -616,6 +616,7 @@ function tick(dt = STEP) {
   if (pressed("KeyM")) setSound(!sound);
   if (!cur) {
     menuT += dt;
+    if (pressed("KeyO")) document.getElementById("onlBtn").click();
     const n = ["Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Digit0"].findIndex((k) => hit.has(k)),
           m = ["Numpad1", "Numpad2", "Numpad3", "Numpad4", "Numpad5", "Numpad6", "Numpad7", "Numpad8", "Numpad9", "Numpad0"].findIndex((k) => hit.has(k));
     if (n >= 0 || m >= 0) start(GAMES[n >= 0 ? n : m].id);
@@ -635,7 +636,7 @@ function tick(dt = STEP) {
 function drawMenu() {
   rect(0, 0, W, H, "#0d1020");
   for (let i = 0; i < 40; i++) rect((i * 97 + menuT * 20 * (1 + i % 3)) % W, (i * 53) % H, 2, 2, "#26304a");
-  txt("MIB ARCADE", W / 2, 40, 26, "#f2f4f8", "center"); txt("by MoonxZara", W / 2, 56, 11, "#a78bfa", "center"); txt("pick a game: 1-9, 0 or click", W / 2, 72, 11, "#8a90a2", "center");
+  txt("MIB ARCADE", W / 2, 40, 26, "#f2f4f8", "center"); txt("by MoonxZara", W / 2, 56, 11, "#a78bfa", "center"); txt("pick a game: 1-9, 0 or click   ·   O: PLAY ONLINE, up to 4 players, split screen", W / 2, 72, 11, "#8a90a2", "center");
   GAMES.forEach((d, i) => {
     const [x, y] = cardAt(i), two = (best[d.id === "racer2" ? "duel" : "sumo"]) || {};
     rect(x, y, CARD_W, CARD_H, "#141827"); rect(x, y, CARD_W, 4, d.col);
