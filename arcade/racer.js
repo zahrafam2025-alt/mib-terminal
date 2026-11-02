@@ -32,12 +32,12 @@ function spaTrack(N = 2100) {
   return { N, step, xy: R, curve: dth.map((d, i) => 110 * d * mult[i]), elev, turn };
 }
 
-function Racer(two = false) {
+function Racer(two = false, online = null) {
   const T = SPA || (SPA = spaTrack()), N = T.N, SEG = 200, LEN = N * SEG, ROAD = 2000, CAMH = 1000, DEPTH = 1 / Math.tan(50 * Math.PI / 180), PZ = CAMH * DEPTH;
   const DRAW = 150, MIRROR = 70, LAPS = 3, MAX = SEG / STEP, ACC = MAX / 4.2, BRAKE = MAX * 1.15, DEC = MAX / 5, OFF_DEC = MAX / 1.6, OFF_LIM = MAX / 4;
   const CW = 0.2, CL = 900, YS = SEG / T.step * 1.8;
   const K = SEG / 110;
-  const rain = Math.random() < 0.25, CENT = rain ? 0.36 : 0.3;
+  const rain = online ? online.rain : Math.random() < 0.25, CENT = rain ? 0.36 : 0.3;
   const YMAX = MAX * 1.08 / (110 * CENT * SEG);
   const DIFF = [{ name: "ROOKIE", top: [0.86, 0.91], corner: 0.86 }, { name: "PRO", top: [0.955, 0.99], corner: 0.95 }, { name: "LEGEND", top: [0.99, 1.02], corner: 1.0 }];
   let diff = 1; try { const d = parseInt(localStorage.getItem("arcade-gp-diff"), 10); if (d >= 0 && d <= 2) diff = d; } catch (e) {}
@@ -68,12 +68,17 @@ function Racer(two = false) {
                       { up: ["ArrowUp"], down: ["ArrowDown"], left: ["ArrowLeft"], right: ["ArrowRight"], turbo: ["Enter", "Slash", "ShiftRight"] }]
                    : [{ up: ["ArrowUp", "KeyW"], down: ["ArrowDown", "KeyS"], left: ["ArrowLeft", "KeyA"], right: ["ArrowRight", "KeyD"], turbo: ["Space"] }];
   const base = () => ({ z: 0, x: 0, vx: 0, h: 0, speed: 0, lap: 0, lapT: 0, bestLap: 0, turbo: 1, place: 0, done: false, finishT: 0, finishPlace: 0, bumpT: 0, tow: false });
-  const P = KEYS.map((k, i) => Object.assign(base(), { me: true, n: i + 1, k, name: two ? (i ? "BLUE" : "RED") : "MoonxZara", code: two ? (i ? "BLU" : "RED") : "MXZ",
-    c: two ? (i ? "#2563eb" : "#dc2626") : "#8b5cf6", shake: 0, msg: "", msgT: 0, gear: 1, rpm: 4200, thr: 0, sky: 0, st: 0, turnT: 0, turnName: "", lastTurn: -1, lastPlace: 0, slide: 0 }));
+  const NETC = ["#8b5cf6", "#ef4444", "#22c55e", "#f59e0b"];
+  const meName = online ? (online.players.find((q) => q.id === online.me) || {}).name || "YOU" : "";
+  const P = KEYS.map((k, i) => Object.assign(base(), { me: true, n: i + 1, k, name: online ? meName : two ? (i ? "BLUE" : "RED") : "MoonxZara", code: online ? meName.slice(0, 3).toUpperCase() : two ? (i ? "BLU" : "RED") : "MXZ",
+    c: online ? NETC[online.players.findIndex((q) => q.id === online.me) % 4] : two ? (i ? "#2563eb" : "#dc2626") : "#8b5cf6", shake: 0, msg: "", msgT: 0, gear: 1, rpm: 4200, thr: 0, sky: 0, st: 0, turnT: 0, turnName: "", lastTurn: -1, lastPlace: 0, slide: 0 }));
   const AIC = ["#1e40af", "#dc2626", "#ef4444", "#f97316", "#14b8a6", "#15803d", "#fb923c"];
   const AIN = [["Max Verst.", "VER"], ["Lewis Ham.", "HAM"], ["Charles Lec.", "LEC"], ["Lando Nor.", "NOR"], ["George Rus.", "RUS"], ["Fernando Alo.", "ALO"], ["Oscar Pia.", "PIA"]];
-  const AI = AIC.slice(0, two ? 6 : 7).map((c, i) => Object.assign(base(), { ai: true, c, name: AIN[i][0], code: AIN[i][1], top: 1, react: rnd(0.15, 0.5), tx: 0, defT: 0, defX: 0, boost: false }));
-  const all = AI.concat(P), FIELD = all.length;
+  const AI = online ? [] : AIC.slice(0, two ? 6 : 7).map((c, i) => Object.assign(base(), { ai: true, c, name: AIN[i][0], code: AIN[i][1], top: 1, react: rnd(0.15, 0.5), tx: 0, defT: 0, defX: 0, boost: false }));
+  const RP = online ? online.players.filter((q) => q.id !== online.me).map((q) => Object.assign(base(), { remote: true, id: q.id, name: q.name, code: q.name.slice(0, 3).toUpperCase(),
+    c: NETC[online.players.findIndex((x) => x.id === q.id) % 4], shake: 0, msg: "", msgT: 0, gear: 1, rpm: 4200, thr: 0, sky: 0, st: 0, turnT: 0, turnName: "", lastTurn: -1, lastPlace: 0, slide: 0, net: null })) : [];
+  const all = online ? online.players.map((q) => (q.id === online.me ? P[0] : RP.find((r) => r.id === q.id))) : AI.concat(P), FIELD = all.length;
+  const split = !!online && all.length > 1;
   all.forEach((c, k) => { c.z = LEN - (3 + Math.floor(k / 2) * 6 + (k % 2) * 3) * SEG; c.x = c.tx = k % 2 ? 0.42 : -0.42; c.place = k + 1; });
   let VAI = [], LINE = [];
   function setDiff(d) {
@@ -87,7 +92,7 @@ function Racer(two = false) {
   LINE = LINE.map((_, i) => { let s = 0; for (let k = -8; k <= 8; k++) s += LINE[(i + k + N) % N]; return s / 17; });
   setDiff(diff);
 
-  const g = { id: two ? "racer2" : "spa", race: true, score: 0, over: false, t: 0, lights: 0, lightsT: 0, goAt: rnd(0.3, 1.4), go: false, outT: 0, result: null, firstDone: 0, finishers: 0, P,
+  const g = { id: two ? "racer2" : "spa", race: true, score: 0, over: false, t: 0, lights: 0, lightsT: 0, goAt: online ? 0.8 : rnd(0.3, 1.4), go: false, outT: 0, result: null, firstDone: 0, finishers: 0, P,
               help: two ? "RED (top): W A S D, F turbo  |  BLUE (bottom): arrows, Enter turbo  ·  3 laps of Spa · brake for the corners · first over the line wins · Esc menu"
                         : "↑ throttle · ↓ brake · ← → steer · Space ERS boost · 3 laps of Spa from the back · brake before La Source, Rivage and the Bus Stop · 1 2 3 on the grid: difficulty · Esc menu" };
 
@@ -248,6 +253,7 @@ function Racer(two = false) {
       return;
     }
     g.outT -= dt; g.t += dt;
+    if (online) { onlineStep(dt); return; }
     P.forEach((p) => drive(p, dt));
     AI.forEach((c) => aiDrive(c, dt));
     all.forEach((c) => { c.touch = Math.max(0, (c.touch || 0) - dt); });
@@ -255,8 +261,40 @@ function Racer(two = false) {
     if (P.every((p) => p.done) && g.t - Math.max(...P.map((p) => p.finishT)) > 2.5) finish();
     else if (two && g.firstDone && g.t - g.firstDone > 30) finish();
   };
+  let sendT = 0;
+  g.netState = (id, m) => { const r = RP.find((x) => x.id === id); if (r) r.net = m; };
+  function onlineStep(dt) {
+    const me = P[0];
+    drive(me, dt);
+    for (const r of RP) {
+      const m = r.net; if (!m) continue;
+      const dz = wrap(m.z - r.z);
+      if (Math.abs(dz) > SEG * 40) { r.z = m.z; r.x = m.x; } else { r.z = (r.z + dz * Math.min(1, dt * 12) + LEN) % LEN; r.x += (m.x - r.x) * Math.min(1, dt * 12); }
+      Object.assign(r, { h: m.h, speed: m.speed, lap: m.lap, lapT: m.lapT, st: m.st, sky: m.sky, bestLap: m.bestLap, turbo: m.turbo, gear: m.gear, rpm: m.rpm });
+      if (m.done && !r.done) { r.done = true; r.finishT = g.t; r.finishPlace = ++g.finishers; if (!g.firstDone) g.firstDone = g.t; }
+    }
+    for (const r of RP) {
+      const dz = wrap(r.z - me.z), dx = r.x - me.x;
+      if (Math.abs(dz) >= CL || Math.abs(dx) >= CW) continue;
+      if ((CL - Math.abs(dz)) / CL < (CW - Math.abs(dx)) / CW) {
+        if (dz > 0 && me.speed > r.speed) { me.speed = r.speed * 0.97; advance(me, -(CL - dz) * 0.5); hitFx(me, ["BUMP!", "RUBBING IS RACING!"], false); }
+      } else { me.x -= Math.sign(dx || 1) * (CW - Math.abs(dx)) * 0.6; hitFx(me, ["WHEEL TO WHEEL!", "SIDE BY SIDE!"], false); }
+    }
+    standings(); engineNote();
+    sendT -= dt;
+    if (sendT <= 0) { sendT = 0.05; online.send({ z: me.z, x: me.x, h: me.h, speed: me.speed, lap: me.lap, lapT: me.lapT, st: me.st, sky: me.sky, bestLap: me.bestLap, turbo: me.turbo, gear: me.gear, rpm: me.rpm, done: me.done }); }
+    if (all.every((c) => c.done) && g.t - Math.max(...all.map((c) => c.finishT)) > 2.5) finish();
+    else if (me.done && g.firstDone && g.t - g.firstDone > 45) finish();
+  }
   function finish() {
     g.over = true; engineSet(false);
+    if (online) {
+      const p = P[0], ord = all.slice().sort((a, b) => (a.done === b.done ? (a.done ? a.finishPlace - b.finishPlace : b.lap * LEN + b.z - a.lap * LEN - a.z) : a.done ? -1 : 1));
+      g.result = [`${ord[0].name.toUpperCase()} WINS!`, ord.map((c, i) => `${i + 1}. ${c.name}${c.bestLap ? " " + c.bestLap.toFixed(2) + " s" : ""}`).join("   ")];
+      if (p.bestLap) record("spa", "lap_ms", Math.round(p.bestLap * 1000));
+      if (ord[0] === p) SFX.win(); else SFX.over();
+      return;
+    }
     if (!two) {
       const p = P[0], pts = [25, 18, 15, 12, 10, 8, 6, 4][p.finishPlace - 1] || 0;
       g.score = pts * 100 + Math.max(0, 400 - Math.round(p.finishT)) + (pts ? [0, 300, 700][diff] : 0);
@@ -410,7 +448,7 @@ function Racer(two = false) {
     for (const o of order.slice().reverse()) { const [x, y] = at(segIdx(o.z)); if (o === p) { circ(x, y, compact ? 3 : 3.8, "#fff"); circ(x, y, compact ? 2 : 2.6, o.c); } else circ(x, y, compact ? 1.6 : 2.2, o.c); }
   }
   function hud(p, vy, vh) {
-    const compact = two, bar = compact ? 20 : 24, by = bar - 7;
+    const compact = two || split, bar = compact ? 20 : 24, by = bar - 7;
     cx.save(); cx.translate(0, vy);
     rect(0, 0, W, bar, "rgba(0,0,0,.5)");
     txt(`${two ? p.name + " " : ""}P${p.place}/${FIELD}`, 8, by, compact ? 13 : 15, p.place === 1 ? "#fde047" : two ? (p.n === 1 ? "#fca5a5" : "#93c5fd") : "#fff");
@@ -482,6 +520,15 @@ function Racer(two = false) {
     }
   }
   g.draw = () => {
+    if (split) {
+      const vs = [P[0], ...RP];
+      if (vs.length === 2) { view(vs[0], 0, H / 2); view(vs[1], H / 2, H / 2); rect(0, H / 2 - 1, W, 2, "#0d1020"); }
+      else vs.forEach((p, i) => { cx.save(); cx.translate((i % 2) * W / 2, Math.floor(i / 2) * H / 2); cx.scale(0.5, 0.5); view(p, 0, H); cx.restore(); });
+      if (vs.length > 2) { rect(W / 2 - 1, 0, 2, H, "#0d1020"); rect(0, H / 2 - 1, W, 2, "#0d1020"); }
+      if (!g.go || g.outT > 0) gantry(H / 2 - 40);
+      if (g.over && g.result) banner(["CHEQUERED FLAG", ...g.result], "Esc: back to the online lobby");
+      return;
+    }
     if (two) { view(P[0], 0, H / 2); view(P[1], H / 2, H / 2); rect(0, H / 2 - 1, W, 2, "#0d1020"); }
     else view(P[0], 0, H);
     if (!g.go || g.outT > 0) gantry(two ? H / 2 - 40 : 64);

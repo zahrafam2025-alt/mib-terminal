@@ -1365,7 +1365,7 @@ function drawUI() {
 function order(c) { if (mode === "guest") net.send({ t: "cmd", c }); else command(ME, c); sfx("click"); }
 const keys = new Set();
 function entAt(sx, sy) {
-  let best = null, bd = 18;
+  let best = null, bd = window.TouchPad && TouchPad.on ? 36 : 18;
   for (const e of G.ents.values()) {
     if (!seen(e)) continue;
     if (e.k === "u" || e.t === "deer") { const [ax, ay] = toScreen(e.x, e.y), d = Math.hypot(ax - sx, ay - 10 - sy); if (d < bd) { bd = d; best = e; } }
@@ -1494,7 +1494,10 @@ if (window.TouchPad && TouchPad.on) (() => {
     if (!f || e.pointerId !== f.id) return;
     clearTimeout(lp); const g = f; f = null;
     if (g.mouse) { upAt(e.clientX / UIS, e.clientY / UIS); if (box) { box = false; boxBtn.classList.remove("on"); } return; }
-    if (!g.moved && !g.long) { send("mousedown", g.x, g.y); UI.mouse = [g.x, g.y]; upAt(g.x, g.y); }
+    if (g.moved || g.long) return;
+    const t = entAt(g.x, g.y), mineSel = [...UI.sel].some((id) => { const u = G.ents.get(id); return u && u.o === ME && u.k === "u"; });
+    if (!(t && t.o === ME) && mineSel) { rightClick(g.x, g.y); return; }
+    send("mousedown", g.x, g.y); UI.mouse = [g.x, g.y]; upAt(g.x, g.y);
   };
   cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
   const boxBtn = TouchPad.button("BOX", { right: 12, top: 66 }, 50, () => { box = !box; setTimeout(() => boxBtn.classList.toggle("on", box), 0); });
