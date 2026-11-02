@@ -103,6 +103,20 @@ canvas{touch-action:none}input,select,textarea{-webkit-user-select:auto;user-sel
     b.style.fontSize = "20px";
     return b;
   };
+  const ACS = [], Orig = window.AudioContext || window.webkitAudioContext;
+  if (on && Orig) {
+    const Wrapped = function (...a) { const c = new Orig(...a); ACS.push(c); return c; };
+    Wrapped.prototype = Orig.prototype;
+    window.AudioContext = Wrapped; window.webkitAudioContext = Wrapped;
+  }
+  let unlocked = false;
+  const SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+  T.wakeSound = () => {
+    try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (e) {}
+    for (const c of ACS) { try { if (c.state !== "running" && c.state !== "closed") c.resume(); } catch (e) {} }
+    if (!unlocked) { unlocked = true; try { const a = new Audio(SILENT); a.setAttribute("playsinline", ""); const p = a.play(); if (p && p.catch) p.catch(() => { unlocked = false; }); } catch (e) { unlocked = false; } }
+  };
+  if (on) for (const ev of ["touchend", "click", "pointerup", "keydown"]) document.addEventListener(ev, T.wakeSound, { capture: true, passive: true });
   window.TouchPad = T;
   if (on) { if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", T.mobile); else T.mobile(); }
 })();
