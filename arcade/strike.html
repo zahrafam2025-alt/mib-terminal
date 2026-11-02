@@ -1157,6 +1157,7 @@ if (window.TouchPad && TouchPad.on) (() => {
   B("SCOPE", { right: 96, bottom: 196 }, 58, () => { if (ME && WPN[wpnOf(ME)] && WPN[wpnOf(ME)].scope) ME.scoped = !ME.scoped; });
   B("WPN", { right: 22, bottom: 20 }, 58, () => glc.dispatchEvent(new WheelEvent("wheel", { deltaY: 1, cancelable: true, bubbles: true })));
   hold("BUY", { left: 16, top: 70 }, 52, "KeyB");
+  hold("📋", { left: 16, top: 130 }, 52, "Tab");
   B("☰", { right: 12, top: 12 }, 46, () => { mouseDown = false; MOVE.forEach((c) => keys.delete(c)); showPanel("pPause"); });
   const sb = T.soundButton(() => sndOn, (on) => { audio(); setSnd(on); }, { right: 66, top: 12 }); sb.style.display = "none"; btns.push(sb);
   for (const id of ["bSolo", "bStart"]) $("#" + id).addEventListener("click", () => T.full());
