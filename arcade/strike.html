@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="MIB Arcade">
+<meta name="theme-color" content="#0b0d14"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png">
+
 <title>STRIKE &amp; DEFUSE · MIB Arcade</title>
 
 <style>
@@ -23,6 +27,10 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}
 .list{max-height:220px;overflow:auto;border:1px solid #232b45;border-radius:10px;padding:6px;margin:8px 0;min-height:44px}
 .item{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid #1b2238}
 .code{font:700 30px Consolas,monospace;letter-spacing:.3em;color:#fbbf24}
+
+/* 2 Nov (owner: "on the phone half the menu is missing"): the menu scrolls and gets compact on a short screen */
+#menu{overflow-y:auto;align-items:flex-start}#menu .card{margin:auto}
+@media (max-height:520px){#menu .card{padding:10px 14px}.title{font-size:24px!important}.sub{margin:2px 0 6px!important;font-size:12px!important}.row{margin:5px 0!important;gap:6px!important}.help{font-size:11px!important;line-height:1.35!important;margin-top:6px!important}button{padding:7px 10px!important}}
 </style></head><body>
 <canvas id="gl"></canvas><canvas id="hud"></canvas>
 <div id="menu"><div class="card">
@@ -36,7 +44,7 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}
       <label>Map<select id="map"><option value="dune">DUNE · desert town</option><option value="villa">VILLA · Mediterranean village</option><option value="reactor">REACTOR · power plant</option></select></label>
       <label>Graphics<select id="gfx"><option value="auto">Auto</option><option value="low">Low · most fluid</option><option value="high">High · full look</option></select></label></div>
     <div class="help" id="gfxInfo" style="margin-top:0"></div>
-    <div class="row"><button id="bSolo" class="pri">PLAY VS BOTS</button><button id="bHost">HOST LAN GAME</button><button id="bJoin">JOIN LAN GAME</button><button id="bFull">FULL SCREEN</button></div>
+    <div class="row"><button id="bSolo" class="pri">PLAY VS BOTS</button><button id="bHost">HOST LAN GAME</button><button id="bJoin">JOIN LAN GAME</button><button id="bFull">FULL SCREEN</button><button id="bSnd">SOUND: ON</button></div>
     <div class="help">ATTACK: carry the charge to site A or B and HOLD E for 3 s to plant it · DEFEND: stop them, or HOLD E on the charge to defuse<br>
       B buy (in your spawn, start of the round) · 1 2 3 4 or mouse wheel: weapons · R reload · right click scope<br>WASD move · Space jump · C crouch · X hide in a box · Shift walk · Tab scores · H help in game · V announcer · Esc menu</div>
     <div style="margin-top:12px"><a href="/arcade">◀ back to the arcade</a><a href="sfx/CREDITS.txt" target="_blank" rel="noopener" style="margin-left:14px">sound credits</a></div>
@@ -45,7 +53,7 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}
     <div class="list" id="hList"></div><div class="row"><button id="bStart" class="pri">START</button><button id="bHostX">CANCEL</button></div>
     <div class="help">Empty places are filled with bots. Players can only join from your home network.</div></div>
   <div id="pJoin" class="hide"><div>Games on your network:</div><div class="list" id="jList"></div><div id="jMsg" class="help"></div><div class="row"><button id="bJoinX">BACK</button></div></div>
-  <div id="pPause" class="hide"><div class="row"><button id="bResume" class="pri">RESUME</button><button id="bQuit">LEAVE THE MATCH</button></div><div class="help">Click the game to look around again.</div></div>
+  <div id="pPause" class="hide"><div class="row"><button id="bResume" class="pri">RESUME</button><button id="bQuit">LEAVE THE MATCH</button><button id="bFull2">FULL SCREEN</button><button id="bSnd2">SOUND: ON</button></div><div class="help">Click the game to look around again.</div></div>
 </div></div>
 <script>
 function showFatal(msg) { const f = document.getElementById("fatal"); if (!f) return; f.classList.remove("hide"); f.textContent = (f.textContent ? f.textContent + " · " : "") + msg; const m = document.getElementById("menu"); if (m) m.classList.remove("hide"); }
@@ -618,9 +626,15 @@ function announce(...keys) {
 }
 
 let AC = null, master = null, NOISE = null;
+let sndOn = (() => { try { return localStorage.getItem("strike-sound") !== "off"; } catch (e) { return true; } })();
+function setSnd(on) {
+  sndOn = on; try { localStorage.setItem("strike-sound", on ? "on" : "off"); } catch (e) {}
+  if (master) master.gain.value = on ? 0.55 : 0;
+  document.querySelectorAll("#bSnd, #bSnd2").forEach((b) => { b.textContent = on ? "SOUND: ON" : "SOUND: OFF"; });
+}
 function audio() {
   if (AC) { if (AC.state === "suspended") AC.resume(); return AC; }
-  try { AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = 0.55; master.connect(AC.destination);
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = sndOn ? 0.55 : 0; master.connect(AC.destination);
     const n = AC.sampleRate; NOISE = AC.createBuffer(1, n, n); const d = NOISE.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; } catch (e) { AC = null; }
   voiceInit(); soundList();
   return AC;
@@ -869,6 +883,7 @@ addEventListener("keydown", (e) => {
   if (mode === "menu") return;
   if (["Tab", "Space", "KeyB"].includes(e.code)) e.preventDefault();
   keys.add(e.code); audio();
+  if (e.code === "KeyM") setSnd(!sndOn);
   if (e.code === "KeyH") { FX.help = !FX.help; FX.helpAuto = false; try { localStorage.setItem("strike-help-seen", "1"); } catch (er) {} }
   if (e.code === "KeyV") { voiceOn = !voiceOn; try { localStorage.setItem("strike-voice", voiceOn ? "on" : "off"); } catch (er) {} FX.msg = { s: voiceOn ? "VOICE ON" : "VOICE OFF", sub: "", t: 1 }; if (voiceOn) announce("voiceon"); }
   if (!ME) return;
@@ -1043,7 +1058,10 @@ function startMatch(humans, c) {
   startRound(); W.events = [];
 }
 $("#bSolo").onclick = () => { audio(); saveName(); mode = "solo"; startMatch([{ id: 0, name: saveName() }], readCfg()); hideMenu(); };
-$("#bFull").onclick = () => { (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
+$("#bFull").onclick = () => { if (window.TouchPad) TouchPad.toggleFull(); else (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
+$("#bFull2").onclick = () => $("#bFull").onclick();
+$("#bSnd").onclick = $("#bSnd2").onclick = () => { audio(); setSnd(!sndOn); };
+setSnd(sndOn);
 let lobby = [];
 $("#bHost").onclick = () => {
   audio(); const name = saveName(); lobby = [{ id: 0, name }]; showPanel("pHost"); $("#hCode").textContent = "····";
@@ -1140,6 +1158,9 @@ if (window.TouchPad && TouchPad.on) (() => {
   B("WPN", { right: 22, bottom: 20 }, 58, () => glc.dispatchEvent(new WheelEvent("wheel", { deltaY: 1, cancelable: true, bubbles: true })));
   hold("BUY", { left: 16, top: 70 }, 52, "KeyB");
   B("☰", { right: 12, top: 12 }, 46, () => { mouseDown = false; MOVE.forEach((c) => keys.delete(c)); showPanel("pPause"); });
+  const sb = T.soundButton(() => sndOn, (on) => { audio(); setSnd(on); }, { right: 66, top: 12 }); sb.style.display = "none"; btns.push(sb);
+  for (const id of ["bSolo", "bStart"]) $("#" + id).addEventListener("click", () => T.full());
+  $("#jList").addEventListener("click", (e) => { if (e.target.closest("[data-room]")) T.full(); });
   setInterval(() => {
     const play = mode !== "menu" && $("#menu").classList.contains("hide");
     [look, left, ...btns].forEach((el) => { el.style.display = play ? "" : "none"; });

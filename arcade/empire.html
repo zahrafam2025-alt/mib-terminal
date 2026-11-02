@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="MIB Arcade">
+<meta name="theme-color" content="#0b0d14"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png">
+
 <title>CORSICAN EMPIRE · MIB Arcade</title>
 
 <style>
@@ -21,6 +25,10 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}.hide{display:none}
 .list{max-height:220px;overflow:auto;border:1px solid #1d3354;border-radius:10px;padding:6px;margin:8px 0;min-height:44px}
 .item{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-bottom:1px solid #16263f}
 .code{font:700 30px Consolas,monospace;letter-spacing:.3em;color:#7dd3fc}
+
+/* 2 Nov (owner: "on the phone half the menu is missing"): the menu scrolls and gets compact on a short screen */
+#menu{overflow-y:auto;align-items:flex-start}#menu .card{margin:auto}
+@media (max-height:520px){#menu .card{padding:10px 14px}.title{font-size:24px!important}.sub{margin:2px 0 6px!important;font-size:12px!important}.row{margin:5px 0!important;gap:6px!important}.help{font-size:11px!important;line-height:1.35!important;margin-top:6px!important}button{padding:7px 10px!important}}
 </style></head><body>
 <canvas id="cv"></canvas>
 <div id="menu"><div class="card">
@@ -33,7 +41,7 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}.hide{display:none}
     <div class="row"><label>Your nation<select id="civ"></select></label>
       <label>Map<select id="mapk"><option value="sea" selected>Mare Nostrum · a sea, the egg island, fords</option><option value="land">Terre Ferme · land and lakes</option></select></label></div>
     <div class="help" id="civInfo" style="margin-top:4px"></div>
-    <div class="row"><button id="bSolo" class="pri">PLAY VS BOTS</button><button id="bHost">HOST LAN GAME</button><button id="bJoin">JOIN LAN GAME</button><button id="bFull">FULL SCREEN</button></div>
+    <div class="row"><button id="bSolo" class="pri">PLAY VS BOTS</button><button id="bHost">HOST LAN GAME</button><button id="bJoin">JOIN LAN GAME</button><button id="bFull">FULL SCREEN</button><button id="bSnd">SOUND: ON</button></div>
     <div class="help">select settlers (left click or drag), then RIGHT CLICK a tree, gold, berries, a deer or a farm to gather;<br>every 10 they gather goes straight into your stock, no walking back, and you see +10 rise over them · right click: move, attack, build, set rally<br>arrows or screen edge: scroll · minimap click · letters on the buttons are hotkeys<br>. idle settler · H town center · Q whole army · N music · J sound · Esc cancel</div>
     <div style="margin-top:12px"><a href="/arcade">◀ back to the arcade</a><a href="sfx/CREDITS.txt" target="_blank" rel="noopener" style="margin-left:14px">sound credits</a></div>
   </div>
@@ -41,7 +49,7 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}.hide{display:none}
     <div class="list" id="hList"></div><div class="row"><button id="bStart" class="pri">START</button><button id="bHostX">CANCEL</button></div>
     <div class="help">Opponents and teams come from the main screen; bots fill the empty seats (up to 4 players).</div></div>
   <div id="pJoin" class="hide"><div>Games on your network:</div><div class="list" id="jList"></div><div id="jMsg" class="help"></div><div class="row"><button id="bJoinX">BACK</button></div></div>
-  <div id="pPause" class="hide"><div class="row"><button id="bResume" class="pri">RESUME</button><button id="bQuit">LEAVE THE GAME</button></div></div>
+  <div id="pPause" class="hide"><div class="row"><button id="bResume" class="pri">RESUME</button><button id="bQuit">LEAVE THE GAME</button><button id="bFull2">FULL SCREEN</button><button id="bSnd2">SOUND: ON</button></div></div>
 </div></div>
 <script>window.ARC_CONFIG = {"api": "https://mib-arcade.terminalmib.workers.dev", "names": true, "sounds": false, "sfx": "sfx/", "music": false, "lan": true, "net": "auto", "pages": {"hub": "./", "strike": "strike.html", "empire": "empire.html"}};</script>
 <script src="site.js"></script><script src="touch.js"></script><script src="net.js"></script><script src="empvoice.js"></script>
@@ -833,7 +841,9 @@ function rec(game, field, value) { ARC.post(game, field, value); }
 
 const cv = $("#cv"), X = cv.getContext("2d");
 let cam = { x: 0, y: 0 }, UI = { sel: new Set(), placing: null, drag: null, mouse: [0, 0], banner: null, hover: null, tip: "" };
-function resize() { cv.width = innerWidth; cv.height = innerHeight; } addEventListener("resize", resize); resize();
+let UIS = 1;
+function resize() { UIS = Math.min(1, innerWidth / 1180, innerHeight / 660); cv.width = Math.round(innerWidth / UIS); cv.height = Math.round(innerHeight / UIS); }
+addEventListener("resize", resize); resize();
 const iso = (x, y) => [(x - y) * TW / 2, (x + y) * TH / 2], toScreen = (x, y) => { const [a, b] = iso(x, y); return [a - cam.x, b - cam.y]; };
 function toTile(sx, sy) { const wx = sx + cam.x, wy = sy + cam.y; return [(wx / (TW / 2) + wy / (TH / 2)) / 2, (wy / (TH / 2) - wx / (TW / 2)) / 2]; }
 function banner(s, t = 3) { UI.banner = { s, t }; }
@@ -1378,14 +1388,14 @@ function entAt(sx, sy) {
 cv.addEventListener("contextmenu", (e) => e.preventDefault());
 cv.addEventListener("mouseleave", () => { UI.mouseIn = false; });
 cv.addEventListener("mousemove", (e) => {
-  UI.mouse = [e.clientX, e.clientY]; UI.mouseIn = true; if (UI.miniDrag) miniJump(e.clientX, e.clientY);
+  UI.mouse = [(e.clientX / UIS), (e.clientY / UIS)]; UI.mouseIn = true; if (UI.miniDrag) miniJump((e.clientX / UIS), (e.clientY / UIS));
   const p = UI.pan; if (!p) return;
-  if (!p.moved && Math.hypot(e.clientX - p.x, e.clientY - p.y) > 6) p.moved = true;
-  if (p.moved) { cam.x = p.cx - (e.clientX - p.x); cam.y = p.cy - (e.clientY - p.y); }
+  if (!p.moved && Math.hypot((e.clientX / UIS) - p.x, (e.clientY / UIS) - p.y) > 6) p.moved = true;
+  if (p.moved) { cam.x = p.cx - ((e.clientX / UIS) - p.x); cam.y = p.cy - ((e.clientY / UIS) - p.y); }
 });
 cv.addEventListener("mousedown", (e) => {
   audio(); if (!G) return;
-  const [mx, my] = [e.clientX, e.clientY], r = miniRect();
+  const [mx, my] = [(e.clientX / UIS), (e.clientY / UIS)], r = miniRect();
   if (my > cv.height - PANEL) {
     if (Math.abs(mx - r.x) / (MM.s / 2) + Math.abs(my - r.y - MM.s / 4) / (MM.s / 4) <= 1.05) { if (e.button === 0) { UI.miniDrag = true; miniJump(mx, my); } else if (e.button === 2) { const [tx, ty] = miniTile(mx, my); order({ k: "go", ids: [...UI.sel], x: tx, y: ty }); } return; }
     for (const b of UI.btn || []) if (mx > b.x && mx < b.x + b.w && my > b.y && my < b.y + b.h && b.ok) { b.act(); return; }
@@ -1461,35 +1471,40 @@ function scroll(dt) {
 if (window.TouchPad && TouchPad.on) (() => {
   cv.style.touchAction = "none";
   let f = null, lp = null, box = false;
-  const send = (type, x, y) => cv.dispatchEvent(new MouseEvent(type, { clientX: x, clientY: y, button: 0, bubbles: true }));
-  const upAt = (x, y) => dispatchEvent(new MouseEvent("mouseup", { clientX: x, clientY: y, button: 0 }));
+  const send = (type, x, y) => cv.dispatchEvent(new MouseEvent(type, { clientX: x * UIS, clientY: y * UIS, button: 0, bubbles: true }));
+  const upAt = (x, y) => dispatchEvent(new MouseEvent("mouseup", { clientX: x * UIS, clientY: y * UIS, button: 0 }));
   cv.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse" || f) return;
     e.preventDefault(); audio();
-    f = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, moved: false };
-    UI.mouse = [e.clientX, e.clientY]; UI.mouseIn = false;
-    if (box || UI.placing || e.clientY > cv.height - PANEL) { f.mouse = true; send("mousedown", e.clientX, e.clientY); return; }
+    const x = e.clientX / UIS, y = e.clientY / UIS;
+    f = { id: e.pointerId, x, y, cx: cam.x, cy: cam.y, moved: false };
+    UI.mouse = [x, y]; UI.mouseIn = false;
+    if (box || UI.placing || y > cv.height - PANEL) { f.mouse = true; send("mousedown", x, y); return; }
     lp = setTimeout(() => { if (f && !f.moved) { f.long = true; rightClick(f.x, f.y); if (navigator.vibrate) navigator.vibrate(25); } }, 420);
   });
   cv.addEventListener("pointermove", (e) => {
     if (!f || e.pointerId !== f.id) return;
-    UI.mouse = [e.clientX, e.clientY];
-    if (f.mouse) { send("mousemove", e.clientX, e.clientY); return; }
-    if (!f.moved && Math.hypot(e.clientX - f.x, e.clientY - f.y) > 10) { f.moved = true; clearTimeout(lp); }
-    if (f.moved) { cam.x = f.cx - (e.clientX - f.x); cam.y = f.cy - (e.clientY - f.y); }
+    const x = e.clientX / UIS, y = e.clientY / UIS;
+    UI.mouse = [x, y];
+    if (f.mouse) { send("mousemove", x, y); return; }
+    if (!f.moved && Math.hypot(x - f.x, y - f.y) > 10 / UIS) { f.moved = true; clearTimeout(lp); }
+    if (f.moved) { cam.x = f.cx - (x - f.x); cam.y = f.cy - (y - f.y); }
   });
   const end = (e) => {
     if (!f || e.pointerId !== f.id) return;
     clearTimeout(lp); const g = f; f = null;
-    if (g.mouse) { upAt(e.clientX, e.clientY); if (box) { box = false; boxBtn.classList.remove("on"); } return; }
+    if (g.mouse) { upAt(e.clientX / UIS, e.clientY / UIS); if (box) { box = false; boxBtn.classList.remove("on"); } return; }
     if (!g.moved && !g.long) { send("mousedown", g.x, g.y); UI.mouse = [g.x, g.y]; upAt(g.x, g.y); }
   };
   cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
   const boxBtn = TouchPad.button("BOX", { right: 12, top: 66 }, 50, () => { box = !box; setTimeout(() => boxBtn.classList.toggle("on", box), 0); });
   const k = TouchPad.key("Escape", "Escape"), esc = TouchPad.button("☰", { right: 12, top: 10 }, 46, k.down, k.up);
-  setInterval(() => { const play = mode !== "menu" && $("#menu").classList.contains("hide"); boxBtn.style.display = esc.style.display = play ? "" : "none"; }, 250);
+  const snd = TouchPad.soundButton(() => soundOn, (on) => { audio(); setSound(on); }, { right: 66, top: 10 });
+  const mine = [boxBtn, esc, snd]; mine.forEach((b) => { b.style.display = "none"; });
+  setInterval(() => { const play = mode !== "menu" && $("#menu").classList.contains("hide"); mine.forEach((b) => { b.style.display = play ? "" : "none"; }); }, 250);
+  for (const id of ["bSolo", "bStart"]) $("#" + id).addEventListener("click", () => TouchPad.full());
+  $("#jList").addEventListener("click", (e) => { if (e.target.closest("[data-room]")) TouchPad.full(); });
 })();
-
 let snapT = 0;
 function hostSend(dt) {
   if (!net) return;
@@ -1554,7 +1569,11 @@ function begin(slots, seed, me, diff, teams, mapk) {
   banner(G.mapk === "sea" ? "MARE NOSTRUM: the egg island hides gold and Napoléon's treasure · fords lead there · build a Dock to fish and sail" : `You lead the ${CIVS[G.players[ME].civ].n}: gather, build houses, advance through the ages`, 6);
 }
 $("#bSolo").onclick = () => { audio(); const slots = slotsFor([{ name: saveName() }]); mode = "solo"; begin(slots, Math.floor(Math.random() * 1e9), 0, +$("#diff").value, $("#teams").value, $("#mapk").value); };
-$("#bFull").onclick = () => { (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
+$("#bFull").onclick = () => { if (window.TouchPad) TouchPad.toggleFull(); else (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
+$("#bFull2").onclick = () => $("#bFull").onclick();
+const sndLabel = () => document.querySelectorAll("#bSnd, #bSnd2").forEach((b) => { b.textContent = soundOn ? "SOUND: ON" : "SOUND: OFF"; });
+$("#bSnd").onclick = $("#bSnd2").onclick = () => { audio(); setSound(!soundOn); sndLabel(); };
+sndLabel();
 let lobby = [];
 $("#bHost").onclick = () => {
   audio(); const name = saveName(); lobby = [{ name }]; showPanel("pHost"); $("#hCode").textContent = "····";

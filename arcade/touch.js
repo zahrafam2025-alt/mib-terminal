@@ -49,5 +49,60 @@
     zone.addEventListener("pointerup", up); zone.addEventListener("pointercancel", (e) => fingers.delete(e.pointerId));
   };
   T.zone = (style) => { T.css(); const z = document.createElement("div"); z.className = "tp"; Object.assign(z.style, style); document.body.appendChild(z); return z; };
+
+  const iOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const standalone = navigator.standalone === true || matchMedia("(display-mode: standalone), (display-mode: fullscreen)").matches;
+  T.iOS = iOS; T.standalone = standalone;
+  T.canFull = () => !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+  T.isFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || standalone;
+  T.full = () => {
+    if (T.isFull()) return;
+    const el = document.documentElement, rq = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!rq) { if (iOS) T.homeTip(true); return; }
+    try {
+      const p = rq.call(el, { navigationUI: "hide" });
+      const lock = () => { try { const o = screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape"); if (o && o.catch) o.catch(() => {}); } catch (e) {} };
+      if (p && p.then) p.then(lock, () => {}); else lock();
+    } catch (e) {}
+  };
+  T.exitFull = () => { try { const ex = document.exitFullscreen || document.webkitExitFullscreen; if ((document.fullscreenElement || document.webkitFullscreenElement) && ex) { const p = ex.call(document); if (p && p.catch) p.catch(() => {}); } } catch (e) {} };
+  T.toggleFull = () => { if (document.fullscreenElement || document.webkitFullscreenElement) T.exitFull(); else T.full(); };
+  T.homeTip = (force) => {
+    if (!iOS || standalone) return;
+    try { if (!force && localStorage.getItem("arcade-hometip")) return; localStorage.setItem("arcade-hometip", "1"); } catch (e) {}
+    if (document.getElementById("tp-tip")) return;
+    const d = document.createElement("div"); d.id = "tp-tip";
+    d.innerHTML = '<b>Full screen on iPhone</b><br>Safari cannot hide its bars. Tap <b>Share</b> <span style="font-size:18px">⬆︎</span>, then <b>Add to Home Screen</b>, and open the arcade from that icon: it plays like an app, full screen, with no swipe-back.<br><button>OK</button>';
+    d.querySelector("button").onclick = () => d.remove();
+    document.body.appendChild(d);
+  };
+  T.mobile = () => {
+    if (!on) return;
+    let vp = document.querySelector('meta[name="viewport"]');
+    if (!vp) { vp = document.createElement("meta"); vp.name = "viewport"; document.head.appendChild(vp); }
+    vp.content = "width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover";
+    const s = document.createElement("style");
+    s.textContent = `html,body{overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-text-size-adjust:100%}
+canvas{touch-action:none}input,select,textarea{-webkit-user-select:auto;user-select:auto;font-size:16px!important}
+#tp-rot{position:fixed;inset:0;z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#05070d;color:#fbbf24;font:700 20px system-ui;text-align:center;padding:20px}
+#tp-rot span{font-size:64px;animation:tprot 2s ease-in-out infinite}@keyframes tprot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
+@media (orientation:portrait){#tp-rot{display:flex}}
+#tp-tip{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:101;width:min(440px,92vw);background:#141827;border:1px solid #fbbf24;border-radius:12px;padding:12px 14px;color:#e5e7eb;font:14px/1.45 system-ui}
+#tp-tip button{margin-top:8px;float:right;padding:6px 16px}`;
+    document.head.appendChild(s);
+    const r = document.createElement("div"); r.id = "tp-rot"; r.innerHTML = "<span>📱</span>Turn your phone sideways to play"; document.body.appendChild(r);
+    for (const ev of ["gesturestart", "gesturechange", "gestureend"]) document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+    document.addEventListener("dblclick", (e) => e.preventDefault(), { passive: false });
+    let lastEnd = 0;
+    document.addEventListener("touchend", (e) => { const now = Date.now(), t = e.target; if (now - lastEnd < 350 && !(t.closest && t.closest("input,select,textarea,a"))) e.preventDefault(); lastEnd = now; }, { passive: false });
+    document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    setTimeout(() => T.homeTip(false), 1500);
+  };
+  T.soundButton = (isOn, set, pos) => {
+    const b = T.button(isOn() ? "🔊" : "🔇", pos || { left: 12, top: 12 }, 44, () => { set(!isOn()); b.textContent = isOn() ? "🔊" : "🔇"; });
+    b.style.fontSize = "20px";
+    return b;
+  };
   window.TouchPad = T;
+  if (on) { if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", T.mobile); else T.mobile(); }
 })();

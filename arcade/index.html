@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="MIB Arcade">
+<meta name="theme-color" content="#0b0d14"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png">
+
 <title>MIB Arcade</title>
 
 <style>
@@ -704,7 +708,7 @@ if (ARC.names) {
 }
 if (TouchPad.on) {
   const st = document.createElement("style");
-  st.textContent = "#screen{width:min(100%, calc((100vh - 70px) * 4 / 3));margin:0 auto;touch-action:none}#tpad.port::after{content:'turn your phone sideways';position:fixed;left:0;right:0;top:8px;text-align:center;color:#fbbf24;font:600 13px system-ui;pointer-events:none}";
+  st.textContent = "#screen{width:min(100%, calc((100vh - 70px) * 4 / 3));margin:0 auto;touch-action:none}body.playing #top,body.playing .help,body.playing #board{display:none}body.playing #wrap{padding:0;max-width:none}body.playing #screen{width:min(100vw, calc(100vh * 4 / 3));border-radius:0;border:0}#tpad.port::after{content:'turn your phone sideways';position:fixed;left:0;right:0;top:8px;text-align:center;color:#fbbf24;font:600 13px system-ui;pointer-events:none}";
   document.head.appendChild(st);
   const pad = document.createElement("div"); pad.id = "tpad"; document.body.appendChild(pad);
   const bt = (label, pos, size, code) => { const k = TouchPad.key(code); return TouchPad.button(label, pos, size, () => { audioStart(); k.down(); }, k.up, pad); };
@@ -714,12 +718,15 @@ if (TouchPad.on) {
   const gp = [bt("◀", { left: 14, bottom: 40 }, 86, "ArrowLeft"), bt("▶", { left: 112, bottom: 40 }, 86, "ArrowRight"),
     bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("ERS", { right: 40, bottom: 150 }, 58, "Space")];
   const esc = bt("☰", { right: 12, top: 12 }, 46, "Escape");
+  const snd = TouchPad.soundButton(() => sound, (on) => { audioStart(); setSound(on); }, { right: 66, top: 12 });
+  cv.addEventListener("click", () => { if (cur) TouchPad.full(); });
   setInterval(() => {
     const isGp = !!cur && cur.id === "spa", show = !!cur;
     any.forEach((b) => { b.style.display = show && !isGp ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
-    esc.style.display = show ? "" : "none";
+    esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
     pad.classList.toggle("port", innerHeight > innerWidth);
+    document.body.classList.toggle("playing", show);
   }, 250);
 }
 setSound(sound); menu(); loadBest(); requestAnimationFrame(frame);
