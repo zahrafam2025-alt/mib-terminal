@@ -83,6 +83,7 @@ function City() {
     police: { name: "POLICE CAR", l: 31, w: 15, max: 340, acc: 360, grip: 8, turn: 2.9, hp: 130, cols: ["#0f172a"] },
     ambulance: { name: "AMBULANCE", l: 38, w: 18, max: 280, acc: 250, grip: 6.5, turn: 2.3, hp: 150, cols: ["#f8fafc"] },
     tank: { name: "TANK", l: 42, w: 26, max: 130, acc: 140, grip: 14, turn: 1.5, hp: 1200, cols: ["#4d5d32"] },
+    jet: { name: "F-16", l: 48, w: 40, max: 950, acc: 520, grip: 4, turn: 2.4, hp: 600, cols: ["#94a3b8"], fly: true },
   };
   const SKIN = ["#f1c27d", "#e0ac69", "#c68642", "#8d5524", "#5a3825", "#3b2219", "#ffdbac"];
   const SHIRT = ["#ef4444", "#3b82f6", "#22c55e", "#eab308", "#a855f7", "#f97316", "#e5e7eb", "#14b8a6", "#ec4899", "#6b7280"];
@@ -127,11 +128,12 @@ function City() {
     c.steer += (steerIn - c.steer) * Math.min(1, dt * 9);
     const oldA = c.a;
     c.a += c.steer * t.turn * clamp(vf / 90, -1, 1) * dt * (hb ? 1.4 : 1);
-    if (carSolid(c)) c.a = oldA;
+    if (!t.fly && carSolid(c)) c.a = oldA;
     c.vx = fxx * vf + rx * vr; c.vy = fyy * vf + ry * vr;
     const sx = c.vx, sy = c.vy;
-    c.x += c.vx * dt; if (carSolid(c)) { c.x -= c.vx * dt; c.vx *= -0.3; }
-    c.y += c.vy * dt; if (carSolid(c)) { c.y -= c.vy * dt; c.vy *= -0.3; }
+    c.x += c.vx * dt; if (!t.fly && carSolid(c)) { c.x -= c.vx * dt; c.vx *= -0.3; }
+    c.y += c.vy * dt; if (!t.fly && carSolid(c)) { c.y -= c.vy * dt; c.vy *= -0.3; }
+    if (t.fly) { const lim = MT * T - 40; if (c.x < 40 || c.x > lim) { c.x = clamp(c.x, 40, lim); c.vx *= -0.4; } if (c.y < 40 || c.y > lim) { c.y = clamp(c.y, 40, lim); c.vy *= -0.4; } }
     const impact = Math.hypot(sx - c.vx, sy - c.vy);
     if (impact > 160) { c.hp -= (impact - 140) * 0.09 * (c.t === "tank" ? 0.1 : 1); sparks(c.x + fxx * t.l / 2, c.y + fyy * t.l / 2, 6); if (near(c, 500)) SFX.bump(); if (c === pl.car) g.shake = Math.max(g.shake, 0.25); }
     if ((Math.abs(vr) > 80 || (hb && Math.abs(vf) > 90)) && !c.wreck && g.t % 0.05 < dt) skid(c);
@@ -144,6 +146,7 @@ function City() {
   }
   function carCircles(c) { const o = c.ty.l / 2 - c.ty.w / 2, f = [Math.cos(c.a), Math.sin(c.a)]; return [[c.x + f[0] * o, c.y + f[1] * o], [c.x, c.y], [c.x - f[0] * o, c.y - f[1] * o]]; }
   function collideCars(A, B) {
+    if (A.ty.fly || B.ty.fly) return;
     if (Math.abs(A.x - B.x) > 60 || Math.abs(A.y - B.y) > 60) return;
     let best = null; const ra = A.ty.w / 2, rb = B.ty.w / 2;
     for (const p of carCircles(A)) for (const q of carCircles(B)) {
@@ -166,6 +169,7 @@ function City() {
     }
   }
   function carVsWalker(c, p, isPlayer) {
+    if (c.ty.fly) return;
     const dx = p.x - c.x, dy = p.y - c.y, f = [Math.cos(c.a), Math.sin(c.a)], u = dx * f[0] + dy * f[1], v = -dx * f[1] + dy * f[0];
     if (Math.abs(u) > c.ty.l / 2 + 5 || Math.abs(v) > c.ty.w / 2 + 5) return;
     const sp = Math.hypot(c.vx, c.vy);
@@ -213,6 +217,12 @@ function City() {
   }
   function fire(car) {
     if (pl.cool > 0) return;
+    if (car && car.ty.fly) {
+      const a = car.a, nx = car.x + Math.cos(a) * 26, ny = car.y + Math.sin(a) * 26;
+      shoot(car, nx, ny, a + rnd(-0.025, 0.025), "b", 34, pl); pl.cool = 0.06; noise(0.04, 0.09, 3200);
+      if (g.t - (pl.mslAt || 0) > 0.7) { pl.mslAt = g.t; for (const sd of [-1, 1]) shoot(car, car.x - Math.sin(a) * 14 * sd, car.y + Math.cos(a) * 14 * sd, a, "rocket", 0, pl); noise(0.3, 0.12, 1000); }
+      return;
+    }
     const w = car && car.t === "tank" ? "shell" : WO[pl.wi];
     const a = pl.a, ox = car ? Math.cos(a) * (car.ty.l / 2 + 4) : Math.cos(a) * 7, oy = car ? Math.sin(a) * (car.ty.l / 2 + 4) : Math.sin(a) * 7;
     if (w === "shell") { shoot(car, pl.x + ox, pl.y + oy, a, "shell", 0, pl); pl.cool = 0.9; noise(0.25, 0.2, 500); return; }
@@ -462,6 +472,7 @@ function City() {
     toast(best.ty.name, "#e5e7eb"); tone(200, 0.08, "square", 0.05);
   }
   function exitCar() {
+    if (pl.car && pl.car.ty.fly && Math.hypot(pl.car.vx, pl.car.vy) > 70) { toast("SLOW DOWN TO LAND (hold ↓)", "#fde047"); return; }
     const c = pl.car, f = [Math.cos(c.a), Math.sin(c.a)], o = c.ty.w / 2 + 8;
     let x = c.x + f[1] * o, y = c.y - f[0] * o;
     if (solidAt(x, y)) { x = c.x - f[1] * o; y = c.y + f[0] * o; }
@@ -481,7 +492,7 @@ function City() {
       c.ctl = { thr: up ? 1 : dn ? -1 : 0, steer: (rt ? 1 : 0) - (lf ? 1 : 0), hb: held("KeyX", "ShiftLeft", "ShiftRight") };
       pl.x = c.x; pl.y = c.y; pl.a = c.a; pl.vx = c.vx; pl.vy = c.vy;
       if (held("Space")) fire(c);
-      const v = Math.abs(fwd(c)); engineSet(true, (c.t === "tank" ? 1200 : 1800) + v * (c.t === "tank" ? 10 : 22), up || dn ? 1 : 0.2);
+      const v = Math.abs(fwd(c)); engineSet(true, c.ty.fly ? 2600 + v * 9 : (c.t === "tank" ? 1200 : 1800) + v * (c.t === "tank" ? 10 : 22), up || dn ? 1 : 0.2);
     } else {
       const run = held("ShiftLeft", "ShiftRight", "KeyX") ? 1.75 : 1, sp = (up ? 78 : dn ? -42 : 0) * run;
       pl.a += ((rt ? 1 : 0) - (lf ? 1 : 0)) * 3.8 * dt;
@@ -499,6 +510,31 @@ function City() {
     }
   }
 
+  const CHEATS = {
+    F16: () => { const j = spawnRide("jet"); toast("F-16 · Space: cannon + missiles · ↓ slow down, F to land", "#fde047"); bigMsg("F-16", "#fde047", 1.5); return j; },
+    TANK: () => { spawnRide("tank"); toast("A TANK. FROM NOWHERE.", "#86efac"); },
+    GUNS: () => { pl.ammo.pistol = 200; pl.ammo.uzi = 600; pl.ammo.rocket = 40; pl.wi = 2; toast("ALL WEAPONS", "#fde047"); },
+    MONEY: () => { pl.money += 100000; toast("+$100,000", "#fde047"); },
+    HEAL: () => { pl.hp = 100; pl.armor = 100; if (pl.car) pl.car.hp = pl.car.ty.hp; toast("HEALTH + ARMOUR", "#86efac"); },
+    NOCOPS: () => { pl.wanted = 0; for (const c of cars) if (c.siren) c.siren = false; toast("WANTED LEVEL CLEARED", "#93c5fd"); },
+  };
+  function spawnRide(t) {
+    if (pl.dead > 0) return null;
+    if (pl.car) { const o = pl.car; o.drv = null; o.ctl = null; pl.car = null; }
+    const c = mkCar(t, pl.x, pl.y, pl.a, { keep: true });
+    c.drv = "player"; pl.car = c; tone(660, 0.1, "square", 0.06); tone(990, 0.15, "square", 0.06, 0, 0.1);
+    return c;
+  }
+  g.dbgCar = () => pl.car ? { t: pl.car.t, x: Math.round(pl.car.x), y: Math.round(pl.car.y), v: Math.round(Math.hypot(pl.car.vx, pl.car.vy)), shots: shots.length } : null;
+  g.cheat = (code) => { const k = String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (CHEATS[k]) { CHEATS[k](); return true; } toast("NO SUCH CHEAT", "#94a3b8"); return false; };
+  let typed = "";
+  if (window.__cityCheatKey) removeEventListener("keydown", window.__cityCheatKey);
+  window.__cityCheatKey = (e) => {
+    if (typeof cur === "undefined" || cur !== g || e.key.length !== 1) return;
+    typed = (typed + e.key.toUpperCase()).slice(-8);
+    for (const k of Object.keys(CHEATS)) if (typed.endsWith(k)) { typed = ""; if (typeof hit !== "undefined") hit.clear(); CHEATS[k](); break; }
+  };
+  addEventListener("keydown", window.__cityCheatKey);
   g.update = (dt) => {
     g.t += dt; g.shake = Math.max(0, g.shake - dt);
     if (g.big) { g.big.t -= dt; if (g.big.t <= 0) g.big = null; }
@@ -585,7 +621,23 @@ function City() {
       }
     }
   }
+  function drawJet(c) {
+    const sp = Math.hypot(c.vx, c.vy), alt = 18 + Math.min(30, sp / 20), k = 1.7 / Math.max(0.6, g.zoom);
+    for (const [ox, oy, col] of [[alt, alt, "rgba(0,0,0,.28)"], [0, 0, null]]) {
+      cx.save(); cx.translate(c.x + ox, c.y + oy); cx.rotate(c.a); cx.scale(k, k);
+      const f = col || "#94a3b8", d = col || "#64748b", poly = (pts, cc) => { cx.fillStyle = cc; cx.beginPath(); pts.forEach(([x, y], i) => (i ? cx.lineTo(x, y) : cx.moveTo(x, y))); cx.closePath(); cx.fill(); };
+      poly([[24, 0], [14, -3], [-2, -4], [-2, -20], [-8, -20], [-14, -5], [-20, -5], [-24, -12], [-27, -12], [-25, 0], [-27, 12], [-24, 12], [-20, 5], [-14, 5], [-8, 20], [-2, 20], [-2, 4], [14, 3]], f);
+      if (!col) {
+        poly([[-2, -20], [-8, -20], [-14, -5], [-6, -5]], d); poly([[-2, 20], [-8, 20], [-14, 5], [-6, 5]], d);
+        poly([[16, 0], [8, -2.5], [4, 0], [8, 2.5]], "#0ea5e9");
+        rect(-7, -21, 3, 2, "#ef4444"); rect(-7, 19, 3, 2, "#ef4444");
+        if (c.ctl && c.ctl.thr > 0) { circ(-28, 0, 3 + Math.random() * 2, "#fde047"); circ(-31, 0, 2 + Math.random() * 2, "#f97316"); }
+      }
+      cx.restore();
+    }
+  }
   function drawCar(c) {
+    if (c.ty.fly) return;
     const l = c.ty.l, w = c.ty.w;
     cx.save(); cx.translate(c.x, c.y); cx.rotate(c.a);
     rect(-l / 2 + 2, -w / 2 + 3, l, w, "rgba(0,0,0,.28)");
@@ -680,6 +732,7 @@ function City() {
     if (m && m.kind === "hit" && !m.car.wreck) { const bob = Math.sin(g.t * 6) * 3; txt("▼", m.car.x, m.car.y - 22 + bob, 16, "#ef4444", "center"); }
     for (const t of trees) if (vis(t)) { const H2 = HC / z, s = H2 / (H2 - 28), tx = g.camx + (t.x - g.camx) * s, ty = g.camy + (t.y - g.camy) * s; circ(t.x + 3, t.y + 3, t.r, "rgba(0,0,0,.25)"); circ(tx, ty, t.r, "#166534"); circ(tx - t.r * 0.25, ty - t.r * 0.25, t.r * 0.6, "#15803d"); }
     for (const b of builds) drawBuilding(b, x0, y0, x1, y1);
+    for (const c of cars) if (c.ty.fly && !c.wreck && vis(c, 120)) drawJet(c);
     cx.restore();
     hud();
   };
@@ -691,7 +744,7 @@ function City() {
     const stars = Math.floor(pl.wanted), flash = stars && pl.hidden < 1 && Math.floor(g.t * 5) % 2;
     for (let i = 0; i < 5; i++) txt("★", W - 18 - i * 17, 26, 17, i < stars ? (flash ? "#fef08a" : "#facc15") : "rgba(255,255,255,.18)", "center");
     if (stars && pl.hidden > 2) txt("out of sight...", W - 10, 42, 9, "#93c5fd", "right");
-    const w = pl.car && pl.car.t === "tank" ? "CANNON" : WP[WO[pl.wi]].name, ammo = pl.car && pl.car.t === "tank" ? "∞" : WO[pl.wi] === "fist" ? "" : String(pl.ammo[WO[pl.wi]]);
+    const w = pl.car && pl.car.ty.fly ? "GUN+MISSILE" : pl.car && pl.car.t === "tank" ? "CANNON" : WP[WO[pl.wi]].name, ammo = pl.car && (pl.car.t === "tank" || pl.car.ty.fly) ? "∞" : WO[pl.wi] === "fist" ? "" : String(pl.ammo[WO[pl.wi]]);
     rect(6, H - 36, 128, 30, "rgba(0,0,0,.5)"); txt(w, 12, H - 22, 11, "#e5e7eb"); txt(ammo, 12, H - 10, 11, "#fde047");
     if (pl.car) { txt(pl.car.ty.name, 130, H - 22, 9, "#94a3b8", "right"); rect(70, H - 15, 58, 4, "#1e293b"); rect(70, H - 15, 58 * clamp(pl.car.hp / pl.car.ty.hp, 0, 1), 4, pl.car.hp > pl.car.ty.hp * 0.35 ? "#22c55e" : "#ef4444"); }
     const RS = 78, rx = W - RS - 8, ry = H - RS - 8, sc = 4.2, img = MT * sc;
