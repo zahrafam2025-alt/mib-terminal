@@ -49,7 +49,7 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}
       B buy (in your spawn, start of the round) · 1 2 3 4 or mouse wheel: weapons · R reload · right click scope<br>WASD move · Space jump · C crouch · X hide in a box · Shift walk · Tab scores · H help in game · V announcer · Esc menu</div>
     <div style="margin-top:12px"><a href="/arcade">◀ back to the arcade</a><a href="sfx/CREDITS.txt" target="_blank" rel="noopener" style="margin-left:14px">sound credits</a></div>
   </div>
-  <div id="pHost" class="hide"><div>Room code (your friends pick it under JOIN LAN GAME, on the same network):</div><div class="code" id="hCode">····</div>
+  <div id="pHost" class="hide"><div>Room code (friends join it from the arcade's PLAY ONLINE, or with your invite link):</div><div class="code" id="hCode">····</div><div class="row" style="margin:4px 0"><button id="bShare">SHARE INVITE</button></div>
     <div class="list" id="hList"></div><div class="row"><button id="bStart" class="pri">START</button><button id="bHostX">CANCEL</button></div>
     <div class="help">Empty places are filled with bots. Players can only join from your home network.</div></div>
   <div id="pJoin" class="hide"><div>Games on your network:</div><div class="list" id="jList"></div><div id="jMsg" class="help"></div><div class="row"><button id="bJoinX">BACK</button></div></div>
@@ -1084,6 +1084,20 @@ function replaceBot(p) {
   else { p.id = p.net; W.players.push(p); }
 }
 $("#bStart").onclick = () => { if (!net || !net.live) return; mode = "host"; startMatch(lobby, readCfg()); net.started(); hideMenu(); };
+for (const id of ["bHost", "bJoin"]) { const b = document.getElementById(id); if (b) b.style.display = "none"; }
+$("#bShare").onclick = async () => {
+  const code = $("#hCode").textContent.trim(); if (!/^[A-Z0-9]{4,8}$/.test(code)) return;
+  const hub = new URL(ARC.page("hub"), location.href); hub.searchParams.set("join", code);
+  try { if (navigator.share) { await navigator.share({ title: "MIB Arcade", text: "Join my game", url: hub.href }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(hub.href); alert("Invite link copied: paste it to your friends."); } catch (e) { prompt("Send this link to your friends:", hub.href); }
+};
+setTimeout(() => {
+  const q = new URLSearchParams(location.search), o = q.get("online"), room = (q.get("room") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!o) return;
+  history.replaceState(null, "", location.pathname);
+  if (o === "host") $("#bHost").onclick();
+  else if (o === "join" && room) { showPanel("pJoin"); joinRoom(room); }
+}, 400);
 $("#bHostX").onclick = () => { if (net) net.close(); net = null; showPanel("pMain"); };
 let joinTimer = null;
 $("#bJoin").onclick = () => {

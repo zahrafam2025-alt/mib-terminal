@@ -111,7 +111,9 @@ canvas{touch-action:none}input,select,textarea{-webkit-user-select:auto;user-sel
   }
   let unlocked = false;
   const SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+  T.wake = () => { try { if ("wakeLock" in navigator && !T.lock && !document.hidden) navigator.wakeLock.request("screen").then((l) => { T.lock = l; l.addEventListener("release", () => { T.lock = null; }); }, () => {}); } catch (e) {} };
   T.wakeSound = () => {
+    T.wake();
     try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (e) {}
     for (const c of ACS) { try { if (c.state !== "running" && c.state !== "closed") c.resume(); } catch (e) {} }
     if (!unlocked) { unlocked = true; try { const a = new Audio(SILENT); a.setAttribute("playsinline", ""); const p = a.play(); if (p && p.catch) p.catch(() => { unlocked = false; }); } catch (e) { unlocked = false; } }
