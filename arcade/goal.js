@@ -88,6 +88,7 @@ function Goal(online = null) {
     g.result = [draw ? "A DRAW!" : `${NAMES[g.s[0] > g.s[1] ? 0 : 1]} WINS ${g.s[0]} : ${g.s[1]}`, P.map((p) => `${p.name} ${NAMES[p.team]}`).join(" · ")];
     if (won) SFX.win(); else SFX.over();
   }
+  g.setSlot = (i, id, name) => { const p = P[i]; if (!p) return; p.human = { id, name }; p.name = name; p.lastK = p.in.k = 0; };
   g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (p) { p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.sp = !!m.sp; p.in.k = Math.max(p.in.k, +m.k || 0); } };
   g.netState = (id, m) => { if (!host) g.net = m; };
   let guestK = 0;

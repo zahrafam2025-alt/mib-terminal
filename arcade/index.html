@@ -608,7 +608,7 @@ function start(id) {
   screenEl.focus();
 }
 function menu() {
-  if (ON && ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); return; }
+  if (ON && ON.live) { if (ON.host) osend({ t: "room" }); ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); return; }
   if (cur && !overDone) saveScore(); engineSet(false); cur = null; paused = false; music("menu"); document.getElementById("help").textContent = "1-9, 0 or click a game · M sound · P pause · Esc menu · records are shared with the loading window's arcade"; }
 function saveScore() {
   if (!cur || cur.id === "sumo") return;
@@ -740,14 +740,25 @@ function onMsg(m, from) {
   if (!ON.host && m.from !== undefined) from = m.from;
   if (from === ON.me) return;
   if (m.t === "lobby") { ON.players = m.players; ON.game = m.game; drawRoom(); }
+  else if (m.t === "slot") { if (ON.live && cur && cur.setSlot) cur.setSlot(m.i, m.id, m.name); }
+  else if (m.t === "addcar") { if (ON.live && cur && cur.addRemote && m.id !== ON.me) cur.addRemote({ id: m.id, name: m.name }); }
   else if (m.t === "wait") { $o("oMsg").textContent = "A round is being played: you are in for the next one (the host presses START)."; }
-  else if (m.t === "go") startOnline(m);
+  else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); }
+  else if (m.t === "room") { if (ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); } }
   else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); }
   else if (m.t === "fr") {
     let img = ON.frames.get(from); if (!img) { img = new Image(); ON.frames.set(from, img); }
     if (m.img) img.src = m.img;
     ON.scores.set(from, { score: m.score || 0, over: !!m.over });
   }
+}
+function lateJoin(q) {
+  if (!ON || !ON.live || !cur) return;
+  if (cur.id === "goal" && cur.setSlot) {
+    const slot = ON.players.findIndex((p) => p.id === q.id); if (slot < 0 || slot > 3) return;
+    cur.setSlot(slot, q.id, q.name); osend({ t: "slot", i: slot, id: q.id, name: q.name });
+  } else if (cur.id === "spa" && cur.addRemote) { cur.addRemote(q); osend({ t: "addcar", id: q.id, name: q.name }); }
+  ON.net.send(q.id, { from: 0, t: "go", game: ON.game, seed: ON.seed, rain: ON.rain, players: ON.players, late: true });
 }
 function lobbyOut() { if (ON && ON.host) osend({ t: "lobby", players: ON.players, game: ON.game }); if (ON) drawRoom(); }
 $o("oName").value = ARC.getName();
@@ -760,7 +771,7 @@ $o("oHost").onclick = () => {
     hello: (m) => { ON.code = m.room; drawRoom(); },
     join: (m) => {
       if (ON.players.length >= 4) return; ON.players.push({ id: m.id, name: m.name }); lobbyOut();
-      if (ON.live) ON.net.send(m.id, { from: 0, t: "wait" });
+      if (ON.live) lateJoin({ id: m.id, name: m.name });
     },
     leave: (m) => { ON.players = ON.players.filter((q) => q.id !== m.id); ON.frames.delete(m.id); ON.scores.delete(m.id); lobbyOut(); },
     msg: (m, from) => onMsg(m, from),
@@ -807,7 +818,7 @@ $o("oStart").onclick = () => {
   ON.net.started();
 };
 function startOnline(m) {
-  ON.players = m.players; ON.game = m.game; ON.live = true; ON.frames.clear(); ON.scores.clear();
+  ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.frames.clear(); ON.scores.clear();
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
   if (m.game === "goal") { cur = Goal({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = cur.help; }

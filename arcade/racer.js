@@ -77,8 +77,8 @@ function Racer(two = false, online = null) {
   const AI = online ? [] : AIC.slice(0, two ? 6 : 7).map((c, i) => Object.assign(base(), { ai: true, c, name: AIN[i][0], code: AIN[i][1], top: 1, react: rnd(0.15, 0.5), tx: 0, defT: 0, defX: 0, boost: false }));
   const RP = online ? online.players.filter((q) => q.id !== online.me).map((q) => Object.assign(base(), { remote: true, id: q.id, name: q.name, code: q.name.slice(0, 3).toUpperCase(),
     c: NETC[online.players.findIndex((x) => x.id === q.id) % 4], shake: 0, msg: "", msgT: 0, gear: 1, rpm: 4200, thr: 0, sky: 0, st: 0, turnT: 0, turnName: "", lastTurn: -1, lastPlace: 0, slide: 0, net: null })) : [];
-  const all = online ? online.players.map((q) => (q.id === online.me ? P[0] : RP.find((r) => r.id === q.id))) : AI.concat(P), FIELD = all.length;
-  const split = !!online && all.length > 1;
+  const all = online ? online.players.map((q) => (q.id === online.me ? P[0] : RP.find((r) => r.id === q.id))) : AI.concat(P);
+  let FIELD = all.length, split = !!online && all.length > 1;
   all.forEach((c, k) => { c.z = LEN - (3 + Math.floor(k / 2) * 6 + (k % 2) * 3) * SEG; c.x = c.tx = k % 2 ? 0.42 : -0.42; c.place = k + 1; });
   let VAI = [], LINE = [];
   function setDiff(d) {
@@ -263,6 +263,12 @@ function Racer(two = false, online = null) {
   };
   let sendT = 0;
   g.netState = (id, m) => { const r = RP.find((x) => x.id === id); if (r) r.net = m; };
+  g.addRemote = (q) => {
+    if (RP.some((r) => r.id === q.id) || all.length >= 4) return;
+    const k = all.length, r = Object.assign(base(), { remote: true, id: q.id, name: q.name, code: q.name.slice(0, 3).toUpperCase(), c: NETC[k % 4], shake: 0, msg: "", msgT: 0, gear: 1, rpm: 4200, thr: 0, sky: 0, st: 0, turnT: 0, turnName: "", lastTurn: -1, lastPlace: 0, slide: 0, net: null });
+    r.z = LEN - 3 * SEG; r.x = 0;
+    RP.push(r); all.push(r); FIELD = all.length; split = true; standings();
+  };
   function onlineStep(dt) {
     const me = P[0];
     drive(me, dt);
