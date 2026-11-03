@@ -6,10 +6,11 @@ function Goal(online = null) {
   const humans = online ? online.players.slice(0, 4) : [{ id: 0, name: (window.ARC && ARC.getName()) || "YOU" }];
   const BOTN = ["Zizou", "Ronnie", "Leo", "Kylian", "Cristiano", "Thierry"];
   const P = [0, 1, 2, 3].map((i) => ({ i, team: i % 2, human: i < humans.length ? humans[i] : null, name: i < humans.length ? humans[i].name : BOTN[i] + " (bot)",
-    x: 0, y: 0, vx: 0, vy: 0, fx: i % 2 ? -1 : 1, fy: 0, stam: 1, kickT: 0, in: { mx: 0, my: 0, sp: false, k: 0 }, lastK: 0 }));
+    x: 0, y: 0, vx: 0, vy: 0, fx: i % 2 ? -1 : 1, fy: 0, stam: 1, kickT: 0, in: { mx: 0, my: 0, sp: false, k: 0, t: 0 }, lastK: 0, lastT: 0, dashT: 0, tackT: 0, dazed: 0 }));
+  let stuckT = 0;
   const ball = { x: 240, y: MY, vx: 0, vy: 0 };
   const g = { id: "goal", score: 0, over: false, t: 0, s: [0, 0], pause: 1.5, msg: "KICK OFF!", result: null, sendT: 0, net: null,
-    help: "arrows / W A S D run · Space shoot · Enter or Shift sprint · run into the ball to dribble · first to 5 · Esc menu" };
+    help: "arrows / W A S D run · Space shoot · Shift sprint · Enter or X tackle · run into the ball to dribble · first to 5 · Esc menu" };
   function kickoff() {
     const spots = [[150, MY - 40], [330, MY + 40], [90, MY + 50], [390, MY - 50]];
     P.forEach((p, i) => { p.x = spots[i][0]; p.y = spots[i][1]; p.vx = p.vy = 0; p.fx = p.team ? -1 : 1; p.fy = 0; });
@@ -31,6 +32,8 @@ function Goal(online = null) {
       if (d < 18 && (align > 0.6 || (align > 0.2 && Math.abs(ball.x - gx) < 140) || p.stuck > 1.5) && p.kickT <= 0) { p.fx = Math.cos(a); p.fy = Math.sin(a) + (Math.random() - 0.5) * 0.3; p.in.k++; }
       else if (d < 30) { tx = ball.x; ty = ball.y; }
     } else { tx = own + (p.team ? -60 : 60); ty = clamp(ball.y, MY - MOUTH - 10, MY + MOUTH + 10); }
+    const foe = P.find((q) => q.team !== p.team && Math.hypot(q.x - ball.x, q.y - ball.y) < PR + BR + 6);
+    if (foe && Math.hypot(foe.x - p.x, foe.y - p.y) < 60 && Math.random() < 0.02) p.in.t++;
     const dx = tx - p.x, dy = ty - p.y, L = Math.hypot(dx, dy);
     p.in.mx = L > 4 ? dx / L : 0; p.in.my = L > 4 ? dy / L : 0; p.in.sp = near && L > 60;
   }
@@ -38,10 +41,29 @@ function Goal(online = null) {
     for (const p of P) {
       if (!p.human) bot(p);
       else if (p.human.id === me) { p.in.mx = (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0); p.in.my = (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0);
-        p.in.sp = held("Enter", "ShiftLeft", "ShiftRight"); if (pressed("Space")) p.in.k++; }
+        const ts = window.TSTICK; p.in.sp = held("ShiftLeft", "ShiftRight") || !!(ts && Math.hypot(ts.x, ts.y) > 0.92); if (pressed("Space")) p.in.k++; if (pressed("Enter", "KeyX")) p.in.t++; }
       const L = Math.hypot(p.in.mx, p.in.my), sprint = p.in.sp && p.stam > 0.05 && L > 0;
       p.stam = clamp(p.stam + (sprint ? -0.9 : 0.35) * dt, 0, 1);
-      const sp = (p.human ? 1 : 0.88) * (sprint ? 165 : 112);
+      p.dazed = Math.max(0, p.dazed - dt); p.dashT = Math.max(0, p.dashT - dt); p.tackT -= dt;
+      if (p.in.t > p.lastT) {
+        p.lastT = p.in.t;
+        if (p.tackT <= 0 && !p.dazed) {
+          const opp = P.filter((q) => q.team !== p.team).sort((a, b) => Math.hypot(a.x - ball.x, a.y - ball.y) - Math.hypot(b.x - ball.x, b.y - ball.y))[0];
+          const tg = opp && Math.hypot(opp.x - ball.x, opp.y - ball.y) < 40 && Math.hypot(opp.x - p.x, opp.y - p.y) < 120 ? opp : ball, dx = tg.x - p.x, dy = tg.y - p.y, d = Math.hypot(dx, dy) || 1;
+          p.dashT = 0.28; p.tackT = 1.1; p.vx = dx / d * 330; p.vy = dy / d * 330; p.fx = dx / d; p.fy = dy / d; p.target = tg === ball ? null : tg;
+          noise(0.12, 0.06, 900);
+        }
+      }
+      if (p.dashT > 0) {
+        if (p.target && Math.hypot(p.target.x - p.x, p.target.y - p.y) < PR * 2 + 5) {
+          const q = p.target; q.dazed = 0.7; p.target = null; p.dashT = 0;
+          if (Math.hypot(ball.x - q.x, ball.y - q.y) < PR + BR + 12) { ball.vx = p.fx * 150 + (Math.random() - 0.5) * 60; ball.vy = p.fy * 150 + (Math.random() - 0.5) * 60; }
+          tone(110, 0.1, "square", 0.08, -40);
+        }
+        p.x = clamp(p.x + p.vx * dt, X0 + PR, X1 - PR); p.y = clamp(p.y + p.vy * dt, Y0 + PR, Y1 - PR); p.kickT -= dt;
+        continue;
+      }
+      const sp = (p.human ? 1 : 0.88) * (sprint ? 165 : 112) * (p.dazed ? 0.35 : 1);
       const wx = L ? p.in.mx / L * sp : 0, wy = L ? p.in.my / L * sp : 0;
       p.vx += (wx - p.vx) * Math.min(1, dt * 10); p.vy += (wy - p.vy) * Math.min(1, dt * 10);
       if (L) { p.fx = p.in.mx / L; p.fy = p.in.my / L; }
@@ -67,6 +89,13 @@ function Goal(online = null) {
         if (vn2 < pn * 1.1) { ball.vx += dx / d * (pn * 1.15 - vn2); ball.vy += dy / d * (pn * 1.15 - vn2); }
       }
     }
+    const nearWall = ball.y < Y0 + 14 || ball.y > Y1 - 14 || ((ball.x < X0 + 14 || ball.x > X1 - 14) && Math.abs(ball.y - MY) > MOUTH);
+    stuckT = nearWall && Math.hypot(ball.vx, ball.vy) < 60 ? stuckT + dt : 0;
+    if (stuckT > 2.5) {
+      stuckT = 0; const dx = 240 - ball.x, dy = MY - ball.y, d = Math.hypot(dx, dy) || 1;
+      ball.x += dx / d * 14; ball.y += dy / d * 14; ball.vx = dx / d * 170; ball.vy = dy / d * 170;
+      g.msg = "THROW-IN"; tone(660, 0.08, "square", 0.05);
+    }
     ball.x += ball.vx * dt; ball.y += ball.vy * dt;
     const fr = Math.exp(-1.15 * dt); ball.vx *= fr; ball.vy *= fr;
     if (ball.y < Y0 + BR) { ball.y = Y0 + BR; ball.vy = Math.abs(ball.vy) * 0.8; }
@@ -89,14 +118,15 @@ function Goal(online = null) {
     if (won) SFX.win(); else SFX.over();
   }
   g.setSlot = (i, id, name) => { const p = P[i]; if (!p) return; p.human = { id, name }; p.name = name; p.lastK = p.in.k = 0; };
-  g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (p) { p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.sp = !!m.sp; p.in.k = Math.max(p.in.k, +m.k || 0); } };
+  g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (p) { p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.sp = !!m.sp; p.in.k = Math.max(p.in.k, +m.k || 0); p.in.t = Math.max(p.in.t, +m.tk || 0); } };
   g.netState = (id, m) => { if (!host) g.net = m; };
-  let guestK = 0;
+  let guestK = 0, guestT = 0;
   g.update = (dt) => {
     if (!host) {
       if (pressed("Space")) guestK++;
+      if (pressed("Enter", "KeyX")) guestT++;
       g.sendT -= dt;
-      if (g.sendT <= 0) { g.sendT = 0.05; online.send({ t: "in", mx: (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0), my: (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0), sp: held("Enter", "ShiftLeft", "ShiftRight"), k: guestK }); }
+      if (g.sendT <= 0) { g.sendT = 0.05; online.send({ t: "in", mx: (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0), my: (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0), sp: held("ShiftLeft", "ShiftRight") || !!(window.TSTICK && Math.hypot(window.TSTICK.x, window.TSTICK.y) > 0.92), k: guestK, tk: guestT }); }
       const m = g.net; if (!m) return;
       const k = Math.min(1, dt * 15);
       ball.x += (m.b[0] - ball.x) * k; ball.y += (m.b[1] - ball.y) * k;

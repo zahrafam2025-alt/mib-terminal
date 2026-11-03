@@ -137,7 +137,7 @@ function ownMenu(on) {
   else menuAudio.pause();
 }
 let engine = null;
-function engineSet(on, rpm = 4000, thr = 0) {
+function engineSet(on, rpm = 4000, thr = 0, voice = null) {
   if (!AC) return;
   if (on && sound && !engine) {
     const mk = (type) => { const o = AC.createOscillator(); o.type = type; return o; };
@@ -152,13 +152,14 @@ function engineSet(on, rpm = 4000, thr = 0) {
     o.connect(clip); sub.connect(gs); gs.connect(clip); hi.connect(gh); gh.connect(clip);
     clip.connect(band); band.connect(low); low.connect(g); g.connect(master);
     [o, sub, hi, lfo].forEach((x) => x.start());
-    engine = { o, sub, hi, lfo, g, low };
+    engine = { o, sub, hi, lfo, g, low, gs, gh };
   }
   if (!engine) return;
   if (!on || !sound) { engine.g.gain.value = 0; try { [engine.o, engine.sub, engine.hi, engine.lfo].forEach((x) => x.stop()); } catch (e) {} engine = null; return; }
   const f = rpm / 15, t = AC.currentTime, k = 0.025;
   engine.o.frequency.setTargetAtTime(f, t, k); engine.sub.frequency.setTargetAtTime(f / 2, t, k); engine.hi.frequency.setTargetAtTime(f * 2, t, k);
   engine.low.frequency.setTargetAtTime(2500 + thr * 5500, t, 0.05);
+  if (voice) { engine.lfo.frequency.setTargetAtTime(voice.lfo, t, 0.1); engine.gs.gain.setTargetAtTime(voice.sub, t, 0.1); engine.gh.gain.setTargetAtTime(voice.hi, t, 0.1); }
   engine.g.gain.setTargetAtTime(0.018 + thr * 0.03 + Math.min(1, rpm / 18000) * 0.015, t, 0.04);
 }
 const SHIFT = () => { noise(0.07, 0.12, 3000); tone(90, 0.06, "square", 0.05); };
@@ -588,6 +589,7 @@ function Jump() {
     gen();
   };
   g.draw = () => {
+    const zz = window.TouchPad && TouchPad.on ? 1.2 : 1; cx.save(); if (zz !== 1) { cx.translate(0, H); cx.scale(zz, zz); cx.translate(0, -H); }
     const sky = cx.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#0e1634"); sky.addColorStop(1, "#2c1e50"); cx.fillStyle = sky; cx.fillRect(0, 0, W, H);
     for (let i = 0; i < 6; i++) { const hx = ((i * 140 - g.cam * 0.3) % 840 + 840) % 840 - 120; cx.fillStyle = "#1d2550"; cx.beginPath(); cx.moveTo(hx, GY); cx.lineTo(hx + 90, GY - 120); cx.lineTo(hx + 180, GY); cx.fill(); }
     const X = (x) => Math.round(x - g.cam);
@@ -614,7 +616,7 @@ function Jump() {
       rect(rx - 4, oy - 5, 9, 10, "#5a3825"); rect(rx - 4.5, oy - 8, 10, 3.5, "#111"); rect(rx - 7 - (r.face > 0 ? 8 : -12), oy - 1, 9, 12, "#111");
       txt(g.net.name(id), rx, oy - 12, 8, r.col, "center");
     }
-    if (g.net && g.over) return void txt(`SCORE ${g.score}`, 10, 20, 14);
+    if (g.net && g.over) { cx.restore(); return void txt(`SCORE ${g.score}`, 10, 20, 14); }
     const p = g.p, SK = "#5a3825", GRN = "#06c167", run = g.ride ? 0 : Math.floor(g.t * 12) % 2;
     cx.save(); cx.translate(X(p.x) + 8, 0); cx.scale(p.face, 1);
     if (g.ride) {
@@ -631,6 +633,7 @@ function Jump() {
     rect(-4, p.y - 5, 9, 10, SK); rect(1.5, p.y - 2.5, 3, 2.2, "#fff"); rect(3.2, p.y - 2.3, 1.4, 1.9, "#111");
     rect(-1, p.y + 2, 6, 3, "#24150d"); rect(1, p.y + 2.6, 3, 0.9, "#7c2d12");
     rect(-4.5, p.y - 8, 10, 3.5, "#111"); rect(4, p.y - 5.5, 4.5, 1.5, GRN);
+    cx.restore();
     cx.restore();
     txt(`SCORE ${g.score}`, 10, 20, 14); txt(`TIPS ${g.coins}`, 10, 36, 11, "#f5b83d"); txt(`BEST ${Math.max(bestOf("jump"), g.score)}`, W - 10, 20, 12, "#8a90a2", "right");
     let hy = 50;
@@ -811,13 +814,17 @@ const GAMES = [
   { id: "empire", name: "CORSICAN EMPIRE", sub: "build, gather, conquer: bots or LAN", href: ARC.page("empire"), col: "#38bdf8" },
 ];
 let cur = null, paused = false, overDone = false, menuT = 0;
+const TOUCH_HELP = { blocks: "tap: turn · slide sideways: move · slide down and hold: faster · flick down: drop", rocks: "stick: fly · A: fire · catch the capsules",
+  snake: "the arrows on the right turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
+  city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball)" };
+const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
 function start(id) {
   const d = GAMES.find((x) => x.id === id);
   if (!d) return;
   if (d.href) { engineSet(false); music(null); location.href = d.href; return; }
   engineSet(false); cur = d.make(); paused = false; overDone = false;
   music(d.quiet ? null : id);
-  document.getElementById("help").textContent = cur.help;
+  document.getElementById("help").textContent = helpOf(cur);
   screenEl.focus();
 }
 function menu() {
@@ -1116,10 +1123,10 @@ function startOnline(m) {
   ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.startT = performance.now(); ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
-  if (m.game === "goal") { cur = Goal({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = cur.help; }
+  if (m.game === "goal") { cur = Goal({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = helpOf(cur); }
   else if (m.game === "spa") {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
-    music(null); document.getElementById("help").textContent = cur.help;
+    music(null); document.getElementById("help").textContent = helpOf(cur);
   } else start(m.game === "rocksvs" ? "rocks" : m.game);
   if (cur && SHARED.has(cur.id) && cur.joinNet) cur.joinNet({ me: ON.me, host: ON.host, players: m.players, versus: m.game === "rocksvs", name: (id) => ((ON && ON.players.find((q) => q.id === id)) || {}).name || "?" });
   if (cur && cur.id === "blocks" && m.players.length > 1) cur.onAttack = (n) => {
@@ -1242,16 +1249,17 @@ if (TouchPad.on) {
   };
   const stickZone = TouchPad.zone({ left: "0", top: "70px", bottom: "0", width: "34%", display: "none" });
   TouchPad.stick(stickZone, (x, y) => {
+    window.TSTICK = { x, y };
     const want = new Set(), gpOnly = !!cur && cur.id === "spa";
     if (x < -0.35) want.add("ArrowLeft"); if (x > 0.35) want.add("ArrowRight");
     if (!gpOnly) { if (y < -0.45) want.add("ArrowUp"); if (y > 0.45) want.add("ArrowDown"); }
     setKeys(want);
-  }, () => setKeys(new Set()));
+  }, () => { window.TSTICK = null; setKeys(new Set()); });
   const any = [bt("A", { right: 20, bottom: 48 }, 82, "Space"), bt("B", { right: 112, bottom: 20 }, 62, "Enter")];
   const wpn = bt("WPN", { right: 40, bottom: 150 }, 58, "KeyE");
-  const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("ERS", { right: 40, bottom: 150 }, 58, "Space")];
-  const dpad = [bt("▲", { left: 84, bottom: 132 }, 70, "ArrowUp"), bt("▼", { left: 84, bottom: 16 }, 70, "ArrowDown"),
-    bt("◀", { left: 10, bottom: 74 }, 70, "ArrowLeft"), bt("▶", { left: 158, bottom: 74 }, 70, "ArrowRight")];
+  const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("BOOST", { left: 22, bottom: 190 }, 70, "Space")];
+  const dpad = [bt("▲", { right: 84, bottom: 132 }, 70, "ArrowUp"), bt("▼", { right: 84, bottom: 16 }, 70, "ArrowDown"),
+    bt("◀", { right: 158, bottom: 74 }, 70, "ArrowLeft"), bt("▶", { right: 10, bottom: 74 }, 70, "ArrowRight")];
   const esc = bt("☰", { right: 12, top: 12 }, 46, "Escape");
   const snd = TouchPad.soundButton(() => sound, (on) => { audioStart(); setSound(on); }, { right: 66, top: 12 });
   cv.addEventListener("click", () => { if (cur) TouchPad.full(); });
@@ -1282,7 +1290,7 @@ if (TouchPad.on) {
     const isGp = !!cur && cur.id === "spa", show = !!cur, blocks = !!cur && cur.id === "blocks", snake = !!cur && cur.id === "snake";
     stickZone.style.display = show && !blocks && !snake ? "" : "none";
     dpad.forEach((b) => { b.style.display = snake ? "" : "none"; });
-    any.forEach((b) => { b.style.display = show && !isGp && !blocks && !snake ? "" : "none"; });
+    any.forEach((b, i) => { b.style.display = show && !isGp && !blocks && !snake && !(i === 1 && cur && (cur.id === "jump" || cur.id === "rocks")) ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
     wpn.style.display = cur && cur.id === "city" ? "" : "none";
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";

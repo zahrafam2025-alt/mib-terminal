@@ -47,7 +47,7 @@ function City() {
     }
     building(x, y, w, h, 34 + R() * (w * h > 12 ? 170 : 90), PAL[Math.floor(R() * PAL.length)]);
   }
-  const carType = () => { const r = R(); return r < 0.42 ? "sedan" : r < 0.58 ? "sport" : r < 0.72 ? "taxi" : "van"; };
+  const carType = () => { const r = R(); return r < 0.36 ? "sedan" : r < 0.48 ? "sport" : r < 0.6 ? "taxi" : r < 0.72 ? "van" : r < 0.8 ? "cabrio" : r < 0.88 ? "suv" : r < 0.95 ? "gt" : "f1"; };
   const KIND = { "1,1": "police", "6,2": "hospital", "2,5": "spray", "5,6": "spray", "7,7": "army", "3,3": "park", "4,4": "park", "0,6": "park", "6,0": "lot", "2,2": "lot", "4,7": "lot" };
   for (let j = 0; j < NB; j++) for (let i = 0; i < NB; i++) {
     const kind = KIND[i + "," + j] || (R() < 0.1 ? "park" : R() < 0.1 ? "lot" : "city"), bx = E + i * PER + 3, by = E + j * PER + 3;
@@ -93,6 +93,10 @@ function City() {
 
   const VT = {
     sedan: { name: "SALOON", l: 30, w: 15, max: 270, acc: 270, grip: 7, turn: 2.7, hp: 100, cols: ["#3b82f6", "#e5e7eb", "#64748b", "#16a34a", "#b91c1c", "#a16207", "#0f766e"] },
+    cabrio: { name: "CABRIOLET", l: 29, w: 14, max: 330, acc: 330, grip: 7.5, turn: 2.9, hp: 85, cols: ["#dc2626", "#f5f5f4", "#1d4ed8", "#065f46"] },
+    f1: { name: "F1 CAR", l: 34, w: 13, max: 620, acc: 720, grip: 11, turn: 3.4, hp: 60, cols: ["#dc2626", "#94a3b8", "#0ea5e9", "#f97316"] },
+    gt: { name: "GT ROADSTER", l: 33, w: 15, max: 450, acc: 470, grip: 8.5, turn: 2.9, hp: 95, cols: ["#14532d", "#1e3a8a", "#e5e7eb", "#111827"] },
+    suv: { name: "SPORT SUV", l: 33, w: 17, max: 320, acc: 330, grip: 7, turn: 2.5, hp: 160, cols: ["#0f172a", "#e5e7eb", "#475569", "#7c2d12"] },
     sport: { name: "SPORTS CAR", l: 30, w: 14, max: 400, acc: 440, grip: 8, turn: 3.0, hp: 80, cols: ["#ef4444", "#f59e0b", "#a855f7", "#22d3ee", "#facc15"] },
     taxi: { name: "TAXI", l: 30, w: 15, max: 280, acc: 280, grip: 7, turn: 2.7, hp: 100, cols: ["#facc15"] },
     van: { name: "VAN", l: 36, w: 17, max: 230, acc: 210, grip: 6, turn: 2.2, hp: 140, cols: ["#f8fafc", "#78716c", "#0f766e", "#7c2d12"] },
@@ -420,7 +424,7 @@ function City() {
   function spawner() {
     const act = (o, r) => Math.abs(o.x - pl.x) < r && Math.abs(o.y - pl.y) < r;
     const traffic = cars.filter((c) => c.drv === "ai" && act(c, 750)).length;
-    if (traffic < 22) { const s = roadSpot(420, 720); if (s) { const r = Math.random(), c = mkCar(r < 0.06 ? "bus" : r < 0.5 ? "sedan" : r < 0.65 ? "taxi" : r < 0.8 ? "van" : "sport", s.x, s.y, s.a, { drv: "ai", ai: s.ai }); c.vx = Math.cos(s.a) * 80; c.vy = Math.sin(s.a) * 80; } }
+    if (traffic < 22) { const s = roadSpot(420, 720); if (s) { const r = Math.random(), c = mkCar(r < 0.06 ? "bus" : r < 0.44 ? "sedan" : r < 0.56 ? "taxi" : r < 0.68 ? "van" : r < 0.78 ? "sport" : r < 0.86 ? "suv" : r < 0.93 ? "cabrio" : r < 0.98 ? "gt" : "f1", s.x, s.y, s.a, { drv: "ai", ai: s.ai }); c.vx = Math.cos(s.a) * 80; c.vy = Math.sin(s.a) * 80; } }
     const stars = Math.floor(pl.wanted), cops = cars.filter((c) => c.t === "police" && c.drv === "cop" && !c.wreck && act(c, 900)).length;
     if (stars >= 1 && pl.dead <= 0 && cops < [0, 2, 3, 4, 6, 8][stars]) { const s = roadSpot(380, 650); if (s) mkCar("police", s.x, s.y, s.a, { drv: "cop", ai: s.ai, siren: true }); }
     const walkers = peds.filter((p) => !p.down && act(p, 560)).length;
@@ -510,7 +514,9 @@ function City() {
     pl.x = x; pl.y = y; c.drv = null; c.ctl = null; pl.car = null; engineSet(false);
   }
   function playerStep(dt) {
-    const up = held("ArrowUp", "KeyW"), dn = held("ArrowDown", "KeyS"), lf = held("ArrowLeft", "KeyA"), rt = held("ArrowRight", "KeyD");
+    let up = held("ArrowUp", "KeyW"), dn = held("ArrowDown", "KeyS"), lf = held("ArrowLeft", "KeyA"), rt = held("ArrowRight", "KeyD");
+    const ts = window.TSTICK, stick = ts && Math.hypot(ts.x, ts.y) > 0.3 ? { a: Math.atan2(ts.y, ts.x), m: Math.min(1, Math.hypot(ts.x, ts.y)) } : null;
+    if (stick) up = dn = lf = rt = false;
     pl.cool -= dt;
     if (pressed("KeyQ")) pl.wi = (pl.wi + WO.length - 1) % WO.length;
     if (pressed("KeyE")) pl.wi = (pl.wi + 1) % WO.length;
@@ -520,12 +526,16 @@ function City() {
       if (c.hp <= 0 && c.fire > 1.9) exitCar();
       if (pressed("KeyH")) { tone(330, 0.3, "square", 0.05); tone(415, 0.3, "square", 0.05); for (const p of peds) if (Math.hypot(p.x - c.x, p.y - c.y) < 120 && !p.cop) { p.flee = 2; p.fx = c.x; p.fy = c.y; } }
       c.ctl = { thr: up ? 1 : dn ? -1 : 0, steer: (rt ? 1 : 0) - (lf ? 1 : 0), hb: held("KeyX", "ShiftLeft", "ShiftRight") };
+      if (stick) { const d = Math.atan2(Math.sin(stick.a - c.a), Math.cos(stick.a - c.a)), back = Math.abs(d) > 2.3 && Math.abs(fwd(c)) < 60;
+        c.ctl = { thr: back ? -stick.m : stick.m * (Math.abs(d) > 1.6 ? 0.4 : 1), steer: Math.max(-1, Math.min(1, (back ? -1 : 1) * (back ? Math.atan2(Math.sin(stick.a - c.a - Math.PI), Math.cos(stick.a - c.a - Math.PI)) : d) * 2.2)), hb: false }; }
       pl.x = c.x; pl.y = c.y; pl.a = c.a; pl.vx = c.vx; pl.vy = c.vy;
       if (held("Space")) fire(c);
-      const v = Math.abs(fwd(c)); engineSet(true, c.ty.fly ? 2600 + v * 9 : (c.t === "tank" ? 1200 : 1800) + v * (c.t === "tank" ? 10 : 22), up || dn ? 1 : 0.2);
+      const v = Math.abs(fwd(c)), VO = { f1: [4200, 80, 0.15, 0.85], sport: [2400, 46, 0.35, 0.5], gt: [1500, 24, 0.85, 0.25], cabrio: [2100, 38, 0.45, 0.4], suv: [1400, 22, 0.8, 0.2],
+        van: [1100, 18, 0.9, 0.15], bus: [900, 14, 0.95, 0.1], police: [2000, 34, 0.5, 0.35], ambulance: [1300, 20, 0.8, 0.2], tank: [1200, 12, 1, 0.1] }[c.t] || [1800, 31, 0.55, 0.28];
+      engineSet(true, c.ty.fly ? 2600 + v * 9 : VO[0] + v * (c.t === "tank" ? 10 : c.t === "f1" ? 30 : 22), up || dn || stick ? 1 : 0.2, c.ty.fly ? null : { lfo: VO[1], sub: VO[2], hi: VO[3] });
     } else {
-      const run = held("ShiftLeft", "ShiftRight", "KeyX") ? 1.75 : 1, sp = (up ? 78 : dn ? -42 : 0) * run;
-      pl.a += ((rt ? 1 : 0) - (lf ? 1 : 0)) * 3.8 * dt;
+      const run = held("ShiftLeft", "ShiftRight", "KeyX") || (stick && stick.m > 0.92) ? 1.75 : 1, sp = (up ? 78 : dn ? -42 : stick ? 78 * stick.m : 0) * run;
+      if (stick) pl.a = stick.a; else pl.a += ((rt ? 1 : 0) - (lf ? 1 : 0)) * 3.8 * dt;
       if (sp) { moveWalker(pl, Math.cos(pl.a) * sp * dt, Math.sin(pl.a) * sp * dt); pl.walkT += dt * Math.abs(sp) / 9; }
       pl.vx = pl.vy = 0;
       if (held("Space")) fire(null);
@@ -678,9 +688,19 @@ function City() {
       rect(-l / 2 + 3, -w / 2 + 5, l - 6, w - 10, body); circ(-2, 0, 8, c.wreck ? "#1c1c1c" : "#3f4f28"); rect(4, -2, 22, 4, c.wreck ? "#1c1c1c" : "#2f3a1e");
       cx.restore(); return;
     }
+    if (c.t === "f1") {
+      for (const [x, y] of [[l / 2 - 7, -w / 2 - 1], [l / 2 - 7, w / 2 - 3], [-l / 2 + 3, -w / 2 - 2], [-l / 2 + 3, w / 2 - 2]]) rect(x, y, 7, 4, "#111");
+      rect(l / 2 - 3, -w / 2, 3, w, c.wreck ? "#262626" : "#111"); rect(-l / 2, -w / 2 + 1, 4, w - 2, body);
+      rect(-l / 2 + 4, -2.5, l - 8, 5, body); rect(-2, -4, 12, 8, body); circ(0, 0, 2.6, c.wreck ? "#111" : "#facc15");
+      cx.restore(); return;
+    }
     rect(-l / 2, -w / 2, l, w, body);
     rect(-l / 2 + 1, -w / 2 + 1, l - 2, 1.5, "rgba(255,255,255,.18)");
-    if (c.t === "bus") { rect(-l / 2 + 4, -w / 2 + 3, l - 12, w - 6, "rgba(255,255,255,.12)"); for (let i = 0; i < 6; i++) { rect(-l / 2 + 5 + i * 8, -w / 2 + 1, 5, 2, "#1e293b"); rect(-l / 2 + 5 + i * 8, w / 2 - 3, 5, 2, "#1e293b"); } rect(l / 2 - 7, -w / 2 + 2, 4, w - 4, "#1e293b"); }
+    if (c.t === "cabrio" && !c.wreck) { rect(l * 0.12, -w / 2 + 2, 2.5, w - 4, "#1e293b"); rect(-l * 0.28, -w / 2 + 2, l * 0.38, w - 4, "#3f2a1d"); rect(-l * 0.22, -w / 2 + 3, 5, 4, "#6b4f3a"); rect(-l * 0.22, w / 2 - 7, 5, 4, "#6b4f3a"); rect(-l / 2, -w / 2, l, w, "rgba(0,0,0,0)"); }
+    if (c.t === "gt" && !c.wreck) rect(-l / 2, -1.2, l, 2.4, "rgba(255,255,255,.35)");
+    if (c.t === "suv" && !c.wreck) { rect(-l * 0.3, -w / 2 + 2, l * 0.5, 1.4, "#111"); rect(-l * 0.3, w / 2 - 3.4, l * 0.5, 1.4, "#111"); }
+    if (c.t === "cabrio" && !c.wreck) { /* open top: no roof glass */ }
+    else if (c.t === "bus") { rect(-l / 2 + 4, -w / 2 + 3, l - 12, w - 6, "rgba(255,255,255,.12)"); for (let i = 0; i < 6; i++) { rect(-l / 2 + 5 + i * 8, -w / 2 + 1, 5, 2, "#1e293b"); rect(-l / 2 + 5 + i * 8, w / 2 - 3, 5, 2, "#1e293b"); } rect(l / 2 - 7, -w / 2 + 2, 4, w - 4, "#1e293b"); }
     else {
       const glass = c.wreck ? "#111" : "#1e293b";
       rect(l * 0.1, -w / 2 + 2, l * 0.2, w - 4, glass); rect(-l * 0.34, -w / 2 + 2, l * 0.12, w - 4, glass);
@@ -818,7 +838,7 @@ function City() {
       cx.globalAlpha = 1;
     }
   }
-  for (let n = 0; n < 18; n++) { const s = roadSpot(90, 650); if (s) mkCar(Math.random() < 0.6 ? "sedan" : any(["taxi", "van", "sport"]), s.x, s.y, s.a, { drv: "ai", ai: s.ai }); }
+  for (let n = 0; n < 18; n++) { const s = roadSpot(90, 650); if (s) mkCar(Math.random() < 0.55 ? "sedan" : any(["taxi", "van", "sport", "suv", "cabrio"]), s.x, s.y, s.a, { drv: "ai", ai: s.ai }); }
   for (let n = 0; n < 160 && peds.length < 40; n++) { const x = pl.x + rnd(-520, 520), y = pl.y + rnd(-420, 420), t = tileAt(x, y); if ((t === WALK || t === GRASS) && Math.hypot(x - pl.x, y - pl.y) > 40) mkPed(x, y); }
   g.joinNet = (o) => {
     const slot = Math.max(0, o.players.findIndex((q) => q.id === o.me));
