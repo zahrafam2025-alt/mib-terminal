@@ -979,6 +979,8 @@ if (TouchPad.on) {
   }, () => setKeys(new Set()));
   const any = [bt("A", { right: 20, bottom: 48 }, 82, "Space"), bt("B", { right: 112, bottom: 20 }, 62, "Enter")];
   const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("ERS", { right: 40, bottom: 150 }, 58, "Space")];
+  const dpad = [bt("▲", { left: 84, bottom: 132 }, 70, "ArrowUp"), bt("▼", { left: 84, bottom: 16 }, 70, "ArrowDown"),
+    bt("◀", { left: 10, bottom: 74 }, 70, "ArrowLeft"), bt("▶", { left: 158, bottom: 74 }, 70, "ArrowRight")];
   const esc = bt("☰", { right: 12, top: 12 }, 46, "Escape");
   const cheatB = TouchPad.button("CHEAT", { left: 12, top: 12 }, 50, () => { const c = prompt("Cheat code (F16, TANK, GUNS, MONEY, HEAL, NOCOPS):", ""); if (c && cur && cur.cheat) cur.cheat(c); screenEl.focus(); }, null, pad);
   cheatB.style.fontSize = "10px";
@@ -1008,9 +1010,10 @@ if (TouchPad.on) {
   };
   cv.addEventListener("pointerup", bEnd); cv.addEventListener("pointercancel", bEnd);
   setInterval(() => {
-    const isGp = !!cur && cur.id === "spa", show = !!cur, blocks = !!cur && cur.id === "blocks";
-    stickZone.style.display = show && !blocks ? "" : "none";
-    any.forEach((b) => { b.style.display = show && !isGp && !blocks ? "" : "none"; });
+    const isGp = !!cur && cur.id === "spa", show = !!cur, blocks = !!cur && cur.id === "blocks", snake = !!cur && cur.id === "snake";
+    stickZone.style.display = show && !blocks && !snake ? "" : "none";
+    dpad.forEach((b) => { b.style.display = snake ? "" : "none"; });
+    any.forEach((b) => { b.style.display = show && !isGp && !blocks && !snake ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇"; cheatB.style.display = cur && cur.cheat ? "" : "none";
     pad.classList.toggle("port", innerHeight > innerWidth);
