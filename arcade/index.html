@@ -1110,8 +1110,6 @@ if (TouchPad.on) {
   const dpad = [bt("▲", { left: 84, bottom: 132 }, 70, "ArrowUp"), bt("▼", { left: 84, bottom: 16 }, 70, "ArrowDown"),
     bt("◀", { left: 10, bottom: 74 }, 70, "ArrowLeft"), bt("▶", { left: 158, bottom: 74 }, 70, "ArrowRight")];
   const esc = bt("☰", { right: 12, top: 12 }, 46, "Escape");
-  const cheatB = TouchPad.button("CHEAT", { left: 12, top: 12 }, 50, () => { const c = prompt("Cheat code (F16, TANK, GUNS, MONEY, HEAL, NOCOPS):", ""); if (c && cur && cur.cheat) cur.cheat(c); screenEl.focus(); }, null, pad);
-  cheatB.style.fontSize = "10px";
   const snd = TouchPad.soundButton(() => sound, (on) => { audioStart(); setSound(on); }, { right: 66, top: 12 });
   cv.addEventListener("click", () => { if (cur) TouchPad.full(); });
   const pq = []; let pqT = null;
@@ -1143,7 +1141,7 @@ if (TouchPad.on) {
     dpad.forEach((b) => { b.style.display = snake ? "" : "none"; });
     any.forEach((b) => { b.style.display = show && !isGp && !blocks && !snake ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
-    esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇"; cheatB.style.display = cur && cur.cheat ? "" : "none";
+    esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
     pad.classList.toggle("port", innerHeight > innerWidth);
     document.body.classList.toggle("playing", show);
   }, 250);

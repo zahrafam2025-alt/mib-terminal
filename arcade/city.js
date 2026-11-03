@@ -1,5 +1,22 @@
 "use strict";
 let CITY_RADAR = null;
+function drawMushroom(X, sx, sy, a, k) {
+  const fade = a < 0.75 ? 1 : 1 - (a - 0.75) / 0.25, rise = Math.min(1, a * 1.8), H = (50 + 150 * rise) * k;
+  X.save();
+  if (a < 0.35) { X.globalAlpha = (1 - a / 0.35) * 0.9; X.strokeStyle = "#fff7ed"; X.lineWidth = 4 * k; X.beginPath(); X.ellipse(sx, sy, (40 + 520 * a) * k, (20 + 260 * a) * k, 0, 0, 6.3); X.stroke(); }
+  X.globalAlpha = 0.85 * fade;
+  const g = X.createRadialGradient(sx, sy, 2, sx, sy, (30 + 70 * rise) * k); g.addColorStop(0, a < 0.3 ? "#fffbeb" : "#fdba74"); g.addColorStop(0.5, "#f97316"); g.addColorStop(1, "rgba(87,83,78,0)");
+  X.fillStyle = g; X.beginPath(); X.ellipse(sx, sy, (30 + 70 * rise) * k, (14 + 30 * rise) * k, 0, 0, 6.3); X.fill();
+  const sw = (10 + 8 * rise) * k, st = X.createLinearGradient(0, sy, 0, sy - H);
+  st.addColorStop(0, "rgba(120,113,108,.9)"); st.addColorStop(0.6, a < 0.4 ? "#fb923c" : "#a8a29e"); st.addColorStop(1, "#78716c");
+  X.fillStyle = st; X.beginPath(); X.moveTo(sx - sw * 1.6, sy); X.quadraticCurveTo(sx - sw * 0.6, sy - H * 0.5, sx - sw * 0.8, sy - H); X.lineTo(sx + sw * 0.8, sy - H); X.quadraticCurveTo(sx + sw * 0.6, sy - H * 0.5, sx + sw * 1.6, sy); X.closePath(); X.fill();
+  const cw = (34 + 60 * rise) * k, ch = (20 + 26 * rise) * k, cy = sy - H;
+  for (const [dx, dy, r, c] of [[0, 0, 1, "#57534e"], [-0.55, 0.15, 0.6, "#78716c"], [0.55, 0.15, 0.6, "#78716c"], [0, -0.25, 0.75, "#a8a29e"], [-0.3, -0.1, 0.45, a < 0.45 ? "#fdba74" : "#d6d3d1"], [0.3, -0.05, 0.4, a < 0.45 ? "#f97316" : "#a8a29e"]]) {
+    X.fillStyle = c; X.beginPath(); X.ellipse(sx + dx * cw, cy + dy * ch, cw * r, ch * r, 0, 0, 6.3); X.fill();
+  }
+  if (a < 0.5) { X.globalAlpha = (0.5 - a) * 1.6 * fade; X.fillStyle = "#fde047"; X.beginPath(); X.ellipse(sx, cy + ch * 0.35, cw * 0.55, ch * 0.3, 0, 0, 6.3); X.fill(); }
+  X.restore();
+}
 function City() {
   const T = 32, NB = 8, PER = 14, E = 3, MT = E * 2 + NB * PER + 2, HC = 600;
   const WATER = 0, ROAD = 1, WALK = 2, GRASS = 3, BUILD = 4, LOT = 5, POND = 6, FENCE = 7, BASE = 8;
@@ -195,7 +212,19 @@ function City() {
     g.shake = Math.max(g.shake, 0.15);
     if (pl.hp <= 0) die("WASTED");
   }
-  function explode(x, y, r = 72, dmg = 120, byPlayer = false) {
+  function explode(x, y, r = 72, dmg = 120, byPlayer = false, nuke = false) {
+    if (nuke) {
+      fx.push({ k: "mush", x, y, t: 4, vx: 0, vy: 0 });
+      for (let i = 0; i < 30; i++) { const a = Math.random() * 6.28, v = rnd(120, 420); fx.push({ k: "fire", x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: rnd(0.4, 1.1), s: rnd(8, 16) }); }
+      decals.push({ k: "scorch", x, y, r: r * 0.55, t: 60 });
+      const far = Math.hypot(x - g.camx, y - g.camy);
+      if (far < 1600) { g.nukeT = Math.max(g.nukeT || 0, 0.45 * (1 - far / 1600) + 0.1); g.shake = Math.max(g.shake, 1.6 * (1 - far / 1600)); noise(3.2, 0.75, 220); noise(1.1, 0.5, 1400); tone(52, 3, "sine", 0.35, -30); }
+      for (const p of peds) { const d = Math.hypot(p.x - x, p.y - y); if (d < r && !p.down) knock(p, p.x - x, p.y - y); else if (d < r * 3 && !p.cop) { p.flee = 6; p.fx = x; p.fy = y; } }
+      for (const c of cars) { const d = Math.hypot(c.x - x, c.y - y); if (d >= r || c.wreck || c === pl.car) continue; const k = 1 - d / r; c.hp -= dmg * 2 * k * (c.t === "tank" ? 0.3 : 1); c.vx += (c.x - x) / (d || 1) * 600 * k; c.vy += (c.y - y) / (d || 1) * 600 * k; if (byPlayer) c.lastHit = pl; }
+      if (!byPlayer && (!pl.car || pl.car.t !== "tank")) { const d = Math.hypot(pl.x - x, pl.y - y); if (d < r) hurtPlayer(dmg * (1 - d / r)); }
+      if (byPlayer) crime(1);
+      return;
+    }
     for (let i = 0; i < 26; i++) { const a = Math.random() * 6.28, v = rnd(30, 190); fx.push({ k: "fire", x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: rnd(0.3, 0.8), s: rnd(5, 11) }); }
     for (let i = 0; i < 14; i++) { const a = Math.random() * 6.28, v = rnd(10, 60); fx.push({ k: "smoke", x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: rnd(1, 2.2), s: rnd(8, 14) }); }
     decals.push({ k: "scorch", x, y, r: r * 0.5, t: 40 });
@@ -209,10 +238,10 @@ function City() {
     if (!pl.car || pl.car.t !== "tank") { const d = Math.hypot(pl.x - x, pl.y - y); if (d < r) hurtPlayer(dmg * (1 - d / r) * (pl.car ? 0.5 : 1)); }
     if (byPlayer) crime(0.5);
   }
-  function shoot(from, x, y, a, kind, dmg, owner) {
-    if (g.net && owner === pl) g.shotQ.push([Math.round(x), Math.round(y), Math.round(a * 1000) / 1000, kind, dmg]);
+  function shoot(from, x, y, a, kind, dmg, owner, nuke = false) {
+    if (g.net && owner === pl) g.shotQ.push([Math.round(x), Math.round(y), Math.round(a * 1000) / 1000, kind, dmg, nuke ? 1 : 0]);
     const v = kind === "b" ? 900 : kind === "rocket" ? 430 : 520;
-    shots.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, kind, dmg, owner, from, t: kind === "b" ? 0.7 : 2.4 });
+    shots.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, kind, dmg, owner, from, nuke, t: kind === "b" ? 0.7 : 2.4 });
     fx.push({ k: "flash", x: x + Math.cos(a) * 3, y: y + Math.sin(a) * 3, t: 0.05 });
     for (const p of peds) if (!p.cop && !p.down && Math.abs(p.x - x) < 240 && Math.abs(p.y - y) < 240) { p.flee = 5; p.fx = x; p.fy = y; }
   }
@@ -221,12 +250,12 @@ function City() {
     if (car && car.ty.fly) {
       const a = car.a, nx = car.x + Math.cos(a) * 26, ny = car.y + Math.sin(a) * 26;
       shoot(car, nx, ny, a + rnd(-0.025, 0.025), "b", 34, pl); pl.cool = 0.06; noise(0.04, 0.09, 3200);
-      if (g.t - (pl.mslAt || 0) > 0.7) { pl.mslAt = g.t; for (const sd of [-1, 1]) shoot(car, car.x - Math.sin(a) * 14 * sd, car.y + Math.cos(a) * 14 * sd, a, "rocket", 0, pl); noise(0.3, 0.12, 1000); }
+      if (g.t - (pl.mslAt || 0) > 1.1) { pl.mslAt = g.t; for (const sd of [-1, 1]) shoot(car, car.x - Math.sin(a) * 14 * sd, car.y + Math.cos(a) * 14 * sd, a, "rocket", 0, pl, true); noise(0.5, 0.25, 900); }
       return;
     }
     const w = car && car.t === "tank" ? "shell" : WO[pl.wi];
     const a = pl.a, ox = car ? Math.cos(a) * (car.ty.l / 2 + 4) : Math.cos(a) * 7, oy = car ? Math.sin(a) * (car.ty.l / 2 + 4) : Math.sin(a) * 7;
-    if (w === "shell") { shoot(car, pl.x + ox, pl.y + oy, a, "shell", 0, pl); pl.cool = 0.9; noise(0.25, 0.2, 500); return; }
+    if (w === "shell") { shoot(car, pl.x + ox, pl.y + oy, a, "shell", 0, pl, true); pl.cool = 1.0; noise(0.6, 0.45, 380); tone(70, 0.4, "sine", 0.25, -40); g.shake = Math.max(g.shake, 0.4); return; }
     if (w === "fist") {
       if (car) return;
       pl.cool = WP.fist.cool;
@@ -254,7 +283,7 @@ function City() {
         if (!hitIt) continue;
         s.dead = true;
         const byP = s.owner === pl;
-        if (s.kind !== "b") { explode(s.x - s.vx * dt / n, s.y - s.vy * dt / n, s.kind === "shell" ? 80 : 70, s.kind === "shell" ? 150 : 120, byP); break; }
+        if (s.kind !== "b") { explode(s.x - s.vx * dt / n, s.y - s.vy * dt / n, s.nuke ? 200 : s.kind === "shell" ? 80 : 70, s.nuke ? 420 : s.kind === "shell" ? 150 : 120, byP, s.nuke); break; }
         if (hitIt === "wall") sparks(s.x, s.y, 3, "#e5e7eb");
         else if (hitIt === "player") hurtPlayer(s.dmg);
         else if (hitIt.ty) {
@@ -268,7 +297,7 @@ function City() {
         }
       }
       s.t -= dt;
-      if (s.t <= 0 && !s.dead) { s.dead = true; if (s.kind !== "b") explode(s.x, s.y, 70, 120, s.owner === pl); }
+      if (s.t <= 0 && !s.dead) { s.dead = true; if (s.kind !== "b") explode(s.x, s.y, s.nuke ? 200 : 70, s.nuke ? 420 : 120, s.owner === pl, s.nuke); }
     }
     prune(shots, (s) => !s.dead);
   }
@@ -531,13 +560,13 @@ function City() {
   let typed = "";
   if (window.__cityCheatKey) removeEventListener("keydown", window.__cityCheatKey);
   window.__cityCheatKey = (e) => {
-    if (typeof cur === "undefined" || cur !== g || e.key.length !== 1) return;
+    if (typeof cur === "undefined" || cur !== g || e.key.length !== 1 || (window.TouchPad && TouchPad.on)) return;
     typed = (typed + e.key.toUpperCase()).slice(-8);
     for (const k of Object.keys(CHEATS)) if (typed.endsWith(k)) { typed = ""; if (typeof hit !== "undefined") hit.clear(); CHEATS[k](); break; }
   };
   addEventListener("keydown", window.__cityCheatKey);
   g.update = (dt) => {
-    g.t += dt; g.shake = Math.max(0, g.shake - dt);
+    g.t += dt; g.shake = Math.max(0, g.shake - dt); g.nukeT = Math.max(0, (g.nukeT || 0) - dt);
     if (g.big) { g.big.t -= dt; if (g.big.t <= 0) g.big = null; }
     g.toasts.forEach((t) => { t.t -= dt; }); prune(g.toasts, (t) => t.t > 0);
     pickups.forEach((k) => { k.t = Math.max(0, k.t - dt); });
@@ -725,6 +754,7 @@ function City() {
     if (g.net) drawRemote(false);
     for (const s of shots) { if (s.kind === "b") rect(s.x - 1.5, s.y - 1.5, 3, 3, "#fde047"); else { circ(s.x, s.y, s.kind === "shell" ? 4 : 3, "#e5e7eb"); circ(s.x - s.vx * 0.012, s.y - s.vy * 0.012, 2.5, "#f97316"); } }
     for (const f of fx) {
+      if (f.k === "mush") continue;
       if (f.k === "fire") { cx.globalAlpha = clamp(f.t * 2, 0, 1); circ(f.x, f.y, f.s * (0.5 + f.t), f.t > 0.4 ? "#fde047" : "#f97316"); }
       else if (f.k === "smoke") { cx.globalAlpha = clamp(f.t * 0.35, 0, 0.5); circ(f.x, f.y, f.s, "#52525b"); }
       else if (f.k === "flash") { cx.globalAlpha = 1; circ(f.x, f.y, 4, "#fef08a"); }
@@ -736,7 +766,9 @@ function City() {
     for (const b of builds) drawBuilding(b, x0, y0, x1, y1);
     for (const c of cars) if (c.ty.fly && !c.wreck && vis(c, 120)) drawJet(c);
     if (g.net) drawRemote(true);
+    for (const f of fx) if (f.k === "mush" && vis(f, 400)) drawMushroom(cx, f.x, f.y, 1 - f.t / 4, 1.3);
     cx.restore();
+    if (g.nukeT > 0) { cx.globalAlpha = Math.min(0.95, g.nukeT * 2.2); rect(0, 0, W, H, "#fffbeb"); cx.globalAlpha = 1; }
     hud();
   };
   function hud() {
@@ -792,7 +824,7 @@ function City() {
   g.netState = (from, m) => {
     if (m.x === undefined) return;
     g.remote.set(from, { x: m.x, y: m.y, a: m.a, car: m.car, dead: m.dead, shirt: m.shirt, money: m.money, t: performance.now(), walkT: (g.remote.get(from) || {}).walkT || 0 });
-    for (const [x, y, a, kind, dmg] of m.sh || []) shoot(null, x, y, a, kind, dmg, "net");
+    for (const [x, y, a, kind, dmg, nk] of m.sh || []) shoot(null, x, y, a, kind, dmg, "net", !!nk);
   };
   g.netOut = () => ({ x: Math.round(pl.x), y: Math.round(pl.y), a: Math.round(pl.a * 100) / 100, dead: pl.dead > 0, shirt: pl.shirt, money: pl.money, score: g.score,
     car: pl.car ? { t: pl.car.t, col: pl.car.col, sp: Math.round(Math.hypot(pl.car.vx, pl.car.vy)) } : null, sh: g.shotQ.splice(0) });
