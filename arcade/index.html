@@ -481,16 +481,35 @@ function Snake() {
       else { const f = foods.splice(fi, 1)[0]; if (g.net.host) foods.push(freeAll()); else g.ate.push({ f, t: performance.now() }); }
     } else g.body.pop();
   };
+  const LCD = pic(W, H, (x) => {
+    const gr = x.createRadialGradient(W / 2, H / 2, 60, W / 2, H / 2, 330); gr.addColorStop(0, "#b4c896"); gr.addColorStop(1, "#97ad7a"); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    x.fillStyle = "rgba(0,0,0,.045)"; for (let yy = OY; yy < OY + GH * C; yy += 4) for (let xx = 0; xx < W; xx += 4) x.fillRect(xx + 0.5, yy + 0.5, 3, 3);
+    x.fillStyle = "#26321e"; x.fillRect(0, OY - 3, W, 3); x.fillRect(0, OY + GH * C, W, 3);
+    x.fillStyle = "rgba(38,50,30,.18)"; x.fillRect(0, OY, W, 2);
+  });
+  const seg = (body, head, col, dead) => {
+    const ok = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) === 1;
+    for (const pass of [0, 1]) {
+      const off = pass ? 0 : 2, c = pass ? (dead ? "#7d8a6a" : "#26321e") : "rgba(38,50,30,.18)";
+      body.forEach(([x, y], i) => {
+        rect(x * C + 2 + off, OY + y * C + 2 + off, C - 4, C - 4, i === 0 && pass && !dead ? "#18200f" : c);
+        const n = body[i + 1]; if (n && ok(body[i], n)) rect(Math.min(x, n[0]) * C + 2 + off + (n[0] !== x ? C - 4 : 0), OY + Math.min(y, n[1]) * C + 2 + off + (n[1] !== y ? C - 4 : 0), n[0] !== x ? 4 : C - 4, n[1] !== y ? 4 : C - 4, c);
+      });
+    }
+    if (col && !dead) body.forEach(([x, y]) => rect(x * C + 6, OY + y * C + 6, C - 12, C - 12, col));
+    if (!dead && body.length) {
+      const [hx, hy] = body[0], d = head || (body[1] ? [hx - body[1][0], hy - body[1][1]] : [1, 0]), ex = hx * C + C / 2 + d[0] * 3, ey = OY + hy * C + C / 2 + d[1] * 3;
+      rect(ex - 4 + (d[0] ? 0 : 0), ey - 4 + (d[1] ? 0 : 0), 3, 3, "#c4d6a8"); rect(ex + 1 - (d[1] ? 0 : 0) * 5, ey + 1, 3, 3, "#c4d6a8");
+    }
+  };
   g.draw = () => {
-    rect(0, 0, W, H, "#a9be8c");
-    for (let x = 0; x < W; x += 4) rect(x, 0, 1, H, "rgba(0,0,0,.025)");
-    rect(0, OY - 2, W, 2, "#26321e"); rect(0, OY + GH * C, W, 2, "#26321e");
+    cx.drawImage(LCD, 0, 0, W, H);
     if (g.net) for (const r of g.remote.values()) {
       if (performance.now() - r.t > 3000) continue;
-      r.body.forEach(([x, y], i) => { rect(x * C + 2, OY + y * C + 2, C - 4, C - 4, r.over ? "#7d8a6a" : i ? "#26321e" : "#18200f"); if (!r.over) rect(x * C + 5, OY + y * C + 5, C - 10, C - 10, r.col); });
+      seg(r.body, null, r.col, r.over);
     }
-    if (!(g.net && g.over)) g.body.forEach(([x, y], i) => { rect(x * C + 2, OY + y * C + 2, C - 4, C - 4, i ? "#26321e" : "#18200f"); if (g.net) rect(x * C + 5, OY + y * C + 5, C - 10, C - 10, g.col); });
-    for (const [fx, fy] of g.net ? g.foods : [g.food]) { cx.fillStyle = "#26321e"; cx.beginPath(); cx.moveTo(fx * C + 10, OY + fy * C + 3); cx.lineTo(fx * C + 17, OY + fy * C + 10); cx.lineTo(fx * C + 10, OY + fy * C + 17); cx.lineTo(fx * C + 3, OY + fy * C + 10); cx.closePath(); cx.fill(); }
+    if (!(g.net && g.over)) seg(g.body, g.dir, g.net ? g.col : null, false);
+    for (const [fx, fy] of g.net ? g.foods : [g.food]) { cx.fillStyle = "rgba(38,50,30,.18)"; cx.beginPath(); cx.moveTo(fx * C + 12, OY + fy * C + 5); cx.lineTo(fx * C + 19, OY + fy * C + 12); cx.lineTo(fx * C + 12, OY + fy * C + 19); cx.lineTo(fx * C + 5, OY + fy * C + 12); cx.closePath(); cx.fill(); cx.fillStyle = "#26321e"; cx.beginPath(); cx.moveTo(fx * C + 10, OY + fy * C + 3); cx.lineTo(fx * C + 17, OY + fy * C + 10); cx.lineTo(fx * C + 10, OY + fy * C + 17); cx.lineTo(fx * C + 3, OY + fy * C + 10); cx.closePath(); cx.fill(); }
     txt(String(g.score).padStart(4, "0"), 8, 15, 14, "#26321e"); txt(`BEST ${Math.max(bestOf("snake"), g.score)}`, W - 8, 15, 12, "#26321e", "right");
   };
   return g;

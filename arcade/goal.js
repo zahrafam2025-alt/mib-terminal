@@ -114,25 +114,62 @@ function Goal(online = null) {
         s: g.s, tm: g.t, msg: g.msg, pause: g.pause, over: g.over, result: g.result }); }
     }
   };
-  g.draw = () => {
-    for (let i = 0; i < 11; i++) rect(X0 + i * (X1 - X0) / 11, Y0, (X1 - X0) / 11 + 1, Y1 - Y0, i % 2 ? "#15803d" : "#16a34a");
-    rect(0, 0, W, Y0, "#0d1020"); rect(0, Y1, W, H - Y1, "#0d1020"); rect(0, Y0, X0, Y1 - Y0, "#0d1020"); rect(X1, Y0, W - X1, Y1 - Y0, "#0d1020");
-    cx.strokeStyle = "rgba(255,255,255,.8)"; cx.lineWidth = 1.5;
-    cx.strokeRect(X0, Y0, X1 - X0, Y1 - Y0); cx.beginPath(); cx.moveTo(240, Y0); cx.lineTo(240, Y1); cx.stroke();
-    cx.beginPath(); cx.arc(240, MY, 34, 0, Math.PI * 2); cx.stroke();
-    cx.strokeRect(X0, MY - 60, 40, 120); cx.strokeRect(X1 - 40, MY - 60, 40, 120);
-    rect(X0 - 12, MY - MOUTH, 12, MOUTH * 2, "rgba(239,68,68,.35)"); rect(X1, MY - MOUTH, 12, MOUTH * 2, "rgba(59,130,246,.35)");
-    cx.strokeRect(X0 - 12, MY - MOUTH, 12, MOUTH * 2); cx.strokeRect(X1, MY - MOUTH, 12, MOUTH * 2);
-    for (const p of P) {
-      circ(p.x + 2, p.y + 3, PR, "rgba(0,0,0,.25)"); circ(p.x, p.y, PR, COL[p.team]);
-      circ(p.x + p.fx * 6, p.y + p.fy * 6, 3, "#f8fafc");
-      if (p.human && p.human.id === me) { cx.strokeStyle = "#fde047"; cx.lineWidth = 2; cx.beginPath(); cx.arc(p.x, p.y, PR + 3, 0, Math.PI * 2); cx.stroke(); rect(p.x - 10, p.y + PR + 4, 20 * p.stam, 2, "#fde047"); }
-      txt(p.name.replace(" (bot)", ""), p.x, p.y - PR - 3, 7, p.human ? "#fff" : "#cbd5e1", "center");
+  const stand = (f) => pic(W, H, (x) => {
+    const bg = x.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, "#111827"); bg.addColorStop(0.5, "#0b1220"); bg.addColorStop(1, "#111827"); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    const KIT = ["#ef4444", "#3b82f6", "#f8fafc", "#fde047", "#ef4444", "#3b82f6", "#a3a3a3", "#f97316"];
+    let n = 7 + f;
+    const fans = (x0, y0, x1, y1) => { for (let yy = y0; yy < y1; yy += 4) for (let xx = x0; xx < x1; xx += 4) { n = (n * 1103515245 + 12345) & 0x7fffffff; x.fillStyle = KIT[n % KIT.length]; x.globalAlpha = 0.45 + (n % 5) / 10; x.fillRect(xx + (n % 2), yy + ((n >> 3) % 2) * (f ? 1 : 0), 2, 2); } x.globalAlpha = 1; };
+    fans(4, 2, W - 4, Y0 - 8); fans(4, Y1 + 9, W - 4, H - 2);
+    for (let i = 0; i < 12; i++) { x.fillStyle = i % 2 ? "#1e3a8a" : "#7f1d1d"; x.fillRect(X0 + i * (X1 - X0) / 12, Y0 - 7, (X1 - X0) / 12 - 1, 5); x.fillRect(X0 + i * (X1 - X0) / 12, Y1 + 2, (X1 - X0) / 12 - 1, 5); }
+    x.fillStyle = "rgba(255,255,255,.75)"; x.font = "bold 4px Consolas, monospace"; x.textAlign = "center";
+    for (let i = 0; i < 12; i++) { x.fillText("MIB ARCADE", X0 + (i + 0.5) * (X1 - X0) / 12, Y0 - 3.2); x.fillText("MIB ARCADE", X0 + (i + 0.5) * (X1 - X0) / 12, Y1 + 5.8); }
+    for (let i = 0; i < 11; i++) { x.fillStyle = i % 2 ? "#15803d" : "#16a34a"; x.fillRect(X0 + i * (X1 - X0) / 11, Y0, (X1 - X0) / 11 + 1, Y1 - Y0); }
+    for (let i = 0; i < 1800; i++) { n = (n * 1103515245 + 12345) & 0x7fffffff; x.fillStyle = n % 3 ? "rgba(0,0,0,.07)" : "rgba(255,255,255,.06)"; x.fillRect(X0 + (n % 1000) / 1000 * (X1 - X0), Y0 + ((n >> 10) % 1000) / 1000 * (Y1 - Y0), 1, 1.5); }
+    const light = x.createRadialGradient(240, MY, 40, 240, MY, 300); light.addColorStop(0, "rgba(255,255,255,.08)"); light.addColorStop(1, "rgba(0,0,0,.28)"); x.fillStyle = light; x.fillRect(X0, Y0, X1 - X0, Y1 - Y0);
+    x.strokeStyle = "rgba(255,255,255,.85)"; x.lineWidth = 1.5;
+    x.strokeRect(X0, Y0, X1 - X0, Y1 - Y0); x.beginPath(); x.moveTo(240, Y0); x.lineTo(240, Y1); x.stroke();
+    x.beginPath(); x.arc(240, MY, 34, 0, Math.PI * 2); x.stroke(); x.fillStyle = "#fff"; x.beginPath(); x.arc(240, MY, 2, 0, 6.3); x.fill();
+    x.strokeRect(X0, MY - 60, 40, 120); x.strokeRect(X1 - 40, MY - 60, 40, 120); x.strokeRect(X0, MY - 28, 14, 56); x.strokeRect(X1 - 14, MY - 28, 14, 56);
+    x.beginPath(); x.arc(X0 + 30, MY, 1.6, 0, 6.3); x.fill(); x.beginPath(); x.arc(X1 - 30, MY, 1.6, 0, 6.3); x.fill();
+    x.beginPath(); x.arc(X0 + 40, MY, 16, -1.1, 1.1); x.stroke(); x.beginPath(); x.arc(X1 - 40, MY, 16, Math.PI - 1.1, Math.PI + 1.1); x.stroke();
+    for (const [cxx, cyy, a0] of [[X0, Y0, 0], [X1, Y0, Math.PI / 2], [X1, Y1, Math.PI], [X0, Y1, -Math.PI / 2]]) { x.beginPath(); x.arc(cxx, cyy, 6, a0, a0 + Math.PI / 2); x.stroke(); }
+    for (const [gx, c] of [[X0 - 12, "#ef4444"], [X1, "#3b82f6"]]) {
+      x.fillStyle = c + "33"; x.fillRect(gx, MY - MOUTH, 12, MOUTH * 2);
+      x.strokeStyle = "rgba(255,255,255,.35)"; x.lineWidth = 0.5;
+      for (let k = 3; k < 12; k += 3) { x.beginPath(); x.moveTo(gx + k, MY - MOUTH); x.lineTo(gx + k, MY + MOUTH); x.stroke(); }
+      for (let k = -MOUTH + 4; k < MOUTH; k += 4) { x.beginPath(); x.moveTo(gx, MY + k); x.lineTo(gx + 12, MY + k); x.stroke(); }
+      x.strokeStyle = "#fff"; x.lineWidth = 2; x.strokeRect(gx, MY - MOUTH, 12, MOUTH * 2);
     }
-    circ(ball.x + 2, ball.y + 2, BR, "rgba(0,0,0,.3)"); circ(ball.x, ball.y, BR, "#f8fafc"); circ(ball.x - 1, ball.y - 1, 2, "#111827");
-    txt(`RED ${g.s[0]}`, 160, 26, 16, COL[0], "center"); txt(`${g.s[1]} BLUE`, 320, 26, 16, COL[1], "center");
-    const left = Math.max(0, TIME - g.t); txt(`${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, "0")}`, 240, 26, 14, "#f8fafc", "center");
-    if (g.pause > 0 && !g.over) txt(g.msg, 240, 120, 18, "#fde047", "center");
+  });
+  const STAND = [stand(0), stand(1)];
+  const SHIRT = {};
+  const shirt = (c) => SHIRT[c] || (SHIRT[c] = pic(22, 22, (x) => {
+    const gr = x.createRadialGradient(9, 8, 1, 11, 11, 11); gr.addColorStop(0, shadeHex(c, 1.45)); gr.addColorStop(0.7, c); gr.addColorStop(1, shadeHex(c, 0.55));
+    x.fillStyle = gr; x.beginPath(); x.ellipse(11, 11, 9, 10, 0, 0, 6.3); x.fill();
+    x.fillStyle = "rgba(255,255,255,.75)"; x.fillRect(10, 2, 2, 18);
+    x.fillStyle = "#3b2416"; x.beginPath(); x.arc(11, 11, 4.2, 0, 6.3); x.fill(); x.fillStyle = "#c68642"; x.beginPath(); x.arc(11.6, 11, 3.3, 0, 6.3); x.fill();
+  }));
+  let ballRot = 0, crowdT = 0;
+  g.draw = () => {
+    crowdT += 1 / 60; const cheer = g.pause > 0 && /GOAL/i.test(g.msg || "");
+    cx.drawImage(STAND[Math.floor(crowdT * (cheer ? 8 : 1.5)) % 2], 0, 0, W, H);
+    for (const p of P) {
+      cx.fillStyle = "rgba(0,0,0,.28)"; cx.beginPath(); cx.ellipse(p.x + 3, p.y + 4, PR + 1, PR - 2, 0, 0, 6.3); cx.fill();
+      if (p.human && p.human.id === me) { cx.strokeStyle = "#fde047"; cx.lineWidth = 2; cx.beginPath(); cx.arc(p.x, p.y, PR + 4, 0, Math.PI * 2); cx.stroke(); rect(p.x - 10, p.y + PR + 5, 20, 2, "rgba(0,0,0,.4)"); rect(p.x - 10, p.y + PR + 5, 20 * p.stam, 2, "#fde047"); }
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(Math.atan2(p.fy, p.fx)); cx.drawImage(shirt(COL[p.team]), -11, -11, 22, 22); cx.restore();
+      txt(p.name.replace(" (bot)", ""), p.x, p.y - PR - 4, 7, p.human ? "#fff" : "#cbd5e1", "center");
+    }
+    const sp = Math.hypot(ball.vx, ball.vy); ballRot += sp / 60 / BR;
+    if (sp > 120) { cx.globalAlpha = 0.25; circ(ball.x - ball.vx * 0.03, ball.y - ball.vy * 0.03, BR * 0.8, "#fff"); circ(ball.x - ball.vx * 0.06, ball.y - ball.vy * 0.06, BR * 0.6, "#fff"); cx.globalAlpha = 1; }
+    circ(ball.x + 2.5, ball.y + 3, BR, "rgba(0,0,0,.35)"); circ(ball.x, ball.y, BR, "#f8fafc");
+    cx.save(); cx.beginPath(); cx.arc(ball.x, ball.y, BR, 0, 6.3); cx.clip(); cx.fillStyle = "#111827";
+    for (let k = 0; k < 3; k++) { const a = ballRot + k * 2.1; cx.beginPath(); cx.arc(ball.x + Math.cos(a) * 2.6, ball.y + Math.sin(a) * 2.6, 1.5, 0, 6.3); cx.fill(); }
+    cx.restore(); circ(ball.x - 1.5, ball.y - 1.5, 1.2, "rgba(255,255,255,.9)");
+    cx.fillStyle = "rgba(5,8,16,.85)"; cx.fillRect(150, 10, 180, 22);
+    rect(150, 10, 60, 22, COL[0]); rect(270, 10, 60, 22, COL[1]);
+    txt(`RED ${g.s[0]}`, 180, 26, 13, "#fff", "center"); txt(`${g.s[1]} BLUE`, 300, 26, 13, "#fff", "center");
+    const left = Math.max(0, TIME - g.t); txt(`${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, "0")}`, 240, 26, 13, "#fde047", "center");
+    if (g.pause > 0 && !g.over) { txt(g.msg, 241, 121, 20, "rgba(0,0,0,.6)", "center"); txt(g.msg, 240, 120, 20, "#fde047", "center"); }
     if (g.over && g.result) banner(["FULL TIME", ...g.result], online ? "Esc: back to the online room" : "Space play again · Esc menu");
   };
   g.dbg = () => ({ ball: [ball.x, ball.y, ball.vx, ball.vy].map((v) => Math.round(v)), p: P.map((p) => [Math.round(p.x), Math.round(p.y)]) });

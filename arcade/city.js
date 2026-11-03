@@ -618,7 +618,7 @@ function City() {
     for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
       const t = map[ty * MT + tx], x = tx * T, y = ty * T;
       if (t === ROAD) rect(x, y, T, T, "#3b3b41");
-      else if (t === WALK) { rect(x, y, T, T, "#a3a3ab"); rect(x, y, T, 1, "#8b8b93"); rect(x, y, 1, T, "#8b8b93"); }
+      else if (t === WALK) { rect(x, y, T, T, "#a6a6ae"); rect(x + 1, y + 1, 14, 14, "#b2b2b9"); rect(x + 17, y + 17, 14, 14, "#b2b2b9"); rect(x, y, T, 1, "#8b8b93"); rect(x, y, 1, T, "#8b8b93"); }
       else if (t === GRASS) rect(x, y, T, T, (tx + ty) % 2 ? "#3d8b37" : "#41923a");
       else if (t === LOT) { rect(x, y, T, T, "#4a4a50"); rect(x, y + T - 1, T, 1, "#5d5d64"); }
       else if (t === BASE) rect(x, y, T, T, (tx + ty) % 2 ? "#8a7a52" : "#857550");
@@ -713,9 +713,13 @@ function City() {
     for (let i = 0; i < 4; i++) {
       const a = base[i], bb = base[(i + 1) % 4], ra = roof[i], rb = roof[(i + 1) % 4];
       cx.fillStyle = i % 2 ? b.wall : shadeOf(b.wall); cx.beginPath(); cx.moveTo(a[0], a[1]); cx.lineTo(bb[0], bb[1]); cx.lineTo(rb[0], rb[1]); cx.lineTo(ra[0], ra[1]); cx.closePath(); cx.fill();
+      const floors = Math.min(6, Math.floor(b.hg / 9));
+      const faces = [g.camy < b.y, g.camx > b.x + b.w, g.camy > b.y + b.h, g.camx < b.x][i];
+      if (faces && floors > 0 && Math.hypot(ra[0] - a[0], ra[1] - a[1]) > 6) { cx.fillStyle = "rgba(15,23,42,.32)"; for (let f = 1; f <= floors; f++) { const k0 = (f - 0.62) / (floors + 0.4), k1 = (f - 0.2) / (floors + 0.4), L = (p, q, k) => [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k]; const p0 = L(a, ra, k0), p1 = L(bb, rb, k0), p2 = L(bb, rb, k1), p3 = L(a, ra, k1); cx.beginPath(); cx.moveTo(p0[0], p0[1]); cx.lineTo(p1[0], p1[1]); cx.lineTo(p2[0], p2[1]); cx.lineTo(p3[0], p3[1]); cx.closePath(); cx.fill(); } }
     }
     const [rx, ry] = roof[0], rw = roof[1][0] - rx, rh = roof[3][1] - ry;
-    rect(rx, ry, rw, rh, b.roof); cx.strokeStyle = "rgba(0,0,0,.25)"; cx.lineWidth = 2; cx.strokeRect(rx + 2, ry + 2, rw - 4, rh - 4);
+    rect(rx, ry, rw, rh, b.roof); rect(rx, ry, rw, 3, "rgba(255,255,255,.22)"); rect(rx, ry, 3, rh, "rgba(255,255,255,.14)"); rect(rx, ry + rh - 3, rw, 3, "rgba(0,0,0,.22)"); rect(rx + rw - 3, ry, 3, rh, "rgba(0,0,0,.18)");
+    cx.strokeStyle = "rgba(0,0,0,.25)"; cx.lineWidth = 2; cx.strokeRect(rx + 4, ry + 4, rw - 8, rh - 8);
     if (b.ac) { rect(rx + rw * (0.15 + b.ac[0] * 0.5), ry + rh * (0.15 + b.ac[1] * 0.5), 10 * s, 8 * s, "rgba(0,0,0,.25)"); rect(rx + rw * (0.2 + b.ac[2] * 0.4), ry + rh * 0.65, 6 * s, 6 * s, "rgba(255,255,255,.2)"); }
     if (b.label) txt(b.label, rx + rw / 2, ry + rh / 2 + 6, b.label.length > 1 ? 13 : 30, b.label === "+" ? "#dc2626" : "#f8fafc", "center");
   }
