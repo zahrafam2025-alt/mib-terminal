@@ -171,6 +171,7 @@ function setSound(on) {
 }
 
 function txt(s, x, y, size = 12, color = "#f2f4f8", align = "left", font = "Consolas, monospace") {
+  if (window.TouchPad && TouchPad.on) s = TouchPad.words(s);
   cx.font = `bold ${size}px ${font}`; cx.fillStyle = color; cx.textAlign = align; cx.textBaseline = "alphabetic"; cx.fillText(s, x, y);
 }
 function rect(x, y, w, h, c) { cx.fillStyle = c; cx.fillRect(x, y, w, h); }
@@ -801,8 +802,8 @@ const GAMES = [
   { id: "snake", name: "SNAKE", sub: "the Nokia 3310 classic", make: Snake, col: "#a9be8c", quiet: true },
   { id: "jump", name: "JUMP", sub: "deliver on the run: scooters, stomps, tips", make: Jump, col: "#06c167" },
   { id: "spa", name: "GRAND PRIX", sub: "3 laps of Spa from the back", make: () => Racer(false), col: "#ef4444", quiet: true },
-  { id: "racer2", name: "GP DUEL · 2P", sub: "red vs blue at Spa, split screen", make: () => Racer(true), col: "#a855f7", quiet: true },
-  { id: "sumo", name: "SUMO · 2P", sub: "letters vs arrows, push them out", make: Sumo, col: "#f5b83d" },
+  { id: "racer2", name: "GP DUEL · 2P", sub: "red vs blue at Spa, split screen", make: () => Racer(true), col: "#a855f7", quiet: true, keys2: true },
+  { id: "sumo", name: "SUMO · 2P", sub: "letters vs arrows, push them out", make: Sumo, col: "#f5b83d", keys2: true },
   { id: "city", name: "CHAOS CITY", sub: "top-down city, no limits", make: () => City(), col: "#fb923c", quiet: true },
   { id: "goal", name: "GOAL RUSH", sub: "2 v 2 football, bots or online", make: () => Goal(), col: "#22c55e" },
   { id: "strike", name: "STRIKE & DEFUSE", sub: "3D tactical shooter, bots or LAN", href: ARC.page("strike"), col: "#eab308" },
@@ -840,7 +841,7 @@ function tick(dt = STEP) {
       if (!cur.over) cur.update(dt);
       else {
         if (ON && ON.live && SHARED.has(cur.id) && cur.net) cur.update(dt);
-        if (!overDone) { overDone = true; saveScore(); if (!cur.race && !cur.own) SFX.over(); music(null); engineSet(false); }
+        if (!overDone) { overDone = true; window.__overAt = performance.now(); saveScore(); if (!cur.race && !cur.own) SFX.over(); music(null); engineSet(false); }
         if (pressed("Space", "Enter") && !(ON && ON.live)) start(cur.id);
       }
     }
@@ -851,7 +852,7 @@ function drawMenu() {
   rect(0, 0, W, H, "#0d1020");
   for (let i = 0; i < 40; i++) rect((i * 97 + menuT * 20 * (1 + i % 3)) % W, (i * 53) % H, 2, 2, "#26304a");
   txt("MIB ARCADE", W / 2, 40, 26, "#f2f4f8", "center"); txt("by MoonxZara", W / 2, 56, 11, "#a78bfa", "center"); txt("pick a game: 1-9, 0 or click  ·  O: play online, up to 4", W / 2, 72, 10, "#8a90a2", "center");
-  GAMES.forEach((d, i) => {
+  shownGames().forEach((d, i) => {
     const [x, y] = cardAt(i), two = (best[d.id === "racer2" ? "duel" : "sumo"]) || {};
     rect(x, y, CARD_W, CARD_H, "#141827"); rect(x, y, CARD_W, 4, d.col);
     txt(i < 10 ? String((i + 1) % 10) : "", x + 8, y + 28, 20, d.col);
@@ -891,11 +892,16 @@ function frame(t) {
   while (dt > 1e-6) { const s = Math.min(dt, 1 / 60); tick(s); dt -= s; }
   musicPump(); draw();
 }
+const shownGames = () => (window.TouchPad && TouchPad.on ? GAMES.filter((d) => !d.keys2) : GAMES);
 cv.addEventListener("click", (e) => {
   audioStart(); screenEl.focus();
+  if (cur && window.TouchPad && TouchPad.on) {
+    if (paused) paused = false;
+    else if (cur.over && overDone && !(ON && ON.live) && performance.now() - (window.__overAt || 0) > 900) start(cur.id);
+  }
   if (cur) return;
   const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
-  GAMES.forEach((d, i) => { const [gx, gy] = cardAt(i); if (x >= gx && x <= gx + CARD_W && y >= gy && y <= gy + CARD_H) start(d.id); });
+  shownGames().forEach((d, i) => { const [gx, gy] = cardAt(i); if (x >= gx && x <= gx + CARD_W && y >= gy && y <= gy + CARD_H) start(d.id); });
 });
 focusEl.addEventListener("click", () => { audioStart(); screenEl.focus(); });
 document.getElementById("snd").onclick = () => { audioStart(); setSound(!sound); screenEl.focus(); };
@@ -1241,6 +1247,7 @@ if (TouchPad.on) {
     setKeys(want);
   }, () => setKeys(new Set()));
   const any = [bt("A", { right: 20, bottom: 48 }, 82, "Space"), bt("B", { right: 112, bottom: 20 }, 62, "Enter")];
+  const wpn = bt("WPN", { right: 40, bottom: 150 }, 58, "KeyE");
   const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("ERS", { right: 40, bottom: 150 }, 58, "Space")];
   const dpad = [bt("▲", { left: 84, bottom: 132 }, 70, "ArrowUp"), bt("▼", { left: 84, bottom: 16 }, 70, "ArrowDown"),
     bt("◀", { left: 10, bottom: 74 }, 70, "ArrowLeft"), bt("▶", { left: 158, bottom: 74 }, 70, "ArrowRight")];
@@ -1276,6 +1283,7 @@ if (TouchPad.on) {
     dpad.forEach((b) => { b.style.display = snake ? "" : "none"; });
     any.forEach((b) => { b.style.display = show && !isGp && !blocks && !snake ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
+    wpn.style.display = cur && cur.id === "city" ? "" : "none";
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
     pad.classList.toggle("port", innerHeight > innerWidth);
     document.body.classList.toggle("playing", show);

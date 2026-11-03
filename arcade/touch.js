@@ -121,4 +121,11 @@ canvas{touch-action:none}input,select,textarea{-webkit-user-select:auto;user-sel
   if (on) for (const ev of ["touchend", "click", "pointerup", "keydown"]) document.addEventListener(ev, T.wakeSound, { capture: true, passive: true });
   window.TouchPad = T;
   if (on) { if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", T.mobile); else T.mobile(); }
+  const WORDS = [[/Space play again/g, "Tap the screen to play again"], [/Space race again/g, "Tap the screen to race again"], [/P to continue/g, "Tap the screen to continue"],
+    [/Esc: back to/g, "☰: back to"], [/Esc menu/g, "☰ menu"], [/\bhold E\b/g, "hold USE"], [/\bHOLD E\b/g, "HOLD USE"], [/B to buy/g, "BUY to buy"],
+    [/H help · B buy · V voice · Tab scores/g, "BUY to buy · 📋 scores"], [/click a line or press 1-9, 0 · B or Esc to close/g, "tap a line · BUY or ☰ to close"],
+    [/Space: cannon \+ missiles · ↓ slow down, F to land/g, "A: cannon + missiles · ↓ slow down, B to land"], [/F or Enter/g, "B"], [/Space or Enter: rematch · /g, ""],
+    [/press START/g, "tap START"], [/pick a game: 1-9, 0 or click\s+·\s+O: play online, up to 4/g, "tap a game  ·  PLAY ONLINE (top): up to 4 friends"], [/hold the click and move to move the map/g, "drag to move the map"]];
+  const said = new Map();
+  T.words = (s) => { if (!T.on || typeof s !== "string") return s; let o = said.get(s); if (o === undefined) { o = s; for (const [a, b] of WORDS) o = o.replace(a, b); if (said.size > 500) said.clear(); said.set(s, o); } return o; };
 })();

@@ -41,7 +41,7 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}
       <label>Side<select id="side"><option value="0">Attack</option><option value="1">Defend</option></select></label>
       <label>Players per team<select id="size"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select></label>
       <label>Bots<select id="diff"><option value="0">Easy</option><option value="1" selected>Normal</option><option value="2">Hard</option></select></label>
-      <label>Map<select id="map"><option value="dune">DUNE · desert town</option><option value="villa">VILLA · Mediterranean village</option><option value="reactor">REACTOR · power plant</option></select></label>
+      <label>Map<select id="map"><option value="dune">DUNE · desert town</option><option value="villa">VILLA · Mediterranean village</option><option value="reactor">REACTOR · power plant</option><option value="port">PORT · container docks</option><option value="temple">TEMPLE · jungle ruins</option></select></label>
       <label>Graphics<select id="gfx"><option value="auto">Auto</option><option value="low">Low · most fluid</option><option value="high">High · full look</option></select></label></div>
     <div class="help" id="gfxInfo" style="margin-top:0"></div>
     <div class="row"><button id="bSolo" class="pri">PLAY VS BOTS</button><button id="bHost">HOST LAN GAME</button><button id="bJoin">JOIN LAN GAME</button><button id="bFull">FULL SCREEN</button><button id="bSnd">SOUND: ON</button></div>
@@ -120,8 +120,32 @@ const GRIDS = {
     "##########aaaaaaaaaaaa##########", "##########aaaaaaaaaaaa##########", "################################", "################################"],
     holds: [[[3, 22, 9, 23], [6, 29, 8, 24], [2, 27, 4, 20]], [[4, 4, 10, 1], [8, 9, 10, 10], [6, 8, 9, 2]], [[10, 12, 20, 15], [10, 18, 20, 18]]],
     extra() { B(-2.5, 12, -21.5, 2.5, 21, -18.5, 7, 0.86); B(-2.8, 20, -21.8, 2.8, 20.6, -18.2, 13); } },
+  port: { name: "PORT", sky: [0.72, 0.82, 0.92], ground: 12, wall: 3, tall: 4, low: 13, roof: 0, h: 8, th: 11, rows: [
+    "BBBBBBBBBB##dddddddd##AAAAAAAAAA", "BBkkBBBBBB##dddddddd##AAAAkkAAAA", "BBkkBBBcBB##dddddddd##AAAAkkAAAA", "BBBBBBBBBB............AAcAAAAAAA",
+    "BBBBBwwBBB............AAAAAAAwwA", "BBBBBBBBBB............AAAAAAAAAA", "BBBBBBBBBB##........##AAAAAAAAAA", "####......##........##......####",
+    "...............c................", "###..kk..................kk..###", "###..kk..................kk..###", "###..........TTTTTT..........###",
+    "###.....kk...TTTTTT...kk.....###", "###.....kk...TTTTTT...kk.....###", "###..........TTTTTT..........###", "###...c......TTTTTT......c...###",
+    "###..........TTTTTT..........###", "###..........TTTTTT..........###", "................................", "....kk....................kk....",
+    "....kk....................kk....", "............kk....kk............", "............kk....kk............", "................................",
+    "####........................rr##", "####........................rr##", "####.....c..................rr##", "......................c.....rr##",
+    "...............ww.............##", "..............................##", "..........aaaaaaaaaaaa..........", "#########.aaaaaaaaaaaa.#########",
+    "#########.aaaaaaaaaaaa.#########", "#########.aaaaaaaaaaaa.#########", "#########.aaaaaaaaaaaa.#########", "################################"],
+    holds: [[[5, 24, 9, 24], [5, 30, 10, 28], [6, 22, 9, 16]], [[5, 7, 9, 7], [5, 1, 10, 3], [6, 9, 9, 15]], [[9, 12, 19, 12], [9, 19, 19, 19]]],
+    extra() { B(-0.4, 11, -16, 0.4, 19, -15.2, 4, 0.8, [0.95, 0.75, 0.1]); B(-12, 18.4, -16.2, 12, 19.2, -15, 4, 0.8, [0.95, 0.75, 0.1]); B(10.5, 12, -16.2, 11.3, 18.4, -15, 4, 0.7); } },
+  temple: { name: "TEMPLE", sky: [0.74, 0.86, 0.78], ground: 14, wall: 8, tall: 8, low: 8, roof: 0, h: 6, th: 7, rows: [
+    "############dddddddd############", "############dddddddd############", "############dddddddd#AAAAAAAAAA#", "#BBBBBBBBB#.........#AAAAAAAAAA#",
+    "#BBwwBBBBB#.........#AAAwwAAAAA#", "#BBBBBBBBB#.........#AAAAAAAAAA#", "#BBBBBwwBB#.........#AAAAAAAcAA#", "#BBBBBBBBB...........AAAAAAAAAA#",
+    "#BBBBBBBBB..c......c############", "#######.............############", "#..###....................###...", "#..###......TTTTTTTT......###...",
+    "#..###......TTTTTTTT......###...", "...###......TTTTTTTT......###...", "............TTTTTTTT............", "..wwwwwww...TTTTTTTT...wwwwwww..",
+    "..wwwwwww...TTTTTTTT...wwwwwww..", "............TTTTTTTT............", "..........c.TTTTTTTT.c..........", "##..........TTTTTTTT..........##",
+    "##............................##", "##....###..............###....##", "##....###..............###....##", "##....###..............###....##",
+    "...............t................", ".............wwwwww.............", ".............wwwwww.............", "###..........................###",
+    "###...c..................c...###", "###..........................###", "###..........................###", "#########.aaaaaaaaaaaa.#########",
+    "#########.aaaaaaaaaaaa.#########", "#########.aaaaaaaaaaaa.#########", "#########.aaaaaaaaaaaa.#########", "################################"],
+    holds: [[[6, 23, 9, 19], [3, 29, 9, 28], [7, 26, 10, 25]], [[7, 3, 12, 2], [4, 8, 9, 11], [8, 6, 10, 7]], [[10, 11, 20, 11], [10, 20, 20, 20]]],
+    extra() { B(-6, 7, -12, 6, 10, 2, 8, 0.9); B(-4, 10, -10, 4, 13, 0, 8, 0.85); B(-2, 13, -8, 2, 16, -2, 9, 0.9); } },
 };
-const MAPLIST = [["dune", "DUNE", "desert town"], ["villa", "VILLA", "Mediterranean village"], ["reactor", "REACTOR", "power plant"]];
+const MAPLIST = [["dune", "DUNE", "desert town"], ["villa", "VILLA", "Mediterranean village"], ["reactor", "REACTOR", "power plant"], ["port", "PORT", "container docks"], ["temple", "TEMPLE", "jungle ruins"]];
 const SOLIDC = "#Twckt", CONT = [[0.7, 0.18, 0.14], [0.16, 0.36, 0.62], [0.2, 0.5, 0.3], [0.85, 0.5, 0.12], [0.55, 0.56, 0.6]];
 function gridMap(M) {
   const G = M.rows, X = (c) => -32 + c * 2, Z = (r) => -36 + r * 2, used = G.map((row) => [...row].map(() => false));
@@ -767,7 +791,7 @@ function drawHud() {
   const w = hud.width, h = hud.height, k = h / 900, x = H2; x.clearRect(0, 0, w, h);
   if (!W) return;
   const cam = camera(), p = cam.p, f = (s, n, c = "#f8fafc", al = "left", wgt = 700) => { x.font = `${wgt} ${Math.round(n * k)}px Consolas, monospace`; x.fillStyle = c; x.textAlign = al; };
-  const tx = (s, X, Y) => { x.fillStyle = x.fillStyle; x.fillText(s, X, Y); };
+  const tx = (s, X, Y) => { x.fillStyle = x.fillStyle; x.fillText(window.TouchPad && TouchPad.on ? TouchPad.words(s) : s, X, Y); };
   if (p === ME && ME.alive && ME.box) {
     x.fillStyle = "#8a6a3e"; x.beginPath(); x.rect(0, 0, w, h); x.rect(w * 0.18, h * 0.38, w * 0.64, h * 0.2); x.fill("evenodd");
     x.strokeStyle = "#5c4426"; x.lineWidth = 6 * k; x.strokeRect(w * 0.18, h * 0.38, w * 0.64, h * 0.2);
