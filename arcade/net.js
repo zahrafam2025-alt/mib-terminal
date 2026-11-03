@@ -8,7 +8,7 @@ const Net = {
     d.textContent = text; d.style.display = "block"; clearTimeout(d._t); if (ms) d._t = setTimeout(() => { d.style.display = "none"; }, ms);
   },
   cid() {
-    try { let v = sessionStorage.getItem("arcade-cid"); if (!v) { v = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); sessionStorage.setItem("arcade-cid", v); } return v; }
+    try { let v = localStorage.getItem("arcade-cid"); if (!v) { v = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); localStorage.setItem("arcade-cid", v); } return v; }
     catch (e) { return Net._cid || (Net._cid = Math.random().toString(36).slice(2, 12)); }
   },
   adminKey() { try { return localStorage.getItem("arcade-admin") || ""; } catch (e) { return ""; } },
@@ -18,14 +18,16 @@ const Net = {
     const connect = () => {
       const ws = new WebSocket(Net.url(c.q)); c.ws = ws;
       let ka = null;
-      let heard = Date.now(), pingAt = 0;
-      ws.onopen = () => { heard = Date.now(); ka = setInterval(() => {
+      let heard = Date.now(), pingAt = 0, tickAt = Date.now();
+      ws.onopen = () => { heard = Date.now(); tickAt = Date.now(); ka = setInterval(() => {
+        const now = Date.now(), late = now - tickAt > 6000; tickAt = now;
         if (ws.readyState !== 1) return;
+        if (late) { pingAt = now; ws.send("#ping"); return; }
         if (pingAt && heard < pingAt) {
-          if (Date.now() - pingAt > 9000) { try { ws.close(); } catch (e) {} if (ws.onclose) { const f = ws.onclose; ws.onclose = null; f(); } }
+          if (now - pingAt > 12000) { try { ws.close(); } catch (e) {} if (ws.onclose) { const f = ws.onclose; ws.onclose = null; f(); } }
           return;
         }
-        pingAt = Date.now(); ws.send("#ping");
+        pingAt = now; ws.send("#ping");
       }, 3000); };
       ws.onmessage = (e) => {
         if (c.ws !== ws) return;
@@ -76,6 +78,7 @@ const Net = {
   join(game, room, name, on) {
     const c = Net.open({ game, role: "join", room, name }, on);
     c.send = (obj) => { if (c.ws && c.ws.readyState === 1) c.ws.send(JSON.stringify(obj)); };
+    c.sendAll = (obj) => { if (c.ws && c.ws.readyState === 1) c.ws.send("#all|" + JSON.stringify(obj)); };
     return c;
   },
 };

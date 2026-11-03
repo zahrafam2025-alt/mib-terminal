@@ -216,7 +216,7 @@ function Blocks() {
                Z: [[0, 0], [1, 0], [1, 1], [2, 1]], J: [[0, 0], [0, 1], [1, 1], [2, 1]], L: [[2, 0], [0, 1], [1, 1], [2, 1]] };
   const COL = { I: "#22d3ee", O: "#f5b83d", T: "#a855f7", S: "#22c55e", Z: "#f05252", J: "#3b82f6", L: "#fb923c" };
   const g = { id: "blocks", score: 0, lines: 0, level: 1, over: false, grid: Array.from({ length: ROWS }, () => Array(COLS).fill(null)),
-              bag: [], piece: null, next: null, fall: 0, das: { dir: 0, t: 0 }, flash: 0, pending: 0, hitT: 0, onAttack: null, clears: [], parts: [],
+              bag: [], piece: null, next: null, fall: 0, das: { dir: 0, t: 0 }, flash: 0, pending: 0, hitT: 0, onAttack: null,
               help: "← → move · ↑ or X turn · ↓ faster · Space drop · Esc menu · P pause" };
   const take = () => { if (!g.bag.length) g.bag = Object.keys(SH).sort(() => Math.random() - 0.5); return g.bag.pop(); };
   const mk = (t) => ({ t, cells: SH[t].map((c) => c.slice()), x: 3, y: 0 });
@@ -231,7 +231,6 @@ function Blocks() {
   function lock() {
     g.piece.cells.forEach(([a, b]) => { if (b + g.piece.y >= 0) g.grid[b + g.piece.y][a + g.piece.x] = COL[g.piece.t]; });
     const full = g.grid.map((r, i) => r.every(Boolean) ? i : -1).filter((i) => i >= 0);
-    full.forEach((i) => { g.clears.push({ y: i, t: 0.35 }); g.grid[i].forEach((c, x) => { for (let k = 0; k < 3; k++) g.parts.push({ x: OX + x * C + 8, y: OY + i * C + 8, vx: rnd(-120, 120), vy: rnd(-160, 40), t: rnd(0.4, 0.8), c }); }); });
     full.forEach((i) => { g.grid.splice(i, 1); g.grid.unshift(Array(COLS).fill(null)); });
     if (full.length) { g.score += [0, 100, 300, 500, 800][full.length] * g.level; g.lines += full.length; g.level = 1 + Math.floor(g.lines / 10); g.flash = 0.25; SFX.line(); } else SFX.drop();
     if (full.length >= 2 && g.onAttack) g.onAttack([0, 0, 1, 2, 4][full.length]);
@@ -250,47 +249,24 @@ function Blocks() {
     if (pressed("Space")) { while (!hitAt(g.piece.cells, g.piece.x, g.piece.y + 1)) { g.piece.y++; g.score += 2; } lock(); return; }
     const soft = held("ArrowDown", "KeyS"), every = soft ? 0.04 : Math.max(0.06, 0.8 - (g.level - 1) * 0.07);
     g.flash = Math.max(0, g.flash - dt); g.hitT = Math.max(0, g.hitT - dt);
-    g.clears.forEach((q) => { q.t -= dt; }); g.clears = g.clears.filter((q) => q.t > 0);
-    g.parts.forEach((q) => { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 500 * dt; q.t -= dt; }); g.parts = g.parts.filter((q) => q.t > 0);
     if ((g.fall += dt) >= every) {
       g.fall = 0;
       if (!hitAt(g.piece.cells, g.piece.x, g.piece.y + 1)) { g.piece.y++; if (soft) g.score += 1; } else lock();
     }
   };
-  const SPR = {};
-  const sprite = (c) => SPR[c] || (SPR[c] = pic(C, C, (x) => {
-    const gr = x.createLinearGradient(0, 0, C, C); gr.addColorStop(0, shadeHex(c, 1.35)); gr.addColorStop(0.5, c); gr.addColorStop(1, shadeHex(c, 0.6));
-    x.fillStyle = shadeHex(c, 0.45); rrect(x, 0.5, 0.5, C - 1, C - 1, 3); x.fill();
-    x.fillStyle = gr; rrect(x, 1.5, 1.5, C - 3, C - 3, 2.5); x.fill();
-    x.fillStyle = "rgba(255,255,255,.35)"; rrect(x, 3, 2.5, C - 6, 3.5, 1.5); x.fill();
-    x.fillStyle = "rgba(255,255,255,.7)"; x.fillRect(3.5, 3, 2, 2);
-  }));
-  const BG = pic(W, H, (x) => {
-    const g0 = x.createLinearGradient(0, 0, 0, H); g0.addColorStop(0, "#151a3a"); g0.addColorStop(1, "#070912"); x.fillStyle = g0; x.fillRect(0, 0, W, H);
-    for (let i = 0; i < 90; i++) { x.fillStyle = `rgba(160,180,255,${(0.08 + (i * 37 % 10) / 50).toFixed(2)})`; x.fillRect((i * 97) % W, (i * 53) % H, 1, 1); }
-    const halo = x.createRadialGradient(OX + COLS * C / 2, OY + ROWS * C / 2, 40, OX + COLS * C / 2, OY + ROWS * C / 2, 260); halo.addColorStop(0, "rgba(124,92,255,.22)"); halo.addColorStop(1, "rgba(124,92,255,0)"); x.fillStyle = halo; x.fillRect(0, 0, W, H);
-    const well = x.createLinearGradient(0, OY, 0, OY + ROWS * C); well.addColorStop(0, "#0b0f22"); well.addColorStop(1, "#05070f"); x.fillStyle = well; x.fillRect(OX, OY, COLS * C, ROWS * C);
-    x.strokeStyle = "rgba(120,140,220,.07)"; x.lineWidth = 1;
-    for (let i = 1; i < COLS; i++) { x.beginPath(); x.moveTo(OX + i * C + 0.5, OY); x.lineTo(OX + i * C + 0.5, OY + ROWS * C); x.stroke(); }
-    for (let i = 1; i < ROWS; i++) { x.beginPath(); x.moveTo(OX, OY + i * C + 0.5); x.lineTo(OX + COLS * C, OY + i * C + 0.5); x.stroke(); }
-    for (const [px, py, pw, ph] of [[340, 22, 120, 82], [340, 112, 120, 176], [14, 22, 132, 84]]) { x.fillStyle = "rgba(20,26,54,.75)"; rrect(x, px, py, pw, ph, 8); x.fill(); x.strokeStyle = "rgba(124,92,255,.35)"; x.stroke(); }
-  });
-  const cell = (x, y, c, a = 1) => { cx.globalAlpha = a; cx.drawImage(sprite(c), OX + x * C, OY + y * C, C, C); cx.globalAlpha = 1; };
+  const cell = (x, y, c, a = 1) => { cx.globalAlpha = a; rect(OX + x * C + 1, OY + y * C + 1, C - 2, C - 2, c); rect(OX + x * C + 1, OY + y * C + 1, C - 2, 3, "rgba(255,255,255,.25)"); cx.globalAlpha = 1; };
   g.draw = () => {
-    cx.drawImage(BG, 0, 0, W, H);
-    cx.strokeStyle = g.hitT ? "#ef4444" : g.flash ? "#a78bfa" : "#3b4a8a"; cx.lineWidth = 2.5; rrect(cx, OX - 3, OY - 3, COLS * C + 6, ROWS * C + 6, 4); cx.stroke();
+    rect(0, 0, W, H, "#0d1020");
+    rect(OX - 4, OY - 4, COLS * C + 8, ROWS * C + 8, g.hitT ? "#ef4444" : g.flash ? "#7c5cff" : "#26304a"); rect(OX, OY, COLS * C, ROWS * C, "#0a0d1a");
     if (g.pending) { const hgt = Math.min(ROWS, g.pending) * C; rect(OX - 12, OY + ROWS * C - hgt, 6, hgt, "#ef4444"); txt(`+${g.pending}`, OX - 30, OY + ROWS * C - hgt - 4, 11, "#fca5a5"); }
     for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (g.grid[y][x]) cell(x, y, g.grid[y][x]);
     if (g.piece) {
       let gy = g.piece.y; while (!hitAt(g.piece.cells, g.piece.x, gy + 1)) gy++;
-      cx.strokeStyle = COL[g.piece.t]; cx.lineWidth = 1.5; cx.globalAlpha = 0.55;
-      g.piece.cells.forEach(([a, b]) => { if (gy + b >= 0) { rrect(cx, OX + (a + g.piece.x) * C + 2, OY + (b + gy) * C + 2, C - 4, C - 4, 2); cx.stroke(); } }); cx.globalAlpha = 1;
+      g.piece.cells.forEach(([a, b]) => { if (gy + b >= 0) cell(a + g.piece.x, b + gy, COL[g.piece.t], 0.22); });
       g.piece.cells.forEach(([a, b]) => { if (g.piece.y + b >= 0) cell(a + g.piece.x, b + g.piece.y, COL[g.piece.t]); });
     }
-    for (const q of g.clears) { cx.globalAlpha = q.t / 0.35; rect(OX, OY + q.y * C - (0.35 - q.t) * 20, COLS * C, C + (0.35 - q.t) * 40, "#fff"); } cx.globalAlpha = 1;
-    cx.globalCompositeOperation = "lighter"; for (const q of g.parts) { cx.globalAlpha = Math.min(1, q.t * 2); cx.drawImage(glow(q.c), q.x - 5, q.y - 5, 10, 10); } cx.globalAlpha = 1; cx.globalCompositeOperation = "source-over";
     txt("NEXT", 350, 40, 13, "#8a90a2");
-    if (g.next) g.next.cells.forEach(([a, b]) => { cx.drawImage(sprite(COL[g.next.t]), 352 + a * 14, 52 + b * 14, 13, 13); });
+    if (g.next) g.next.cells.forEach(([a, b]) => { rect(352 + a * 14, 52 + b * 14, 12, 12, COL[g.next.t]); });
     [["SCORE", g.score], ["LINES", g.lines], ["LEVEL", g.level], ["BEST", Math.max(bestOf("blocks"), g.score)]].forEach(([k, v], i) => {
       txt(k, 350, 130 + i * 44, 13, "#8a90a2"); txt(String(v), 350, 150 + i * 44, 18); });
     txt("BLOCKS", 24, 40, 18, "#22d3ee"); txt("clear lines,", 24, 62, 12, "#8a90a2"); txt("speed grows", 24, 78, 12, "#8a90a2"); txt("every 10", 24, 94, 12, "#8a90a2");
@@ -457,26 +433,6 @@ function Jump() {
     help: "← → run · Space or ↑ jump · again in the air: double jump · stomp the blobs · grab the bubbles: E-scooter, E-bike, tip magnet · coins are tips · Esc menu" };
   const RIDES = { scooter: { name: "E-SCOOTER", t: 8, v: 310, jumps: 2 }, bike: { name: "E-BIKE", t: 10, v: 255, jumps: 3 } };
   const wr = seeded(Math.floor(Math.random() * 2 ** 31)), R = (a, b) => a + wr() * (b - a), RI = (a, b) => Math.floor(R(a, b + 1));
-  const SKYJ = pic(W, H, (x) => {
-    const sk = x.createLinearGradient(0, 0, 0, H); sk.addColorStop(0, "#0b1030"); sk.addColorStop(0.6, "#2a1d55"); sk.addColorStop(1, "#4a2a5e"); x.fillStyle = sk; x.fillRect(0, 0, W, H);
-    for (let i = 0; i < 110; i++) { x.fillStyle = `rgba(255,255,255,${(0.15 + (i * 29 % 11) / 18).toFixed(2)})`; x.fillRect((i * 113) % W, (i * 67) % 210, 1, 1); }
-    const mg = x.createRadialGradient(390, 60, 4, 390, 60, 70); mg.addColorStop(0, "rgba(254,243,199,.55)"); mg.addColorStop(1, "rgba(254,243,199,0)"); x.fillStyle = mg; x.fillRect(300, 0, 180, 150);
-    x.fillStyle = "#fef3c7"; x.beginPath(); x.arc(390, 60, 18, 0, 6.3); x.fill(); x.fillStyle = "rgba(0,0,0,.08)"; x.beginPath(); x.arc(384, 55, 4, 0, 6.3); x.arc(396, 66, 3, 0, 6.3); x.fill();
-  });
-  const SKYLINE = pic(960, 160, (x) => {
-    let bx = 0, n = 7;
-    while (bx < 960) {
-      n = (n * 73 + 19) % 101; const w = 30 + n % 40, h = 50 + (n * 7) % 100;
-      x.fillStyle = n % 3 ? "#1a1640" : "#211a4a"; x.fillRect(bx, 160 - h, w, h);
-      for (let wy = 160 - h + 6; wy < 156; wy += 8) for (let wx = bx + 4; wx < bx + w - 4; wx += 7) if ((wx * 13 + wy * 7 + n) % 5 === 0) { x.fillStyle = (wx + wy) % 3 ? "rgba(253,224,71,.55)" : "rgba(147,197,253,.45)"; x.fillRect(wx, wy, 3, 4); }
-      bx += w + 2;
-    }
-  });
-  const DIRT = pic(64, 64, (x) => {
-    const d = x.createLinearGradient(0, 0, 0, 64); d.addColorStop(0, "#5b3a24"); d.addColorStop(1, "#3b2416"); x.fillStyle = d; x.fillRect(0, 0, 64, 64);
-    for (let i = 0; i < 22; i++) { x.fillStyle = i % 3 ? "rgba(0,0,0,.18)" : "rgba(255,220,180,.1)"; x.beginPath(); x.ellipse((i * 23) % 64, (i * 37) % 64, 2 + i % 3, 1.3 + i % 2, 0, 0, 6.3); x.fill(); }
-  });
-  const dirtPat = cx.createPattern(DIRT, "repeat"); if (dirtPat && dirtPat.setTransform) dirtPat.setTransform(new DOMMatrix().scale(0.5));
   g.joinNet = (o) => { g.net = o; g.remote = new Map(); g.bonkQ = []; g.col = NETCOL[Math.max(0, o.players.findIndex((q) => q.id === o.me)) % 4]; };
   g.netState = (from, m) => {
     if (m.x === undefined) return;
@@ -541,16 +497,11 @@ function Jump() {
     gen();
   };
   g.draw = () => {
-    cx.drawImage(SKYJ, 0, 0, W, H);
-    const so = ((g.cam * 0.15) % 960 + 960) % 960; cx.drawImage(SKYLINE, -so, GY - 175, 960, 160); cx.drawImage(SKYLINE, 960 - so, GY - 175, 960, 160);
-    for (let i = 0; i < 6; i++) { const hx = ((i * 140 - g.cam * 0.3) % 840 + 840) % 840 - 120; cx.fillStyle = "#15183a"; cx.beginPath(); cx.moveTo(hx, GY); cx.quadraticCurveTo(hx + 90, GY - 150, hx + 180, GY); cx.fill(); }
+    const sky = cx.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#0e1634"); sky.addColorStop(1, "#2c1e50"); cx.fillStyle = sky; cx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 6; i++) { const hx = ((i * 140 - g.cam * 0.3) % 840 + 840) % 840 - 120; cx.fillStyle = "#1d2550"; cx.beginPath(); cx.moveTo(hx, GY); cx.lineTo(hx + 90, GY - 120); cx.lineTo(hx + 180, GY); cx.fill(); }
     const X = (x) => Math.round(x - g.cam);
-    g.ground.forEach(([a, b]) => {
-      cx.save(); cx.translate(X(a), GY); cx.fillStyle = dirtPat || "#3b2a1e"; cx.fillRect(0, 0, b - a, H - GY); cx.restore();
-      rect(X(a), GY - 1, b - a, 7, "#16a34a"); rect(X(a), GY - 1, b - a, 2.5, "#4ade80"); rect(X(a), GY + 6, b - a, 2, "rgba(0,0,0,.3)");
-      for (let k = a + 6; k < b - 4; k += 11) rect(X(k), GY - 3 - (k * 7 % 3), 1.5, 3 + (k * 7 % 3), "#4ade80");
-    });
-    g.plats.forEach(([a, b, y]) => { rect(X(a) + 2, y + 10, b - a - 4, 4, "rgba(0,0,0,.35)"); rect(X(a), y, b - a, 10, "#6d4fe0"); rect(X(a), y, b - a, 3, "#c4b5fd"); rect(X(a), y + 8, b - a, 2, "#4c32b8"); for (let k = a + 6; k < b - 4; k += 14) rect(X(k), y + 4.5, 2, 2, "#ede9fe"); });
+    g.ground.forEach(([a, b]) => { rect(X(a), GY, b - a, H - GY, "#3b2a1e"); rect(X(a), GY, b - a, 6, "#22c55e"); });
+    g.plats.forEach(([a, b, y]) => { rect(X(a), y, b - a, 10, "#7c5cff"); rect(X(a), y, b - a, 3, "#a78bfa"); });
     g.coinsL.forEach((c) => { if (c.got) return; const w = Math.abs(Math.sin(g.t * 5 + c.x)) * 6 + 1; cx.fillStyle = "#f5b83d"; cx.beginPath(); cx.ellipse(X(c.x), c.y, w, 7, 0, 0, 6.3); cx.fill(); });
     g.foes.forEach((f) => { if (f.dead) return; circ(X(f.x) + 8, GY - 9, 10, "#f05252"); rect(X(f.x) + 3 + (f.v > 0 ? 3 : 0), GY - 14, 4, 4, "#fff"); rect(X(f.x) + 9 + (f.v > 0 ? 3 : 0), GY - 14, 4, 4, "#fff"); });
     g.items.forEach((it) => {
@@ -900,9 +851,12 @@ function drawRoom() {
   $o("oList").innerHTML = ON.players.map((q) => `<div class="oitem"><span>${String(q.name).replace(/[<>&]/g, "")}${q.id === ON.me ? " (you)" : ""}</span><span class="help" style="margin:0">${q.id === 0 ? "host" : "joined"}${ON.scores.has(q.id) ? " · " + ON.scores.get(q.id).score : ""}</span></div>`).join("");
   $o("oStart").style.display = ON.host ? "" : "none";
 }
+const FANOUT = new Set(["st", "fr", "atk", "watch"]);
 function osend(obj) {
   if (!ON || !ON.net) return;
-  if (ON.host) ON.net.send("*", Object.assign({ from: 0 }, obj)); else ON.net.send(obj);
+  if (ON.host) ON.net.send("*", Object.assign({ from: 0 }, obj));
+  else if (FANOUT.has(obj.t) && ON.net.sendAll) ON.net.sendAll(Object.assign({ from: ON.me, d: 1 }, obj));
+  else ON.net.send(obj);
 }
 function onlineName() {
   let n = ARC.getName() || $o("oName").value.trim();
@@ -914,8 +868,8 @@ function onMsg(m, from) {
   if (ON.host && from) {
     if (m.t === "in") { if (ON.live && cur && cur.netInput) cur.netInput(from, m); return; }
     if (m.t === "late") { const q = ON.players.find((x) => x.id === from); if (q && ON.live) lateJoin(q); return; }
-    if (m.t === "watch") { ON.watchT = Date.now(); ON.net.send("*", Object.assign({}, m, { from })); return; }
-    if (m.t === "st" || m.t === "fr" || m.t === "atk") ON.net.send("*", Object.assign({}, m, { from }));
+    if (m.t === "watch") { if (ON.live) ON.watchT = Date.now(); if (!m.d) ON.net.send("*", Object.assign({}, m, { from })); return; }
+    if (m.t === "st" || m.t === "fr" || m.t === "atk") { if (!m.d) ON.net.send("*", Object.assign({}, m, { from })); }
     else return;
   }
   if (!ON.host && m.from !== undefined) from = m.from;
@@ -927,7 +881,7 @@ function onMsg(m, from) {
   else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); }
   else if (m.t === "room") { if (ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); } }
   else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); if (m.score !== undefined && SHARED.has(ON.game)) ON.scores.set(from, { score: m.score, over: !!m.over }); }
-  else if (m.t === "watch") ON.watchT = Date.now();
+  else if (m.t === "watch") { if (ON.live) ON.watchT = Date.now(); }
   else if (m.t === "atk") { if (ON.live && cur && cur.addGarbage && m.to === ON.me) { cur.addGarbage(m.n); Net.note(`${(ON.players.find((q) => q.id === from) || {}).name || "Someone"} sends you ${m.n} row${m.n > 1 ? "s" : ""}!${m.x2 ? " (COMEBACK ×2)" : ""}`, 1800); } }
   else if (m.t === "fr") {
     let img = ON.frames.get(from); if (!img) { img = new Image(); ON.frames.set(from, img); }
@@ -953,16 +907,19 @@ $o("oHost").onclick = () => {
   if (ON && ON.host && ON.net && !ON.net.quit) { showOnline("oRoom"); return; }
   const name = onlineName();
   if (PAGE_GAMES[$o("oGame").value]) { pageRoom($o("oGame").value, "host"); return; }
-  ON = { host: true, me: 0, code: "", players: [{ id: 0, name }], game: $o("oGame").value, live: false, frames: new Map(), scores: new Map(), seen: new Map(), watchT: 0 };
+  ON = { host: true, me: 0, code: "", players: [{ id: 0, name }], game: $o("oGame").value, live: false, frames: new Map(), scores: new Map(), seen: new Map(), watchT: 0, away: new Set() };
   ON.net = Net.host("hub", name, {
     hello: (m) => { ON.code = m.room; drawRoom(); },
     join: (m) => {
       const known = ON.players.find((q) => q.id === m.id);
+      if (!known && ON.players.length >= 4) { const gone = ON.players.find((q) => q.id && ON.away.has(q.id)); if (gone) { ON.players = ON.players.filter((q) => q !== gone); ON.frames.delete(gone.id); } }
       if (known) known.name = m.name; else if (ON.players.length < 4) ON.players.push({ id: m.id, name: m.name }); else { lobbyOut(); return; }
       lobbyOut();
       if (ON.live) lateJoin({ id: m.id, name: m.name });
     },
-    leave: (m) => { ON.players = ON.players.filter((q) => q.id !== m.id); ON.frames.delete(m.id); ON.scores.delete(m.id); lobbyOut(); },
+    leave: (m) => { ON.players = ON.players.filter((q) => q.id !== m.id); ON.frames.delete(m.id); ON.scores.delete(m.id); ON.away.delete(m.id); lobbyOut(); },
+    away: (m) => { ON.away.add(m.id); },
+    back: (m) => { ON.away.delete(m.id); },
     msg: (m, from) => onMsg(m, from),
     error: (m) => { $o("oMsg").textContent = "Could not open a room: " + m.why; },
     fail: () => { $o("oMsg").textContent = "Could not reach the game server. Try again."; },
@@ -1054,7 +1011,7 @@ $o("oStart").onclick = () => {
   ON.net.started();
 };
 function startOnline(m) {
-  ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.frames.clear(); ON.scores.clear(); ON.seen.clear();
+  ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
   if (m.game === "goal") { cur = Goal({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = cur.help; }
@@ -1074,14 +1031,14 @@ function startOnline(m) {
   if (window.TouchPad && TouchPad.on) TouchPad.full();
 }
 const onSnap = document.createElement("canvas"); onSnap.width = 960; onSnap.height = 720;
-const onSmall = document.createElement("canvas"); onSmall.width = 320; onSmall.height = 240;
+const onSmall = document.createElement("canvas"); onSmall.width = 240; onSmall.height = 180;
 setInterval(() => {
   if (!ON || !ON.live || !cur) return;
   const shared = cur.id === "spa" || cur.id === "goal" || SHARED.has(cur.id), watched = Date.now() - ON.watchT < 5000;
   if (shared ? !watched : ON.players.length < 2 && !watched) return;
-  onSmall.getContext("2d").drawImage(shared || ON.players.length < 2 ? cv : onSnap, 0, 0, 320, 240);
-  osend({ t: "fr", img: onSmall.toDataURL("image/jpeg", 0.55), score: cur.score || 0, over: !!cur.over });
-}, 140);
+  onSmall.getContext("2d").drawImage(shared || ON.players.length < 2 ? cv : onSnap, 0, 0, 240, 180);
+  osend({ t: "fr", img: onSmall.toDataURL("image/jpeg", 0.5), score: cur.score || 0, over: !!cur.over });
+}, 160);
 function watching() { return !!(ON && !ON.live && ON.seen && ON.players.some((q) => q.id !== ON.me && Date.now() - (ON.seen.get(q.id) || 0) < 3000)); }
 function drawWatch() {
   if (!watching()) return false;

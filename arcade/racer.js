@@ -288,7 +288,8 @@ function Racer(two = false, online = null) {
     }
     standings(); engineNote();
     sendT -= dt;
-    if (sendT <= 0) { sendT = 0.05; online.send({ z: me.z, x: me.x, h: me.h, speed: me.speed, lap: me.lap, lapT: me.lapT, st: me.st, sky: me.sky, bestLap: me.bestLap, turbo: me.turbo, gear: me.gear, rpm: me.rpm, done: me.done }); }
+    if (sendT <= 0) { sendT = 0.05; const r2 = (v) => (typeof v === "number" ? Math.round(v * 100) / 100 : v);
+      online.send({ z: r2(me.z), x: r2(me.x), h: r2(me.h), speed: r2(me.speed), lap: me.lap, lapT: r2(me.lapT), st: r2(me.st), sky: r2(me.sky), bestLap: r2(me.bestLap), turbo: r2(me.turbo), gear: me.gear, rpm: Math.round(me.rpm), done: me.done }); }
     if (all.every((c) => c.done) && g.t - Math.max(...all.map((c) => c.finishT)) > 2.5) finish();
     else if (me.done && g.firstDone && g.t - g.firstDone > 45) finish();
   }
