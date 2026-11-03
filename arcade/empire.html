@@ -62,6 +62,8 @@ const mul32 = (a) => () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a 
 const N = 96, TW = 64, TH = 32;
 const AGES = ["FRONTIER", "COLONIAL", "FORTRESS", "INDUSTRIAL"], AGECOST = [null, { f: 500 }, { f: 900, g: 600 }, { f: 1500, g: 1200 }], AGET = 40;
 const UT = {
+  tank: { n: "Tank", hp: 1600, atk: 70, rng: 7, rof: 2.2, spd: 1.7, cls: "art", cost: {}, t: 1, sight: 11, age: 0, bonus: { bld: 2.5, inf: 1.4, cav: 1.4 }, splash: 1.0, key: "", cheat: true },
+  f16: { n: "F-16", hp: 900, atk: 50, rng: 7, rof: 0.9, spd: 4.6, cls: "air", cost: {}, t: 1, sight: 15, age: 0, bonus: { bld: 1.6, ship: 2 }, splash: 0.7, key: "", cheat: true, fly: true },
   vil: { n: "Settler", hp: 60, atk: 4, rng: 0, rof: 1.5, spd: 1.25, cls: "vil", cost: { f: 50 }, t: 12, sight: 6, age: 0, key: "V" },
   pike: { n: "Pikeman", hp: 110, atk: 11, rng: 0, rof: 1.5, spd: 1.35, cls: "inf", cost: { f: 50, w: 30 }, t: 14, sight: 7, age: 0, bonus: { cav: 3, art: 1.5 }, key: "P" },
   musk: { n: "Musketeer", hp: 120, atk: 20, rng: 5, rof: 2.4, spd: 1.2, cls: "inf", cost: { f: 75, g: 25 }, t: 18, sight: 8, age: 0, bonus: { cav: 1.8 }, key: "M" },
@@ -265,7 +267,7 @@ function path(sx, sy, goal, hx, hy, limit = 6000) {
 const adjGoal = (e) => { const s = e.sz || 1, x0 = Math.floor(e.k === "r" && e.t === "deer" ? e.x : e.x), y0 = Math.floor(e.k === "r" && e.t === "deer" ? e.y : e.y); return (x, y) => x >= x0 - 1 && x <= x0 + s && y >= y0 - 1 && y <= y0 + s && !(x >= x0 && x < x0 + s && y >= y0 && y < y0 + s); };
 function goTo(u, tx, ty, near) {
   const goal = near ? near : (x, y) => x === Math.floor(tx) && y === Math.floor(ty);
-  PASS = UT[u.t] && UT[u.t].naval ? passShip : passable; PASSO = u.o;
+  PASS = UT[u.t] && UT[u.t].fly ? inMap : UT[u.t] && UT[u.t].naval ? passShip : passable; PASSO = u.o;
   u.path = path(u.x, u.y, goal, tx, ty); u.dest = [tx, ty];
   PASS = passable; PASSO = -1;
   if (!near && u.path.length) u.path[u.path.length - 1] = [tx, ty];
@@ -273,6 +275,15 @@ function goTo(u, tx, ty, near) {
 
 function command(o, c) {
   const pl = G.players[o]; if (!pl || pl.dead) return;
+  if (c.k === "cheat") {
+    const tc = [...G.ents.values()].find((e) => e.k === "b" && e.o === o && e.t === "TC") || [...G.ents.values()].find((e) => e.k === "u" && e.o === o);
+    if (!tc) return;
+    const cx0 = tc.x + (tc.sz || 1) + 1, cy0 = tc.y + (tc.sz || 1) + 1, made = [];
+    if (c.code === "F16") for (let i = 0; i < 2; i++) made.push(unit(o, "f16", cx0 + i, cy0));
+    else if (c.code === "TANK") for (let i = 0; i < 3; i++) made.push(unit(o, "tank", cx0 + i, cy0 + 0.5));
+    else if (c.code === "GOLD") { pl.res.f += 5000; pl.res.w += 5000; pl.res.g += 5000; }
+    return;
+  }
   const mine = (c.ids || []).map((id) => G.ents.get(id)).filter((e) => e && e.o === o);
   if (c.k === "train") { const b = G.ents.get(c.id), cost = UT[c.t] && costOf(pl, c.t); if (b && b.o === o && b.done && trainsFor(b, pl).includes(c.t) && UT[c.t].age <= pl.age && afford(pl, cost) && b.q.length < 6 && !b.aging) { pay(pl, cost); b.q.push({ t: c.t, p: 0 }); } else if (o === ME) sfx("cant"); return; }
   if (c.k === "revive") {
@@ -352,7 +363,7 @@ function damageOf(a, t) {
   if (t.k === "u" && UT[t.t].armor && !(ua && ua.cls === "rng")) d *= UT[t.t].armor;
   return d;
 }
-const SHOT = { can: "ball", obus: "obus", oeuf: "egg", arb: "arrow", longb: "arrow", rocket: "rocket", organ: "musket", bomb: "obus", frig: "shipball", hero: "pistol" };
+const SHOT = { tank: "ball", f16: "rocket", can: "ball", obus: "obus", oeuf: "egg", arb: "arrow", longb: "arrow", rocket: "rocket", organ: "musket", bomb: "obus", frig: "shipball", hero: "pistol" };
 function shoot(a, t, dmg, kind) {
   const [sx, sy] = center(a), [tx, ty] = center(t), dur = kind === "ball" ? 0.7 : kind === "arrow" ? 0.45 : 0.08;
   G.shots.push({ sx, sy, tx, ty, t: 0, dur: kind === "obus" ? 1.1 : kind === "egg" ? 0.6 : kind === "rocket" ? 0.5 : kind === "shipball" ? 0.6 : dur, dmg, tgt: t.id, by: a.id, kind, splash: a.k === "u" ? UT[a.t].splash || 0 : 0, o: a.o, z0: a.k === "b" ? BT[a.t].h * 0.8 : 0 });
@@ -502,9 +513,10 @@ function tick(dt) {
   for (const u of us) { const k = Math.floor(u.x) + Math.floor(u.y) * N; if (!cell.has(k)) cell.set(k, []); cell.get(k).push(u); }
   for (const u of us) {
     if (u.st === "gather" && u.gtype === "farm") continue;
+    if (UT[u.t].fly) continue;
     const nav = UT[u.t].naval, gap = nav ? 0.9 : 0.42;
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) for (const v of cell.get(Math.floor(u.x) + dx + (Math.floor(u.y) + dy) * N) || []) {
-      if (v === u || !!UT[v.t].naval !== nav) continue; const ddx = u.x - v.x, ddy = u.y - v.y, d = Math.hypot(ddx, ddy) || 0.01;
+      if (v === u || !!UT[v.t].naval !== nav || UT[v.t].fly) continue; const ddx = u.x - v.x, ddy = u.y - v.y, d = Math.hypot(ddx, ddy) || 0.01;
       if (d < gap) { const p = (gap - d) * 0.5, nx2 = u.x + ddx / d * p, ny2 = u.y + ddy / d * p; if ((nav ? passShip : passable)(Math.floor(nx2), Math.floor(ny2))) { u.x = nx2; u.y = ny2; } }
     }
   }
@@ -1182,7 +1194,27 @@ function drawShip(e, sx, sy) {
   if (e.t === "fishb") { X.strokeStyle = "rgba(230,220,190,.6)"; X.lineWidth = 1; const [a, b] = P(-L * 0.4, Wd, 3); X.beginPath(); X.moveTo(a, b); X.lineTo(a + px * 12, b + py * 6 + 8); X.stroke(); }
   if (e.hp < e.mhp || UI.sel.has(e.id)) bar(e, sx, sy - (big ? 60 : 36));
 }
+function drawCheatUnit(e, sx, sy, col) {
+  const a = Math.atan2((Math.cos(e.face) + Math.sin(e.face)) / 2, Math.cos(e.face) - Math.sin(e.face));
+  if (e.t === "tank") {
+    X.fillStyle = "rgba(0,0,0,.3)"; X.beginPath(); X.ellipse(sx + 2, sy + 1, 17, 8, 0, 0, 6.3); X.fill();
+    X.save(); X.translate(sx, sy - 6); X.rotate(a * 0.5);
+    X.fillStyle = "#27272a"; X.fillRect(-15, -9, 30, 5); X.fillRect(-15, 5, 30, 5);
+    X.fillStyle = "#4d5d32"; X.fillRect(-13, -6, 26, 12); X.fillStyle = col; X.fillRect(-13, -6, 26, 3);
+    X.fillStyle = "#3f4f28"; X.beginPath(); X.arc(-2, 0, 6, 0, 6.3); X.fill(); X.fillStyle = "#2f3a1e"; X.fillRect(2, -1.5, 16, 3);
+    X.restore(); return;
+  }
+  const alt = 26, k = 1.1;
+  for (const [ox, oy, shadow] of [[8, 4, true], [0, -alt, false]]) {
+    X.save(); X.translate(sx + ox, sy + oy); X.rotate(a); X.scale(k, k * 0.8);
+    const f = shadow ? "rgba(0,0,0,.25)" : "#94a3b8", poly = (pts, c) => { X.fillStyle = c; X.beginPath(); pts.forEach(([x, y], i) => (i ? X.lineTo(x, y) : X.moveTo(x, y))); X.closePath(); X.fill(); };
+    poly([[16, 0], [9, -2], [-1, -3], [-1, -13], [-5, -13], [-9, -3], [-13, -3], [-16, -8], [-18, -8], [-17, 0], [-18, 8], [-16, 8], [-13, 3], [-9, 3], [-5, 13], [-1, 13], [-1, 3], [9, 2]], f);
+    if (!shadow) { poly([[11, 0], [5, -1.7], [3, 0], [5, 1.7]], "#0ea5e9"); X.fillStyle = col; X.fillRect(-6, -2, 6, 4); if (Math.hypot(e.tx !== undefined ? e.tx - e.x : 0, e.ty !== undefined ? e.ty - e.y : 0) > 0.05 || (e.path && e.path.length)) { X.fillStyle = "#fde047"; X.beginPath(); X.arc(-19, 0, 2.5, 0, 6.3); X.fill(); } }
+    X.restore();
+  }
+}
 function drawUnit(e, sx, sy) {
+  if (e.t === "tank" || e.t === "f16") { drawCheatUnit(e, sx, sy, PCOL[e.o]); return; }
   const ut = UT[e.t], col = PCOL[e.o], fx = Math.cos(e.face) - Math.sin(e.face), fy = (Math.cos(e.face) + Math.sin(e.face)) / 2, dir = fx >= 0 ? 1 : -1;
   if (ut.naval) { drawShip(e, sx, sy); return; }
   const moving = (e.path && e.path.length) || (e.tx !== undefined && Math.hypot(e.tx - e.x, e.ty - e.y) > 0.03), step = moving ? Math.sin(e.walk * 10) * 2.2 : 0;
@@ -1460,6 +1492,13 @@ addEventListener("keydown", (e) => {
   if (k === "J") setSound(!soundOn);
 });
 addEventListener("keyup", (e) => keys.delete(e.code));
+let typedCheat = "";
+addEventListener("keydown", (e) => {
+  if (!G || mode === "menu" || e.key.length !== 1 || (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))) return;
+  typedCheat = (typedCheat + e.key.toUpperCase()).slice(-6);
+  for (const code of ["F16", "TANK", "GOLD"]) if (typedCheat.endsWith(code)) { typedCheat = ""; order({ k: "cheat", code }); cheatNote(code); break; }
+});
+function cheatNote(code) { const n = { F16: "F-16 × 2 at your Town Center", TANK: "TANKS × 3 at your Town Center", GOLD: "+5000 food, wood and gold" }[code]; if (n && window.Net) Net.note("CHEAT: " + n, 2500); }
 function scroll(dt) {
   const sp = 900 * dt, [mx, my] = UI.mouse, edge = 6, m = UI.mouseIn && document.hasFocus();
   if (keys.has("ArrowLeft") || (m && mx < edge)) cam.x -= sp; if (keys.has("ArrowRight") || (m && mx > cv.width - edge)) cam.x += sp;
@@ -1501,9 +1540,11 @@ if (window.TouchPad && TouchPad.on) (() => {
   };
   cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
   const boxBtn = TouchPad.button("BOX", { right: 12, top: 66 }, 50, () => { box = !box; setTimeout(() => boxBtn.classList.toggle("on", box), 0); });
+  const cheatBtn = TouchPad.button("CHEAT", { right: 12, top: 122 }, 50, () => { const c = (prompt("Cheat code (F16, TANK, GOLD):", "") || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (["F16", "TANK", "GOLD"].includes(c)) { order({ k: "cheat", code: c }); cheatNote(c); } });
+  cheatBtn.style.fontSize = "10px";
   const k = TouchPad.key("Escape", "Escape"), esc = TouchPad.button("☰", { right: 12, top: 10 }, 46, k.down, k.up);
   const snd = TouchPad.soundButton(() => soundOn, (on) => { audio(); setSound(on); }, { right: 66, top: 10 });
-  const mine = [boxBtn, esc, snd]; mine.forEach((b) => { b.style.display = "none"; });
+  const mine = [boxBtn, esc, snd, cheatBtn]; mine.forEach((b) => { b.style.display = "none"; });
   setInterval(() => { const play = mode !== "menu" && $("#menu").classList.contains("hide"); mine.forEach((b) => { b.style.display = play ? "" : "none"; }); }, 250);
   for (const id of ["bSolo", "bStart"]) $("#" + id).addEventListener("click", () => TouchPad.full());
   $("#jList").addEventListener("click", (e) => { if (e.target.closest("[data-room]")) TouchPad.full(); });
@@ -1584,7 +1625,14 @@ $("#bHost").onclick = () => {
   draw2();
   net = Net.host("empire", name, {
     hello: (m) => { $("#hCode").textContent = m.room; },
-    join: (m) => { if (mode === "menu" && lobby.length < 4) { lobby.push({ name: m.name, net: m.id }); draw2(); } },
+    join: (m) => {
+      if (mode === "menu" && lobby.length < 4) { lobby.push({ name: m.name, net: m.id }); draw2(); return; }
+      if (mode !== "host" || !G || !G.start) return;
+      const p = G.players.find((q) => q.kind === "bot" && !q.dead); if (!p) return;
+      p.kind = "net"; p.net = m.id; p.ai = null; p.name = m.name;
+      const st = G.start; net.send(m.id, { t: "start", seed: st.seed, slots: G.players.map((x) => ({ name: x.name, kind: x.kind === "me" ? "net" : x.kind, civ: x.civ })), me: p.i, diff: st.diff, teams: st.teams, mapk: st.mapk });
+      Net.note(m.name + " joined: they play " + (CIVS[p.civ] ? CIVS[p.civ].n || p.civ : p.civ), 3000);
+    },
     leave: (m) => { lobby = lobby.filter((h) => h.net !== m.id); draw2(); if (G && mode === "host") { const p = G.players.find((q) => q.net === m.id); if (p) { p.kind = "bot"; p.ai = { t: 0, wave: 0, nextWave: G.t + 200, waveSize: 8 }; p.name += " (bot)"; } } },
     msg: (m, from) => { if (mode === "host" && m.t === "cmd") { const p = G.players.find((q) => q.net === from); if (p && !p.dead) command(p.i, m.c); } },
     error: (m) => { alert("LAN: " + m.why); showPanel("pMain"); },
@@ -1595,7 +1643,7 @@ $("#bStart").onclick = () => {
   if (!net || !net.live) return;
   const slots = slotsFor(lobby), seed = Math.floor(Math.random() * 1e9), diff = +$("#diff").value, teams = $("#teams").value, mapk = $("#mapk").value;
   slots.forEach((s, i) => { if (s.net) net.send(s.net, { t: "start", seed, slots: slots.map((x) => ({ name: x.name, kind: x.kind === "me" ? "net" : x.kind, civ: x.civ })), me: i, diff, teams, mapk }); });
-  net.started(); mode = "host"; begin(slots, seed, 0, diff, teams, mapk);
+  net.started(); mode = "host"; begin(slots, seed, 0, diff, teams, mapk); G.start = { seed, diff, teams, mapk };
 };
 for (const id of ["bHost", "bJoin"]) { const b = document.getElementById(id); if (b) b.style.display = "none"; }
 $("#bShare").onclick = async () => {

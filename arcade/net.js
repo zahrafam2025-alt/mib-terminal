@@ -12,10 +12,17 @@ const Net = {
     const connect = () => {
       const ws = new WebSocket(Net.url(c.q)); c.ws = ws;
       let ka = null;
-      ws.onopen = () => { ka = setInterval(() => { if (ws.readyState === 1) ws.send("#ping"); }, 10000); };
+      let heard = Date.now();
+      ws.onopen = () => { heard = Date.now(); ka = setInterval(() => {
+        if (ws.readyState !== 1) return;
+        if (Date.now() - heard > 12000) { try { ws.close(); } catch (e) {} if (ws.onclose) { const f = ws.onclose; ws.onclose = null; f(); } return; }
+        ws.send("#ping");
+      }, 4000); };
       ws.onmessage = (e) => {
         if (c.ws !== ws) return;
+        heard = Date.now();
         const s = e.data;
+        if (s === '#{"t":"pong"}') return;
         if (s[0] === "#") {
           const m = JSON.parse(s.slice(1));
           if (m.t === "hello") {
