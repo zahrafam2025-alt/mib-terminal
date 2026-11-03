@@ -211,7 +211,7 @@ function Blocks() {
                Z: [[0, 0], [1, 0], [1, 1], [2, 1]], J: [[0, 0], [0, 1], [1, 1], [2, 1]], L: [[2, 0], [0, 1], [1, 1], [2, 1]] };
   const COL = { I: "#22d3ee", O: "#f5b83d", T: "#a855f7", S: "#22c55e", Z: "#f05252", J: "#3b82f6", L: "#fb923c" };
   const g = { id: "blocks", score: 0, lines: 0, level: 1, over: false, grid: Array.from({ length: ROWS }, () => Array(COLS).fill(null)),
-              bag: [], piece: null, next: null, fall: 0, das: { dir: 0, t: 0 }, flash: 0,
+              bag: [], piece: null, next: null, fall: 0, das: { dir: 0, t: 0 }, flash: 0, pending: 0, hitT: 0, onAttack: null,
               help: "← → move · ↑ or X turn · ↓ faster · Space drop · Esc menu · P pause" };
   const take = () => { if (!g.bag.length) g.bag = Object.keys(SH).sort(() => Math.random() - 0.5); return g.bag.pop(); };
   const mk = (t) => ({ t, cells: SH[t].map((c) => c.slice()), x: 3, y: 0 });
@@ -228,6 +228,12 @@ function Blocks() {
     const full = g.grid.map((r, i) => r.every(Boolean) ? i : -1).filter((i) => i >= 0);
     full.forEach((i) => { g.grid.splice(i, 1); g.grid.unshift(Array(COLS).fill(null)); });
     if (full.length) { g.score += [0, 100, 300, 500, 800][full.length] * g.level; g.lines += full.length; g.level = 1 + Math.floor(g.lines / 10); g.flash = 0.25; SFX.line(); } else SFX.drop();
+    if (full.length >= 2 && g.onAttack) g.onAttack([0, 0, 1, 2, 4][full.length]);
+    if (g.pending && !full.length) {
+      const n = Math.min(g.pending, 8); g.pending -= n; g.hitT = 0.5;
+      for (let k = 0; k < n; k++) { if (g.grid[0].some(Boolean)) g.over = true; g.grid.shift(); const row = Array(COLS).fill("#4b5563"); row[Math.floor(Math.random() * COLS)] = null; g.grid.push(row); }
+      tone(90, 0.25, "sawtooth", 0.08, -30);
+    }
     spawn();
   }
   g.update = (dt) => {
@@ -237,7 +243,7 @@ function Blocks() {
     if (pressed("ArrowUp", "KeyX", "KeyW")) turn();
     if (pressed("Space")) { while (!hitAt(g.piece.cells, g.piece.x, g.piece.y + 1)) { g.piece.y++; g.score += 2; } lock(); return; }
     const soft = held("ArrowDown", "KeyS"), every = soft ? 0.04 : Math.max(0.06, 0.8 - (g.level - 1) * 0.07);
-    g.flash = Math.max(0, g.flash - dt);
+    g.flash = Math.max(0, g.flash - dt); g.hitT = Math.max(0, g.hitT - dt);
     if ((g.fall += dt) >= every) {
       g.fall = 0;
       if (!hitAt(g.piece.cells, g.piece.x, g.piece.y + 1)) { g.piece.y++; if (soft) g.score += 1; } else lock();
@@ -246,7 +252,8 @@ function Blocks() {
   const cell = (x, y, c, a = 1) => { cx.globalAlpha = a; rect(OX + x * C + 1, OY + y * C + 1, C - 2, C - 2, c); rect(OX + x * C + 1, OY + y * C + 1, C - 2, 3, "rgba(255,255,255,.25)"); cx.globalAlpha = 1; };
   g.draw = () => {
     rect(0, 0, W, H, "#0d1020");
-    rect(OX - 4, OY - 4, COLS * C + 8, ROWS * C + 8, g.flash ? "#7c5cff" : "#26304a"); rect(OX, OY, COLS * C, ROWS * C, "#0a0d1a");
+    rect(OX - 4, OY - 4, COLS * C + 8, ROWS * C + 8, g.hitT ? "#ef4444" : g.flash ? "#7c5cff" : "#26304a"); rect(OX, OY, COLS * C, ROWS * C, "#0a0d1a");
+    if (g.pending) { const hgt = Math.min(ROWS, g.pending) * C; rect(OX - 12, OY + ROWS * C - hgt, 6, hgt, "#ef4444"); txt(`+${g.pending}`, OX - 30, OY + ROWS * C - hgt - 4, 11, "#fca5a5"); }
     for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (g.grid[y][x]) cell(x, y, g.grid[y][x]);
     if (g.piece) {
       let gy = g.piece.y; while (!hitAt(g.piece.cells, g.piece.x, gy + 1)) gy++;
@@ -259,6 +266,7 @@ function Blocks() {
       txt(k, 350, 130 + i * 44, 13, "#8a90a2"); txt(String(v), 350, 150 + i * 44, 18); });
     txt("BLOCKS", 24, 40, 18, "#22d3ee"); txt("clear lines,", 24, 62, 12, "#8a90a2"); txt("speed grows", 24, 78, 12, "#8a90a2"); txt("every 10", 24, 94, 12, "#8a90a2");
   };
+  g.addGarbage = (n) => { g.pending += n; g.hitT = 0.3; };
   spawn();
   return g;
 }
@@ -734,7 +742,7 @@ function onMsg(m, from) {
   if (!ON) return;
   if (ON.host && from) {
     if (m.t === "in") { if (ON.live && cur && cur.netInput) cur.netInput(from, m); return; }
-    if (m.t === "st" || m.t === "fr") ON.net.send("*", Object.assign({}, m, { from }));
+    if (m.t === "st" || m.t === "fr" || m.t === "atk") ON.net.send("*", Object.assign({}, m, { from }));
     else return;
   }
   if (!ON.host && m.from !== undefined) from = m.from;
@@ -746,6 +754,7 @@ function onMsg(m, from) {
   else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); }
   else if (m.t === "room") { if (ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); } }
   else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); }
+  else if (m.t === "atk") { if (ON.live && cur && cur.addGarbage && m.to === ON.me) { cur.addGarbage(m.n); Net.note(`${(ON.players.find((q) => q.id === from) || {}).name || "Someone"} sends you ${m.n} row${m.n > 1 ? "s" : ""}!${m.x2 ? " (COMEBACK ×2)" : ""}`, 1800); } }
   else if (m.t === "fr") {
     let img = ON.frames.get(from); if (!img) { img = new Image(); ON.frames.set(from, img); }
     if (m.img) img.src = m.img;
@@ -846,6 +855,14 @@ function startOnline(m) {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
     music(null); document.getElementById("help").textContent = cur.help;
   } else start(m.game);
+  if (cur && cur.id === "blocks" && m.players.length > 1) cur.onAttack = (n) => {
+    const sc = (q) => (q.id === ON.me ? cur.score : (ON.scores.get(q.id) || {}).score || 0);
+    const others = ON.players.filter((q) => q.id !== ON.me && !(ON.scores.get(q.id) || {}).over).sort((a, b) => sc(b) - sc(a));
+    if (!others.length) return;
+    const lead = Math.max(...others.map(sc)), x2 = lead - cur.score >= 1500;
+    osend({ t: "atk", to: others[0].id, n: n * (x2 ? 2 : 1), x2 });
+    Net.note(`${n * (x2 ? 2 : 1)} row${n * (x2 ? 2 : 1) > 1 ? "s" : ""} sent to ${others[0].name}${x2 ? " · COMEBACK ×2" : ""}`, 1500);
+  };
   if (window.TouchPad && TouchPad.on) TouchPad.full();
 }
 const onSnap = document.createElement("canvas"); onSnap.width = 960; onSnap.height = 720;
@@ -865,7 +882,10 @@ function drawSplit() {
     if (q.id === ON.me) cx.drawImage(onSnap, x, y, w, h);
     else { const img = ON.frames.get(q.id); if (img && img.complete && img.naturalWidth) cx.drawImage(img, x, y, w, h); else txt("waiting for " + q.name + "...", x + w / 2, y + h / 2, 9, "#8a90a2", "center"); }
     const sc = q.id === ON.me ? { score: cur.score || 0, over: !!cur.over } : ON.scores.get(q.id) || { score: 0, over: false };
-    rect(x, y, w, 13, "rgba(0,0,0,.6)"); txt(`${q.name}${q.id === ON.me ? " (you)" : ""} · ${sc.score}`, x + 4, y + 10, 8, q.id === ON.me ? "#fde047" : "#e5e7eb");
+    const all = order.map((o) => (o.id === ON.me ? cur.score || 0 : (ON.scores.get(o.id) || {}).score || 0)), top = Math.max(...all), second = all.filter((v) => v !== top).length ? Math.max(...all.filter((v) => v !== top)) : top;
+    const leads = sc.score === top && top > 0 && all.filter((v) => v === top).length === 1;
+    rect(x, y, w, 13, leads ? "rgba(180,83,9,.85)" : "rgba(0,0,0,.6)");
+    txt(`${leads ? "👑 " : ""}${q.name}${q.id === ON.me ? " (you)" : ""} · ${sc.score}${leads && top - second > 0 ? `  +${top - second}` : ""}`, x + 4, y + 10, 8, q.id === ON.me ? "#fde047" : "#e5e7eb");
     if (sc.over && q.id !== ON.me) txt("GAME OVER", x + w / 2, y + h / 2, 12, "#f87171", "center");
   });
   rect(W / 2 - 0.5, 0, 1, H, "#26304a"); if (n > 2) rect(0, H / 2 - 0.5, W, 1, "#26304a");
