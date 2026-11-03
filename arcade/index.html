@@ -272,27 +272,47 @@ function Blocks() {
 }
 
 function Rocks() {
-  const g = { id: "rocks", score: 0, over: false, lives: 3, t: 0, spawn: 0.5, cool: 0, inv: 1.5,
+  const g = { id: "rocks", score: 0, over: false, lives: 3, t: 0, spawn: 0.5, cool: 0, inv: 1.5, rid: 0, col: "#22d3ee",
               ship: { x: W / 2, y: H - 40 }, shots: [], rocks: [], parts: [], stars: Array.from({ length: 70 }, () => [rnd(0, W), rnd(0, H), rnd(0.3, 1.5)]),
               help: "← → ↑ ↓ fly · Space fire · big rocks split · Esc menu · P pause" };
   const burst = (x, y, n, c) => { for (let i = 0; i < n; i++) { const a = rnd(0, 6.28), v = rnd(30, 170); g.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: rnd(0.3, 0.8), c }); } };
-  const rock = (x, y, r, vx, vy) => ({ x, y, r, vx, vy, a: 0, spin: rnd(-2, 2), shape: Array.from({ length: 9 }, () => rnd(0.72, 1.12)) });
+  const shapeOf = (id) => Array.from({ length: 9 }, (_, i) => 0.72 + 0.4 * (((Math.sin(id * 12.9898 + i * 78.233) * 43758.5453) % 1 + 1) % 1));
+  const rock = (x, y, r, vx, vy, id = ++g.rid) => ({ id, x, y, r, vx, vy, a: 0, spin: ((id * 7) % 9 - 4) / 2, shape: shapeOf(id) });
+  g.joinNet = (o) => {
+    const n = o.players.length, slot = Math.max(0, o.players.findIndex((q) => q.id === o.me));
+    g.net = o; g.remote = new Map(); g.hitQ = []; g.gone = new Map(); g.col = NETCOL[slot % 4]; g.ship.x = W * (slot + 1) / (n + 1);
+  };
+  const breakRock = (r) => { r.dead = true; burst(r.x, r.y, 10, "#f5b83d"); SFX.boom(); if (!g.net || g.net.host) { if (r.r > 15) [-1, 1].forEach((k) => g.rocks.push(rock(r.x, r.y, r.r * 0.6, k * rnd(50, 90), r.vy * 0.8))); } else { g.hitQ.push(r.id); g.gone.set(r.id, performance.now()); } };
+  g.netState = (from, m) => {
+    if (m.x === undefined) return;
+    g.remote.set(from, { x: m.x, y: m.y, over: m.over, inv: m.inv, col: m.col, sh: m.sh || [], t: performance.now() });
+    if (g.net.host && m.hits) for (const id of m.hits) { const r = g.rocks.find((q) => q.id === id && !q.dead); if (r) breakRock(r); }
+    if (from === 0 && !g.net.host && m.rocks) {
+      const now = performance.now(), by = new Map(g.rocks.map((r) => [r.id, r]));
+      for (const [id, t] of g.gone) if (now - t > 3000) g.gone.delete(id);
+      g.rocks = m.rocks.filter((q) => !g.gone.has(q[0])).map(([id, x, y, r, vx, vy]) => { const k = by.get(id) || rock(x, y, r, vx, vy, id); k.x = x; k.y = y; k.r = r; k.vx = vx; k.vy = vy; return k; });
+    }
+  };
+  g.netOut = () => ({ x: Math.round(g.ship.x), y: Math.round(g.ship.y), over: g.over, inv: g.inv > 0, col: g.col, score: g.score, sh: g.shots.slice(-8).map((b) => [Math.round(b.x), Math.round(b.y)]),
+    hits: g.net.host ? undefined : g.hitQ.splice(0), rocks: g.net.host ? g.rocks.filter((r) => !r.dead).map((r) => [r.id, Math.round(r.x), Math.round(r.y), Math.round(r.r * 10) / 10, Math.round(r.vx), Math.round(r.vy)]) : undefined });
   g.update = (dt) => {
     g.t += dt; g.inv = Math.max(0, g.inv - dt); g.cool -= dt;
     const s = g.ship;
-    s.x = clamp(s.x + ((held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0)) * 230 * dt, 14, W - 14);
-    s.y = clamp(s.y + ((held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0)) * 170 * dt, H * 0.45, H - 18);
-    if (held("Space") && g.cool <= 0) { g.shots.push({ x: s.x, y: s.y - 12 }); g.cool = 0.16; SFX.shot(); }
-    if ((g.spawn -= dt) <= 0) { g.spawn = Math.max(0.22, 1.0 - g.t * 0.012); const r = rnd(10, 26); g.rocks.push(rock(rnd(r, W - r), -r, r, rnd(-30, 30), rnd(45, 90) + g.t * 0.9)); }
+    if (!g.over) {
+      s.x = clamp(s.x + ((held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0)) * 230 * dt, 14, W - 14);
+      s.y = clamp(s.y + ((held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0)) * 170 * dt, H * 0.45, H - 18);
+      if (held("Space") && g.cool <= 0) { g.shots.push({ x: s.x, y: s.y - 12 }); g.cool = 0.16; SFX.shot(); }
+    }
+    const many = g.net ? 1 + 0.5 * (g.net.players.length - 1) : 1;
+    if ((!g.net || g.net.host) && (g.spawn -= dt) <= 0) { g.spawn = Math.max(0.22, 1.0 - g.t * 0.012) / many; const r = rnd(10, 26); g.rocks.push(rock(rnd(r, W - r), -r, r, rnd(-30, 30), rnd(45, 90) + g.t * 0.9)); }
     g.shots.forEach((b) => { b.y -= 420 * dt; });
     g.rocks.forEach((r) => { r.x += r.vx * dt; r.y += r.vy * dt; r.a += r.spin * dt; if (r.x < r.r || r.x > W - r.r) r.vx *= -1; });
     g.parts.forEach((p) => { p.x += p.vx * dt; p.y += p.vy * dt; p.t -= dt; });
     for (const b of g.shots) for (const r of g.rocks) if (!r.dead && !b.dead && Math.hypot(b.x - r.x, b.y - r.y) < r.r + 2) {
-      b.dead = r.dead = true; g.score += Math.round(40 - r.r); burst(r.x, r.y, 10, "#f5b83d"); SFX.boom();
-      if (r.r > 15) [-1, 1].forEach((k) => g.rocks.push(rock(r.x, r.y, r.r * 0.6, k * rnd(50, 90), r.vy * 0.8)));
+      b.dead = true; g.score += Math.round(40 - r.r); breakRock(r);
     }
-    for (const r of g.rocks) if (!r.dead && !g.inv && Math.hypot(s.x - r.x, s.y - r.y) < r.r + 8) {
-      r.dead = true; g.lives--; g.inv = 2; burst(s.x, s.y, 26, "#22d3ee"); SFX.boom(); if (g.lives <= 0) g.over = true;
+    if (!g.over) for (const r of g.rocks) if (!r.dead && !g.inv && Math.hypot(s.x - r.x, s.y - r.y) < r.r + 8) {
+      r.dead = true; if (g.net && !g.net.host) { g.hitQ.push(r.id); g.gone.set(r.id, performance.now()); } g.lives--; g.inv = 2; burst(s.x, s.y, 26, "#22d3ee"); SFX.boom(); if (g.lives <= 0) g.over = true;
     }
     g.shots = g.shots.filter((b) => !b.dead && b.y > -10); g.rocks = g.rocks.filter((r) => !r.dead && r.y < H + 40); g.parts = g.parts.filter((p) => p.t > 0);
   };
@@ -302,10 +322,17 @@ function Rocks() {
     cx.strokeStyle = "#c7cbe0"; cx.lineWidth = 2;
     g.rocks.forEach((r) => { cx.beginPath(); r.shape.forEach((k, i) => { const a = r.a + i / r.shape.length * 6.283; cx[i ? "lineTo" : "moveTo"](r.x + Math.cos(a) * r.r * k, r.y + Math.sin(a) * r.r * k); }); cx.closePath(); cx.stroke(); });
     g.shots.forEach((b) => rect(b.x - 1, b.y - 6, 2, 8, "#f5b83d"));
+    if (g.net) for (const [id, r] of g.remote) {
+      if (performance.now() - r.t > 3000) continue;
+      r.sh.forEach(([x, y]) => rect(x - 1, y - 6, 2, 8, r.col));
+      if (r.over || (r.inv && Math.floor(performance.now() / 100) % 2)) continue;
+      cx.fillStyle = r.col; cx.beginPath(); cx.moveTo(r.x, r.y - 12); cx.lineTo(r.x - 9, r.y + 9); cx.lineTo(r.x, r.y + 5); cx.lineTo(r.x + 9, r.y + 9); cx.closePath(); cx.fill();
+      txt(g.net.name(id), r.x, r.y + 22, 8, r.col, "center");
+    }
     g.parts.forEach((p) => { cx.globalAlpha = clamp(p.t * 2, 0, 1); rect(p.x, p.y, 2, 2, p.c); }); cx.globalAlpha = 1;
     const s = g.ship;
     if (!g.over && (!g.inv || Math.floor(g.inv * 10) % 2)) {
-      cx.fillStyle = "#22d3ee"; cx.beginPath(); cx.moveTo(s.x, s.y - 12); cx.lineTo(s.x - 9, s.y + 9); cx.lineTo(s.x, s.y + 5); cx.lineTo(s.x + 9, s.y + 9); cx.closePath(); cx.fill();
+      cx.fillStyle = g.col; cx.beginPath(); cx.moveTo(s.x, s.y - 12); cx.lineTo(s.x - 9, s.y + 9); cx.lineTo(s.x, s.y + 5); cx.lineTo(s.x + 9, s.y + 9); cx.closePath(); cx.fill();
       rect(s.x - 2, s.y + 7, 4, rnd(3, 8), "#f97316");
     }
     txt(`SCORE ${g.score}`, 10, 20, 14); txt(`BEST ${Math.max(bestOf("rocks"), g.score)}`, W / 2, 20, 12, "#8a90a2", "center"); txt("▲".repeat(Math.max(0, g.lives)), W - 10, 20, 14, "#22d3ee", "right");
@@ -318,22 +345,48 @@ function Snake() {
   const g = { id: "snake", score: 0, over: false, body: [[8, 8], [7, 8], [6, 8]], dir: [1, 0], next: [1, 0], t: 0, food: null, help: "arrows or W A S D steer · eat, grow, avoid the walls and yourself · Esc menu" };
   const free = () => { let p; do { p = [rint(0, GW - 1), rint(0, GH - 1)]; } while (g.body.some((b) => b[0] === p[0] && b[1] === p[1])); return p; };
   g.food = free();
+  g.joinNet = (o) => {
+    const slot = Math.max(0, o.players.findIndex((q) => q.id === o.me)) % 4, S = [[[5, 3], [1, 0]], [[18, 13], [-1, 0]], [[5, 13], [1, 0]], [[18, 3], [-1, 0]]][slot];
+    g.net = o; g.remote = new Map(); g.ate = []; g.col = NETCOL[slot];
+    g.body = [0, 1, 2].map((k) => [S[0][0] - S[1][0] * k, S[0][1]]); g.dir = g.next = S[1];
+    g.foods = o.host ? [free(), free(), free()] : [];
+  };
+  const others = () => [...(g.remote || new Map()).values()].filter((r) => !r.over && performance.now() - r.t < 3000);
+  const freeAll = () => { let f; do { f = free(); } while (others().some((r) => r.body.some((b) => b[0] === f[0] && b[1] === f[1]))); return f; };
+  g.netState = (from, m) => {
+    if (!m.body) return;
+    g.remote.set(from, { body: m.body, over: m.over, col: m.col, t: performance.now() });
+    if (from === 0 && !g.net.host && m.foods) { const now = performance.now(); g.ate = g.ate.filter((a) => now - a.t < 1500); g.foods = m.foods.filter((f) => !g.ate.some((a) => a.f[0] === f[0] && a.f[1] === f[1])); }
+    if (g.net.host && m.ate) for (const f of m.ate) { const i = g.foods.findIndex((x) => x[0] === f[0] && x[1] === f[1]); if (i >= 0) { g.foods.splice(i, 1); g.foods.push(freeAll()); } }
+  };
+  g.netOut = () => ({ body: g.body, score: g.score, over: g.over, col: g.col, foods: g.net.host ? g.foods : undefined, ate: g.net.host ? undefined : g.ate.map((a) => a.f) });
   g.update = (dt) => {
+    if (g.over) return;
     const want = pressed("ArrowUp", "KeyW") ? [0, -1] : pressed("ArrowDown", "KeyS") ? [0, 1] : pressed("ArrowLeft", "KeyA") ? [-1, 0] : pressed("ArrowRight", "KeyD") ? [1, 0] : null;
     if (want && !(want[0] === -g.dir[0] && want[1] === -g.dir[1])) g.next = want;
     if ((g.t += dt) < Math.max(0.065, 0.13 - g.score * 0.003)) return;
     g.t = 0; g.dir = g.next;
     const h = [g.body[0][0] + g.dir[0], g.body[0][1] + g.dir[1]];
     if (h[0] < 0 || h[1] < 0 || h[0] >= GW || h[1] >= GH || g.body.some((b) => b[0] === h[0] && b[1] === h[1])) { g.over = true; return; }
+    if (g.net && others().some((r) => r.body.some((b) => b[0] === h[0] && b[1] === h[1]))) { g.over = true; SFX.over(); return; }
     g.body.unshift(h);
-    if (h[0] === g.food[0] && h[1] === g.food[1]) { g.score++; g.food = free(); SFX.eat(); } else g.body.pop();
+    const foods = g.net ? g.foods : [g.food], fi = foods.findIndex((f) => h[0] === f[0] && h[1] === f[1]);
+    if (fi >= 0) {
+      g.score++; SFX.eat();
+      if (!g.net) g.food = free();
+      else { const f = foods.splice(fi, 1)[0]; if (g.net.host) foods.push(freeAll()); else g.ate.push({ f, t: performance.now() }); }
+    } else g.body.pop();
   };
   g.draw = () => {
     rect(0, 0, W, H, "#a9be8c");
     for (let x = 0; x < W; x += 4) rect(x, 0, 1, H, "rgba(0,0,0,.025)");
     rect(0, OY - 2, W, 2, "#26321e"); rect(0, OY + GH * C, W, 2, "#26321e");
-    g.body.forEach(([x, y], i) => rect(x * C + 2, OY + y * C + 2, C - 4, C - 4, i ? "#26321e" : "#18200f"));
-    const [fx, fy] = g.food; cx.fillStyle = "#26321e"; cx.beginPath(); cx.moveTo(fx * C + 10, OY + fy * C + 3); cx.lineTo(fx * C + 17, OY + fy * C + 10); cx.lineTo(fx * C + 10, OY + fy * C + 17); cx.lineTo(fx * C + 3, OY + fy * C + 10); cx.closePath(); cx.fill();
+    if (g.net) for (const r of g.remote.values()) {
+      if (performance.now() - r.t > 3000) continue;
+      r.body.forEach(([x, y], i) => { rect(x * C + 2, OY + y * C + 2, C - 4, C - 4, r.over ? "#7d8a6a" : i ? "#26321e" : "#18200f"); if (!r.over) rect(x * C + 5, OY + y * C + 5, C - 10, C - 10, r.col); });
+    }
+    if (!(g.net && g.over)) g.body.forEach(([x, y], i) => { rect(x * C + 2, OY + y * C + 2, C - 4, C - 4, i ? "#26321e" : "#18200f"); if (g.net) rect(x * C + 5, OY + y * C + 5, C - 10, C - 10, g.col); });
+    for (const [fx, fy] of g.net ? g.foods : [g.food]) { cx.fillStyle = "#26321e"; cx.beginPath(); cx.moveTo(fx * C + 10, OY + fy * C + 3); cx.lineTo(fx * C + 17, OY + fy * C + 10); cx.lineTo(fx * C + 10, OY + fy * C + 17); cx.lineTo(fx * C + 3, OY + fy * C + 10); cx.closePath(); cx.fill(); }
     txt(String(g.score).padStart(4, "0"), 8, 15, 14, "#26321e"); txt(`BEST ${Math.max(bestOf("snake"), g.score)}`, W - 8, 15, 12, "#26321e", "right");
   };
   return g;
@@ -345,14 +398,23 @@ function Jump() {
     ride: null, mag: 0, msg: "", msgT: 0,
     help: "← → run · Space or ↑ jump · again in the air: double jump · stomp the blobs · grab the bubbles: E-scooter, E-bike, tip magnet · coins are tips · Esc menu" };
   const RIDES = { scooter: { name: "E-SCOOTER", t: 8, v: 310, jumps: 2 }, bike: { name: "E-BIKE", t: 10, v: 255, jumps: 3 } };
+  const wr = seeded(Math.floor(Math.random() * 2 ** 31)), R = (a, b) => a + wr() * (b - a), RI = (a, b) => Math.floor(R(a, b + 1));
+  g.joinNet = (o) => { g.net = o; g.remote = new Map(); g.bonkQ = []; g.col = NETCOL[Math.max(0, o.players.findIndex((q) => q.id === o.me)) % 4]; };
+  g.netState = (from, m) => {
+    if (m.x === undefined) return;
+    g.remote.set(from, { x: m.x, y: m.y, face: m.face, on: m.on, ride: m.ride, over: m.over, col: m.col, t: performance.now() });
+    if (m.bonk && m.bonk.includes(g.net.me) && !g.over) { g.p.vy = Math.max(g.p.vy, 260); g.p.vx = -140 * g.p.face; g.msg = "BONKED BY " + g.net.name(from).toUpperCase(); g.msgT = 1.2; SFX.stomp(); }
+  };
+  g.netOut = () => ({ x: Math.round(g.p.x), y: Math.round(g.p.y), face: g.p.face, on: g.p.on, ride: g.ride ? g.ride.k : null, over: g.over, col: g.col, score: g.score, bonk: g.bonkQ.splice(0) });
   function gen() {
     while (g.genX < g.cam + W + 300) {
-      const d = g.genX / 1000, gap = rint(50, Math.min(150, 70 + d * 14)), len = rint(140, 380);
+      const d = g.genX / 1000, gap = RI(50, Math.min(150, 70 + d * 14)), len = RI(140, 380);
       const x0 = g.genX + gap; g.ground.push([x0, x0 + len]);
-      if (Math.random() < 0.6) { const px = x0 + rint(10, Math.max(20, len - 110)), py = GY - rint(70, 120); g.plats.push([px, px + rint(70, 110), py]); for (let i = 0; i < 3; i++) g.coinsL.push({ x: px + 18 + i * 22, y: py - 18 }); }
+      if (wr() < 0.6) { const px = x0 + RI(10, Math.max(20, len - 110)), py = GY - RI(70, 120); g.plats.push([px, px + RI(70, 110), py]); for (let i = 0; i < 3; i++) g.coinsL.push({ x: px + 18 + i * 22, y: py - 18 }); }
       else for (let i = 0; i < 4; i++) g.coinsL.push({ x: x0 + 30 + i * 24, y: GY - 60 - Math.sin(i / 3 * Math.PI) * 30 });
-      if (len > 200 && Math.random() < 0.55 + Math.min(0.3, d * 0.05)) g.foes.push({ x: x0 + len / 2, a: x0 + 10, b: x0 + len - 22, v: rnd(30, 60 + d * 6) * (Math.random() < 0.5 ? -1 : 1) });
-      if (x0 > 1100 && len > 170 && !g.ride && Math.random() < 0.2) g.items.push({ x: x0 + rint(40, len - 40), y: GY - 30, k: pick(["scooter", "scooter", "bike", "magnet"]) });
+      const fr = wr(), fv = R(30, 60 + d * 6) * (wr() < 0.5 ? -1 : 1), ir = wr(), ix = RI(40, Math.max(40, len - 40)), ik = ["scooter", "scooter", "bike", "magnet"][Math.floor(wr() * 4)];
+      if (len > 200 && fr < 0.55 + Math.min(0.3, d * 0.05)) g.foes.push({ x: x0 + len / 2, a: x0 + 10, b: x0 + len - 22, v: fv });
+      if (x0 > 1100 && len > 170 && !g.ride && ir < 0.2) g.items.push({ x: x0 + ix, y: GY - 30, k: ik });
       g.genX = x0 + len;
     }
     const cut = g.cam - 200;
@@ -360,6 +422,10 @@ function Jump() {
     g.items = g.items.filter((it) => it.x > cut && !it.got);
   }
   g.update = (dt) => {
+    if (g.over) {
+      if (g.net) { const xs = [...g.remote.values()].filter((r) => !r.over && performance.now() - r.t < 3000).map((r) => r.x); if (xs.length) { g.cam += (Math.max(...xs) - 160 - g.cam) * Math.min(1, dt * 3); gen(); } }
+      return;
+    }
     g.t += dt; g.msgT -= dt; const p = g.p, prevB = p.y + 24, R = g.ride && RIDES[g.ride.k];
     const dir = (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0);
     p.vx += (dir * (R ? R.v : 190) - p.vx) * Math.min(1, dt * 9); if (dir) p.face = dir;
@@ -387,6 +453,10 @@ function Jump() {
       else if (g.ride) { f.dead = true; g.stomps++; SFX.stomp(); g.msg = "RAMMED!"; g.msgT = 0.6; }
       else g.over = true;
     });
+    if (g.net) for (const [id, r] of g.remote) {
+      if (r.over || performance.now() - r.t > 1000 || Math.abs(r.x - p.x) > 14 || p.vy <= 0 || prevB > r.y + 4 || p.y + 24 < r.y) continue;
+      p.y = r.y - 24; p.vy = -470; p.jumps = 1; g.stomps++; g.bonkQ.push(id); g.msg = "BONK! +50"; g.msgT = 0.8; SFX.stomp();
+    }
     if (p.y > H + 40) g.over = true;
     g.cam = Math.max(g.cam, p.x - 160); g.maxX = Math.max(g.maxX, p.x);
     g.score = Math.floor(g.maxX / 10) + g.coins * 10 + g.stomps * 50;
@@ -410,6 +480,16 @@ function Jump() {
         rect(ix - 6.75, iy - 7.5, 3.5, 3.5, "#e5e7eb"); rect(ix + 3.25, iy - 7.5, 3.5, 3.5, "#e5e7eb");
       } else vehicle(it.k, ix, iy + 7, 0.85);
     });
+    if (g.net) for (const [id, r] of g.remote) {
+      if (performance.now() - r.t > 3000 || r.over) continue;
+      const rx = X(r.x) + 8; if (rx < -20 || rx > W + 20) continue;
+      if (r.ride) vehicle(r.ride, rx, r.y + 24.5, 1);
+      const oy = r.y - (r.ride ? 4 : 0);
+      rect(rx - 5, oy + 17, 4, 6, "#2e3440"); rect(rx + 1, oy + 17, 4, 6, "#2e3440"); rect(rx - 6, oy + 5, 12, 13, r.col);
+      rect(rx - 4, oy - 5, 9, 10, "#5a3825"); rect(rx - 4.5, oy - 8, 10, 3.5, "#111"); rect(rx - 7 - (r.face > 0 ? 8 : -12), oy - 1, 9, 12, "#111");
+      txt(g.net.name(id), rx, oy - 12, 8, r.col, "center");
+    }
+    if (g.net && g.over) return void txt(`SCORE ${g.score}`, 10, 20, 14);
     const p = g.p, SK = "#5a3825", GRN = "#06c167", run = g.ride ? 0 : Math.floor(g.t * 12) % 2;
     cx.save(); cx.translate(X(p.x) + 8, 0); cx.scale(p.face, 1);
     if (g.ride) {
@@ -636,6 +716,7 @@ function tick(dt = STEP) {
     if (!paused) {
       if (!cur.over) cur.update(dt);
       else {
+        if (ON && ON.live && SHARED.has(cur.id) && cur.net) cur.update(dt);
         if (!overDone) { overDone = true; saveScore(); if (!cur.race && !cur.own) SFX.over(); music(null); engineSet(false); }
         if (pressed("Space", "Enter") && !(ON && ON.live)) start(cur.id);
       }
@@ -666,7 +747,8 @@ function draw() {
   if (!cur) { if (!(ON && !ON.live && drawWatch())) drawMenu(); }
   else {
     cur.draw();
-    if (ON && ON.live && cur.id !== "spa" && cur.id !== "goal" && ON.players.length > 1) drawSplit();
+    if (ON && ON.live && cur.id !== "spa" && cur.id !== "goal" && !SHARED.has(cur.id) && ON.players.length > 1) drawSplit();
+    if (ON && ON.live && SHARED.has(cur.id) && cur.net && ON.players.length > 1) drawShared();
     if (paused) banner(["PAUSED"], "P to continue · Esc menu");
     if (cur.over && !cur.race && !cur.own && !(ON && ON.live && ON.players.length > 1)) banner(["GAME OVER", `${cur.score}${cur.score > 0 && cur.score >= bestOf(cur.id) ? "  NEW BEST!" : ""}`], "Space play again · Esc menu");
   }
@@ -693,6 +775,7 @@ document.getElementById("menuBtn").onclick = () => { menu(); screenEl.focus(); }
 
 const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
 const realRandom = Math.random;
+const SHARED = new Set(["snake", "rocks", "jump", "city"]), NETCOL = ["#22d3ee", "#f472b6", "#a3e635", "#fbbf24"];
 const seeded = (a) => () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 let ON = null;
 (() => {
@@ -757,7 +840,7 @@ function onMsg(m, from) {
   else if (m.t === "wait") { $o("oMsg").textContent = "A round is being played: you are in for the next one (the host presses START)."; }
   else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); }
   else if (m.t === "room") { if (ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); } }
-  else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); }
+  else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); if (m.score !== undefined && SHARED.has(ON.game)) ON.scores.set(from, { score: m.score, over: !!m.over }); }
   else if (m.t === "watch") ON.watchT = Date.now();
   else if (m.t === "atk") { if (ON.live && cur && cur.addGarbage && m.to === ON.me) { cur.addGarbage(m.n); Net.note(`${(ON.players.find((q) => q.id === from) || {}).name || "Someone"} sends you ${m.n} row${m.n > 1 ? "s" : ""}!${m.x2 ? " (COMEBACK ×2)" : ""}`, 1800); } }
   else if (m.t === "fr") {
@@ -860,6 +943,7 @@ function startOnline(m) {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
     music(null); document.getElementById("help").textContent = cur.help;
   } else start(m.game);
+  if (cur && SHARED.has(cur.id) && cur.joinNet) cur.joinNet({ me: ON.me, host: ON.host, players: m.players, name: (id) => ((ON && ON.players.find((q) => q.id === id)) || {}).name || "?" });
   if (cur && cur.id === "blocks" && m.players.length > 1) cur.onAttack = (n) => {
     const sc = (q) => (q.id === ON.me ? cur.score : (ON.scores.get(q.id) || {}).score || 0);
     const others = ON.players.filter((q) => q.id !== ON.me && !(ON.scores.get(q.id) || {}).over).sort((a, b) => sc(b) - sc(a));
@@ -874,7 +958,7 @@ const onSnap = document.createElement("canvas"); onSnap.width = 960; onSnap.heig
 const onSmall = document.createElement("canvas"); onSmall.width = 320; onSmall.height = 240;
 setInterval(() => {
   if (!ON || !ON.live || !cur) return;
-  const shared = cur.id === "spa" || cur.id === "goal", watched = Date.now() - ON.watchT < 5000;
+  const shared = cur.id === "spa" || cur.id === "goal" || SHARED.has(cur.id), watched = Date.now() - ON.watchT < 5000;
   if (shared ? !watched : ON.players.length < 2 && !watched) return;
   onSmall.getContext("2d").drawImage(shared || ON.players.length < 2 ? cv : onSnap, 0, 0, 320, 240);
   osend({ t: "fr", img: onSmall.toDataURL("image/jpeg", 0.55), score: cur.score || 0, over: !!cur.over });
@@ -904,6 +988,14 @@ setInterval(() => {
   if (++watchN % 4 === 0 && ON && !ON.live && ON.code && ON.players.length > 1) osend({ t: "watch" });
 }, 500);
 $o("oPlayNow").onclick = () => { if (ON && !ON.host) { osend({ t: "late" }); $o("oMsg").textContent = "Joining the round…"; } };
+setInterval(() => { if (ON && ON.live && cur && cur.net && cur.netOut && SHARED.has(cur.id)) osend(Object.assign({ t: "st" }, cur.netOut())); }, 70);
+function drawShared() {
+  const rows = ON.players.map((q, i) => ({ q, i, sc: q.id === ON.me ? { score: cur.score || 0, over: !!cur.over } : ON.scores.get(q.id) || { score: 0, over: false } })).sort((a, b) => b.sc.score - a.sc.score);
+  rows.forEach((r, k) => { const y = 34 + k * 12; rect(W - 114, y - 9, 110, 11, "rgba(0,0,0,.55)"); txt(`${k === 0 && r.sc.score > 0 ? "👑 " : ""}${r.q.name}${r.q.id === ON.me ? " (you)" : ""}${r.sc.over ? " ✖" : ""}`, W - 110, y, 8, NETCOL[r.i % 4]); txt(String(r.sc.score), W - 7, y, 8, "#fff", "right"); });
+  if (!cur.over) return;
+  if (rows.every((r) => r.sc.over)) banner([`${rows[0].q.name.toUpperCase()} WINS!`, rows.map((r, k) => `${k + 1}. ${r.q.name} ${r.sc.score}`).join("   ")], ON.host ? "Esc: back to the room, then START for another round" : "Esc: back to the room");
+  else { rect(0, H / 2 - 16, W, 28, "rgba(0,0,0,.6)"); txt("YOU'RE OUT · watching the others", W / 2, H / 2 + 3, 13, "#f87171", "center"); }
+}
 function drawSplit() {
   const n = ON.players.length, mine = ON.players.findIndex((q) => q.id === ON.me);
   onSnap.getContext("2d").drawImage(cv, 0, 0);

@@ -12,12 +12,15 @@ const Net = {
     const connect = () => {
       const ws = new WebSocket(Net.url(c.q)); c.ws = ws;
       let ka = null;
-      let heard = Date.now();
+      let heard = Date.now(), pingAt = 0;
       ws.onopen = () => { heard = Date.now(); ka = setInterval(() => {
         if (ws.readyState !== 1) return;
-        if (Date.now() - heard > 12000) { try { ws.close(); } catch (e) {} if (ws.onclose) { const f = ws.onclose; ws.onclose = null; f(); } return; }
-        ws.send("#ping");
-      }, 4000); };
+        if (pingAt && heard < pingAt) {
+          if (Date.now() - pingAt > 9000) { try { ws.close(); } catch (e) {} if (ws.onclose) { const f = ws.onclose; ws.onclose = null; f(); } }
+          return;
+        }
+        pingAt = Date.now(); ws.send("#ping");
+      }, 3000); };
       ws.onmessage = (e) => {
         if (c.ws !== ws) return;
         heard = Date.now();

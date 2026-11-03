@@ -210,6 +210,7 @@ function City() {
     if (byPlayer) crime(0.5);
   }
   function shoot(from, x, y, a, kind, dmg, owner) {
+    if (g.net && owner === pl) g.shotQ.push([Math.round(x), Math.round(y), Math.round(a * 1000) / 1000, kind, dmg]);
     const v = kind === "b" ? 900 : kind === "rocket" ? 430 : 520;
     shots.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, kind, dmg, owner, from, t: kind === "b" ? 0.7 : 2.4 });
     fx.push({ k: "flash", x: x + Math.cos(a) * 3, y: y + Math.sin(a) * 3, t: 0.05 });
@@ -721,6 +722,7 @@ function City() {
     for (const c of cars) if (vis(c, 60)) drawCar(c);
     for (const p of peds) if (!p.down && vis(p)) drawPed(p);
     if (!pl.car && pl.dead <= 0) drawPed(pl, true);
+    if (g.net) drawRemote(false);
     for (const s of shots) { if (s.kind === "b") rect(s.x - 1.5, s.y - 1.5, 3, 3, "#fde047"); else { circ(s.x, s.y, s.kind === "shell" ? 4 : 3, "#e5e7eb"); circ(s.x - s.vx * 0.012, s.y - s.vy * 0.012, 2.5, "#f97316"); } }
     for (const f of fx) {
       if (f.k === "fire") { cx.globalAlpha = clamp(f.t * 2, 0, 1); circ(f.x, f.y, f.s * (0.5 + f.t), f.t > 0.4 ? "#fde047" : "#f97316"); }
@@ -733,6 +735,7 @@ function City() {
     for (const t of trees) if (vis(t)) { const H2 = HC / z, s = H2 / (H2 - 28), tx = g.camx + (t.x - g.camx) * s, ty = g.camy + (t.y - g.camy) * s; circ(t.x + 3, t.y + 3, t.r, "rgba(0,0,0,.25)"); circ(tx, ty, t.r, "#166534"); circ(tx - t.r * 0.25, ty - t.r * 0.25, t.r * 0.6, "#15803d"); }
     for (const b of builds) drawBuilding(b, x0, y0, x1, y1);
     for (const c of cars) if (c.ty.fly && !c.wreck && vis(c, 120)) drawJet(c);
+    if (g.net) drawRemote(true);
     cx.restore();
     hud();
   };
@@ -756,6 +759,7 @@ function City() {
     if (!g.mission) dot(booths[g.ring], Math.floor(g.t * 4) % 2 ? "#fde047" : "#a16207", 3);
     else if (g.mission.target) dot(g.mission.target, "#22d3ee", 3);
     for (const c of cars) if (c.t === "police" && c.drv && Math.abs(c.x - pl.x) < 700 && Math.abs(c.y - pl.y) < 700) dot(c, Math.floor(g.t * 8) % 2 ? "#ef4444" : "#3b82f6", 1.8);
+    if (g.net) for (const r of g.remote.values()) if (!r.dead && performance.now() - r.t < 3000) dot(r, r.shirt || "#fff", 3);
     cx.save(); cx.translate(rx + RS / 2, ry + RS / 2); cx.rotate(pl.a); cx.fillStyle = "#fff"; cx.beginPath(); cx.moveTo(5, 0); cx.lineTo(-3.5, -3.5); cx.lineTo(-3.5, 3.5); cx.closePath(); cx.fill(); cx.restore();
     cx.restore();
     cx.strokeStyle = "#475569"; cx.lineWidth = 1; cx.strokeRect(rx, ry, RS, RS);
@@ -780,6 +784,29 @@ function City() {
   }
   for (let n = 0; n < 18; n++) { const s = roadSpot(90, 650); if (s) mkCar(Math.random() < 0.6 ? "sedan" : any(["taxi", "van", "sport"]), s.x, s.y, s.a, { drv: "ai", ai: s.ai }); }
   for (let n = 0; n < 160 && peds.length < 40; n++) { const x = pl.x + rnd(-520, 520), y = pl.y + rnd(-420, 420), t = tileAt(x, y); if ((t === WALK || t === GRASS) && Math.hypot(x - pl.x, y - pl.y) > 40) mkPed(x, y); }
+  g.joinNet = (o) => {
+    const slot = Math.max(0, o.players.findIndex((q) => q.id === o.me));
+    g.net = o; g.remote = new Map(); g.shotQ = []; pl.shirt = ["#f97316", "#ec4899", "#84cc16", "#eab308"][slot % 4];
+    pl.x += (slot % 2) * 26; pl.y += Math.floor(slot / 2) * 26;
+  };
+  g.netState = (from, m) => {
+    if (m.x === undefined) return;
+    g.remote.set(from, { x: m.x, y: m.y, a: m.a, car: m.car, dead: m.dead, shirt: m.shirt, money: m.money, t: performance.now(), walkT: (g.remote.get(from) || {}).walkT || 0 });
+    for (const [x, y, a, kind, dmg] of m.sh || []) shoot(null, x, y, a, kind, dmg, "net");
+  };
+  g.netOut = () => ({ x: Math.round(pl.x), y: Math.round(pl.y), a: Math.round(pl.a * 100) / 100, dead: pl.dead > 0, shirt: pl.shirt, money: pl.money, score: g.score,
+    car: pl.car ? { t: pl.car.t, col: pl.car.col, sp: Math.round(Math.hypot(pl.car.vx, pl.car.vy)) } : null, sh: g.shotQ.splice(0) });
+  const ghost = (r) => { const ty = VT[r.car.t]; return { t: r.car.t, ty, x: r.x, y: r.y, a: r.a, vx: r.car.sp || 0, vy: 0, col: r.car.col, hp: ty.hp, wreck: 0, siren: r.car.t === "police", ctl: { thr: 1 } }; };
+  function drawRemote(air) {
+    for (const [id, r] of g.remote) {
+      if (performance.now() - r.t > 3000 || r.dead) continue;
+      const fly = r.car && VT[r.car.t] && VT[r.car.t].fly;
+      if (air !== !!fly) continue;
+      if (r.car && VT[r.car.t]) { const c = ghost(r); fly ? drawJet(c) : drawCar(c); }
+      else { r.walkT += 0.25; drawPed({ x: r.x, y: r.y, a: r.a, skin: "#c68642", shirt: r.shirt || "#e5e7eb", walkT: r.walkT }); }
+      txt(g.net.name(id), r.x, r.y - (r.car ? 22 : 10), 9, "#fde047", "center");
+    }
+  }
   g.debug = { pl, cars, peds, map, MT, T, builds, booths, get mission() { return g.mission; }, startMission, crime };
   return g;
 }
