@@ -32,6 +32,7 @@
   };
   A.scores = async () => { try { return await (await fetch(A.url("/api/arcade"), { cache: "no-store" })).json(); } catch (e) { return null; } };
   window.ARC = A;
+  if (A.names && "serviceWorker" in navigator && location.protocol === "https:") addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
   document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('a[href="/arcade"]').forEach((a) => { a.href = A.page("hub"); });
     if (!A.lan) ["bHost", "bJoin"].forEach((id) => { const b = document.getElementById(id); if (b) b.style.display = "none"; });

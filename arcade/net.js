@@ -48,9 +48,11 @@ const Net = {
           if (on[m.t]) on[m.t](m);
           return;
         }
+        const i = q.role === "host" ? s.indexOf("|") : -1, o = JSON.parse(s.slice(i + 1));
+        if (o && o.__taunt !== undefined) { Net.hearTaunt(o); if (q.role === "host" && !o.d) c.send("*", o); return; }
         if (!on.msg) return;
-        if (q.role === "host") { const i = s.indexOf("|"); on.msg(JSON.parse(s.slice(i + 1)), +s.slice(0, i)); }
-        else on.msg(JSON.parse(s));
+        if (q.role === "host") on.msg(o, +s.slice(0, i));
+        else on.msg(o);
       };
       ws.onclose = () => {
         clearInterval(ka);
@@ -65,8 +67,9 @@ const Net = {
       };
     };
     connect();
+    Net.conns.add(c);
     document.addEventListener("visibilitychange", () => { if (!document.hidden && c.lost && !c.quit && c.ws && c.ws.readyState > 1) connect(); });
-    c.close = () => { c.quit = true; try { c.ws.close(); } catch (e) {} };
+    c.close = () => { c.quit = true; Net.conns.delete(c); try { c.ws.close(); } catch (e) {} };
     return c;
   },
   host(game, name, on) {
@@ -81,4 +84,35 @@ const Net = {
     c.sendAll = (obj) => { if (c.ws && c.ws.readyState === 1) c.ws.send("#all|" + JSON.stringify(obj)); };
     return c;
   },
+  conns: new Set(),
+  TAUNTS: [
+    { g: 0, l: "fr", s: "C'est colossal !", p: 0.9 }, { g: 0, l: "en", s: "Colossal!", p: 0.7, r: 0.8 }, { g: 0, l: "fr", s: "Colossââââl !", p: 0.6, r: 0.75 },
+    { g: 1, l: "en", s: "Respect my authoritah!", p: 1.7 }, { g: 1, l: "en", s: "Screw you guys, I'm going home!", p: 1.7 }, { g: 1, l: "en", s: "Whatever! I do what I want!", p: 1.7 },
+    { g: 1, l: "en", s: "Sweeet!", p: 1.8 }, { g: 1, l: "en", s: "Seriously, you guys!", p: 1.7 },
+    { g: 2, l: "fr", s: "Roberrrrt, j'suis tachéééée !", p: 1.4, r: 0.9 }, { g: 2, l: "fr", s: "La boulette dans ta tête !", p: 0.8 }, { g: 2, l: "fr", s: "Mokkori !", p: 1.2 },
+    { g: 2, l: "fr", s: "Même pas mal !", p: 1.1 },
+  ],
+  voice(lang) {
+    const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+    return vs.find((v) => v.lang.toLowerCase().startsWith(lang) && /Google|Natural|Online|Denise|Henri|Aria|Guy|Samantha|Daniel/i.test(v.name)) || vs.find((v) => v.lang.toLowerCase().startsWith(lang)) || null;
+  },
+  sayTaunt(i, who) {
+    const t = Net.TAUNTS[i]; if (!t) return;
+    Net.note((who ? who + ": " : "") + t.s.replace(/r{3,}/g, "rrr"), 2500);
+    try { const u = new SpeechSynthesisUtterance(t.s), v = Net.voice(t.l); if (v) u.voice = v; u.lang = t.l === "fr" ? "fr-FR" : "en-US"; u.pitch = t.p || 1; u.rate = t.r || 1; u.volume = 1; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
+  },
+  hearTaunt(o) { if (Date.now() - (Net._heard.get(o.n) || 0) < 1500) return; Net._heard.set(o.n, Date.now()); Net.sayTaunt(o.__taunt, o.n); },
+  _heard: new Map(), _last: 0,
+  taunt(group) {
+    if (Date.now() - Net._last < 2000) return; Net._last = Date.now();
+    const all = Net.TAUNTS.map((t, i) => [t, i]).filter(([t]) => t.g === group), i = all[Math.floor(Math.random() * all.length)][1];
+    const name = (window.ARC && ARC.getName && ARC.getName()) || "Player", o = { __taunt: i, n: name, d: 1 };
+    Net.sayTaunt(i, "");
+    for (const c of Net.conns) { if (!c.ws || c.ws.readyState !== 1) continue; if (c.sendAll) c.sendAll(o); else c.send("*", o); }
+  },
 };
+addEventListener("keydown", (e) => {
+  const g = { F2: 0, F3: 1, F4: 2 }[e.code];
+  if (g === undefined || (e.target && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))) return;
+  e.preventDefault(); Net.taunt(g);
+}, true);

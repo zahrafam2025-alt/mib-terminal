@@ -278,6 +278,7 @@ function Blocks() {
 
 function Rocks() {
   const g = { id: "rocks", score: 0, over: false, lives: 3, t: 0, spawn: 0.5, cool: 0, inv: 1.5, rid: 0, col: "#22d3ee",
+              enemies: [], eshots: [], pups: [], pow: null, shield: 0, eT: 9, down: 0, pvpQ: [], beam: 0,
               ship: { x: W / 2, y: H - 40 }, shots: [], rocks: [], parts: [], stars: Array.from({ length: 70 }, () => [rnd(0, W), rnd(0, H), rnd(0.3, 1.5)]),
               help: "← → ↑ ↓ fly · Space fire · big rocks split · Esc menu · P pause" };
   const burst = (x, y, n, c) => { for (let i = 0; i < n; i++) { const a = rnd(0, 6.28), v = rnd(30, 170); g.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: rnd(0.3, 0.8), c }); } };
@@ -315,39 +316,93 @@ function Rocks() {
   g.joinNet = (o) => {
     const n = o.players.length, slot = Math.max(0, o.players.findIndex((q) => q.id === o.me));
     g.net = o; g.remote = new Map(); g.hitQ = []; g.gone = new Map(); g.col = NETCOL[slot % 4]; g.ship.x = W * (slot + 1) / (n + 1);
+    g.lives = 5; g.versus = !!o.versus; g.help = g.versus ? "VERSUS: your shots hit the other ships · 5 lives · last ship flying wins" : "TOGETHER: 5 lives each; a fallen ship comes back while a mate still flies";
+  };
+  const PUPS = { triple: ["T", "#22d3ee", "TRIPLE SHOT"], laser: ["L", "#f472b6", "LASER"], shield: ["S", "#a3e635", "SHIELD"], bomb: ["B", "#f97316", "BOMB!"], life: ["+", "#fde047", "+1 LIFE"] };
+  const dropPup = (x, y, chance) => { if (Math.random() < chance) g.pups.push({ x, y, k: pick(["triple", "triple", "laser", "shield", "bomb", "life"]), t: 0 }); };
+  const hitEnemy = (e, by) => {
+    burst(e.x, e.y, 6, "#f472b6"); g.score += 50;
+    if (g.net && !g.net.host) { g.hitQ.push("e" + e.id); return; }
+    if (--e.hp <= 0) { e.dead = true; g.score += 150; burst(e.x, e.y, 30, "#f472b6"); SFX.boom(); dropPup(e.x, e.y, 0.6); }
+  };
+  const bomb = () => {
+    for (const r of g.rocks) if (!r.dead && r.y > -10) { g.score += 10; breakRock(r); }
+    for (const e of g.enemies) if (!e.dead) { e.hp = 1; hitEnemy(e); }
+    g.eshots = []; g.flashT = 0.4; noise(0.8, 0.4, 600);
   };
   const breakRock = (r) => { r.dead = true; burst(r.x, r.y, 10, "#f5b83d"); SFX.boom(); if (!g.net || g.net.host) { if (r.r > 15) [-1, 1].forEach((k) => g.rocks.push(rock(r.x, r.y, r.r * 0.6, k * rnd(50, 90), r.vy * 0.8))); } else { g.hitQ.push(r.id); g.gone.set(r.id, performance.now()); } };
   g.netState = (from, m) => {
     if (m.x === undefined) return;
     g.remote.set(from, { x: m.x, y: m.y, over: m.over, inv: m.inv, col: m.col, sh: m.sh || [], t: performance.now() });
-    if (g.net.host && m.hits) for (const id of m.hits) { const r = g.rocks.find((q) => q.id === id && !q.dead); if (r) breakRock(r); }
+    if (g.net.host && m.hits) for (const id of m.hits) {
+      if (typeof id === "string") { const e = g.enemies.find((q) => "e" + q.id === id && !q.dead); if (e && --e.hp <= 0) { e.dead = true; burst(e.x, e.y, 30, "#f472b6"); SFX.boom(); } continue; }
+      const r = g.rocks.find((q) => q.id === id && !q.dead); if (r) breakRock(r);
+    }
+    g.remote.get(from).down = m.down;
+    if (m.pvp && m.pvp.includes(g.net.me) && !g.over && !g.down && !g.inv && !g.shield) { g.lives--; g.inv = 2; burst(g.ship.x, g.ship.y, 26, g.col); SFX.boom(); Net.note(`${g.net.name(from)} shot you down!`, 1500); if (g.lives <= 0) g.over = true; }
+    if (from === 0 && !g.net.host && m.en) { g.enemies = m.en.map(([id, x, y, hp, vx]) => ({ id, x, y, hp, vx })); g.eshots = (m.es || []).map(([x, y, vx, vy]) => ({ x, y, vx, vy })); }
     if (from === 0 && !g.net.host && m.rocks) {
       const now = performance.now(), by = new Map(g.rocks.map((r) => [r.id, r]));
       for (const [id, t] of g.gone) if (now - t > 3000) g.gone.delete(id);
       g.rocks = m.rocks.filter((q) => !g.gone.has(q[0])).map(([id, x, y, r, vx, vy]) => { const k = by.get(id) || rock(x, y, r, vx, vy, id); k.x = x; k.y = y; k.r = r; k.vx = vx; k.vy = vy; return k; });
     }
   };
-  g.netOut = () => ({ x: Math.round(g.ship.x), y: Math.round(g.ship.y), over: g.over, inv: g.inv > 0, col: g.col, score: g.score, sh: g.shots.slice(-8).map((b) => [Math.round(b.x), Math.round(b.y)]),
+  g.netOut = () => ({ x: Math.round(g.ship.x), y: Math.round(g.ship.y), over: g.over, down: g.down > 0, inv: g.inv > 0 || g.shield > 0, col: g.col, score: g.score, sh: g.shots.slice(-8).map((b) => [Math.round(b.x), Math.round(b.y)]),
+    pvp: g.pvpQ.length ? g.pvpQ.splice(0) : undefined,
+    en: g.net.host ? g.enemies.filter((e) => !e.dead).map((e) => [e.id, Math.round(e.x), Math.round(e.y), e.hp, e.vx]) : undefined,
+    es: g.net.host ? g.eshots.map((b) => [Math.round(b.x), Math.round(b.y), Math.round(b.vx), Math.round(b.vy)]) : undefined,
     hits: g.net.host ? undefined : g.hitQ.splice(0), rocks: g.net.host ? g.rocks.filter((r) => !r.dead).map((r) => [r.id, Math.round(r.x), Math.round(r.y), Math.round(r.r * 10) / 10, Math.round(r.vx), Math.round(r.vy)]) : undefined });
   g.update = (dt) => {
-    g.t += dt; g.inv = Math.max(0, g.inv - dt); g.cool -= dt;
-    const s = g.ship;
-    if (!g.over) {
+    g.t += dt; g.inv = Math.max(0, g.inv - dt); g.cool -= dt; g.shield = Math.max(0, g.shield - dt); g.beam = Math.max(0, g.beam - dt); g.flashT = Math.max(0, (g.flashT || 0) - dt);
+    if (g.pow && (g.pow.t -= dt) <= 0) g.pow = null;
+    const s = g.ship, alive = !g.over && !g.down;
+    if (g.down && (g.down -= dt) <= 0) { g.down = 0; g.lives = 2; g.inv = 3; Net.note("Back in the fight!", 1500); }
+    if (alive) {
       s.x = clamp(s.x + ((held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0)) * 230 * dt, 14, W - 14);
       s.y = clamp(s.y + ((held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0)) * 170 * dt, H * 0.45, H - 18);
-      if (held("Space") && g.cool <= 0) { g.shots.push({ x: s.x, y: s.y - 12 }); g.cool = 0.16; SFX.shot(); }
+      if (held("Space") && g.cool <= 0) {
+        if (g.pow && g.pow.k === "laser") { g.beam = 0.12; g.cool = 0.12; tone(1400, 0.05, "sawtooth", 0.03, -600);
+          for (const r of g.rocks) if (!r.dead && r.y < s.y && Math.abs(r.x - s.x) < r.r + 3) { g.score += Math.round(40 - r.r); breakRock(r); }
+          for (const e of g.enemies) if (!e.dead && e.y < s.y && Math.abs(e.x - s.x) < 18) hitEnemy(e);
+        } else if (g.pow && g.pow.k === "triple") { for (const vx of [-130, 0, 130]) g.shots.push({ x: s.x, y: s.y - 12, vx }); g.cool = 0.18; SFX.shot(); }
+        else { g.shots.push({ x: s.x, y: s.y - 12 }); g.cool = 0.16; SFX.shot(); }
+      }
     }
+    if (!g.net || g.net.host) {
+      if ((g.eT -= dt) <= 0) { g.eT = Math.max(5, rnd(10, 16) - g.t * 0.03); const L = Math.random() < 0.5; g.enemies.push({ id: ++g.rid, x: L ? -20 : W + 20, y: rnd(35, 140), vx: (L ? 1 : -1) * rnd(55, 85), hp: 3, fire: rnd(0.8, 1.6), ph: rnd(0, 6) }); }
+      const ships = [alive ? s : null, ...(g.net ? [...g.remote.values()].filter((r) => !r.over && !r.down && performance.now() - r.t < 2000) : [])].filter(Boolean);
+      for (const e of g.enemies) {
+        if ((e.fire -= dt) <= 0 && ships.length && e.x > 0 && e.x < W) {
+          e.fire = rnd(1.1, 1.9); const tg = ships.reduce((a, b) => (Math.hypot(b.x - e.x, b.y - e.y) < Math.hypot(a.x - e.x, a.y - e.y) ? b : a)), d = Math.hypot(tg.x - e.x, tg.y - e.y) || 1;
+          g.eshots.push({ x: e.x, y: e.y + 8, vx: (tg.x - e.x) / d * 170, vy: (tg.y - e.y) / d * 170 }); tone(320, 0.08, "square", 0.04, -150);
+        }
+      }
+    }
+    for (const e of g.enemies) { e.x += e.vx * dt; e.ph = (e.ph || 0) + dt * 3; e.y += Math.sin(e.ph) * 20 * dt; }
+    g.enemies = g.enemies.filter((e) => !e.dead && e.x > -40 && e.x < W + 40);
+    g.eshots.forEach((b) => { b.x += b.vx * dt; b.y += b.vy * dt; }); g.eshots = g.eshots.filter((b) => !b.dead && b.y < H + 10 && b.y > -10 && b.x > -10 && b.x < W + 10);
+    g.pups.forEach((u) => { u.y += 55 * dt; u.t += dt; });
+    if (alive) for (const u of g.pups) if (!u.got && Math.hypot(u.x - s.x, u.y - s.y) < 18) {
+      u.got = true; tone(660, 0.08, "square", 0.06); tone(990, 0.14, "square", 0.06, 0, 0.08); Net.note(PUPS[u.k][2], 1200);
+      if (u.k === "life") g.lives++; else if (u.k === "shield") g.shield = 8; else if (u.k === "bomb") bomb(); else g.pow = { k: u.k, t: u.k === "laser" ? 6 : 10 };
+    }
+    g.pups = g.pups.filter((u) => !u.got && u.y < H + 20);
     const many = g.net ? 1 + 0.5 * (g.net.players.length - 1) : 1;
     if ((!g.net || g.net.host) && (g.spawn -= dt) <= 0) { g.spawn = Math.max(0.22, 1.0 - g.t * 0.012) / many; const r = rnd(10, 26); g.rocks.push(rock(rnd(r, W - r), -r, r, rnd(-30, 30), rnd(45, 90) + g.t * 0.9)); }
-    g.shots.forEach((b) => { b.y -= 420 * dt; });
+    g.shots.forEach((b) => { b.y -= 420 * dt; b.x += (b.vx || 0) * dt; });
     g.rocks.forEach((r) => { r.x += r.vx * dt; r.y += r.vy * dt; r.a += r.spin * dt; if (r.x < r.r || r.x > W - r.r) r.vx *= -1; });
     g.parts.forEach((p) => { p.x += p.vx * dt; p.y += p.vy * dt; p.t -= dt; });
     for (const b of g.shots) for (const r of g.rocks) if (!r.dead && !b.dead && Math.hypot(b.x - r.x, b.y - r.y) < r.r + 2) {
-      b.dead = true; g.score += Math.round(40 - r.r); breakRock(r);
+      b.dead = true; g.score += Math.round(40 - r.r); if (r.r > 18) dropPup(r.x, r.y, 0.12); breakRock(r);
     }
-    if (!g.over) for (const r of g.rocks) if (!r.dead && !g.inv && Math.hypot(s.x - r.x, s.y - r.y) < r.r + 8) {
-      r.dead = true; if (g.net && !g.net.host) { g.hitQ.push(r.id); g.gone.set(r.id, performance.now()); } g.lives--; g.inv = 2; burst(s.x, s.y, 26, "#22d3ee"); SFX.boom(); if (g.lives <= 0) g.over = true;
+    for (const b of g.shots) for (const e of g.enemies) if (!e.dead && !b.dead && Math.abs(b.x - e.x) < 16 && Math.abs(b.y - e.y) < 9) { b.dead = true; hitEnemy(e); }
+    if (g.net && g.versus) for (const b of g.shots) for (const [id, r] of g.remote) if (!b.dead && !r.over && !r.down && !r.inv && Math.abs(b.x - r.x) < 10 && Math.abs(b.y - r.y) < 12) { b.dead = true; g.pvpQ.push(id); g.score += 250; burst(r.x, r.y, 12, r.col); }
+    const hurt = () => { g.lives--; g.inv = 2; burst(s.x, s.y, 26, g.col); SFX.boom(); if (g.lives <= 0) { if (g.net && !g.versus && [...g.remote.values()].some((r) => !r.over && !r.down && performance.now() - r.t < 3000)) { g.down = 8; Net.note("Shot down! Back in 8 s if a mate holds on", 2500); } else g.over = true; } };
+    if (alive && !g.inv && !g.shield) {
+      for (const r of g.rocks) if (!r.dead && Math.hypot(s.x - r.x, s.y - r.y) < r.r + 8) { r.dead = true; if (g.net && !g.net.host) { g.hitQ.push(r.id); g.gone.set(r.id, performance.now()); } hurt(); break; }
+      for (const b of g.eshots) if (!b.dead && !g.inv && Math.abs(b.x - s.x) < 9 && Math.abs(b.y - s.y) < 11) { b.dead = true; hurt(); }
     }
+    if (g.net && g.versus && !g.over && g.remote.size && [...g.remote.values()].every((r) => r.over)) { g.score += 1000; g.over = true; Net.note("LAST SHIP FLYING! +1000", 3000); }
     g.shots = g.shots.filter((b) => !b.dead && b.y > -10); g.rocks = g.rocks.filter((r) => !r.dead && r.y < H + 40); g.parts = g.parts.filter((p) => p.t > 0);
   };
   g.draw = () => {
@@ -356,20 +411,34 @@ function Rocks() {
     g.rocks.forEach((r) => { if (!r.spr) r.spr = rockPic(r); const s2 = r.r + 3; cx.save(); cx.translate(r.x, r.y); cx.rotate(r.a); cx.drawImage(r.spr, -s2, -s2, s2 * 2, s2 * 2); cx.restore(); });
     cx.globalCompositeOperation = "lighter";
     g.shots.forEach((b) => { cx.drawImage(glow("#f5b83d"), b.x - 5, b.y - 10, 10, 18); rect(b.x - 0.75, b.y - 6, 1.5, 8, "#fff7d6"); });
+    if (g.beam) { cx.drawImage(glow("#f472b6"), g.ship.x - 8, 0, 16, g.ship.y - 10); rect(g.ship.x - 1.5, 0, 3, g.ship.y - 12, "#fdf2f8"); }
+    for (const b of g.eshots) cx.drawImage(glow("#ef4444"), b.x - 6, b.y - 6, 12, 12);
+    for (const u of g.pups) { const [L, c] = PUPS[u.k], bob = Math.sin(u.t * 6) * 2; cx.drawImage(glow(c), u.x - 16, u.y - 16 + bob, 32, 32); cx.globalCompositeOperation = "source-over"; circ(u.x, u.y + bob, 8, "#0b1020"); txt(L, u.x, u.y + 4 + bob, 11, c, "center"); cx.globalCompositeOperation = "lighter"; }
     cx.globalCompositeOperation = "source-over";
+    for (const e of g.enemies) {
+      cx.fillStyle = "#64748b"; cx.beginPath(); cx.ellipse(e.x, e.y, 17, 6, 0, 0, 6.3); cx.fill(); cx.fillStyle = "#cbd5e1"; cx.beginPath(); cx.ellipse(e.x, e.y - 1.5, 17, 3, 0, 0, 6.3); cx.fill();
+      cx.fillStyle = "rgba(244,114,182,.85)"; cx.beginPath(); cx.ellipse(e.x, e.y - 4, 7, 6, 0, Math.PI, 0); cx.fill();
+      for (let i = 0; i < 5; i++) rect(e.x - 12 + i * 6, e.y + 2, 2, 2, Math.floor(g.t * 8 + i) % 2 ? "#fde047" : "#f97316");
+      for (let i = 0; i < e.hp; i++) rect(e.x - 6 + i * 5, e.y - 14, 3, 2, "#f472b6");
+    }
     if (g.net) for (const [id, r] of g.remote) {
       if (performance.now() - r.t > 3000) continue;
       cx.globalCompositeOperation = "lighter"; r.sh.forEach(([x, y]) => cx.drawImage(glow(r.col), x - 5, y - 10, 10, 18)); cx.globalCompositeOperation = "source-over";
-      if (r.over || (r.inv && Math.floor(performance.now() / 100) % 2)) continue;
+      if (r.over || r.down || (r.inv && Math.floor(performance.now() / 100) % 2)) continue;
       drawShip(r.x, r.y, r.col, g.t + id);
       txt(g.net.name(id), r.x, r.y + 22, 8, r.col, "center");
     }
     cx.globalCompositeOperation = "lighter"; g.parts.forEach((p) => { cx.globalAlpha = clamp(p.t * 2, 0, 1); cx.drawImage(glow(p.c), p.x - 4, p.y - 4, 8, 8); }); cx.globalAlpha = 1; cx.globalCompositeOperation = "source-over";
     const s = g.ship;
-    if (!g.over && (!g.inv || Math.floor(g.inv * 10) % 2)) {
+    if (!g.over && !g.down && (!g.inv || Math.floor(g.inv * 10) % 2)) {
       drawShip(s.x, s.y, g.col, g.t);
+      if (g.shield) { cx.strokeStyle = `rgba(163,230,53,${0.5 + Math.sin(g.t * 10) * 0.3})`; cx.lineWidth = 2; cx.beginPath(); cx.arc(s.x, s.y, 20, 0, 6.3); cx.stroke(); }
     }
-    txt(`SCORE ${g.score}`, 10, 20, 14); txt(`BEST ${Math.max(bestOf("rocks"), g.score)}`, W / 2, 20, 12, "#8a90a2", "center"); txt("▲".repeat(Math.max(0, g.lives)), W - 10, 20, 14, "#22d3ee", "right");
+    if (g.down) txt(`SHOT DOWN · back in ${Math.ceil(g.down)}`, W / 2, H / 2, 14, "#fca5a5", "center");
+    if (g.flashT) { cx.globalAlpha = g.flashT * 2; rect(0, 0, W, H, "#fff7ed"); cx.globalAlpha = 1; }
+    txt(`SCORE ${g.score}`, 10, 20, 14); txt(`BEST ${Math.max(bestOf("rocks"), g.score)}`, W / 2, 20, 12, "#8a90a2", "center"); txt("▲".repeat(Math.max(0, Math.min(8, g.lives))), W - 10, 20, 14, g.col, "right");
+    if (g.pow) txt(`${PUPS[g.pow.k][2]} ${Math.ceil(g.pow.t)}s`, 10, 36, 10, PUPS[g.pow.k][1]); else if (g.shield) txt(`SHIELD ${Math.ceil(g.shield)}s`, 10, 36, 10, "#a3e635");
+    if (g.net) txt(g.versus ? "VERSUS" : "TOGETHER", 10, H - 8, 9, "#8a90a2");
   };
   return g;
 }
@@ -401,6 +470,7 @@ function Snake() {
     if ((g.t += dt) < Math.max(0.065, 0.13 - g.score * 0.003)) return;
     g.t = 0; g.dir = g.next;
     const h = [g.body[0][0] + g.dir[0], g.body[0][1] + g.dir[1]];
+    if (g.net) { h[0] = (h[0] + GW) % GW; h[1] = (h[1] + GH) % GH; }
     if (h[0] < 0 || h[1] < 0 || h[0] >= GW || h[1] >= GH || g.body.some((b) => b[0] === h[0] && b[1] === h[1])) { g.over = true; return; }
     if (g.net && others().some((r) => r.body.some((b) => b[0] === h[0] && b[1] === h[1]))) { g.over = true; SFX.over(); return; }
     g.body.unshift(h);
@@ -783,6 +853,12 @@ function draw() {
     cur.draw();
     if (ON && ON.live && cur.id !== "spa" && cur.id !== "goal" && !SHARED.has(cur.id) && ON.players.length > 1) drawSplit();
     if (ON && ON.live && SHARED.has(cur.id) && cur.net && ON.players.length > 1) drawShared();
+    if (ON && ON.live && ON.players.length > 1 && performance.now() - ON.startT < 4000) {
+      const a = Math.min(1, (4000 - (performance.now() - ON.startT)) / 600), n = ON.players.length; cx.globalAlpha = a;
+      rect(W / 2 - 110, H / 2 - 22 - n * 9, 220, 30 + n * 18, "rgba(5,7,13,.82)"); txt("PLAYERS", W / 2, H / 2 - 6 - n * 9, 11, "#fbbf24", "center");
+      ON.players.forEach((q, i) => { const c = NETCOL[i % 4]; rect(W / 2 - 92, H / 2 + 2 - n * 9 + i * 18, 10, 10, c); txt(`${q.name}${q.id === ON.me ? "  ← YOU" : ""}`, W / 2 - 74, H / 2 + 11 - n * 9 + i * 18, 12, q.id === ON.me ? "#fde047" : "#e5e7eb"); });
+      cx.globalAlpha = 1;
+    }
     if (paused) banner(["PAUSED"], "P to continue · Esc menu");
     if (cur.over && !cur.race && !cur.own && !(ON && ON.live && ON.players.length > 1)) banner(["GAME OVER", `${cur.score}${cur.score > 0 && cur.score >= bestOf(cur.id) ? "  NEW BEST!" : ""}`], "Space play again · Esc menu");
   }
@@ -807,9 +883,9 @@ document.getElementById("snd").onclick = () => { audioStart(); setSound(!sound);
 document.getElementById("pauseBtn").onclick = () => { if (cur && cur.id !== "sumo") paused = !paused; screenEl.focus(); };
 document.getElementById("menuBtn").onclick = () => { menu(); screenEl.focus(); };
 
-const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
+const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS · together"], ["rocksvs", "ROCKS · versus (shoot each other)"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
 const realRandom = Math.random;
-const SHARED = new Set(["snake", "rocks", "jump", "city"]), NETCOL = ["#22d3ee", "#f472b6", "#a3e635", "#fbbf24"];
+const SHARED = new Set(["snake", "rocks", "rocksvs", "jump", "city"]), NETCOL = ["#22d3ee", "#f472b6", "#a3e635", "#fbbf24"];
 const seeded = (a) => () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 let ON = null;
 (() => {
@@ -1011,15 +1087,15 @@ $o("oStart").onclick = () => {
   ON.net.started();
 };
 function startOnline(m) {
-  ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
+  ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.startT = performance.now(); ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
   if (m.game === "goal") { cur = Goal({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = cur.help; }
   else if (m.game === "spa") {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
     music(null); document.getElementById("help").textContent = cur.help;
-  } else start(m.game);
-  if (cur && SHARED.has(cur.id) && cur.joinNet) cur.joinNet({ me: ON.me, host: ON.host, players: m.players, name: (id) => ((ON && ON.players.find((q) => q.id === id)) || {}).name || "?" });
+  } else start(m.game === "rocksvs" ? "rocks" : m.game);
+  if (cur && SHARED.has(cur.id) && cur.joinNet) cur.joinNet({ me: ON.me, host: ON.host, players: m.players, versus: m.game === "rocksvs", name: (id) => ((ON && ON.players.find((q) => q.id === id)) || {}).name || "?" });
   if (cur && cur.id === "blocks" && m.players.length > 1) cur.onAttack = (n) => {
     const sc = (q) => (q.id === ON.me ? cur.score : (ON.scores.get(q.id) || {}).score || 0);
     const others = ON.players.filter((q) => q.id !== ON.me && !(ON.scores.get(q.id) || {}).over).sort((a, b) => sc(b) - sc(a));
