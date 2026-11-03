@@ -1519,7 +1519,6 @@ if (window.TouchPad && TouchPad.on) (() => {
     f = { id: e.pointerId, x, y, cx: cam.x, cy: cam.y, moved: false };
     UI.mouse = [x, y]; UI.mouseIn = false;
     if (box || UI.placing || y > cv.height - PANEL) { f.mouse = true; send("mousedown", x, y); return; }
-    lp = setTimeout(() => { if (f && !f.moved) { f.long = true; rightClick(f.x, f.y); if (navigator.vibrate) navigator.vibrate(25); } }, 420);
   });
   cv.addEventListener("pointermove", (e) => {
     if (!f || e.pointerId !== f.id) return;
