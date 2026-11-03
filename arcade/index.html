@@ -663,12 +663,12 @@ function drawMenu() {
 }
 const CARD_W = 72, CARD_H = 124, cardAt = (i) => [7 + (i % 6) * 78, 84 + Math.floor(i / 6) * 134];
 function draw() {
-  if (!cur) drawMenu();
+  if (!cur) { if (!(ON && !ON.live && drawWatch())) drawMenu(); }
   else {
     cur.draw();
     if (ON && ON.live && cur.id !== "spa" && cur.id !== "goal" && ON.players.length > 1) drawSplit();
     if (paused) banner(["PAUSED"], "P to continue · Esc menu");
-    if (cur.over && !cur.race && !cur.own) banner(["GAME OVER", `${cur.score}${cur.score > 0 && cur.score >= bestOf(cur.id) ? "  NEW BEST!" : ""}`], "Space play again · Esc menu");
+    if (cur.over && !cur.race && !cur.own && !(ON && ON.live && ON.players.length > 1)) banner(["GAME OVER", `${cur.score}${cur.score > 0 && cur.score >= bestOf(cur.id) ? "  NEW BEST!" : ""}`], "Space play again · Esc menu");
   }
   focusEl.style.display = document.hasFocus() ? "none" : "flex";
 }
@@ -703,7 +703,9 @@ let ON = null;
 #onl input,#onl select{background:#0b1020;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:15px "Segoe UI",sans-serif}
 #onl .orow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}#onl .ocode{font:700 30px Consolas,monospace;letter-spacing:.3em;color:#fbbf24}
 #onl .oitem{display:flex;justify-content:space-between;align-items:center;padding:5px 2px;border-bottom:1px solid var(--line)}#onl .pri{background:#b45309;border-color:#f59e0b;color:#fff}
-#onl .hide{display:none}`;
+#onl .hide{display:none}
+#onl.watch{background:transparent;align-items:flex-end;pointer-events:none}#onl.watch .ocard{pointer-events:auto;background:rgba(15,18,30,.88);padding:6px 10px;margin-bottom:6px;font-size:12px}
+#onl.watch #oList,#onl.watch #oWhat,#onl.watch .help{display:none}#onl.watch .ot{font-size:13px}#onl.watch .orow{margin-top:4px}#onl.watch .ocode{font-size:16px}`;
   document.head.appendChild(st);
   const d = document.createElement("div"); d.id = "onl"; d.className = "hide";
   d.innerHTML = `<div class="ocard"><div class="ot">PLAY ONLINE</div><div class="help" style="margin:2px 0 0">up to 4 players · friends join with the room code</div>
@@ -711,7 +713,7 @@ let ON = null;
     <label>Game<select id="oGame">${ONLINE_GAMES.map(([id, n]) => `<option value="${id}">${n}</option>`).join("")}</select></label>
     <div class="orow"><button id="oHost" class="pri">HOST A GAME</button><button id="oJoin">JOIN A GAME</button><button id="oClose">CLOSE</button></div></div>
   <div id="oRoom" class="hide"><div>Room code <span class="ocode" id="oCode">····</span></div><div class="help" id="oWhat" style="margin:4px 0"></div><div id="oList"></div>
-    <div class="orow"><button id="oStart" class="pri">START</button><button id="oShare">SHARE INVITE</button><button id="oLeave">LEAVE</button></div><div class="help" id="oMsg"></div></div>
+    <div class="orow"><button id="oStart" class="pri">START</button><button id="oPlayNow" class="pri" style="display:none">PLAY NOW</button><button id="oShare">SHARE INVITE</button><button id="oLeave">LEAVE</button></div><div class="help" id="oMsg"></div></div>
   <div id="oJoinP" class="hide"><div>Open games:</div><div id="oRooms" style="min-height:40px"></div><div class="orow"><button id="oBack">BACK</button></div><div class="help" id="oJMsg"></div></div></div>`;
   screenEl.appendChild(d);
 })();
@@ -742,6 +744,8 @@ function onMsg(m, from) {
   if (!ON) return;
   if (ON.host && from) {
     if (m.t === "in") { if (ON.live && cur && cur.netInput) cur.netInput(from, m); return; }
+    if (m.t === "late") { const q = ON.players.find((x) => x.id === from); if (q && ON.live) lateJoin(q); return; }
+    if (m.t === "watch") { ON.watchT = Date.now(); ON.net.send("*", Object.assign({}, m, { from })); return; }
     if (m.t === "st" || m.t === "fr" || m.t === "atk") ON.net.send("*", Object.assign({}, m, { from }));
     else return;
   }
@@ -754,11 +758,12 @@ function onMsg(m, from) {
   else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); }
   else if (m.t === "room") { if (ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); } }
   else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); }
+  else if (m.t === "watch") ON.watchT = Date.now();
   else if (m.t === "atk") { if (ON.live && cur && cur.addGarbage && m.to === ON.me) { cur.addGarbage(m.n); Net.note(`${(ON.players.find((q) => q.id === from) || {}).name || "Someone"} sends you ${m.n} row${m.n > 1 ? "s" : ""}!${m.x2 ? " (COMEBACK ×2)" : ""}`, 1800); } }
   else if (m.t === "fr") {
     let img = ON.frames.get(from); if (!img) { img = new Image(); ON.frames.set(from, img); }
     if (m.img) img.src = m.img;
-    ON.scores.set(from, { score: m.score || 0, over: !!m.over });
+    ON.scores.set(from, { score: m.score || 0, over: !!m.over }); ON.seen.set(from, Date.now());
   }
 }
 function lateJoin(q) {
@@ -778,7 +783,7 @@ const pageRoom = (game, how, room) => { const u = new URL(ARC.page(game), locati
 $o("oHost").onclick = () => {
   const name = onlineName();
   if (PAGE_GAMES[$o("oGame").value]) { pageRoom($o("oGame").value, "host"); return; }
-  ON = { host: true, me: 0, code: "", players: [{ id: 0, name }], game: $o("oGame").value, live: false, frames: new Map(), scores: new Map() };
+  ON = { host: true, me: 0, code: "", players: [{ id: 0, name }], game: $o("oGame").value, live: false, frames: new Map(), scores: new Map(), seen: new Map(), watchT: 0 };
   ON.net = Net.host("hub", name, {
     hello: (m) => { ON.code = m.room; drawRoom(); },
     join: (m) => {
@@ -809,7 +814,7 @@ $o("oJoin").onclick = () => {
 $o("oBack").onclick = () => { clearInterval(roomsTimer); showOnline("oMain"); };
 function joinOnline(room) {
   clearInterval(roomsTimer);
-  ON = { host: false, me: null, code: room, players: [], game: "", live: false, frames: new Map(), scores: new Map() };
+  ON = { host: false, me: null, code: room, players: [], game: "", live: false, frames: new Map(), scores: new Map(), seen: new Map(), watchT: 0 };
   ON.net = Net.join("hub", room, ARC.getName() || "Player", {
     hello: (m) => { ON.me = m.you; ON.code = m.room; showOnline("oRoom"); },
     msg: (m) => onMsg(m, 0),
@@ -847,7 +852,7 @@ $o("oStart").onclick = () => {
   ON.net.started();
 };
 function startOnline(m) {
-  ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.frames.clear(); ON.scores.clear();
+  ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.frames.clear(); ON.scores.clear(); ON.seen.clear();
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
   if (m.game === "goal") { cur = Goal({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = cur.help; }
@@ -868,10 +873,37 @@ function startOnline(m) {
 const onSnap = document.createElement("canvas"); onSnap.width = 960; onSnap.height = 720;
 const onSmall = document.createElement("canvas"); onSmall.width = 320; onSmall.height = 240;
 setInterval(() => {
-  if (!ON || !ON.live || !cur || cur.id === "spa" || cur.id === "goal" || ON.players.length < 2) return;
-  onSmall.getContext("2d").drawImage(onSnap, 0, 0, 320, 240);
+  if (!ON || !ON.live || !cur) return;
+  const shared = cur.id === "spa" || cur.id === "goal", watched = Date.now() - ON.watchT < 5000;
+  if (shared ? !watched : ON.players.length < 2 && !watched) return;
+  onSmall.getContext("2d").drawImage(shared || ON.players.length < 2 ? cv : onSnap, 0, 0, 320, 240);
   osend({ t: "fr", img: onSmall.toDataURL("image/jpeg", 0.55), score: cur.score || 0, over: !!cur.over });
 }, 140);
+function watching() { return !!(ON && !ON.live && ON.seen && ON.players.some((q) => q.id !== ON.me && Date.now() - (ON.seen.get(q.id) || 0) < 3000)); }
+function drawWatch() {
+  if (!watching()) return false;
+  const live = ON.players.filter((q) => q.id !== ON.me && Date.now() - (ON.seen.get(q.id) || 0) < 3000), n = live.length;
+  rect(0, 0, W, H, "#05070d");
+  live.forEach((q, i) => {
+    const one = n === 1, w = one ? W : W / 2, h = one ? H : H / 2, x = one ? 0 : (i % 2) * W / 2, y = one ? 0 : Math.floor(i / 2) * H / 2 + (n === 2 ? H / 4 : 0);
+    const img = ON.frames.get(q.id); if (img && img.complete && img.naturalWidth) cx.drawImage(img, x, y, w, h);
+    const sc = ON.scores.get(q.id) || { score: 0, over: false };
+    rect(x, y, w, 13, "rgba(0,0,0,.6)"); txt(`${q.name} · ${sc.score}`, x + 4, y + 10, 8, "#e5e7eb");
+    if (sc.over) txt("GAME OVER", x + w / 2, y + h / 2, 12, "#f87171", "center");
+  });
+  if (n > 1) { rect(W / 2 - 0.5, 0, 1, H, "#26304a"); if (n > 2) rect(0, H / 2 - 0.5, W, 1, "#26304a"); }
+  const blink = Math.floor(performance.now() / 600) % 2;
+  rect(W - 92, 4, 88, 14, "rgba(185,28,28,.85)"); txt(`${blink ? "●" : "○"} SPECTATING`, W - 48, 14, 8, "#fff", "center");
+  return true;
+}
+let watchN = 0;
+setInterval(() => {
+  const w = watching();
+  $o("onl").classList.toggle("watch", w && !$o("oRoom").classList.contains("hide"));
+  $o("oPlayNow").style.display = w && ON && !ON.host ? "" : "none";
+  if (++watchN % 4 === 0 && ON && !ON.live && ON.code && ON.players.length > 1) osend({ t: "watch" });
+}, 500);
+$o("oPlayNow").onclick = () => { if (ON && !ON.host) { osend({ t: "late" }); $o("oMsg").textContent = "Joining the round…"; } };
 function drawSplit() {
   const n = ON.players.length, mine = ON.players.findIndex((q) => q.id === ON.me);
   onSnap.getContext("2d").drawImage(cv, 0, 0);
@@ -886,7 +918,7 @@ function drawSplit() {
     const leads = sc.score === top && top > 0 && all.filter((v) => v === top).length === 1;
     rect(x, y, w, 13, leads ? "rgba(180,83,9,.85)" : "rgba(0,0,0,.6)");
     txt(`${leads ? "👑 " : ""}${q.name}${q.id === ON.me ? " (you)" : ""} · ${sc.score}${leads && top - second > 0 ? `  +${top - second}` : ""}`, x + 4, y + 10, 8, q.id === ON.me ? "#fde047" : "#e5e7eb");
-    if (sc.over && q.id !== ON.me) txt("GAME OVER", x + w / 2, y + h / 2, 12, "#f87171", "center");
+    if (sc.over) { txt(q.id === ON.me ? "YOU'RE OUT" : "GAME OVER", x + w / 2, y + h / 2, 12, "#f87171", "center"); if (q.id === ON.me) txt("watching the others", x + w / 2, y + h / 2 + 14, 8, "#e5e7eb", "center"); }
   });
   rect(W / 2 - 0.5, 0, 1, H, "#26304a"); if (n > 2) rect(0, H / 2 - 0.5, W, 1, "#26304a");
   const done = cur.over && ON.players.every((q) => q.id === ON.me || (ON.scores.get(q.id) || {}).over);
