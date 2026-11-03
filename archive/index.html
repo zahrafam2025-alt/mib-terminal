@@ -243,19 +243,7 @@
   <div id="hero-art" class="on alive grade-neutral" aria-hidden="true"><div class="art" style="background-image:url('../assets/scenes/story.jpg')"></div></div>
   <div id="vignette" aria-hidden="true"></div>
 
-  <header class="masthead">
-    <a class="home" href="../index.html" aria-label="MARKET INTELLIGENCE BRIEF — home">
-      <span class="mark">MIB<b>▮</b></span>
-      <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
-    </a>
-<nav class="menu" aria-label="Site"><a href="../" data-i18n="Aujourd’hui">Today</a><a href="../weekly.html" data-i18n="La Semaine">The Week</a><a class="on" href="../archive/" data-i18n="Archives">Archive</a></nav>
-    <span class="stamp">2026-11-03 19:00 UTC</span>
-    
-    <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
-      <i></i><i></i>
-    </button>
-  </header>
-  <div class="menu-overlay" aria-hidden="true"><nav aria-label="Site"></nav></div>
+<script src="/header.js" data-active="archive"></script><noscript><nav class="menu" aria-label="Site"><a href="../">Today</a> · <a href="../weekly.html">The Week</a> · <a href="../archive/">Archive</a> · <a href="/arcade/">Arcade</a></nav></noscript>
 
   <main>
     <div class="scene-inner">
@@ -341,33 +329,6 @@
     </div>
   </main>
 
-  <script>
-    // burger + overlay, mirroring the homepage's buildMenu wiring; the
-    // overlay links are cloned from the masthead menu so both stay one list
-    (function () {
-      var btn = document.querySelector(".menu-toggle");
-      var ovl = document.querySelector(".menu-overlay");
-      var ovlNav = ovl.querySelector("nav");
-      var bar = document.querySelector("nav.menu");
-      if (bar) {
-        ovlNav.innerHTML = bar.innerHTML;
-        Array.prototype.forEach.call(ovlNav.querySelectorAll("a"),
-          function (a, i) { a.style.setProperty("--i", i); });
-      }
-      btn.addEventListener("click", function () {
-        var open = ovl.classList.toggle("open");
-        btn.setAttribute("aria-expanded", String(open));
-        ovl.setAttribute("aria-hidden", String(!open));
-      });
-      ovl.addEventListener("click", function (e) {
-        if (e.target === ovl || e.target.tagName === "A") {
-          ovl.classList.remove("open");
-          btn.setAttribute("aria-expanded", "false");
-          ovl.setAttribute("aria-hidden", "true");
-        }
-      });
-    })();
-  </script>
 
 </body>
 </html>
