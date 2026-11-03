@@ -1626,9 +1626,9 @@ $("#bHost").onclick = () => {
   net = Net.host("empire", name, {
     hello: (m) => { $("#hCode").textContent = m.room; },
     join: (m) => {
-      if (mode === "menu" && lobby.length < 4) { lobby.push({ name: m.name, net: m.id }); draw2(); return; }
+      if (mode === "menu") { if (lobby.some((h) => h.net === m.id)) return; if (lobby.length < 4) { lobby.push({ name: m.name, net: m.id }); draw2(); } return; }
       if (mode !== "host" || !G || !G.start) return;
-      const p = G.players.find((q) => q.kind === "bot" && !q.dead); if (!p) return;
+      const p = G.players.find((q) => q.net === m.id && q.kind === "net") || G.players.find((q) => q.kind === "bot" && !q.dead); if (!p) return;
       p.kind = "net"; p.net = m.id; p.ai = null; p.name = m.name;
       const st = G.start; net.send(m.id, { t: "start", seed: st.seed, slots: G.players.map((x) => ({ name: x.name, kind: x.kind === "me" ? "net" : x.kind, civ: x.civ })), me: p.i, diff: st.diff, teams: st.teams, mapk: st.mapk });
       Net.note(m.name + " joined: they play " + (CIVS[p.civ] ? CIVS[p.civ].n || p.civ : p.civ), 3000);

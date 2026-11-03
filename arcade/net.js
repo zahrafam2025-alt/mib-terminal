@@ -7,7 +7,13 @@ const Net = {
     if (!d) { d = document.createElement("div"); d.id = "net-note"; d.style.cssText = "position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:200;background:rgba(15,18,30,.92);color:#fde047;border:1px solid #fbbf24;border-radius:10px;padding:7px 14px;font:600 13px system-ui,sans-serif;pointer-events:none;max-width:90vw;text-align:center"; document.body.appendChild(d); }
     d.textContent = text; d.style.display = "block"; clearTimeout(d._t); if (ms) d._t = setTimeout(() => { d.style.display = "none"; }, ms);
   },
+  cid() {
+    try { let v = sessionStorage.getItem("arcade-cid"); if (!v) { v = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); sessionStorage.setItem("arcade-cid", v); } return v; }
+    catch (e) { return Net._cid || (Net._cid = Math.random().toString(36).slice(2, 12)); }
+  },
+  adminKey() { try { return localStorage.getItem("arcade-admin") || ""; } catch (e) { return ""; } },
   open(q, on) {
+    if (q.role === "join") { q.cid = Net.cid(); const a = Net.adminKey(); if (a) q.admin = a; }
     const c = { ws: null, you: null, room: null, key: null, live: false, quit: false, lost: 0, q: Object.assign({}, q) };
     const connect = () => {
       const ws = new WebSocket(Net.url(c.q)); c.ws = ws;
@@ -33,6 +39,8 @@ const Net = {
             if (again) { c.lost = 0; Net.note("Back online", 2000); if (on.found) on.found(m); return; }
           }
           if (m.t === "error" && c.room !== null) { c.quit = true; if (on.close) on.close(); return; }
+          if (m.t === "kicked") { c.quit = true; Net.note("You were removed from this game", 6000); if (on.close) on.close(); return; }
+          if (m.t === "closed") { c.quit = true; if (m.why === "admin") Net.note("This game was closed by the admin", 6000); }
           if (m.t === "away") Net.note(m.id === 0 ? "The host lost their connection: waiting for them (up to 90 s)…" : "A player lost their connection: their place is kept 90 s", m.id === 0 ? 0 : 4000);
           if (m.t === "back") Net.note(m.id === 0 ? "The host is back" : "A player is back", 2500);
           if (on[m.t]) on[m.t](m);

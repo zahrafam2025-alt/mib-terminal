@@ -794,16 +794,19 @@ let ON = null;
   d.innerHTML = `<div class="ocard"><div class="ot">PLAY ONLINE</div><div class="help" style="margin:2px 0 0">up to 4 players · friends join with the room code</div>
   <div id="oMain"><label>Your name<input id="oName" maxlength="16"></label>
     <label>Game<select id="oGame">${ONLINE_GAMES.map(([id, n]) => `<option value="${id}">${n}</option>`).join("")}</select></label>
-    <div class="orow"><button id="oHost" class="pri">HOST A GAME</button><button id="oJoin">JOIN A GAME</button><button id="oClose">CLOSE</button></div></div>
+    <div class="orow"><button id="oHost" class="pri">HOST A GAME</button><button id="oJoin">JOIN A GAME</button><button id="oAdmBtn" style="display:none">ADMIN</button><button id="oClose">CLOSE</button></div></div>
   <div id="oRoom" class="hide"><div>Room code <span class="ocode" id="oCode">····</span></div><div class="help" id="oWhat" style="margin:4px 0"></div><div id="oList"></div>
     <div class="orow"><button id="oStart" class="pri">START</button><button id="oPlayNow" class="pri" style="display:none">PLAY NOW</button><button id="oShare">SHARE INVITE</button><button id="oLeave">LEAVE</button></div><div class="help" id="oMsg"></div></div>
+  <div id="oAdm" class="hide"><div class="ot" style="font-size:14px">ADMIN · every game being played</div><div id="oAdmList" style="min-height:40px"></div>
+    <div class="orow"><button id="oAdmBack">BACK</button><button id="oAdmOut">LOG OUT</button></div><div class="help" id="oAdmMsg"></div></div>
   <div id="oJoinP" class="hide"><div>Open games:</div><div id="oRooms" style="min-height:40px"></div><div class="orow"><button id="oBack">BACK</button></div><div class="help" id="oJMsg"></div></div></div>`;
   screenEl.appendChild(d);
 })();
 const $o = (id) => document.getElementById(id);
 function showOnline(panel) {
   $o("onl").classList.remove("hide");
-  for (const id of ["oMain", "oRoom", "oJoinP"]) $o(id).classList.toggle("hide", id !== panel);
+  for (const id of ["oMain", "oRoom", "oJoinP", "oAdm"]) $o(id).classList.toggle("hide", id !== panel);
+  $o("oAdmBtn").style.display = Net.adminKey() ? "" : "none";
   if (panel === "oRoom" && ON) drawRoom();
 }
 function hideOnline() { $o("onl").classList.add("hide"); screenEl.focus(); }
@@ -864,13 +867,16 @@ $o("oClose").onclick = hideOnline;
 const PAGE_GAMES = { strike: "STRIKE & DEFUSE", empire: "CORSICAN EMPIRE" };
 const pageRoom = (game, how, room) => { const u = new URL(ARC.page(game), location.href); u.searchParams.set("online", how); if (room) u.searchParams.set("room", room); location.href = u.href; };
 $o("oHost").onclick = () => {
+  if (ON && ON.host && ON.net && !ON.net.quit) { showOnline("oRoom"); return; }
   const name = onlineName();
   if (PAGE_GAMES[$o("oGame").value]) { pageRoom($o("oGame").value, "host"); return; }
   ON = { host: true, me: 0, code: "", players: [{ id: 0, name }], game: $o("oGame").value, live: false, frames: new Map(), scores: new Map(), seen: new Map(), watchT: 0 };
   ON.net = Net.host("hub", name, {
     hello: (m) => { ON.code = m.room; drawRoom(); },
     join: (m) => {
-      if (ON.players.length >= 4) return; ON.players.push({ id: m.id, name: m.name }); lobbyOut();
+      const known = ON.players.find((q) => q.id === m.id);
+      if (known) known.name = m.name; else if (ON.players.length < 4) ON.players.push({ id: m.id, name: m.name }); else { lobbyOut(); return; }
+      lobbyOut();
       if (ON.live) lateJoin({ id: m.id, name: m.name });
     },
     leave: (m) => { ON.players = ON.players.filter((q) => q.id !== m.id); ON.frames.delete(m.id); ON.scores.delete(m.id); lobbyOut(); },
@@ -897,14 +903,16 @@ $o("oJoin").onclick = () => {
 $o("oBack").onclick = () => { clearInterval(roomsTimer); showOnline("oMain"); };
 function joinOnline(room) {
   clearInterval(roomsTimer);
-  ON = { host: false, me: null, code: room, players: [], game: "", live: false, frames: new Map(), scores: new Map(), seen: new Map(), watchT: 0 };
+  if (ON && ON.net) { if (!ON.host && ON.code === room && !ON.net.quit) { showOnline("oRoom"); return; } const n = ON.net; ON = null; n.close(); }
+  const self = ON = { host: false, me: null, code: room, players: [], game: "", live: false, frames: new Map(), scores: new Map(), seen: new Map(), watchT: 0 };
+  const cur_ = (f) => (...a) => { if (ON === self) f(...a); };
   ON.net = Net.join("hub", room, ARC.getName() || "Player", {
-    hello: (m) => { ON.me = m.you; ON.code = m.room; showOnline("oRoom"); },
-    msg: (m) => onMsg(m, 0),
-    error: (m) => { $o("oJMsg").textContent = "Could not join: " + m.why; ON = null; },
-    fail: () => { $o("oJMsg").textContent = "Could not reach the game server. Try again."; ON = null; },
-    closed: () => { alert("The host left the game."); leaveOnline(); },
-    close: () => { if (ON && !ON.host) { leaveOnline(); $o("oJMsg").textContent = "The connection to the game was lost. Join again."; } },
+    hello: cur_((m) => { ON.me = m.you; ON.code = m.room; showOnline("oRoom"); }),
+    msg: cur_((m) => onMsg(m, 0)),
+    error: cur_((m) => { $o("oJMsg").textContent = "Could not join: " + m.why; ON = null; }),
+    fail: cur_(() => { $o("oJMsg").textContent = "Could not reach the game server. Try again."; ON = null; }),
+    closed: cur_((m) => { alert(m && m.why === "admin" ? "The admin closed this game." : "The host left the game."); leaveOnline(); }),
+    close: cur_(() => { if (!ON.host) { leaveOnline(); $o("oJMsg").textContent = "The connection to the game was lost. Join again."; } }),
   });
 }
 function leaveOnline() {
@@ -912,6 +920,34 @@ function leaveOnline() {
   Math.random = realRandom; if (cur) { engineSet(false); cur = null; } showOnline("oMain");
 }
 $o("oLeave").onclick = leaveOnline;
+const adminApi = async (body) => {
+  const r = await fetch((window.ARC ? ARC.url("") : "") + "/api/arcade/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ key: Net.adminKey() }, body)) });
+  const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || "HTTP " + r.status); return d;
+};
+let admTimer = null;
+const GAME_NAME = { hub: "ARCADE", strike: "STRIKE", empire: "EMPIRE" };
+async function adminList() {
+  try {
+    const rs = await adminApi({ act: "rooms" });
+    $o("oAdmList").innerHTML = rs.length ? rs.map((r) => `<div class="oitem" style="flex-wrap:wrap;gap:4px"><span><b>${r.room}</b> · ${GAME_NAME[r.game] || r.game}${r.started ? " · playing" : " · in the room"} · ${Math.round((Date.now() - r.at) / 60000)} min</span>
+      <span><button data-aj="${r.room}" data-ag="${r.game}">JOIN</button> <button data-ac="${r.room}" style="border-color:#ef4444">CLOSE</button></span>
+      <div style="width:100%;font-size:12px">${(r.names || []).map((x) => `${esc(x.n)}${x.id === 0 ? " (host)" : ` <button data-ak="${r.room}" data-aid="${x.id}" style="padding:1px 6px;font-size:11px">KICK</button>`}`).join(" · ")}</div></div>`).join("")
+      : '<div class="help">no game is being played right now</div>';
+    document.querySelectorAll("[data-aj]").forEach((b) => { b.onclick = () => { clearInterval(admTimer); if (PAGE_GAMES[b.dataset.ag]) pageRoom(b.dataset.ag, "join", b.dataset.aj); else { onlineName(); joinOnline(b.dataset.aj); } }; });
+    document.querySelectorAll("[data-ac]").forEach((b) => { b.onclick = async () => { if (!confirm("Close room " + b.dataset.ac + " for everyone in it?")) return; try { await adminApi({ act: "close", room: b.dataset.ac }); $o("oAdmMsg").textContent = "Room " + b.dataset.ac + " closed."; adminList(); } catch (e) { $o("oAdmMsg").textContent = e.message; } }; });
+    document.querySelectorAll("[data-ak]").forEach((b) => { b.onclick = async () => { try { await adminApi({ act: "kick", room: b.dataset.ak, id: +b.dataset.aid }); $o("oAdmMsg").textContent = "Player removed."; adminList(); } catch (e) { $o("oAdmMsg").textContent = e.message; } }; });
+  } catch (e) { $o("oAdmMsg").textContent = "Admin: " + e.message; if (/wrong admin key/.test(e.message)) { try { localStorage.removeItem("arcade-admin"); } catch (x) {} clearInterval(admTimer); } }
+}
+$o("oAdmBtn").onclick = () => { showOnline("oAdm"); $o("oAdmMsg").textContent = ""; adminList(); clearInterval(admTimer); admTimer = setInterval(adminList, 3000); };
+$o("oAdmBack").onclick = () => { clearInterval(admTimer); showOnline("oMain"); };
+$o("oAdmOut").onclick = () => { try { localStorage.removeItem("arcade-admin"); } catch (e) {} clearInterval(admTimer); showOnline("oMain"); };
+(async () => {
+  const q = new URLSearchParams(location.search); if (!q.has("admin")) return;
+  history.replaceState(null, "", location.pathname);
+  const k = (prompt("Admin key:", "") || "").trim(); if (!k) return;
+  try { localStorage.setItem("arcade-admin", k); await adminApi({ act: "rooms" }); audioStart(); showOnline("oMain"); $o("oAdmBtn").click(); }
+  catch (e) { try { localStorage.removeItem("arcade-admin"); } catch (x) {} alert("Admin: " + e.message); }
+})();
 $o("oShare").onclick = async () => {
   if (!ON || !ON.code) return;
   const url = location.origin + location.pathname + "?join=" + ON.code, text = "Join my game in the MIB Arcade: " + url;

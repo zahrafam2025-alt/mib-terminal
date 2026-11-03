@@ -1070,7 +1070,8 @@ $("#bHost").onclick = () => {
   draw();
   net = Net.host("strike", name, {
     hello: (m) => { $("#hCode").textContent = m.room; },
-    join: (m) => { if (mode === "host") { const p = mkPlayer(m.id, m.name, W.players.filter((q) => q.team === 0).length <= W.players.filter((q) => q.team === 1).length ? 0 : 1, "net"); p.net = m.id; replaceBot(p); } else { lobby.push({ id: m.id, name: m.name, net: m.id }); draw(); } },
+    join: (m) => { if (lobby.some((h) => h.net === m.id) || (W && W.players.some((q) => q.net === m.id && q.kind === "net"))) return;
+      if (mode === "host") { const p = mkPlayer(m.id, m.name, W.players.filter((q) => q.team === 0).length <= W.players.filter((q) => q.team === 1).length ? 0 : 1, "net"); p.net = m.id; replaceBot(p); } else { lobby.push({ id: m.id, name: m.name, net: m.id }); draw(); } },
     leave: (m) => { lobby = lobby.filter((h) => h.net !== m.id); draw(); if (W && mode === "host") { const p = W.players.find((q) => q.net === m.id); if (p) { p.kind = "bot"; p.net = null; p.ai = mkPlayer(0, "", 0, "bot").ai; p.name += " (bot)"; } } },
     msg: (m, from) => { if (mode === "host") hostMsg(m, from); },
     error: (m) => { alert("LAN: " + m.why); showPanel("pMain"); },
