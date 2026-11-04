@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-04T00:02:55Z",
     "date": "2026-11-04",
-    "built_at": "2026-11-04 01:09 UTC",
+    "built_at": "2026-11-04 01:43 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -80,16 +80,52 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
-      "title": "Midterm elections 2026 live updates: Ossoff wins Georgia Senate, House control 'leans' Dem",
+      "title": "Midterm elections 2026 live updates: Cooper wins N.C. Senate, House control 'leans' Dem",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/03/midterm-elections-2026-live-updates.html",
-      "at": "2026-11-04T01:08:04+00:00"
+      "at": "2026-11-04T01:39:37+00:00"
+    },
+    {
+      "title": "Tech in a “needed reset:” 5 sectors to own right now",
+      "src": "Yahoo Finance",
+      "url": "https://www.thestreet.com/video/tech-in-a-much-needed-reset-5-sectors-to-own-right-now?.tsrc=rss",
+      "at": "2026-11-04T01:23:09+00:00"
+    },
+    {
+      "title": "Stock Futures Drop as Democrats Post Strong Early Numbers",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/38d9d41e-bd5e-3a23-a06f-f6054bb3d7b2/stock-futures-drop-as.html?.tsrc=rss",
+      "at": "2026-11-04T01:09:41+00:00"
     },
     {
       "title": "Google responds to political backlash over removing search from schools that ban AI",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/03/google-responds-to-outrage-over-removing-search-in-schools-that-ban-ai.html",
       "at": "2026-11-04T01:07:01+00:00"
+    },
+    {
+      "title": "President Donald Trump Claims He'll \"Veto Everything\" if Democrats Retake Congress, and It Has Big Implications for the Stock Market",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/investing/2026/11/03/donald-trump-claims-veto-everything-democrats-retake-congress-big-implications-for-stock-market/?.tsrc=rss",
+      "at": "2026-11-04T01:07:01+00:00"
+    },
+    {
+      "title": "U.S. stock futures steady with midterms in focus; AMD rallies on strong earnings",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/u-stock-futures-steady-midterms-010643358.html?.tsrc=rss",
+      "at": "2026-11-04T01:06:43+00:00"
+    },
+    {
+      "title": "New XRP Wallets Just Hit Their Sixth-Highest Day of 2026. Are They New Buyers or Coins Leaving Binance?",
+      "src": "Yahoo Finance",
+      "url": "https://247wallst.com/investing/cryptocurrency/2026/11/03/new-xrp-wallets-just-hit-their-sixth-highest-day-of-2026-are-they-new-buyers-or-coins-leaving-binance/?.tsrc=rss",
+      "at": "2026-11-04T01:01:52+00:00"
+    },
+    {
+      "title": "Review & Preview: A Divided Market on Election Day",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/d01706ed-bcdd-34f3-a5ca-4605fa78c17b/review-%26-preview%3A-a-divided.html?.tsrc=rss",
+      "at": "2026-11-04T00:55:00+00:00"
     },
     {
       "title": "The 7,500 BTC That Left Binance’s SAFU Fund Has Moved Again, to an Unlabeled Address",
@@ -218,46 +254,10 @@ window.MIB_BRIEF = {
       "at": "2026-11-03T22:30:13+00:00"
     },
     {
-      "title": "Crypto Market Today, Nov. 3: XRP and Zcash Defy Recent Weakness as Midterm Elections Take Center Stage",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/03/crypto-market-today-nov-3-xrp-and-zcash-defy-recent-weakness-as-midterm-elections-take-center-stage/?.tsrc=rss",
-      "at": "2026-11-03T22:30:02+00:00"
-    },
-    {
       "title": "JetBlue raises bag fees for third time in a year as fuel costs bite",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/03/jetblue-checked-bag-fee.html",
       "at": "2026-11-03T22:26:20+00:00"
-    },
-    {
-      "title": "Stock Market Today, Nov. 3: Stellantis Falls on Reports of Chip Shortage Disrupting Fiat Output",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/03/stock-market-today-nov-3-stellantis-falls-on-reports-of-chip-shortage-disrupting-fiat-output/?.tsrc=rss",
-      "at": "2026-11-03T22:24:16+00:00"
-    },
-    {
-      "title": "US tech stocks recover after selloff spooks investors over AI spending",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/us-tech-stocks-recover-selloff-221845320.html?.tsrc=rss",
-      "at": "2026-11-03T22:18:45+00:00"
-    },
-    {
-      "title": "Stock Market Today, Nov. 3: Palantir Falls After Q3 Results as Valuation Stays in Focus",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/03/stock-market-today-nov-3-palantir-falls-after-q3-results-as-valuation-stays-in-focus/?.tsrc=rss",
-      "at": "2026-11-03T22:17:09+00:00"
-    },
-    {
-      "title": "How Much Did Dominion Stock Really Pay Its Holders?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/d/articles/622175/how-much-did-dominion-stock-really-pay-its-holders/2026-11-03?.tsrc=rss",
-      "at": "2026-11-03T22:16:59+00:00"
-    },
-    {
-      "title": "Superior Group (SGC) Stock Declines While Market Improves: Some Information for Investors",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/superior-group-sgc-stock-declines-221502830.html?.tsrc=rss",
-      "at": "2026-11-03T22:15:02+00:00"
     }
   ],
   "footer": {
