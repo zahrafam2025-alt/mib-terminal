@@ -12,14 +12,33 @@
   var get = function (sym) { for (var i = 0; i < items.length; i++) if (items[i].sym === sym) return items[i]; return null; };
 
   // the numbers strip: the build's snapshot first, then the live (15-min delayed) feed every minute
+  var chg = function (t) { return t.bp != null ? (t.bp >= 0 ? "+" : "−") + Math.abs(t.bp) + " bp" : pct(t.pct); }, chc = function (t) { return t.bp != null ? cls(t.bp) : cls(t.pct); };
+  var px = function (t) { return t.price != null ? t.price.toLocaleString("en-US", { maximumFractionDigits: t.price > 1000 ? 0 : 2 }) : ""; };
   var paintTape = function (list) {
     if (!list || !list.length) return;
     items = list;
-    $("tape").innerHTML = list.map(function (t) {
-      var ch = t.bp != null ? (t.bp >= 0 ? "+" : "−") + Math.abs(t.bp) + " bp" : pct(t.pct), c = t.bp != null ? cls(t.bp) : cls(t.pct);
-      return '<div class="tk"><span>' + esc(t.label) + '</span>' + (t.price != null ? t.price.toLocaleString("en-US", { maximumFractionDigits: 2 }) : "") + ' <b class="' + c + '">' + ch + "</b></div>";
+    var one = list.map(function (t) { return '<div class="tk"><span>' + esc(t.label) + '</span>' + px(t) + ' <b class="' + chc(t) + '">' + chg(t) + "</b></div>"; }).join("");
+    $("tape").innerHTML = one + '<div class="tk sep" aria-hidden="true">·</div>' + one;            // twice, so it can roll round
+    var b = $("board"); if (b) b.innerHTML = list.map(function (t) {
+      var v = t.bp != null ? t.bp / 10 : t.pct, k = v == null ? 0 : Math.max(-1, Math.min(1, v / 1.5));
+      var bg = v == null ? "var(--raised)" : "color-mix(in srgb, " + (k >= 0 ? "var(--up)" : "var(--down)") + " " + Math.round(10 + Math.abs(k) * 38) + "%, var(--surface))";
+      return '<div class="bt" style="background:' + bg + '"><span>' + esc(t.label) + '</span><b class="tnum">' + px(t) + '</b><i class="tnum ' + chc(t) + '">' + chg(t) + "</i></div>";
     }).join("");
   };
+  // 4 Nov (owner: "the bar with key info is not rolling, it has to be swiped with a finger"): it rolls by itself, a
+  // finger or the mouse stops it for a few seconds, and it can still be swiped
+  (function () {
+    var el = $("tape"), hold = 0, last = performance.now();
+    var stop = function () { hold = performance.now() + 4000; };
+    ["pointerdown", "touchstart", "wheel", "mouseenter"].forEach(function (ev) { el.addEventListener(ev, stop, { passive: true }); });
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var step = function (t) {
+      var dt = Math.min(0.05, (t - last) / 1000); last = t;
+      if (t > hold && el.scrollWidth > el.clientWidth + 4) { el.scrollLeft += 34 * dt; var half = el.scrollWidth / 2; if (el.scrollLeft >= half) el.scrollLeft -= half; }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  })();
   if (ARCHIVE) { var tp = document.querySelector(".tape"); if (tp) tp.hidden = true; }
   else {
     paintTape(items);
@@ -37,7 +56,7 @@
   var vixJump = (S.changed || []).filter(function (c) { return /^VIX/.test(c); })[0];
   var h = [];
   if (spx && spx.pct != null) h.push((spx.pct >= 0.15 ? "Stocks edge up" : spx.pct <= -0.15 ? "Stocks slip" : "Stocks go nowhere") + (br != null && br < 40 && spx.pct > 0 ? " on a handful of giants" : br != null && br > 60 ? " with most names joining in" : ""));
-  if (vixJump || (R.vix && R.vix > 20)) h.push("the fear gauge " + (vixJump ? "jumps to " + Number(R.vix).toFixed(1) : "sits above 20"));
+  if (vixJump || (R.vix && R.vix > 20)) { var vx = (get("VIX") || {}).price || R.vix; h.push("the VIX fear gauge " + (vixJump ? "jumps to " + Number(vx).toFixed(1) : "sits above 20, at " + Number(vx).toFixed(1))); }
   $("headline").textContent = h.length ? h.join(" while ").replace(/^./, function (c) { return c.toUpperCase(); }) + "." : (S.story || {}).lede || "";
   var next = ((S.watchlist || {}).items || []).filter(function (e) { return e.impact === "high"; })[0] || ((S.watchlist || {}).items || [])[0];
   var rows = [
@@ -95,19 +114,56 @@
     }).join("") + "</div></div>";
   }).join("") || '<p class="sub">No major event this week.</p>';
 
-  // deep dives
+  // deep dives (4 Nov, owner: "the themes are great, the content and substance not"): each one gives the figures that
+  // matter and the day's headlines on that theme; nothing generic
   var dives = [], desk = S.desks || {}, cr = desk.crypto || {}, lv = (desk.chart_read || {}).levels || {};
-  dives.push({ t: "Who is buying", p: (tape.body || [""])[0].split(" — ")[0] + ".", body: "<p>" + esc((tape.body || [""])[0]) + "</p><ul>" + (tape.observations || []).map(function (o) { return "<li>" + esc(o) + "</li>"; }).join("") + "</ul>" });
+  var TAG = { crypto: /bitcoin|crypto|\bether\b|ethereum|\bbtc\b|binance|coinbase|stablecoin|blockchain|solana/i, ai: /\bai\b|nvidia|chip|semiconductor|\bamd\b|intel|tsmc|openai|data cent|broadcom|micron|qualcomm|anthropic/i,
+    macro: /\bfed\b|powell|inflation|\bcpi\b|jobs|payroll|unemployment|yield|treasur|rate cut|rate hike|gdp|tariff|recession|consumer/i, energy: /\boil\b|opec|crude|natural gas|gasoline|\bgold\b|copper|commodit/i,
+    earn: /earnings|revenue|guidance|outlook|quarter|q[1-4]\b|beats|misses|profit/i };
+  var tagged = function (k, n) { return NEWS.filter(function (x) { return TAG[k].test(x.title); }).slice(0, n || 4); };
+  var heads = function (k) { var xs = tagged(k); return xs.length ? '<div class="label">In the news</div><ul class="hl">' + xs.map(function (x) { return '<li><a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + esc(x.title) + "</a> <small>" + esc(x.src) + " · " + esc(ago(x.at)) + "</small></li>"; }).join("") + "</ul>" : ""; };
+  var bar2 = function (l, v, max, txt) { var w = Math.max(2, Math.min(100, 100 * Math.abs(v) / (max || 1))); return '<div class="mini"><span>' + esc(l) + '</span><div class="mt"><i style="width:' + w + "%;background:" + (v >= 0 ? "var(--up)" : "var(--down)") + '"></i></div><b class="tnum ' + cls(v) + '">' + esc(txt) + "</b></div>"; };
+  var share = function (l, v, txt, goodHigh) { return '<div class="mini"><span>' + esc(l) + '</span><div class="mt"><i style="width:' + Math.max(2, Math.min(100, v)) + "%;background:" + ((goodHigh ? v >= 50 : v < 50) ? "var(--up)" : "var(--warn)") + '"></i></div><b class="tnum">' + esc(txt) + "</b></div>"; };
+  var brd = tape.breadth || {}, sec2 = ((S.money || {}).sectors || []);
+  if (brd.pct != null) {
+    var lead = ((S.money || {}).leaders || []).slice(0, 3).map(function (x) { return x[0] + " (" + x[2] + ")"; }).join(", "), lag = ((S.money || {}).laggards || []).slice(0, 3).map(function (x) { return x[0] + " (" + x[2] + ")"; }).join(", ");
+    dives.push({ t: "Who is buying", p: brd.pct + "% of " + (brd.n || "the") + " instruments rose · " + (tape.green_sectors != null ? tape.green_sectors + " of " + tape.total_sectors + " sectors green" : "") + (tape.concentration != null ? " · top 3 names = " + Math.round(tape.concentration * 100) + "% of the gains" : ""),
+      body: share("Instruments rising", brd.pct, brd.pct + "%", true) + (tape.green_sectors != null ? share("Sectors green", tape.green_sectors / tape.total_sectors * 100, tape.green_sectors + " / " + tape.total_sectors, true) : "")
+        + (tape.concentration != null ? share("Gains from the top 3 names", tape.concentration * 100, Math.round(tape.concentration * 100) + "%", false) : "")
+        + (brd.delta != null ? "<p>Compared with the same session before, " + Math.abs(Math.round(brd.delta * 100)) + "% " + (brd.delta < 0 ? "fewer" : "more") + " instruments are taking part. " + (brd.pct < 40 ? "A narrow rise like this often fades unless more names join in." : brd.pct > 60 ? "A broad move: most of the market agrees." : "") + "</p>" : "")
+        + (lead ? "<p><b>Leading:</b> " + esc(lead) + "<br><b>Lagging:</b> " + esc(lag) + "</p>" : "") });
+  }
   var lvKeys = Object.keys(lv).filter(function (k) { return lv[k].range_low != null; });
-  if (lvKeys.length) dives.push({ t: "Price levels", p: "Where the big funds sit inside today's range: near the top is strength, near the bottom weakness.", body: lvKeys.map(function (k) { var x = lv[k];
-    return '<div class="lvl"><div style="display:flex;justify-content:space-between"><b>' + esc(k) + '</b><span class="tnum">' + x.price + " · " + x.range_pos_pct + '% of the range</span></div><div class="rng"><i style="left:calc(' + x.range_pos_pct + '% - 2px)"></i></div><div class="ends"><span>support ' + x.range_low + "</span><span>resistance " + x.range_high + "</span></div></div>"; }).join("") });
-  if (cr.body) dives.push({ t: "Crypto desk", p: "Bitcoin " + (cr.btc && cr.btc.price ? "$" + Math.round(cr.btc.price).toLocaleString("en-US") : "") + (cr.eth && cr.eth.price ? " · Ether $" + Math.round(cr.eth.price).toLocaleString("en-US") : ""),
-    body: "<p>" + esc(cr.body) + "</p>" + (cr.longs != null ? '<div class="label">Signals: ' + cr.longs + " up · " + cr.shorts + ' down</div><div class="bar"><i style="width:' + (100 * cr.longs / (cr.longs + cr.shorts || 1)) + '%;background:var(--up)"></i><i style="flex:1;background:var(--down);opacity:.55"></i></div>' : "") });
+  var NAMES = { SPY: "S&P 500", QQQ: "Nasdaq 100", SMH: "Chip stocks", XLB: "Materials", IWM: "Small caps", DIA: "Dow" };
+  if (lvKeys.length) dives.push({ t: "Price levels", p: lvKeys.map(function (k) { return (NAMES[k] || k) + " at " + lv[k].range_pos_pct + "% of its range"; }).slice(0, 2).join(" · "),
+    body: lvKeys.map(function (k) { var x = lv[k], pos = x.range_pos_pct, verdict = pos >= 75 ? "pressing on resistance" : pos <= 25 ? "close to support" : "mid-range";
+      return '<div class="lvl"><div style="display:flex;justify-content:space-between;gap:8px"><b>' + esc(NAMES[k] || k) + ' <small style="color:var(--muted)">' + esc(k) + '</small></b><span class="tnum">' + x.price + " · " + esc(verdict) + '</span></div><div class="rng"><i style="left:calc(' + pos + '% - 2px)"></i></div><div class="ends"><span>support ' + x.range_low + "</span><span>resistance " + x.range_high + "</span></div></div>"; }).join("")
+      + "<p>Near the top of the range, a break higher confirms strength; a fall back from it is a warning. Near the bottom, support either holds or gives way.</p>" });
+  if (cr.body || tagged("crypto").length) {
+    var btc = cr.btc || {}, eth = cr.eth || {}, lv2 = lv.BTCUSD || {};
+    dives.push({ t: "Crypto desk", p: (btc.price ? "Bitcoin $" + Math.round(btc.price).toLocaleString("en-US") : "") + (eth.price ? " · Ether $" + Math.round(eth.price).toLocaleString("en-US") : "") + (cr.longs != null ? " · " + cr.longs + " signals up, " + cr.shorts + " down" : ""),
+      body: (btc.price ? '<div class="tiles"><div><span>Bitcoin</span><b class="tnum">$' + Math.round(btc.price).toLocaleString("en-US") + "</b>" + (lv2.nearest_support ? "<small>support " + Math.round(lv2.nearest_support).toLocaleString("en-US") + " · resistance " + Math.round(lv2.nearest_resistance).toLocaleString("en-US") + "</small>" : "") + "</div>" + (eth.price ? '<div><span>Ether</span><b class="tnum">$' + Math.round(eth.price).toLocaleString("en-US") + "</b></div>" : "") + "</div>" : "")
+        + (cr.body ? "<p>" + esc(cr.body.replace(/Bias: [^\s]+ /, "Bias: ")) + "</p>" : "")
+        + (cr.longs != null ? share("Crypto signals up", cr.longs / (cr.longs + cr.shorts || 1) * 100, cr.longs + " of " + (cr.longs + cr.shorts), true) : "") + heads("crypto") });
+  }
   var semis = (desk.ai_semis || {}).names || [];
-  if (semis.length) dives.push({ t: "AI & chips", p: semis.map(function (n) { return n[0]; }).join(", ") + ": who is leading the AI trade today.", body: '<div class="chips">' + semis.map(function (n) { return '<span class="chip">' + esc(n[0]) + ' <span class="' + cls(n[1]) + '">' + (n[1] >= 0 ? "+" : "−") + Math.abs(n[1]).toFixed(2) + "</span></span>"; }).join("") + "</div><p style=\"color:var(--muted);margin:0\">Momentum scores from −1 to +1.</p>" });
-  var dis = S.disconnect || {};
-  if ((dis.divergences || []).length || (dis.mispriced || []).length) dives.push({ t: "What doesn't add up", p: (dis.divergences || [])[0] || "", body: "<ul>" + (dis.divergences || []).concat((dis.mispriced || []).map(function (m) { return m.text; })).map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" });
-  if ((S.consensus || []).length) dives.push({ t: "What everyone thinks", p: "Where the crowd leans, and what it may be missing.", body: "<ul>" + S.consensus.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" });
+  if (semis.length || tagged("ai").length) {
+    var best = semis.slice().sort(function (a, b) { return b[1] - a[1]; });
+    dives.push({ t: "AI & chips", p: best.length ? "Strongest " + best[0][0] + ", weakest " + best[best.length - 1][0] + (lv.SMH ? " · chip stocks at " + lv.SMH.range_pos_pct + "% of their range" : "") : "The AI trade in today's news",
+      body: best.map(function (n) { return bar2(n[0], n[1], 1, (n[1] >= 0 ? "+" : "−") + Math.abs(n[1]).toFixed(2)); }).join("") + (best.length ? '<p style="color:var(--muted)">Momentum from −1 (selling) to +1 (buying).</p>' : "") + heads("ai") });
+  }
+  var macroEv = ((S.watchlist || {}).items || []).filter(function (e) { return e.impact === "high"; });
+  if (macroEv.length || tagged("macro").length) dives.push({ t: "Jobs, inflation & the Fed", p: macroEv.length ? macroEv.length + " big releases ahead: " + macroEv.slice(0, 2).map(function (e) { return e.event; }).join(", ") : "The economy in today's news",
+    body: macroEv.map(function (e) { return "<p><b>" + esc(e.event) + "</b> · " + esc(e.when) + (e.consensus ? " · expected " + esc(e.consensus) : "") + (e.invalidates ? "<br><span style=\"color:var(--muted)\">A surprise: " + esc(e.invalidates) + "</span>" : "") + "</p>"; }).join("") + heads("macro") });
+  var oil = get("WTI"), gold = get("GOLD");
+  if (oil || gold || tagged("energy").length) dives.push({ t: "Oil, gold & commodities", p: [oil ? "Oil $" + oil.price + " " + pct(oil.pct) : "", gold ? "Gold $" + Math.round(gold.price) + " " + pct(gold.pct) : ""].filter(Boolean).join(" · ") || "Commodities in the news",
+    body: (oil || gold ? '<div class="tiles">' + [oil, gold, get("DXY")].filter(Boolean).map(function (t) { return "<div><span>" + esc(t.label) + '</span><b class="tnum">' + px(t) + '</b><small class="' + chc(t) + '">' + chg(t) + "</small></div>"; }).join("") + "</div>" : "") + heads("energy") });
+  if (tagged("earn").length) dives.push({ t: "Earnings", p: tagged("earn", 2).map(function (x) { return x.title.split(/[:,]/)[0]; }).join(" · "), body: heads("earn") });
+  var risks = [];
+  if ((S.story || {}).counter) risks.push("What could flip it: " + S.story.counter);
+  ((S.disconnect || {}).divergences || []).forEach(function (x) { if (risks.indexOf(x) < 0) risks.push(x); });
+  (S.changed || []).forEach(function (x) { risks.push("Changed since yesterday: " + x); });
+  if (risks.length) dives.push({ t: "Risks to watch", p: risks[0], body: "<ul>" + risks.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" });
   if ((S.glossary || []).length) dives.push({ t: "Words of the day", p: S.glossary.slice(0, 4).map(function (g) { return g[0]; }).join(" · "), body: '<div class="gl">' + S.glossary.map(function (g) { return "<div><b>" + esc(g[0]) + "</b> <span>" + esc(g[1]) + "</span></div>"; }).join("") + "</div>" });
   $("diveList").innerHTML = dives.map(function (x) { return '<details class="dive"><summary><div class="row"><h3>' + esc(x.t) + '</h3><span class="more">Open</span></div><p>' + esc(x.p) + '</p></summary><div class="body">' + x.body + "</div></details>"; }).join("");
 
@@ -117,11 +173,12 @@
   var cid = ls("arcade-cid"); if (!cid) { cid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); ls("arcade-cid", cid); }
   var day = (B.meta && B.meta.date) || new Date().toISOString().slice(0, 10), roomOf = { today: "brief-" + day, markets: "markets", crypto: "crypto", games: "games" };
   var room = "today", ws = null, tries = 0, msgs = [], online = 0, nameMode = !ls("arcade-name");
+  var AVS = window.MIB_AV || [], myAv = function () { var i = +ls("mib-avatar"); return isNaN(i) ? -1 : i; };
   var col = function (n) { var h = 0; for (var i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) % 360; return "hsl(" + h + " 55% 45%)"; };
   var hhmm = function (t) { var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); };
   var state = function (s) { $("chatState").textContent = s; };
   var paint = function () {
-    $("msgs").innerHTML = msgs.length ? msgs.map(function (m) { return '<div class="m"><span class="av" style="background:' + col(m.n) + '">' + esc((m.n || "?")[0].toUpperCase()) + '</span><div><div class="who">' + esc(m.n) + "<small>" + hhmm(m.at) + '</small></div><p>' + esc(m.x) + "</p></div></div>"; }).join("")
+    $("msgs").innerHTML = msgs.length ? msgs.map(function (m) { return '<div class="m"><span class="av" style="background:' + (AVS[m.a] ? "var(--raised)" : col(m.n)) + (AVS[m.a] ? ";font-size:18px" : "") + '">' + esc(AVS[m.a] || (m.n || "?")[0].toUpperCase()) + '</span><div><div class="who">' + esc(m.n) + "<small>" + hhmm(m.at) + '</small></div><p>' + esc(m.x) + "</p></div></div>"; }).join("")
       : '<p style="color:var(--muted);margin:0">' + (room === "today" ? "No comment on this brief yet. Be the first." : "Nobody has said anything here yet. Start it off.") + "</p>";
     $("msgs").scrollTop = 1e6;
   };
@@ -134,7 +191,7 @@
     if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} }
     var r = room;
     state("connecting…");
-    ws = new WebSocket(API.replace(/^http/, "ws") + "/chat?" + new URLSearchParams({ room: roomOf[r], name: ls("arcade-name") || "Guest", cid: cid }));
+    ws = new WebSocket(API.replace(/^http/, "ws") + "/chat?" + new URLSearchParams({ room: roomOf[r], name: ls("arcade-name") || "Guest", cid: cid, a: String(myAv()) }));
     ws.onmessage = function (e) {
       var d; try { d = JSON.parse(e.data); } catch (x) { return; }
       if (r !== room) return;
@@ -151,10 +208,21 @@
   $("rooms").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || b.dataset.room === room) return; room = b.dataset.room; [].forEach.call($("rooms").children, function (x) { x.classList.toggle("on", x === b); }); msgs = []; paint(); setForm(); connect(); });
   $("send").addEventListener("submit", function (e) {
     e.preventDefault(); var v = $("msg").value.trim(); if (!v) return;
-    if (nameMode) { var n = v.replace(/[^\p{L}\p{N} _.\-]/gu, "").trim().slice(0, 16); if (!n) return; ls("arcade-name", n); nameMode = false; $("msg").value = ""; setForm(); connect(); return; }
-    if (ws && ws.readyState === 1) { ws.send(JSON.stringify({ t: "say", x: v })); $("msg").value = ""; } else state("not connected yet");
+    if (nameMode) { var n = v.replace(/[^\p{L}\p{N} _.\-]/gu, "").trim().slice(0, 16); if (!n) return; ls("arcade-name", n); nameMode = false; $("msg").value = ""; setForm(); connect(); window.dispatchEvent(new CustomEvent("mib-me")); return; }
+    if (ws && ws.readyState === 1) {
+      ws.send(JSON.stringify({ t: "say", x: v })); $("msg").value = "";
+      var rs = (ls("mib-rooms") || "").split(",").filter(Boolean); if (rs.indexOf(roomOf[room]) < 0) { rs.push(roomOf[room]); ls("mib-rooms", rs.slice(-40).join(",")); }
+    } else state("not connected yet");
   });
   setForm(); connect();
+  addEventListener("mib-me", function () { nameMode = !ls("arcade-name"); setForm(); connect(); });   // a new name or avatar from the menu bar
+  // who is on the site right now (the menu bar's line to the server), to start a game on the spot
+  var paintHere = function () {
+    var h = window.MIB_HERE || { n: 0, who: [] }, el = $("here"); if (!el) return;
+    el.innerHTML = '<div class="label">Online now · ' + h.n + "</div>" + (h.who.length ? '<div class="chips">' + h.who.map(function (w) { return '<span class="chip">' + esc((AVS[w.a] || "👤") + " " + w.n) + (w.p === "arcade" ? ' <small style="color:var(--up)">playing</small>' : "") + "</span>"; }).join("") + "</div>"
+      : '<p style="color:var(--muted);margin:4px 0 0;font-size:14px">' + (h.n > 1 ? h.n + " people here, none has picked a name yet." : "Just you for now. Share the site and play together.") + "</p>");
+  };
+  addEventListener("mib-here", paintHere); paintHere();
   var G = [["Grand Prix", "race each other at Spa"], ["Strike & Defuse", "5 maps, up to 8 players"], ["Goal Rush", "2 v 2 football"], ["Corsican Empire", "build, gather, conquer"], ["Chaos City", "one city for everyone"], ["Rocks", "together or versus"]];
   $("games") && ($("games").innerHTML = G.map(function (g) { return '<a href="/arcade/"><b>' + esc(g[0]) + "</b><small>" + esc(g[1]) + "</small></a>"; }).join(""));
 

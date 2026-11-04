@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy · MIB Terminal</title>
+<meta name="description" content="MIB Terminal keeps no cookies and no tracking. What we store, why, for how long, and how to have it deleted.">
+<link rel="canonical" href="https://mibterminal.com/privacy.html">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/terminal.css">
+<style>
+  .doc { max-width: 720px; margin: 0 auto; padding-block: 28px 60px; }
+  .doc h1 { font: 800 clamp(28px, 4vw, 38px)/1.1 var(--display); margin: 0 0 10px; }
+  .doc h2 { margin-top: 28px; }
+  .doc p, .doc li { color: var(--muted); }
+  .doc table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .doc th, .doc td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .doc th { font: 700 11px var(--num); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .doc td:first-child { color: var(--ink); font-weight: 600; }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+<script src="/header.js" data-active="page"></script>
+<main class="gut"><article class="doc">
+  <p class="label">Privacy</p>
+  <h1>No cookies. No tracking. Only what you choose to share.</h1>
+  <p>MIB Terminal and its arcade use no cookies, no advertising, no analytics service and no tracking pixels. Nobody signs up: there is no account, no e-mail and no password.</p>
+
+  <h2>What is kept, and where</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>What</th><th>Where</th><th>Why, and for how long</th></tr></thead>
+    <tbody>
+      <tr><td>The nickname and avatar you pick</td><td>In your browser (and shown next to your messages and scores)</td><td>So friends know who is who. Until you change or clear it below.</td></tr>
+      <tr><td>Your scores</td><td>The scoreboard server</td><td>The top 10 per game, under your nickname. Only the best scores stay.</td></tr>
+      <tr><td>Your chat messages</td><td>The chat server</td><td>So others can read them. Each room keeps only its last 200 messages.</td></tr>
+      <tr><td>A random browser number</td><td>In your browser, and with your messages</td><td>So a reload brings you back to your place in a game, and so you can delete your own messages. It is not linked to who you are.</td></tr>
+      <tr><td>Visit counts</td><td>The site's server</td><td>How many visits each day, and the most people online at once. Counts only: no address, no device, no history of pages.</td></tr>
+      <tr><td>Your light or dark choice, your game settings</td><td>In your browser only</td><td>So the site looks the way you set it.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Please pick a nickname rather than your real name. The pages are served by GitHub Pages and the scores and chat by Cloudflare: like any host, they see your internet address while they answer you. Our own server keeps it for one minute in memory only, to stop score spam, and never writes it down.</p>
+
+  <h2>Delete what is yours</h2>
+  <p>This removes the messages you wrote from this browser, then clears your nickname, avatar and settings from it. Scores stay on the boards under the nickname (they carry no other information).</p>
+  <p><button class="btn" id="forget" type="button">Delete my messages and clear this browser</button></p>
+  <p id="forgetMsg" role="status"></p>
+
+  <h2>Translations and links</h2>
+  <p>The “Français” button opens the page through Google's page translator; Google then sees the page you translate. Headlines link to the news sites that published them.</p>
+
+  <h2>Questions</h2>
+  <p>Ask in the Lounge chat. Educational market commentary, not investment advice.</p>
+</article></main>
+<script>
+(function () {
+  var API = window.MIB_CHAT_API || "https://mib-arcade.terminalmib.workers.dev";
+  var ls = function (k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } };
+  document.getElementById("forget").addEventListener("click", function () {
+    var out = document.getElementById("forgetMsg"), cid = ls("arcade-cid"), rooms = ls("mib-rooms").split(",").filter(Boolean);
+    out.textContent = "Deleting…";
+    var clear = function (n) {
+      try { ["arcade-name", "mib-avatar", "mib-rooms", "mib-theme", "arcade-cid", "ov-view"].forEach(function (k) { localStorage.removeItem(k); }); } catch (e) {}
+      out.textContent = (n ? n + " message" + (n === 1 ? "" : "s") + " deleted. " : "No message of yours was found. ") + "Your nickname and settings are cleared from this browser.";
+    };
+    if (!cid || !rooms.length) { clear(0); return; }
+    fetch(API + "/api/forget", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ cid: cid, rooms: rooms }) })
+      .then(function (r) { return r.json(); }).then(function (d) { clear(d.deleted || 0); }).catch(function () { out.textContent = "The server did not answer. Try again in a minute."; });
+  });
+})();
+</script>
+</body>
+</html>

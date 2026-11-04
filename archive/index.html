@@ -237,6 +237,22 @@
     .menu-overlay, .menu-overlay a, .btn { transition: none; }
   }
 
+  /* 2026-11-04 (owner: "the week and the archive on the old layout should match the rest"): the new site's look,
+     light or dark like the homepage, no photo backdrop, the text on a card */
+  :root { --bg-deep: #f4f6f9; --panel: #ffffff; --panel-line: #e1e5ec; --ink: #0f172a; --muted: #5b6474; --faint: #5b6474; --gold: #b7791f; --gold-dk: #e8a317;
+    --serif: "Archivo", "Segoe UI", sans-serif; --sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) { --bg-deep: #0b0f17; --panel: #121826; --panel-line: #232c40; --ink: #e8ecf3; --muted: #95a0b4; --faint: #95a0b4; --gold: #f5b53b; color-scheme: dark; } }
+  :root[data-theme=dark] { --bg-deep: #0b0f17; --panel: #121826; --panel-line: #232c40; --ink: #e8ecf3; --muted: #95a0b4; --faint: #95a0b4; --gold: #f5b53b; color-scheme: dark; }
+  #hero-art, #vignette { display: none !important; }
+  main { padding: 28px max(16px, env(safe-area-inset-right, 0px)) 80px max(16px, env(safe-area-inset-left, 0px)); }
+  .scene-inner { background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; padding: clamp(18px, 4vw, 40px); }
+  .hero { padding-bottom: 24px; }
+  .hero h1 { font: 800 clamp(28px, 4vw, 42px)/1.15 var(--serif); text-shadow: none; letter-spacing: -.01em; }
+  p { font: 400 18px/1.65 var(--sans); text-shadow: none; }
+  h2, li, .hero .proof { text-shadow: none; }
+  li { color: var(--ink); }
+  .arch-list a { font: 600 18px/1.5 var(--sans); }
+  .btn { box-shadow: none; color: #1a1205; background: var(--gold-dk); }
 </style>
 </head>
 <body>
@@ -250,6 +266,7 @@
 
 <h2>DAILY ARCHIVE</h2>
 <ul class="arch-list">
+<li><a href="daily/2026-11-04.html">2026-11-04 — the full daily brief</a></li>
 <li><a href="daily/2026-11-03.html">2026-11-03 — the full daily brief</a></li>
 <li><a href="daily/2026-09-21.html">2026-09-21 — the full daily brief</a></li>
 <li><a href="daily/2026-09-18.html">2026-09-18 — the full daily brief</a></li>
