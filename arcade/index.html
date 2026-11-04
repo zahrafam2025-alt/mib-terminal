@@ -1038,13 +1038,14 @@ function openSheet(d) {
 }
 (() => {
   const st = document.createElement("style");
-  st.textContent = `#gsheet{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(5,7,13,.72)}#gsheet.open{display:flex}
-#gsheet .scard{position:relative;width:min(420px,92%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;display:grid;gap:10px;font:14px "Segoe UI",sans-serif}
+  st.textContent = `#gsheet{position:absolute;inset:0;z-index:6;display:none;overflow:auto;padding:8px 0;box-sizing:border-box;background:rgba(5,7,13,.72)}#gsheet.open{display:flex}
+#gsheet .scard{position:relative;margin:auto;width:min(420px,92%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;display:grid;gap:10px;font:14px "Segoe UI",sans-serif}
 #gsheet .stitle{font:800 22px Consolas,monospace;letter-spacing:.06em}#gsheet .ssub{color:var(--muted);margin-top:-6px}
 #gsheet .srow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}#gsheet .srow span{width:80px;color:var(--muted);font-size:13px}
 #gsheet .srow button{padding:6px 10px;border-radius:999px}#gsheet .srow button.on{background:#b45309;border-color:#f59e0b;color:#fff}
 #gsheet .sbtns{display:grid;gap:8px;margin-top:4px}#gsheet .sbtns button{padding:12px;font-size:16px;font-weight:700;border-radius:10px}#gsheet .sbtns .pri{background:#b45309;border-color:#f59e0b;color:#fff}
-#gsheet .sclose{position:absolute;right:8px;top:8px;padding:4px 9px;border-radius:8px}`;
+#gsheet .sclose{position:absolute;right:8px;top:8px;padding:4px 9px;border-radius:8px}
+@media (max-height:480px){#gsheet .scard{width:min(640px,94%);gap:6px;padding:10px 12px}#gsheet .stitle{font-size:18px}#gsheet .sbtns{grid-auto-flow:column;grid-auto-columns:1fr}#gsheet .sbtns button{padding:9px 6px;font-size:14px}#gsheet .srow button{padding:4px 9px}}`;
   document.head.appendChild(st);
 })();
 const pageRoom = (game, how, room) => { const u = new URL(ARC.page(game), location.href); u.searchParams.set("online", how); if (room) u.searchParams.set("room", room); location.href = u.href; };
