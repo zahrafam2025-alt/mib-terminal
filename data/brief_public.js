@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-04T00:02:55Z",
     "date": "2026-11-04",
-    "built_at": "2026-11-04 01:50 UTC",
+    "built_at": "2026-11-04 02:02 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -80,16 +80,22 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
+      "title": "Midterm elections 2026 live updates: Cooper wins N.C. Senate, House control 'leans' Dem",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/03/midterm-elections-2026-live-updates.html",
+      "at": "2026-11-04T02:01:03+00:00"
+    },
+    {
+      "title": "Is Money Leaving Stocks Or Just Moving Around? This Market Strategist Sees A ‘Healthy’ Rotation",
+      "src": "Yahoo Finance",
+      "url": "https://stocktwits.com/news-articles/markets/equity/is-money-leaving-stocks-or-just-moving-around-this-market-strategist-sees-a-healthy-rotation/cNGhuCQR9dN?.tsrc=rss",
+      "at": "2026-11-04T01:51:05+00:00"
+    },
+    {
       "title": "Midterm elections could jolt stocks if Democrats sweep Congress",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/03/midterm-election-stock-market.html",
       "at": "2026-11-04T01:49:58+00:00"
-    },
-    {
-      "title": "Midterm elections 2026 live updates: Cooper wins N.C. Senate, House control 'leans' Dem",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/03/midterm-elections-2026-live-updates.html",
-      "at": "2026-11-04T01:48:45+00:00"
     },
     {
       "title": "Tech in a “needed reset:” 5 sectors to own right now",
@@ -252,12 +258,6 @@ window.MIB_BRIEF = {
       "src": "Yahoo Finance",
       "url": "https://www.fool.com/coverage/stock-market-today/2026/11/03/stock-market-today-nov-3-grab-holdings-jumps-9-on-q3-revenue-beat-and-raised-2026-outlook/?.tsrc=rss",
       "at": "2026-11-03T22:35:46+00:00"
-    },
-    {
-      "title": "BC-Select Stock Indices",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/world-indices/articles/bc-select-stock-indices-223013736.html?.tsrc=rss",
-      "at": "2026-11-03T22:30:13+00:00"
     }
   ],
   "footer": {

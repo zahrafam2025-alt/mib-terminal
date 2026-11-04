@@ -133,3 +133,7 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
 .dive .body p { margin: 0; color: var(--muted); }
 #here { display: grid; gap: 6px; }
 @media (max-width: 480px) { .mini { grid-template-columns: minmax(0, 1fr) 70px; } .mini .mt { grid-column: 1 / -1; grid-row: 2; } .board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* 4 Nov: an event's reminder buttons (Coming up) */
+.remind { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.remind .btn { font-size: 13px; padding: 7px 12px; text-decoration: none; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }

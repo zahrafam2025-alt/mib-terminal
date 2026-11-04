@@ -30,9 +30,9 @@
   if (!document.querySelector('link[rel="manifest"]')) { var mf = document.createElement("link"); mf.rel = "manifest"; mf.href = "/site.webmanifest"; document.head.appendChild(mf); }
   var css = document.createElement("style");
   css.textContent = [
-    ".mibbar,.mb-pane{--mb-bg:#ffffff;--mb-ink:#0f172a;--mb-muted:#5b6474;--mb-raised:#eef1f6;--mb-line:#e1e5ec;--mb-brand:#e8a317;--mb-up:#0e9f5a}.mibbar{position:fixed;left:0;right:0;top:0;z-index:1000;background:var(--mb-bg);border-bottom:1px solid var(--mb-line);font:600 15px 'Source Sans 3','Segoe UI',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}",
-    "@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .mibbar,:root:not([data-theme=light]) .mb-pane{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}}",
-    ":root[data-theme=dark] .mibbar,:root[data-theme=dark] .mb-pane{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}",
+    ".mibbar,.mb-pane,.mb-add{--mb-bg:#ffffff;--mb-ink:#0f172a;--mb-muted:#5b6474;--mb-raised:#eef1f6;--mb-line:#e1e5ec;--mb-brand:#e8a317;--mb-up:#0e9f5a}.mibbar{position:fixed;left:0;right:0;top:0;z-index:1000;background:var(--mb-bg);border-bottom:1px solid var(--mb-line);font:600 15px 'Source Sans 3','Segoe UI',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}",
+    "@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .mibbar,:root:not([data-theme=light]) .mb-pane,:root:not([data-theme=light]) .mb-add{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}}",
+    ":root[data-theme=dark] .mibbar,:root[data-theme=dark] .mb-pane,:root[data-theme=dark] .mb-add{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}",
     "body{padding-top:calc(57px + env(safe-area-inset-top,0px)) !important}body.playing{padding-top:0 !important}",
     "html{scroll-padding-top:calc(70px + env(safe-area-inset-top,0px))}",
     ".mibbar .mb-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:content-box}",
@@ -118,7 +118,7 @@
       say(/iPhone|iPad/.test(navigator.userAgent) ? L("On iPhone: tap Share ⬆︎ at the bottom of Safari, then “Add to Home Screen”.", "Sur iPhone : touche Partager ⬆︎ en bas de Safari, puis « Sur l'écran d'accueil ».") : L("In your browser's menu (⋮), choose “Install app” or “Add to Home screen”.", "Dans le menu du navigateur (⋮), choisis « Installer l'application » ou « Ajouter à l'écran d'accueil »."));
     }
     if (act === "share") {
-      var d = { title: "MIB Terminal", text: "The market in 3 minutes, then chat and play together", url: "https://mibterminal.com/" };
+      var d = { title: "MIB Terminal", text: L("The market in 3 minutes, then chat and play together. Open it and add it to your home screen:", "Le marché en 3 minutes, puis on discute et on joue ensemble. Ouvre-le et ajoute-le à ton écran d'accueil :"), url: "https://mibterminal.com/?add=1" };
       if (navigator.share) navigator.share(d).catch(function () {});
       else if (navigator.clipboard) navigator.clipboard.writeText(d.url).then(function () { say(L("Link copied: send it to a friend.", "Lien copié : envoie-le à un ami.")); }, function () { say(d.url); });
       else say(d.url);
@@ -141,6 +141,35 @@
   };
   if (fr) translate();
   addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; });
+  // ---- the home-screen invitation (4 Nov, owner: "sharing with a friend just opens the browser, it does not add the
+  // icon to the home screen"): no website may put its icon there by itself, so a phone that is not using the installed
+  // app gets a small bar: on Android its button opens the phone's own install window, on an iPhone (where Apple allows
+  // nothing more) it shows the two taps. Shown at once for a shared link (?add=1), otherwise from the second visit;
+  // ✕ hides it for good.
+  (function () {
+    var installed = (navigator.standalone === true) || matchMedia("(display-mode: standalone)").matches;
+    var q = new URLSearchParams(location.search), shared = q.get("add") === "1";
+    if (shared) { q.delete("add"); history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash); }
+    var visits = (+ls("mib-visits") || 0) + 1; ls("mib-visits", String(visits));
+    if (installed || !matchMedia("(pointer: coarse)").matches || ls("mib-add-no") || (!shared && visits < 2) || active === "arcade") return;
+    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    var st = document.createElement("style");
+    st.textContent = ".mb-add{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:1002;background:var(--mb-bg);color:var(--mb-ink);border:1px solid var(--mb-line);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.35);padding:12px 12px 12px 14px;display:flex;gap:10px;align-items:center;font:600 15px/1.35 'Source Sans 3',sans-serif}"
+      + ".mb-add img{width:40px;height:40px;border-radius:9px;flex:none}.mb-add div{flex:1}.mb-add small{display:block;color:var(--mb-muted);font-weight:400;font-size:13px}body.playing .mb-add{display:none}.mb-add .mb-btn{font:700 14px 'Source Sans 3',sans-serif;padding:8px 14px;border-radius:10px;border:0;background:var(--mb-brand);color:#1a1205;cursor:pointer}.mb-add .x{background:none;border:0;color:var(--mb-muted);font-size:20px;padding:4px 6px;cursor:pointer}";
+    document.head.appendChild(st);
+    var box = document.createElement("div"); box.className = "mb-add notranslate"; box.setAttribute("translate", "no");
+    box.innerHTML = '<img src="/arcade/icon-192.png" alt=""><div>' + L("Add MIB to your home screen", "Ajoute MIB à ton écran d'accueil") + "<small>" + L("One tap to the market, the chat and the games.", "Le marché, le chat et les jeux en un geste.") + '</small></div><button class="mb-btn pri" type="button" data-add="1">' + L("Add", "Ajouter") + '</button><button class="x" type="button" aria-label="close">✕</button>';
+    var go = function () { document.body.appendChild(box); };
+    if (document.body) setTimeout(go, shared ? 600 : 2500); else addEventListener("DOMContentLoaded", function () { setTimeout(go, 2500); });
+    box.addEventListener("click", function (e) {
+      if (e.target.closest(".x")) { ls("mib-add-no", "1"); box.remove(); return; }
+      if (!e.target.closest("[data-add]")) return;
+      if (deferred) { deferred.prompt(); deferred.userChoice && deferred.userChoice.then(function (c) { if (c && c.outcome === "accepted") box.remove(); }); deferred = null; return; }
+      box.querySelector("div").innerHTML = ios ? L("Tap <b>Share ⬆︎</b> at the bottom of the screen, then <b>“Add to Home Screen”</b>.", "Touche <b>Partager ⬆︎</b> en bas de l'écran, puis <b>« Sur l'écran d'accueil »</b>.")
+        : L("Open the browser's menu <b>⋮</b>, then <b>“Install app”</b> or <b>“Add to Home screen”</b>.", "Ouvre le menu du navigateur <b>⋮</b>, puis <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.");
+      e.target.closest("[data-add]").remove();
+    });
+  })();
 
   // ---- presence: one light line to the chat server; it counts this visit (no cookie, nothing personal) and
   // says who is online. Your place shows only your chosen name, avatar and the page you are on.

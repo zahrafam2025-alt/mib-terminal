@@ -28,13 +28,19 @@
   // 4 Nov (owner: "the bar with key info is not rolling, it has to be swiped with a finger"): it rolls by itself, a
   // finger or the mouse stops it for a few seconds, and it can still be swiped
   (function () {
-    var el = $("tape"), hold = 0, last = performance.now();
-    var stop = function () { hold = performance.now() + 4000; };
+    var el = $("tape"), hold = 0, last = performance.now(), pos = 0, held = false;
+    var stop = function () { hold = performance.now() + 4000; held = true; };
     ["pointerdown", "touchstart", "wheel", "mouseenter"].forEach(function (ev) { el.addEventListener(ev, stop, { passive: true }); });
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // 4 Nov (owner: "the bar is not rolling any more"): half a pixel a frame was added to scrollLeft, which Safari keeps
+    // in whole pixels, so it never moved; the position is now kept here and written whole
     var step = function (t) {
       var dt = Math.min(0.05, (t - last) / 1000); last = t;
-      if (t > hold && el.scrollWidth > el.clientWidth + 4) { el.scrollLeft += 34 * dt; var half = el.scrollWidth / 2; if (el.scrollLeft >= half) el.scrollLeft -= half; }
+      if (t > hold && el.scrollWidth > el.clientWidth + 4) {
+        if (held) { pos = el.scrollLeft; held = false; }             // carry on from where a finger left it
+        pos += 34 * dt; var half = el.scrollWidth / 2; if (pos >= half) pos -= half;
+        el.scrollLeft = Math.round(pos);
+      }
       requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
@@ -107,10 +113,25 @@
   var evs = ((S.watchlist || {}).items || []).slice().sort(function (a, b) { return when(a) - when(b); }), days = {};   // soonest first
   evs.forEach(function (e) { var k = (e.when || "").split(" ").slice(0, 3).join(" "); (days[k] = days[k] || []).push(e); });
   var impc = { high: "var(--down)", medium: "var(--warn)", low: "var(--muted)" };
+  // 4 Nov (owner: "a coming-up event should have a simple way to set a reminder, like adding it to the calendar"): a
+  // calendar file (iPhone, Android, Outlook, Mac: it opens "add to calendar") with an alert 15 minutes before, or Google
+  // Calendar's own page. Nothing is sent anywhere until one is tapped.
+  var stamp = function (t) { return new Date(t).toISOString().replace(/[-:]/g, "").replace(/\.\d+/, ""); };
+  var remind = function (e) {
+    var t = when(e); if (t >= 9e15) return "";
+    var title = (e.event || "Market event") + " (MIB Terminal)", note = [e.confirms ? "As expected: " + e.confirms : "", e.invalidates ? "Surprise: " + e.invalidates : "", "https://mibterminal.com/#calendar"].filter(Boolean).join("\n");
+    var icsEsc = function (x) { return String(x).replace(/\\/g, "\\\\").replace(/[,;]/g, "\\$&").replace(/\n/g, "\\n"); };
+    var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//MIB Terminal//EN", "BEGIN:VEVENT", "UID:" + t + "-" + String(e.event || "").replace(/\W+/g, "") + "@mibterminal.com", "DTSTAMP:" + stamp(Date.now()),
+      "DTSTART:" + stamp(t), "DTEND:" + stamp(t + 30 * 60000), "SUMMARY:" + icsEsc(title), "DESCRIPTION:" + icsEsc(note),
+      "BEGIN:VALARM", "TRIGGER:-PT15M", "ACTION:DISPLAY", "DESCRIPTION:" + icsEsc(title), "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    var g = "https://calendar.google.com/calendar/render?" + new URLSearchParams({ action: "TEMPLATE", text: title, dates: stamp(t) + "/" + stamp(t + 30 * 60000), details: note });
+    return '<span class="remind"><a class="btn" download="mib-' + stamp(t).slice(0, 8) + '.ics" href="data:text/calendar;charset=utf-8,' + encodeURIComponent(ics) + '">🔔 Add to my calendar</a>'
+      + '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(g) + '">Google Calendar</a></span>';
+  };
   $("cal").innerHTML = Object.keys(days).map(function (k) {
     return '<div class="day"><div class="dl">' + esc(k) + '</div><div class="ev">' + days[k].map(function (e) {
       return '<details class="ev1"><summary><i class="imp" style="background:' + (impc[e.impact] || "var(--muted)") + '" title="' + esc(e.impact) + ' impact"></i><b>' + esc(e.event) + '</b><span class="tm">' + esc((e.when || "").split(" ").slice(3).join(" ")) + (e.consensus ? " · exp. " + esc(e.consensus) : "") + "</span></summary>"
-        + '<div class="body">' + (e.confirms ? "<span>As expected: " + esc(e.confirms) + "</span>" : "") + (e.invalidates ? "<span>Surprise: " + esc(e.invalidates) + "</span>" : "") + (!e.confirms && !e.invalidates ? "<span>" + esc(e.impact) + " impact</span>" : "") + "</div></details>";
+        + '<div class="body">' + (e.confirms ? "<span>As expected: " + esc(e.confirms) + "</span>" : "") + (e.invalidates ? "<span>Surprise: " + esc(e.invalidates) + "</span>" : "") + (!e.confirms && !e.invalidates ? "<span>" + esc(e.impact) + " impact</span>" : "") + remind(e) + "</div></details>";
     }).join("") + "</div></div>";
   }).join("") || '<p class="sub">No major event this week.</p>';
 
