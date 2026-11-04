@@ -270,6 +270,15 @@ const passable = (x, y) => { if (!inMap(x, y) || G.terr[idx(x, y)] === 1) return
   return e.t === "FARM" || (e.t === "GATE" && PASSO >= 0 && e.o >= 0 && G.players[e.o].team === G.players[PASSO].team); };
 const passShip = (x, y) => inMap(x, y) && G.terr[idx(x, y)] >= 1 && !G.occ[idx(x, y)];
 let PASS = passable;
+function nearFree(x, y, ok, R = 12) {
+  const cx = Math.floor(x), cy = Math.floor(y);
+  for (let r = 0; r <= R; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+    if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+    if (ok(cx + dx, cy + dy)) return [cx + dx + 0.5, cy + dy + 0.5];
+  }
+  return null;
+}
+const passOf = (u) => (UT[u.t] && UT[u.t].fly ? inMap : UT[u.t] && UT[u.t].naval ? passShip : passable);
 function path(sx, sy, goal, hx, hy, limit = 6000) {
   sx = Math.floor(sx); sy = Math.floor(sy);
   const open = [], g = new Map(), from = new Map(), h = (x, y) => Math.hypot(x - hx, y - hy);
@@ -330,6 +339,14 @@ function command(o, c) {
     return;
   }
   if (c.k === "age") { const b = G.ents.get(c.id); const cost = AGECOST[pl.age + 1]; if (b && b.o === o && b.t === "TC" && b.done && cost && !pl.aging && afford(pl, cost)) { pay(pl, cost); pl.aging = true; pl.ageT = AGET; b.aging = true; } return; }
+  if (c.k === "demolish") { const b = G.ents.get(c.id); if (!b || b.k !== "b" || b.o !== o) return; const k = BT[b.t].cost || {}; for (const [r, v] of Object.entries(k)) pl.res[r] += Math.floor(v / 4); G.fx.push({ k: "dust", x: b.x + (b.sz || 1) / 2, y: b.y + (b.sz || 1) / 2, t: 0.8, s: 1.6 }); remove(b); if (o === ME) sfx("fall"); return; }
+  if (c.k === "relocate") {
+    const b = G.ents.get(c.id); if (!b || b.k !== "b" || b.o !== o || !b.done) return;
+    occupy(b, 0); const ok = canPlace(b.t, c.x, c.y, o);
+    if (!ok) { occupy(b, b.id); if (o === ME) sfx("cant"); return; }
+    b.x = c.x; b.y = c.y; occupy(b, b.id); b.rally = null; if (o === ME) sfx("done");
+    return;
+  }
   if (c.k === "place") {
     const vils = mine.filter((u) => u.t === "vil"), bt = BT[c.t];
     if (!bt || bt.age > pl.age || (bt.civ && bt.civ !== pl.civ) || (bt.max && [...G.ents.values()].filter((e) => e.o === o && e.t === c.t).length >= bt.max) || !afford(pl, bt.cost) || !canPlace(c.t, c.x, c.y, o)) { if (o === ME) sfx("cant"); return; }
@@ -407,6 +424,16 @@ function stepUnit(u, dt) {
     const [px, py] = u.path[0], dx = px - u.x, dy = py - u.y, d = Math.hypot(dx, dy), sp = ut.spd * dt;
     if (d <= sp) { u.x = px; u.y = py; u.path.shift(); } else { u.x += dx / d * sp; u.y += dy / d * sp; }
     u.face = Math.atan2(dy, dx); u.walk += dt;
+  }
+  if ((u.fixT = (u.fixT || 0) - dt) <= 0) {
+    u.fixT = 1; const ok = passOf(u);
+    PASSO = u.o; const inside = !ok(Math.floor(u.x), Math.floor(u.y)); PASSO = -1;
+    const lost = u.st === "move" && !(u.path && u.path.length) && u.dest && Math.hypot(u.dest[0] - u.x, u.dest[1] - u.y) > 1.6;
+    if (inside || (lost && !u.retried)) {
+      PASSO = u.o; const f = nearFree(u.x, u.y, ok); PASSO = -1;
+      if (f) { if (inside) { u.x = f[0]; u.y = f[1]; } if (u.dest) { goTo(u, u.dest[0], u.dest[1]); u.st = u.st === "idle" ? "move" : u.st; } }
+      u.retried = lost && !inside;
+    } else if (u.path && u.path.length) u.retried = false;
   }
   const moving = u.path && u.path.length;
   if (u.st === "idle" || (u.st === "move" && !moving)) {
@@ -515,7 +542,9 @@ function stepBuilding(b, dt) {
     if (q.p >= 1) {
       b.q.shift(); let [cx, cy] = [b.x + b.sz / 2, b.y + b.sz + 0.5];
       if (ut.naval) { const w = dockWater(b.x, b.y, b.sz); if (!w) return; [cx, cy] = w; }
-      const u = unit(b.o, q.t, cx + (ut.naval ? 0 : rnd(-0.5, 0.5)), cy);
+      const free = ut.fly ? null : nearFree(cx, cy, ut.naval ? passShip : passable);
+      if (free) [cx, cy] = free;
+      const u = unit(b.o, q.t, cx + (ut.naval || free ? 0 : rnd(-0.5, 0.5)), cy);
       if (q.t === "strel" && pl.pop + 1 < pl.cap) unit(b.o, "strel", cx + 0.6, cy);
       G.events.push({ k: "born", o: b.o, t: q.t });
       if (b.rally && !ut.naval) { const t = G.ents.get(G.occ[idx(Math.floor(b.rally[0]), Math.floor(b.rally[1]))] || 0); if (t && t.k === "r" && u.t === "vil") command(b.o, { k: "go", ids: [u.id], tgt: t.id, x: b.rally[0], y: b.rally[1] }); else { u.st = "move"; goTo(u, b.rally[0], b.rally[1]); } }
@@ -1386,6 +1415,10 @@ function buttons() {
   if (b && b.t === "TC" && pl.heroDown) out.push([`Revive ${CIVS[pl.civ].hero.split(" ")[0]}`, "E", { f: 200, g: 150 }, () => order({ k: "revive", id: b.id }), afford(pl, { f: 200, g: 150 }), "your hero, back on his feet"]);
   if (b && b.t === "TC" && pl.age < 3) out.push([`Advance to ${AGES[pl.age + 1]}`, "U", AGECOST[pl.age + 1], () => order({ k: "age", id: b.id }), !pl.aging && afford(pl, AGECOST[pl.age + 1]), pl.aging ? "advancing..." : ""]);
   if (sel.some((e) => e.k === "u")) out.push(["Stop", "X", null, () => order({ k: "stop", ids: sel.map((e) => e.id) }), true, ""]);
+  if (b && !BT[b.t].wall) out.push(["Move", "M", null, () => { UI.placing = b.t; UI.moving = b.id; }, true, "pick its new place"]);
+  if (b) out.push([UI.armed === b.id && performance.now() - UI.armedT < 3000 ? "Sure? Demolish" : "Demolish", "DELETE", null, () => {
+    if (UI.armed === b.id && performance.now() - UI.armedT < 3000) { UI.armed = null; order({ k: "demolish", id: b.id }); UI.sel.clear(); } else { UI.armed = b.id; UI.armedT = performance.now(); }
+  }, true, "a second press to confirm · a quarter of the cost back"]);
   return out;
 }
 function drawUI() {
@@ -1486,10 +1519,11 @@ cv.addEventListener("mousedown", (e) => {
   }
   if (e.button === 0) {
     if (UI.placing && UI.ghost && BT[UI.placing].wall) { UI.wallFrom = [UI.ghost[0], UI.ghost[1]]; return; }
+    if (UI.placing && UI.ghost && UI.moving) { const [bx, by] = UI.ghost; order({ k: "relocate", id: UI.moving, x: bx, y: by }); UI.placing = null; UI.moving = null; return; }
     if (UI.placing && UI.ghost) { const [bx, by, ok] = UI.ghost; if (ok) { order({ k: "place", t: UI.placing, x: bx, y: by, ids: [...UI.sel] }); if (!e.shiftKey) UI.placing = null; } return; }
     UI.drag = [mx, my];
   } else if (e.button === 2 || e.button === 1) {
-    if (UI.placing) { UI.placing = null; return; }
+    if (UI.placing) { UI.placing = null; UI.moving = null; return; }
     UI.pan = { x: mx, y: my, cx: cam.x, cy: cam.y, moved: false, b: e.button }; e.preventDefault();
   }
 });
@@ -1531,7 +1565,7 @@ function miniJump(mx, my) { lookAt(...miniTile(mx, my)); }
 addEventListener("keydown", (e) => {
   if (mode === "menu") return;
   keys.add(e.code); audio();
-  if (e.code === "Escape") { if (G && G.over) { quit(); return; } UI.wallFrom = null; if (UI.placing) UI.placing = null; else if (UI.sel.size) UI.sel.clear(); else showPanel("pPause"); return; }
+  if (e.code === "Escape") { if (G && G.over) { quit(); return; } UI.wallFrom = null; if (UI.placing) { UI.placing = null; UI.moving = null; } else if (UI.sel.size) UI.sel.clear(); else showPanel("pPause"); return; }
   if (!G) return;
   const k = e.key.toUpperCase();
   for (const b of UI.btn || []) if (b.key === k && b.ok) { b.act(); e.preventDefault(); return; }
