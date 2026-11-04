@@ -10,13 +10,16 @@ function Goal(online = null) {
   let stuckT = 0;
   const ball = { x: 240, y: MY, vx: 0, vy: 0 };
   const g = { id: "goal", own: true, score: 0, over: false, t: 0, s: [0, 0], pause: 1.5, msg: "KICK OFF!", result: null, sendT: 0, net: null,
-    help: "arrows / W A S D run · Space shoot · Shift sprint · Enter or X tackle · run into the ball to dribble · first to 5 · Esc menu" };
+    help: "arrows / W A S D run · Space shoot · Shift sprint · Enter or X tackle · R or ⟲ BALLE: ball back to the centre · first to 5 · Esc menu" };
   function kickoff() {
     const spots = [[150, MY - 40], [330, MY + 40], [90, MY + 50], [390, MY - 50]];
     P.forEach((p, i) => { p.x = spots[i][0]; p.y = spots[i][1]; p.vx = p.vy = 0; p.fx = p.team ? -1 : 1; p.fy = 0; });
     Object.assign(ball, { x: 240, y: MY, vx: 0, vy: 0 });
   }
   kickoff();
+  let resetAt = -9;
+  const BALL_BTN = [8, 8, 62, 22];
+  function resetBall() { if (g.t - resetAt < 3 || g.over) return; resetAt = g.t; kickoff(); g.pause = 0.8; g.msg = "BALLE AU CENTRE"; tone(520, 0.08, "square", 0.05); }
   const mine = () => P.find((p) => p.human && p.human.id === me);
   function bot(p) {
     const gx = p.team ? X0 : X1, own = p.team ? X1 : X0, mate = P.find((q) => q !== p && q.team === p.team);
@@ -41,7 +44,7 @@ function Goal(online = null) {
     for (const p of P) {
       if (!p.human) bot(p);
       else if (p.human.id === me) { p.in.mx = (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0); p.in.my = (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0);
-        const ts = window.TSTICK; p.in.sp = held("ShiftLeft", "ShiftRight") || !!(ts && Math.hypot(ts.x, ts.y) > 0.92); if (pressed("Space")) p.in.k++; if (pressed("Enter", "KeyX")) p.in.t++; }
+        const ts = window.TSTICK; p.in.sp = held("ShiftLeft", "ShiftRight") || !!(ts && Math.hypot(ts.x, ts.y) > 0.92); if (pressed("Space")) p.in.k++; if (pressed("Enter", "KeyX")) p.in.t++; if (pressed("KeyR")) resetBall(); }
       const L = Math.hypot(p.in.mx, p.in.my), sprint = p.in.sp && p.stam > 0.05 && L > 0;
       p.stam = clamp(p.stam + (sprint ? -0.9 : 0.35) * dt, 0, 1);
       p.dazed = Math.max(0, p.dazed - dt); p.dashT = Math.max(0, p.dashT - dt); p.tackT -= dt;
@@ -119,15 +122,16 @@ function Goal(online = null) {
     if (won) SFX.win(); else SFX.over();
   }
   g.setSlot = (i, id, name) => { const p = P[i]; if (!p) return; p.human = { id, name }; p.name = name; p.lastK = p.in.k = 0; };
-  g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (p) { p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.sp = !!m.sp; p.in.k = Math.max(p.in.k, +m.k || 0); p.in.t = Math.max(p.in.t, +m.tk || 0); } };
+  g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (p) { p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.sp = !!m.sp; p.in.k = Math.max(p.in.k, +m.k || 0); p.in.t = Math.max(p.in.t, +m.tk || 0); if ((+m.rb || 0) > (p.lastRb || 0)) { p.lastRb = +m.rb; resetBall(); } } };
   g.netState = (id, m) => { if (!host) g.net = m; };
-  let guestK = 0, guestT = 0;
+  let guestK = 0, guestT = 0, guestR = 0;
   g.update = (dt) => {
     if (!host) {
       if (pressed("Space")) guestK++;
       if (pressed("Enter", "KeyX")) guestT++;
+      if (pressed("KeyR")) guestR++;
       g.sendT -= dt;
-      if (g.sendT <= 0) { g.sendT = 0.05; online.send({ t: "in", mx: (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0), my: (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0), sp: held("ShiftLeft", "ShiftRight") || !!(window.TSTICK && Math.hypot(window.TSTICK.x, window.TSTICK.y) > 0.92), k: guestK, tk: guestT }); }
+      if (g.sendT <= 0) { g.sendT = 0.05; online.send({ t: "in", mx: (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0), my: (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0), sp: held("ShiftLeft", "ShiftRight") || !!(window.TSTICK && Math.hypot(window.TSTICK.x, window.TSTICK.y) > 0.92), k: guestK, tk: guestT, rb: guestR }); }
       const m = g.net; if (!m) return;
       const k = Math.min(1, dt * 15);
       ball.x += (m.b[0] - ball.x) * k; ball.y += (m.b[1] - ball.y) * k;
@@ -200,9 +204,11 @@ function Goal(online = null) {
     rect(150, 10, 60, 22, COL[0]); rect(270, 10, 60, 22, COL[1]);
     txt(`RED ${g.s[0]}`, 180, 26, 13, "#fff", "center"); txt(`${g.s[1]} BLUE`, 300, 26, 13, "#fff", "center");
     const left = Math.max(0, TIME - g.t); txt(`${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, "0")}`, 240, 26, 13, "#fde047", "center");
+    { const [bx, by, bw, bh] = BALL_BTN; cx.fillStyle = "rgba(5,8,16,.8)"; cx.fillRect(bx, by, bw, bh); cx.strokeStyle = "#fde047"; cx.lineWidth = 1; cx.strokeRect(bx, by, bw, bh); txt("⟲ BALLE", bx + bw / 2, by + 15, 10, "#fde047", "center"); }
     if (g.pause > 0 && !g.over) { txt(g.msg, 241, 121, 20, "rgba(0,0,0,.6)", "center"); txt(g.msg, 240, 120, 20, "#fde047", "center"); }
     if (g.over && g.result) banner(["FULL TIME", ...g.result], online ? (window.againLine ? againLine() : "Tap to play again") : "Space play again · Esc menu");
   };
+  g.tap = (x, y) => { const [bx, by, bw, bh] = BALL_BTN; if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) { if (host) resetBall(); else guestR++; } };
   g.dbg = () => ({ ball: [ball.x, ball.y, ball.vx, ball.vy].map((v) => Math.round(v)), p: P.map((p) => [Math.round(p.x), Math.round(p.y)]) });
   return g;
 }

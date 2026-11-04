@@ -837,7 +837,7 @@ const GAMES = [
 let cur = null, paused = false, overDone = false, menuT = 0;
 const TOUCH_HELP = { blocks: "arrows: move · A: drop · B: turn  (or tap the picture: turn, slide: move, flick down: drop)", rocks: "stick: fly · A: fire · catch the capsules",
   snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
-  city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball)",
+  city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball) · ⟲ BALLE (top left): ball back to the centre",
   tennis: "stick: move (let go: you run to the ball) · A: swing · B: use your item, or dive · first to 7",
   fight: "stick: walk, jump (up), crouch (down), walk away = block · A: punch (3 = combo) · B: kick · A+B: special" };
 const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
