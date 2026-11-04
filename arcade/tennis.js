@@ -13,12 +13,12 @@ function Tennis(online = null) {
   const BOTN = ["Rafa", "Serena", "Roger", "Venus", "Novak", "Andy"];
   const ITEMS = ["🍌", "🔥", "🍄", "❄️", "💣", "🌀"];
   const P = [...Array(N).keys()].map((i) => ({ i, team: i % 2, human: seats[i], name: seats[i] ? seats[i].name : BOTN[i] + " (bot)",
-    x: 0, y: 0, vx: 0, vy: 0, fx: i % 2 ? -1 : 1, fy: 0, in: { mx: 0, my: 0, k: 0, b: 0 }, lastK: 0, lastB: 0, swingT: 0, swingA: 0,
+    x: 0, y: 0, vx: 0, vy: 0, fx: i % 2 ? -1 : 1, fy: 0, in: { mx: 0, my: 0, k: 0, b: 0, l: 0 }, lastK: 0, lastB: 0, lastL: 0, swingT: 0, swingA: 0,
     item: -1, charged: "", giantT: 0, frozenT: 0, dazed: 0, spin: 0, diveT: 0, downT: 0, err: seats[i] ? 0 : 45 }));
   const ball = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, last: -1, bounces: 0, fire: false, bomb: false, curve: 0, t: 0, held: true };
   const boxes = [], peels = [], fx = [];
   const g = { id: "tennis", own: true, score: 0, over: false, s: [0, 0], pause: 1.2, msg: "FIRST TO 7!", flash: "", flashT: 0, result: null, sendT: 0, net: null,
-    help: "arrows / W A S D move · Space swing (and serve) · Enter or X: item, or dive · first to 7 · Esc menu" };
+    help: "arrows / W A S D move · Space shot (and serve) · Enter or X lob · E item or dive · first to 7 · Esc menu" };
   let server = 0, serveT = 0, rally = 0, boxT = 6;
   const say = (s, t = 1.2) => { g.flash = s; g.flashT = t; };
   const mine = () => P.find((p) => p.human && p.human.id === me);
@@ -39,9 +39,9 @@ function Tennis(online = null) {
     }
     return [team ? 360 : 120, MY];
   }
-  function shoot(p, serve = false) {
+  function shoot(p, serve = false, lob = false) {
     const opp = P.filter((q) => q.team !== p.team), side = p.team ? -1 : 1;
-    const deep = serve ? 0.55 + Math.random() * 0.35 : 0.35 + Math.random() * 0.6;
+    const deep = serve ? 0.55 + Math.random() * 0.35 : lob ? 0.7 + Math.random() * 0.25 : 0.35 + Math.random() * 0.6;
     let tx = NX + side * (25 + deep * (X1 - NX - 35)), ty;
     if (p.human && Math.abs(p.in.my) > 0.3) ty = p.in.my < 0 ? Y0 + 22 : Y1 - 22;
     else { const oy = opp.reduce((a, q) => a + q.y, 0) / opp.length; ty = oy > MY ? Y0 + 20 + Math.random() * 60 : Y1 - 20 - Math.random() * 60; }
@@ -50,6 +50,7 @@ function Tennis(online = null) {
     if (!p.human) { tx += (Math.random() - 0.5) * p.err; ty += (Math.random() - 0.5) * p.err; }
     const smash = !serve && ball.z > 17, kind = p.charged; p.charged = "";
     let sp = (serve ? 230 : 205) + Math.min(80, rally * 6) + (smash ? 140 : 0);
+    if (lob && !serve) { sp *= 0.62; say("LOB !", 0.6); } else if (!serve && !smash) sp *= 1.12;
     if (kind === "fire") sp = 440;
     if (ball.fire && !serve) { sp *= 0.55; p.dazed = 0.9; p.spin = 1; p.vx -= side * 160; say("BURNT!"); boom(p.x, p.y, "#f97316", 10); }
     const dist = Math.hypot(tx - ball.x, ty - ball.y), T = Math.max(0.35, dist / sp);
@@ -105,7 +106,8 @@ function Tennis(online = null) {
       if (mine2) { tx = lx + (p.team ? 7 : -7); ty = ly; }
       if (p.item >= 0 && Math.random() < 0.004) useItem(p);
       const d = Math.hypot(ball.x - p.x, ball.y - p.y);
-      if (d < (p.giantT > 0 ? 28 : 18) && ball.z < 26 && Math.random() < 0.5) p.in.k++;
+      const atNet = P.some((q) => q.team !== p.team && Math.abs(q.x - NX) < 90);
+      if (d < (p.giantT > 0 ? 28 : 18) && ball.z < 26 && Math.random() < 0.5) { if (atNet && Math.random() < 0.3) p.in.l++; else p.in.k++; }
       if (mine2 && d > 26 && d < 46 && ball.z < 10 && ball.vz < 0 && Math.random() < 0.02) p.in.b++;
     } else if (p.item >= 0 && Math.random() < 0.006) useItem(p);
     const dx = tx - p.x, dy = ty - p.y, L = Math.hypot(dx, dy);
@@ -121,12 +123,13 @@ function Tennis(online = null) {
       else if (p.human.id === me) {
         const ts = window.TSTICK; p.in.mx = (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0); p.in.my = (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0);
         if (ts && Math.hypot(ts.x, ts.y) > 0.3) { p.in.mx = ts.x; p.in.my = ts.y; }
-        if (pressed("Space")) p.in.k++; if (pressed("Enter", "KeyX")) p.in.b++;
+        if (pressed("Space")) p.in.k++; if (pressed("Enter", "KeyX")) p.in.l++; if (pressed("KeyE", "ShiftLeft")) p.in.b++;
       }
       p.giantT = Math.max(0, p.giantT - dt); p.frozenT = Math.max(0, p.frozenT - dt); p.dazed = Math.max(0, p.dazed - dt); p.downT = Math.max(0, p.downT - dt);
       p.swingT = Math.max(0, p.swingT - dt); p.spin = Math.max(0, p.spin - dt);
       if (p.in.k > p.lastK && ball.held && P[server] === p) { p.lastK = p.in.k; shoot(p, true); }
-      if (p.in.k > p.lastK) { p.lastK = p.in.k; if (!p.downT && !p.dazed) { p.swingT = 0.42; p.swingA = 1; } }
+      if (p.in.k > p.lastK) { p.lastK = p.in.k; if (!p.downT && !p.dazed) { p.swingT = 0.42; p.swingA = 1; p.lob = false; } }
+      if (p.in.l > p.lastL) { p.lastL = p.in.l; if (ball.held && P[server] === p) shoot(p, true); else if (!p.downT && !p.dazed) { p.swingT = 0.42; p.swingA = 1; p.lob = true; } }
       if (p.in.b > p.lastB) {
         p.lastB = p.in.b;
         if (p.item >= 0) useItem(p);
@@ -149,7 +152,7 @@ function Tennis(online = null) {
       for (const pl of peels) if (!pl.gone && Math.hypot(pl.x - p.x, pl.y - p.y) < 10) { pl.gone = true; p.dazed = 1.1; p.spin = 1.1; say(`${p.name.replace(" (bot)", "")} SLIPPED!`, 0.9); tone(700, 0.25, "sawtooth", 0.05, -500); }
       for (const b of boxes) if (!b.gone && p.item < 0 && Math.hypot(b.x - p.x, b.y - p.y) < 14) { b.gone = true; giveItem(p); }
       const reach = (p.giantT > 0 ? 38 : 27) + (p.diveT > 0 ? 8 : 0);
-      if (p.swingT > 0 && !ball.held && ball.last !== p.team && ball.z < (p.giantT > 0 ? 42 : 32) && Math.hypot(ball.x - p.x, ball.y - p.y) < reach && (p.team ? ball.x > NX - 4 : ball.x < NX + 4)) shoot(p);
+      if (p.swingT > 0 && !ball.held && ball.last !== p.team && ball.z < (p.giantT > 0 ? 10 : 0) + (Math.abs(p.x - NX) < 80 ? 95 : 32) && Math.hypot(ball.x - p.x, ball.y - p.y) < reach && (p.team ? ball.x > NX - 4 : ball.x < NX + 4)) shoot(p, false, p.lob);
     }
     for (let i = peels.length - 1; i >= 0; i--) if (peels[i].gone) peels.splice(i, 1);
     for (let i = boxes.length - 1; i >= 0; i--) if (boxes[i].gone) boxes.splice(i, 1);
@@ -179,19 +182,19 @@ function Tennis(online = null) {
     if (ball.x < -40 || ball.x > W + 40 || ball.y < -40 || ball.y > H + 40) point(ball.bounces ? ball.last : 1 - ball.last, ball.bounces ? "WINNER!" : "OUT!");
   }
   g.setSlot = (i, id, name) => { const p = P[i]; if (!p) return; p.human = { id, name }; p.name = name; p.lastK = p.in.k = 0; p.lastB = p.in.b = 0; };
-  g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (p) { p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.k = Math.max(p.in.k, +m.k || 0); p.in.b = Math.max(p.in.b, +m.b || 0); } };
+  g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (p) { p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.k = Math.max(p.in.k, +m.k || 0); p.in.b = Math.max(p.in.b, +m.b || 0); p.in.l = Math.max(p.in.l, +m.l || 0); } };
   g.netState = (id, m) => { if (!host) g.net = m; };
-  let guestK = 0, guestB = 0;
+  let guestK = 0, guestB = 0, guestL = 0;
   g.update = (dt) => {
     for (const f of fx) { f.t -= dt; f.x += f.vx * dt; f.y += f.vy * dt; }
     for (let i = fx.length - 1; i >= 0; i--) if (fx[i].t <= 0) fx.splice(i, 1);
     g.flashT = Math.max(0, g.flashT - dt);
     if (!host) {
-      if (pressed("Space")) guestK++; if (pressed("Enter", "KeyX")) guestB++;
+      if (pressed("Space")) guestK++; if (pressed("Enter", "KeyX")) guestL++; if (pressed("KeyE", "ShiftLeft")) guestB++;
       g.sendT -= dt;
       if (g.sendT <= 0) {
         g.sendT = 0.05; const ts = window.TSTICK, st = ts && Math.hypot(ts.x, ts.y) > 0.3;
-        online.send({ t: "in", mx: st ? ts.x : (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0), my: st ? ts.y : (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0), k: guestK, b: guestB });
+        online.send({ t: "in", mx: st ? ts.x : (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0), my: st ? ts.y : (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0), k: guestK, b: guestB, l: guestL });
       }
       const m = g.net; if (!m) return;
       const k = Math.min(1, dt * 15);

@@ -838,7 +838,7 @@ let cur = null, paused = false, overDone = false, menuT = 0;
 const TOUCH_HELP = { blocks: "arrows: move · A: drop · B: turn  (or tap the picture: turn, slide: move, flick down: drop)", rocks: "stick: fly · A: fire · catch the capsules",
   snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
   city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball) · ⟲ BALLE (top left): ball back to the centre",
-  tennis: "stick: move · A: swing and serve · B: use your item, or dive · first to 7",
+  tennis: "stick: move · A: shot and serve · B: lob (over a player at the net) · C: your item, or a dive · first to 7",
   fight: "stick: walk, jump (up), crouch (down), walk away = block · A: punch (3 = combo) · B: kick · C: special · block then A/B: counter" };
 const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
 function start(id) {
@@ -1437,7 +1437,7 @@ if (TouchPad.on) {
     blk.forEach((b) => { b.style.display = blocks ? "" : "none"; });
     any.forEach((b, i) => { b.style.display = show && !isGp && !blocks && !snake && !(i === 1 && cur && (cur.id === "jump" || cur.id === "rocks")) ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
-    wpn.style.display = cur && cur.id === "city" ? "" : "none"; cBtn.style.display = cur && cur.id === "fight" ? "" : "none";
+    wpn.style.display = cur && cur.id === "city" ? "" : "none"; cBtn.style.display = cur && (cur.id === "fight" || cur.id === "tennis") ? "" : "none";
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
     pad.classList.toggle("port", innerHeight > innerWidth);
     document.body.classList.toggle("playing", show);
