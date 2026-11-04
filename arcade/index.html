@@ -22,11 +22,13 @@ button:hover { border-color:var(--a); }
 /* 4 Nov (owner: "one pager wherever possible: the arcade could be the list of games with the best scores on the side,
    instead of scrolling"): on any screen wide enough, the game on the left at the window's height, the scoreboard beside it */
 @media (min-width:640px) {
-  #wrap { max-width:1320px; display:grid; grid-template-columns:min(calc(100vw - 330px), calc((100vh - 172px) * 4 / 3)) minmax(220px, 300px); grid-template-areas:"top top" "screen board" "help board"; column-gap:14px; justify-content:center; align-items:start; }
-  #top { grid-area:top; } #screen { grid-area:screen; width:100% !important; margin:0 !important; } #help { grid-area:help; }
-  #board { grid-area:board; margin-top:0 !important; max-height:calc(100vh - 150px); overflow:auto; scrollbar-width:thin; }
-  #board .bgrid { grid-template-columns:1fr !important; }
-  body.playing #wrap { display:block; }
+  body:not(.playing) #wrap { max-width:1320px; display:grid; grid-template-columns:minmax(140px, 180px) min(calc(100vw - 230px), calc((100vh - 100px) * 4 / 3)); grid-template-rows:auto 1fr; grid-template-areas:"top screen" "board screen" "help help"; column-gap:12px; justify-content:center; align-items:start; }
+  body:not(.playing) #top { grid-area:top; } body:not(.playing) #screen { grid-area:screen; width:100% !important; margin:0 !important; } body:not(.playing) #help { grid-area:help; }
+  body:not(.playing) #top { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:0 0 8px; } body:not(.playing) #top > span[style*="flex:1"] { display:none; }
+  body:not(.playing) #top > b, body:not(.playing) #top > span { grid-column:1 / -1; } body:not(.playing) #top button { padding:4px 6px !important; font-size:12px !important; min-height:0 !important; }
+  body:not(.playing) #board { grid-area:board; margin-top:0 !important; max-height:calc(100vh - 200px); overflow:auto; scrollbar-width:thin; }
+  #board .bgrid { grid-template-columns:1fr !important; gap:5px !important; }
+  #board .bcard { padding:5px 8px !important; cursor:pointer; } #board .bt { font-size:11px !important; margin-bottom:1px !important; } #board ol { font-size:11.5px !important; }
 }
 </style></head>
 <body>
@@ -34,7 +36,7 @@ button:hover { border-color:var(--a); }
   <div id="top"><b>MIB ARCADE</b><span class="help" style="margin:0">by MoonxZara</span><span class="help" id="rec"></span><span style="flex:1"></span>
     <button id="onlBtn" title="play with friends">PLAY ONLINE</button><button id="snd" title="M">sound on</button><button id="pauseBtn" title="P">pause</button><button id="menuBtn" title="Esc">menu</button></div>
   <div id="screen" tabindex="0"><canvas id="c" width="960" height="720"></canvas><div id="focus">click here to play</div></div>
-  <div class="help" id="help"></div><div class="help"><a href="sfx/CREDITS.txt" target="_blank" rel="noopener" style="margin-left:14px">sound credits</a></div>
+  <div class="help" id="help"></div><div class="help"><a href="sfx/CREDITS.txt" class="credlink" style="margin-left:14px">sound credits</a><dialog id="credDlg" style="max-width:min(640px,92vw);max-height:80vh;background:#141827;color:#e5e7eb;border:1px solid #26304a;border-radius:12px;padding:14px"><button type="button" onclick="this.closest('dialog').close()" style="float:right">✕ close</button><pre style="white-space:pre-wrap;font:12px Consolas,monospace;margin:30px 0 0"></pre></dialog><script>document.querySelectorAll(".credlink").forEach(function(a){a.onclick=function(e){e.preventDefault();var d=document.getElementById("credDlg");fetch(a.getAttribute("href")).then(function(r){return r.text()}).then(function(t){d.querySelector("pre").textContent=t;d.showModal()})}})</script></div>
 </div>
 <script>window.ARC_CONFIG = {"api": "https://mib-arcade.terminalmib.workers.dev", "names": true, "sounds": false, "sfx": "sfx/", "music": false, "lan": true, "net": "auto", "pages": {"hub": "./", "strike": "strike.html", "empire": "empire.html"}};</script>
 <script src="site.js"></script>
@@ -840,7 +842,7 @@ function start(id) {
 }
 function menu() {
   if (ON && ON.live) { if (ON.host) osend({ t: "room" }); ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); return; }
-  if (cur && !overDone) saveScore(); engineSet(false); cur = null; paused = false; music("menu"); document.getElementById("help").textContent = "1-9, 0 or click a game · M sound · P pause · Esc menu · records are shared with the loading window's arcade"; }
+  if (cur && !overDone) saveScore(); engineSet(false); cur = null; paused = false; music("menu"); document.getElementById("help").textContent = ""; }
 function saveScore() {
   if (!cur || cur.id === "sumo") return;
   if (cur.score > 0) record(cur.id, "best", cur.score);
@@ -870,7 +872,7 @@ function tick(dt = STEP) {
 function drawMenu() {
   rect(0, 0, W, H, "#0d1020");
   for (let i = 0; i < 40; i++) rect((i * 97 + menuT * 20 * (1 + i % 3)) % W, (i * 53) % H, 2, 2, "#26304a");
-  txt("MIB ARCADE", W / 2, 40, 26, "#f2f4f8", "center"); txt("by MoonxZara", W / 2, 56, 11, "#a78bfa", "center"); txt("pick a game: 1-9, 0 or click  ·  O: play online, up to 4", W / 2, 72, 10, "#8a90a2", "center");
+  txt("MIB ARCADE", W / 2, 40, 26, "#f2f4f8", "center"); txt("by MoonxZara", W / 2, 56, 11, "#a78bfa", "center"); 
   shownGames().forEach((d, i) => {
     const [x, y] = cardAt(i), two = (best[d.id === "racer2" ? "duel" : "sumo"]) || {};
     rect(x, y, CARD_W, CARD_H, "#141827"); rect(x, y, CARD_W, 4, d.col);
@@ -1060,6 +1062,14 @@ function openSheet(d) {
 @media (max-height:480px){#gsheet .scard{width:min(640px,94%);gap:6px;padding:10px 12px}#gsheet .stitle{font-size:18px}#gsheet .sbtns{grid-auto-flow:column;grid-auto-columns:1fr}#gsheet .sbtns button{padding:9px 6px;font-size:14px}#gsheet .srow button{padding:4px 9px}}`;
   document.head.appendChild(st);
 })();
+let INV = null;
+const sendInvite = (room, n = 0) => { if (!INV) return; if (window.MIB_INVITE && n > 0) { MIB_INVITE(INV.to, INV.g, room); INV = null; return; } if (n < 4) setTimeout(() => sendInvite(room, n + 1), 800); };
+(() => {
+  const q = new URLSearchParams(location.search), to = q.get("invite"), g = q.get("g");
+  if (!to || !g || !ONLINE_OK.has(g) || PAGE_GAMES[g]) return;
+  history.replaceState(null, "", location.pathname); INV = { to, g };
+  setTimeout(() => { showOnline("oMain"); $o("oGame").value = g; $o("oHost").click(); }, 400);
+})();
 (() => {
   const q = new URLSearchParams(location.search), id = q.get("sheet"); if (!id) return;
   history.replaceState(null, "", location.pathname);
@@ -1072,7 +1082,7 @@ $o("oHost").onclick = () => {
   if (PAGE_GAMES[$o("oGame").value]) { pageRoom($o("oGame").value, "host"); return; }
   ON = { host: true, me: 0, code: "", players: [{ id: 0, name }], game: $o("oGame").value, live: false, frames: new Map(), scores: new Map(), seen: new Map(), watchT: 0, away: new Set() };
   ON.net = Net.host("hub", name, {
-    hello: (m) => { ON.code = m.room; drawRoom(); },
+    hello: (m) => { ON.code = m.room; drawRoom(); sendInvite(m.room); },
     join: (m) => {
       const known = ON.players.find((q) => q.id === m.id);
       if (!known && ON.players.length >= 4) { const gone = ON.players.find((q) => q.id && ON.away.has(q.id)); if (gone) { ON.players = ON.players.filter((q) => q !== gone); ON.frames.delete(gone.id); } }
@@ -1267,15 +1277,17 @@ function askName() {
 const BOARD_ROWS = [["goal", "best", "GOAL RUSH"], ["tennis", "best", "RALLY RUMBLE"], ["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
   ["strike", "wins", "STRIKE & DEFUSE · matches won"], ["empire", "wins", "CORSICAN EMPIRE · wins"], ["city", "best", "CHAOS CITY"], ["blocks", "best", "BLOCKS"],
   ["rocks", "best", "ROCKS"], ["snake", "best", "SNAKE"], ["jump", "best", "JUMP"]];
+let boardOpen = "";
+document.addEventListener("click", (e) => { const c = e.target.closest && e.target.closest("#board .bcard"); if (!c) return; boardOpen = boardOpen === c.dataset.b ? "" : c.dataset.b; showBoard(); });
 function showBoard() {
   const box = document.getElementById("board"); if (!box) return;
   const me = ARC.getName(), fmt = (f, v) => f === "lap_ms" ? (v / 1000).toFixed(2) + " s" : String(v);
   const cards = BOARD_ROWS.map(([g, f, title]) => {
-    const top = (((best[g] || {}).top || {})[f] || []).slice(0, 3);
-    const rows = top.length ? top.map((e, i) => `<li${e.n === me ? ' class="me"' : ""}><span>${i + 1}. ${esc(e.n)}</span><b>${fmt(f, e.v)}</b></li>`).join("") : '<li class="none">no score yet: be the first</li>';
-    return `<div class="bcard"><div class="bt">${title}</div><ol>${rows}</ol></div>`;
+    const all = ((best[g] || {}).top || {})[f] || [], open = boardOpen === g + f, top = open ? all : all.slice(0, 3);
+    const rows = top.length ? top.map((e, i) => `<li${e.n === me ? ' class="me"' : ""}><span>${i + 1}. ${esc(e.n)}</span><b>${fmt(f, e.v)}</b></li>`).join("") : '<li class="none">—</li>';
+    return `<div class="bcard${open ? " open" : ""}" data-b="${g + f}"><div class="bt">${title.replace(/ · .*/, (m) => (f === "best" ? "" : m))}</div><ol>${rows}</ol></div>`;
   }).join("");
-  box.innerHTML = `<div class="bh">SCOREBOARD <span>${me ? "you play as <b>" + esc(me) + "</b>" : "pick a name to get on it"}</span></div><div class="bgrid">${cards}</div>`;
+  box.innerHTML = `<div class="bh">TOP SCORES</div><div class="bgrid">${cards}</div>`;
 }
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 if (ARC.names) {
@@ -1341,7 +1353,7 @@ if (TouchPad.on) {
     bf = null;
   };
   cv.addEventListener("pointerup", bEnd); cv.addEventListener("pointercancel", bEnd);
-  setInterval(() => {
+  const padTick = () => {
     const isGp = !!cur && cur.id === "spa", show = !!cur, blocks = !!cur && cur.id === "blocks", snake = !!cur && cur.id === "snake";
     stickZone.style.display = show && !blocks && !snake ? "" : "none";
     dpad.forEach((b) => { b.style.display = snake || blocks ? "" : "none"; });
@@ -1353,7 +1365,8 @@ if (TouchPad.on) {
     pad.classList.toggle("port", innerHeight > innerWidth);
     document.body.classList.toggle("playing", show);
     document.body.classList.toggle("lpad", snake);
-  }, 250);
+  };
+  padTick(); setInterval(padTick, 250);
 }
 setSound(sound); menu(); loadBest(); requestAnimationFrame(frame);
 window.arcade = { start, menu, tick, draw, get game() { return cur; }, press(code) { keys.add(code); hit.add(code); }, release(code) { keys.delete(code); },

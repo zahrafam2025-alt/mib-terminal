@@ -13,6 +13,21 @@
   if (A.net === "auto") A.net = A.api.replace(/^http/, "ws") + "/arcade/net";
   A.online = !!A.net;
   A.url = (p) => A.api + p;
+  const netAuto = (window.ARC_CONFIG || {}).net === "auto";
+  A.pick = async (force) => {
+    if (!A.names || !A.api || !/^https?:/.test(location.protocol)) return;
+    const ok = async (u) => { try { const c = new AbortController(), t = setTimeout(() => c.abort(), 4000); const r = await fetch(u + "/api/arcade", { cache: "no-store", signal: c.signal }); clearTimeout(t); return r.ok; } catch (e) { return false; } };
+    let main = A.main || A.api, backup = A.backup || "";
+    try {
+      if (!A.main) { const j = await (await fetch("/arcade/api.json", { cache: "no-store" })).json(); if (/^https:\/\/[a-z0-9.-]+\.workers\.dev$/.test(j.api || "")) main = j.api; if (/^https:\/\/[a-z0-9.-]+\.workers\.dev$/.test(j.backup || "")) backup = j.backup; }
+    } catch (e) {}
+    A.main = main; A.backup = backup;
+    let pick = main;
+    try { const c = JSON.parse(sessionStorage.getItem("arcade-pick") || "null"); if (!force && c && Date.now() - c.t < 120000 && (c.u === main || c.u === backup)) pick = c.u; else if (backup && !(await ok(main)) && await ok(backup)) pick = backup; } catch (e) { if (backup && !(await ok(main)) && await ok(backup)) pick = backup; }
+    try { sessionStorage.setItem("arcade-pick", JSON.stringify({ u: pick, t: Date.now() })); } catch (e) {}
+    A.api = pick; if (netAuto) A.net = pick.replace(/^http/, "ws") + "/arcade/net";
+  };
+  A.ready = A.pick();
   A.soundIndex = (game) => A.sounds ? "/arcade/sounds/" + game : A.sfx ? A.sfx + game + ".json" : "";
   A.soundBase = (game) => A.sounds ? "/arcade/sounds/" + game + "/" : A.sfx + game + "/";
   A.page = (k) => A.pages[k] || "/arcade";
@@ -25,12 +40,21 @@
   A.post = async (game, field, value) => {
     const body = { game, field, value };
     if (A.names) { const n = A.getName(); if (!n) return null; body.name = n; }
-    try {
-      const r = await fetch(A.url("/api/arcade"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      return r.ok ? await r.json() : null;
-    } catch (e) { return null; }
+    await A.ready;
+    for (let k = 0; k < 2; k++) {
+      try {
+        const r = await fetch(A.url("/api/arcade"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        if (r.ok) return await r.json();
+      } catch (e) {}
+      if (!k) await A.pick(true);
+    }
+    return null;
   };
-  A.scores = async () => { try { return await (await fetch(A.url("/api/arcade"), { cache: "no-store" })).json(); } catch (e) { return null; } };
+  A.scores = async () => {
+    await A.ready;
+    for (let k = 0; k < 2; k++) { try { const r = await fetch(A.url("/api/arcade"), { cache: "no-store" }); if (r.ok) return await r.json(); } catch (e) {} if (!k) await A.pick(true); }
+    return null;
+  };
   window.ARC = A;
   if (A.names && "serviceWorker" in navigator && location.protocol === "https:") addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
   document.addEventListener("DOMContentLoaded", () => {
