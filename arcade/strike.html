@@ -787,10 +787,11 @@ function aimedAt() {
   return best && best.q;
 }
 
+const PHONE = !!(window.TouchPad && TouchPad.on), hudK = (h) => h / (PHONE ? 560 : 900);
 function drawHud() {
-  const w = hud.width, h = hud.height, k = h / 900, x = H2; x.clearRect(0, 0, w, h);
+  const w = hud.width, h = hud.height, k = hudK(h), x = H2, FS = PHONE ? 1.2 : 1; x.clearRect(0, 0, w, h);
   if (!W) return;
-  const cam = camera(), p = cam.p, f = (s, n, c = "#f8fafc", al = "left", wgt = 700) => { x.font = `${wgt} ${Math.round(n * k)}px Consolas, monospace`; x.fillStyle = c; x.textAlign = al; };
+  const cam = camera(), p = cam.p, f = (s, n, c = "#f8fafc", al = "left", wgt = 700) => { x.font = `${wgt} ${Math.round(n * k * FS)}px Consolas, monospace`; x.fillStyle = c; x.textAlign = al; };
   const tx = (s, X, Y) => { x.fillStyle = x.fillStyle; x.fillText(window.TouchPad && TouchPad.on ? TouchPad.words(s) : s, X, Y); };
   if (p === ME && ME.alive && ME.box) {
     x.fillStyle = "#8a6a3e"; x.beginPath(); x.rect(0, 0, w, h); x.rect(w * 0.18, h * 0.38, w * 0.64, h * 0.2); x.fill("evenodd");
@@ -822,7 +823,7 @@ function drawHud() {
     f("", 12, "#cbd5e1", "right"); const wn = `${e.w === "charge" ? "✹" : e.w === "nade" ? "GRENADE" : (WPN[e.w] || { name: "" }).name}${e.head ? " ◎" : ""}`; tx(wn, w - 26 * k - vw, y); const ww = x.measureText(wn).width;
     if (e.a) { f("", 14, COLS[e.at] || "#fff", "right"); tx(e.a, w - 36 * k - vw - ww, y); }
   });
-  const RS = 170 * k, rx = 14 * k, ry = 14 * k, sc = RS / 72; x.fillStyle = "rgba(10,12,20,.6)"; x.fillRect(rx, ry, RS, RS);
+  const RS = (PHONE ? 120 : 170) * k, rx = 14 * k, ry = 14 * k, sc = RS / 72; x.fillStyle = "rgba(10,12,20,.6)"; x.fillRect(rx, ry, RS, RS);
   x.fillStyle = "rgba(148,163,184,.55)";
   for (const b of BOX) if (b[4] > 1.5 && b[1] < 1 && b[3] - b[0] < 60) x.fillRect(rx + (b[0] + 36) * sc, ry + (b[2] + 36) * sc, (b[3] - b[0]) * sc, (b[5] - b[2]) * sc);
   for (const s of SITES) { f("", 15, "#fb923c", "center"); tx(s.n, rx + ((s.x0 + s.x1) / 2 + 36) * sc, ry + ((s.z0 + s.z1) / 2 + 40) * sc); }
@@ -846,7 +847,7 @@ function drawHud() {
       const sl = [[1, ME.prim], [2, ME.sec || "pistol"], [3, "knife"], [4, ME.nades ? "nade" : null]].filter((s) => s[1]);
       x.fillStyle = "rgba(10,12,20,.45)"; x.fillRect(w - 250 * k, h - 84 * k - sl.length * 20 * k, 236 * k, sl.length * 20 * k + 14 * k);
       sl.forEach(([n, it], i) => { const on = ME.slot === n; f("", on ? 15 : 13, on ? "#fde68a" : "#94a3b8", "right"); tx(`${on ? "▶ " : ""}${n}  ${it === "nade" ? "GRENADE" : WPN[it].name}`, w - 26 * k, h - 76 * k - (sl.length - 1 - i) * 20 * k); });
-      f("", 11, "#64748b", "right"); tx("1-4 · mouse wheel · Q", w - 26 * k, h - 90 * k - sl.length * 20 * k);
+      if (!PHONE) { f("", 11, "#64748b", "right"); tx("1-4 · mouse wheel · Q", w - 26 * k, h - 90 * k - sl.length * 20 * k); }
     } else { f("", 14, "#cbd5e1", "right"); tx(wk === "nade" ? "GRENADE" : WPN[wk].name, w - 26 * k, h - 74 * k); }
     f("", 30, "#f8fafc", "right"); tx(wk === "knife" ? "—" : wk === "nade" ? String(p.nades) : a ? `${p === ME && mode === "guest" ? Math.max(0, a[0] - pendingShots()) : a[0]} / ${a[1]}` : "", w - 26 * k, h - 28 * k);
     if (p.rT > 0) { f("", 14, "#fde68a", "center"); tx("RELOADING", w / 2, h / 2 + 60 * k); }
@@ -878,9 +879,9 @@ function drawHud() {
     f("", 12, "#94a3b8", "center"); tx("click a line or press 1-9, 0 · B or Esc to close", w / 2, L.y0 + L.bh - 16 * k);
   }
   if (FX.help && !FX.buy) {
-    const bw = 820 * k, bh = 420 * k, x0 = w / 2 - bw / 2, y0 = h / 2 - bh / 2 - 20 * k;
+    const bw = PHONE ? w * 0.92 : 820 * k, bh = 420 * k, x0 = w / 2 - bw / 2, y0 = h / 2 - bh / 2 - 20 * k;
     x.fillStyle = "rgba(10,12,20,.9)"; x.fillRect(x0, y0, bw, bh); x.strokeStyle = "#b45309"; x.lineWidth = 2 * k; x.strokeRect(x0, y0, bw, bh);
-    HELP.forEach(([s, c], i) => { f("", i ? 14 : 22, c || "#e5e7eb", i ? "left" : "center", i ? 400 : 700); tx(s, i ? x0 + 28 * k : w / 2, y0 + (i ? 54 + i * 28 : 38) * k); });
+    (PHONE ? HELP_PHONE : HELP).forEach(([s, c], i) => { f("", i ? 14 : 22, c || "#e5e7eb", i ? "left" : "center", i ? 400 : 700); tx(s, i ? x0 + 28 * k : w / 2, y0 + (i ? 54 + i * 28 : 38) * k); });
   }
   if (keys.has("Tab")) {
     x.fillStyle = "rgba(10,12,20,.9)"; x.fillRect(w / 2 - 300 * k, h * 0.18, 600 * k, 420 * k);
@@ -903,6 +904,16 @@ const HELP = [
   ["X: hide in a cardboard box. Keep still and bots walk past; move and they may notice. No shooting from inside.", "#fde68a"],
   ["H: show or hide this page · V: announcer voice on or off", "#94a3b8"],
 ];
+const HELP_PHONE = [
+  ["HOW TO PLAY", "#fbbf24"],
+  ["ATTACK (orange): take the charge to site A or B (radar),", ""],
+  ["   stand on it and hold USE 3 s. Then defend it 40 s.", ""],
+  ["DEFEND (blue): stop them, or hold USE on the charge (5 s).", ""],
+  ["First team to 8 rounds wins. Kills and wins earn money.", ""],
+  ["BUY at the start of a round · 📋 scores · WPN next weapon", "#fde68a"],
+  ["Left side: move · right side: drag to look · FIRE shoots", "#fde68a"],
+  ["JUMP · DUCK · R reload · SCOPE (sniper) · ☰ pause", "#94a3b8"],
+];
 function objectiveHint() {
   if (!ME || !ME.alive || !W || ME.useT > 0) return null;
   const ch = W.charge, st = W.state;
@@ -914,7 +925,7 @@ function objectiveHint() {
 }
 const buyBox = (w, h, k) => ({ x0: w / 2 - 260 * k, y0: h / 2 - 270 * k, bw: 520 * k, bh: 520 * k, row0: h / 2 - 185 * k, rh: 36 * k });
 function buyRowAt(e) {
-  const s = hud.width / innerWidth, X = e.clientX * s, Y = e.clientY * s, k = hud.height / 900, L = buyBox(hud.width, hud.height, k);
+  const s = hud.width / innerWidth, X = e.clientX * s, Y = e.clientY * s, k = hudK(hud.height), L = buyBox(hud.width, hud.height, k);
   if (X < L.x0 || X > L.x0 + L.bw) return -1;
   for (let i = 0; i < BUY.length; i++) { const y = L.row0 + i * L.rh; if (Y >= y - 23 * k && Y < y - 23 * k + L.rh) return i; }
   return Y >= L.y0 && Y <= L.y0 + L.bh ? -2 : -1;
@@ -1264,8 +1275,8 @@ if (window.TouchPad && TouchPad.on) (() => {
   }, 250);
   B("SCOPE", { right: 96, bottom: 196 }, 58, () => { if (ME && WPN[wpnOf(ME)] && WPN[wpnOf(ME)].scope) ME.scoped = !ME.scoped; });
   B("WPN", { right: 22, bottom: 20 }, 58, () => glc.dispatchEvent(new WheelEvent("wheel", { deltaY: 1, cancelable: true, bubbles: true })));
-  hold("BUY", { left: 16, top: 70 }, 52, "KeyB");
-  hold("📋", { left: 16, top: 130 }, 52, "Tab");
+  hold("BUY", { left: 16, top: 112 }, 52, "KeyB");
+  hold("📋", { left: 16, top: 172 }, 52, "Tab");
   B("☰", { right: 12, top: 12 }, 46, () => { mouseDown = false; MOVE.forEach((c) => keys.delete(c)); showPanel("pPause"); });
   const sb = T.soundButton(() => sndOn, (on) => { audio(); setSnd(on); }, { right: 66, top: 12 }); sb.style.display = "none"; btns.push(sb);
   for (const id of ["bSolo", "bStart"]) $("#" + id).addEventListener("click", () => T.full());

@@ -1276,7 +1276,7 @@ if (ARC.names) {
 }
 if (TouchPad.on) {
   const st = document.createElement("style");
-  st.textContent = "#screen{width:min(100%, calc((100vh - 70px) * 4 / 3));margin:0 auto;touch-action:none}body.playing #top,body.playing .help,body.playing #board{display:none}body.playing #wrap{padding:0;max-width:none}body.playing #screen{width:min(100vw, calc(100vh * 4 / 3));border-radius:0;border:0}#tpad.port::after{content:'turn your phone sideways';position:fixed;left:0;right:0;top:8px;text-align:center;color:#fbbf24;font:600 13px system-ui;pointer-events:none}";
+  st.textContent = "#screen{width:min(100%, calc((100vh - 70px) * 4 / 3));margin:0 auto;touch-action:none}body.playing #top,body.playing .help,body.playing #board{display:none}body.playing #wrap{padding:0;max-width:none}body.playing #screen{width:min(100vw, calc(100vh * 4 / 3));border-radius:0;border:0}body.playing.lpad #screen{width:min(calc(100vw - 250px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)), calc(100vh * 4 / 3));margin:0 env(safe-area-inset-right,0px) 0 auto}#tpad.port::after{content:'turn your phone sideways';position:fixed;left:0;right:0;top:8px;text-align:center;color:#fbbf24;font:600 13px system-ui;pointer-events:none}";
   document.head.appendChild(st);
   const pad = document.createElement("div"); pad.id = "tpad"; document.body.appendChild(pad);
   const bt = (label, pos, size, code) => { const k = TouchPad.key(code); return TouchPad.button(label, pos, size, () => { audioStart(); k.down(); }, k.up, pad); };
@@ -1335,6 +1335,7 @@ if (TouchPad.on) {
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
     pad.classList.toggle("port", innerHeight > innerWidth);
     document.body.classList.toggle("playing", show);
+    document.body.classList.toggle("lpad", snake);
   }, 250);
 }
 setSound(sound); menu(); loadBest(); requestAnimationFrame(frame);
