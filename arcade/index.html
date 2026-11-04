@@ -838,8 +838,8 @@ let cur = null, paused = false, overDone = false, menuT = 0;
 const TOUCH_HELP = { blocks: "arrows: move · A: drop · B: turn  (or tap the picture: turn, slide: move, flick down: drop)", rocks: "stick: fly · A: fire · catch the capsules",
   snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
   city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball) · ⟲ BALLE (top left): ball back to the centre",
-  tennis: "stick: move (let go: you run to the ball) · A: swing · B: use your item, or dive · first to 7",
-  fight: "stick: walk, jump (up), crouch (down), walk away = block · A: punch (3 = combo) · B: kick · A+B: special" };
+  tennis: "stick: move · A: swing and serve · B: use your item, or dive · first to 7",
+  fight: "stick: walk, jump (up), crouch (down), walk away = block · A: punch (3 = combo) · B: kick · C: special · block then A/B: counter" };
 const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
 function start(id) {
   if (window.TouchPad && TouchPad.release) TouchPad.release();
@@ -1399,6 +1399,7 @@ if (TouchPad.on) {
   }, () => { window.TSTICK = null; setKeys(new Set()); });
   const any = [bt("A", { right: 20, bottom: 48 }, 82, "Space"), bt("B", { right: 112, bottom: 20 }, 62, "Enter")];
   const wpn = bt("WPN", { right: 40, bottom: 150 }, 58, "KeyE");
+  const cBtn = bt("C", { right: 34, bottom: 150 }, 62, "KeyE");
   const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("BOOST", { left: 22, bottom: 190 }, 70, "Space")];
   const dpad = [bt("▲", { left: 76, bottom: 122 }, 62, "ArrowUp"), bt("▼", { left: 76, bottom: 14 }, 62, "ArrowDown"),
     bt("◀", { left: 10, bottom: 68 }, 62, "ArrowLeft"), bt("▶", { left: 142, bottom: 68 }, 62, "ArrowRight")];
@@ -1436,7 +1437,7 @@ if (TouchPad.on) {
     blk.forEach((b) => { b.style.display = blocks ? "" : "none"; });
     any.forEach((b, i) => { b.style.display = show && !isGp && !blocks && !snake && !(i === 1 && cur && (cur.id === "jump" || cur.id === "rocks")) ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
-    wpn.style.display = cur && cur.id === "city" ? "" : "none";
+    wpn.style.display = cur && cur.id === "city" ? "" : "none"; cBtn.style.display = cur && cur.id === "fight" ? "" : "none";
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
     pad.classList.toggle("port", innerHeight > innerWidth);
     document.body.classList.toggle("playing", show);

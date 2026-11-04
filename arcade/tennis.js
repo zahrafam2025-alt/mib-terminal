@@ -18,7 +18,7 @@ function Tennis(online = null) {
   const ball = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, last: -1, bounces: 0, fire: false, bomb: false, curve: 0, t: 0, held: true };
   const boxes = [], peels = [], fx = [];
   const g = { id: "tennis", own: true, score: 0, over: false, s: [0, 0], pause: 1.2, msg: "FIRST TO 7!", flash: "", flashT: 0, result: null, sendT: 0, net: null,
-    help: "arrows / W A S D move (or let go: you run to the ball) · Space swing · Enter or X: item, or dive · first to 7 · Esc menu" };
+    help: "arrows / W A S D move · Space swing (and serve) · Enter or X: item, or dive · first to 7 · Esc menu" };
   let server = 0, serveT = 0, rally = 0, boxT = 6;
   const say = (s, t = 1.2) => { g.flash = s; g.flashT = t; };
   const mine = () => P.find((p) => p.human && p.human.id === me);
@@ -114,9 +114,7 @@ function Tennis(online = null) {
   function step(dt) {
     if (ball.held) {
       const sv = P[server]; ball.x = sv.x + (sv.team ? -9 : 9); ball.y = sv.y; ball.z = 14 + Math.sin(serveT * 5) * 3; serveT += dt;
-      const wants = sv.human ? sv.in.k > sv.lastK || serveT > 4 : serveT > 1.1;
-      if (sv.human) sv.lastK = sv.in.k;
-      if (wants) shoot(sv, true);
+      if (!sv.human ? serveT > 1.1 : serveT > 8) shoot(sv, true);
     }
     for (const p of P) {
       if (!p.human) bot(p);
@@ -127,6 +125,7 @@ function Tennis(online = null) {
       }
       p.giantT = Math.max(0, p.giantT - dt); p.frozenT = Math.max(0, p.frozenT - dt); p.dazed = Math.max(0, p.dazed - dt); p.downT = Math.max(0, p.downT - dt);
       p.swingT = Math.max(0, p.swingT - dt); p.spin = Math.max(0, p.spin - dt);
+      if (p.in.k > p.lastK && ball.held && P[server] === p) { p.lastK = p.in.k; shoot(p, true); }
       if (p.in.k > p.lastK) { p.lastK = p.in.k; if (!p.downT && !p.dazed) { p.swingT = 0.42; p.swingA = 1; } }
       if (p.in.b > p.lastB) {
         p.lastB = p.in.b;
@@ -140,10 +139,6 @@ function Tennis(online = null) {
       else if (p.downT > 0 || p.dazed > 0) { p.vx *= 0.85; p.vy *= 0.85; }
       else {
         let mx = p.in.mx, my = p.in.my;
-        if (p.human && Math.hypot(mx, my) < 0.2 && !ball.held && ball.last !== p.team) {
-          const [lx, ly] = landing(p.team), mate = P.find((q) => q !== p && q.team === p.team);
-          if (!mate || mate.human === null || Math.hypot(lx - p.x, ly - p.y) <= Math.hypot(lx - mate.x, ly - mate.y) + 10) { const dx = lx + (p.team ? 7 : -7) - p.x, dy = ly - p.y, L = Math.hypot(dx, dy); if (L > 4) { mx = dx / L * 0.85; my = dy / L * 0.85; } }
-        }
         const L = Math.hypot(mx, my), sp = (p.human ? 135 : 118) * (p.frozenT > 0 ? 0.4 : 1);
         const wx = L > 0.05 ? mx / Math.max(1, L) * sp : 0, wy = L > 0.05 ? my / Math.max(1, L) * sp : 0;
         p.vx += (wx - p.vx) * Math.min(1, dt * 12); p.vy += (wy - p.vy) * Math.min(1, dt * 12);

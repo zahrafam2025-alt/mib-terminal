@@ -22,7 +22,7 @@
   addEventListener("blur", () => T.release()); document.addEventListener("visibilitychange", () => { if (document.hidden) T.release(); });
   T.button = (label, pos, size, down, up, parent) => {
     T.css();
-    const b = document.createElement("div"); b.className = "tp-b"; b.textContent = label;
+    const b = document.createElement("div"); b.className = "tp-b notranslate"; b.setAttribute("translate", "no"); b.textContent = label;
     Object.assign(b.style, { width: size + "px", height: size + "px" }, Object.fromEntries(Object.entries(pos).map(([k, v]) => [k, typeof v === "number" ? "calc(" + v + "px + env(safe-area-inset-" + k + ", 0px))" : v])));
     let held = null;
     const end0 = () => { if (held === null) return; held = null; b.classList.remove("on"); if (up) up({}); };
