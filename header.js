@@ -156,12 +156,33 @@
   paintMe(); connect();
 
   if (!home) return;
-  // on the homepage the bar shows the section on screen
-  var keys = ["today", "news", "money", "calendar", "dives"];
-  var mark = function () {
-    var y = scrollY + 120, on = "today";
-    keys.forEach(function (k) { var s = document.getElementById(k); if (s && s.getBoundingClientRect().top + scrollY <= y) on = k; });
-    [].forEach.call(bar.querySelectorAll("nav a"), function (a) { if (a.dataset.k !== "lounge") a.classList.toggle("on", a.dataset.k === on); });
+  // 2026-11-04 (owner: "limit scrolls, really one pagers wherever possible"): on the homepage each menu item shows its
+  // own part of the page instead of scrolling to it; the address keeps #news etc. (links, sharing and Back still work),
+  // and each part ends with a button to the next one, so the whole brief can still be read in order
+  var VIEWS = [["today", ["today", "markets"]], ["news", ["news"]], ["money", ["money"]], ["calendar", ["calendar"]], ["dives", ["dives"]], ["lounge", ["lounge", "premium"]]];
+  var NAMES = { today: L("Today", "Aujourd'hui"), news: L("News", "Actus"), money: L("Money", "Marchés"), calendar: L("Calendar", "Agenda"), dives: L("Deep dive", "Analyses"), lounge: L("Lounge", "Lounge") };
+  var keyOf = function (h) { h = (h || "").replace("#", ""); for (var i = 0; i < VIEWS.length; i++) if (VIEWS[i][0] === h || VIEWS[i][1].indexOf(h) >= 0) return VIEWS[i][0]; return "today"; };
+  var nextBtn = document.createElement("div"); nextBtn.className = "mb-nextv notranslate"; nextBtn.setAttribute("translate", "no");
+  var st2 = document.createElement("style");
+  st2.textContent = ".mb-nextv{display:flex;justify-content:space-between;gap:10px;margin:22px 0 6px}.mb-nextv a{font:700 15px 'Source Sans 3',sans-serif;padding:10px 16px;border-radius:10px;border:1px solid var(--line,#26304a);color:inherit;text-decoration:none}.mb-nextv a.nx{background:var(--brand,#e8a317);border-color:var(--brand,#e8a317);color:#1a1205;margin-left:auto}";
+  document.head.appendChild(st2);
+  var show = function (k, jump) {
+    var at = 0; for (var i = 0; i < VIEWS.length; i++) if (VIEWS[i][0] === k) at = i;
+    var want = VIEWS[at][1];
+    [].forEach.call(document.querySelectorAll("main section[id]"), function (sec) { sec.style.display = want.indexOf(sec.id) >= 0 ? "" : "none"; });
+    [].forEach.call(bar.querySelectorAll("nav a"), function (a) { if (a.dataset.k !== "lounge") a.classList.toggle("on", a.dataset.k === k); });
+    var prev = VIEWS[at - 1], next = VIEWS[at + 1];
+    nextBtn.innerHTML = (prev ? '<a href="#' + prev[0] + '">← ' + NAMES[prev[0]] + "</a>" : "") + (next ? '<a class="nx" href="#' + next[0] + '">' + L("Next: ", "Suite : ") + NAMES[next[0]] + " →</a>" : "");
+    var foot = document.getElementById("foot"); if (foot && nextBtn.parentNode !== foot.parentNode) foot.parentNode.insertBefore(nextBtn, foot);
+    if (jump !== false) window.scrollTo(0, 0);
+    window.dispatchEvent(new CustomEvent("mib-view", { detail: k }));
   };
-  addEventListener("scroll", mark, { passive: true }); addEventListener("load", mark);
+  bar.addEventListener("click", function (e) {
+    var a = e.target.closest("nav a"); if (!a || !a.dataset.k || a.dataset.k === "week" || a.dataset.k === "archive" || a.dataset.k === "arcade") return;
+    e.preventDefault(); var k = keyOf(a.dataset.k); if (location.hash !== "#" + k) history.pushState(null, "", "#" + k); show(k);
+  });
+  addEventListener("hashchange", function () { show(keyOf(location.hash)); });
+  addEventListener("popstate", function () { show(keyOf(location.hash)); });
+  var first = function () { show(keyOf(location.hash), false); };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", first); else first();
 })();
