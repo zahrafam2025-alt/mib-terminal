@@ -652,6 +652,12 @@ function render(dt) {
   const nades = W ? W.nades : [];
   while (S3.nadeObjs.length < nades.length) { const g = makeGun("nade", false); g.scale.setScalar(1.3); S3.scene.add(g); S3.nadeObjs.push(g); }
   S3.nadeObjs.forEach((g, i) => { g.visible = i < nades.length; if (g.visible) { g.position.set(nades[i].x, nades[i].y, nades[i].z); g.rotation.x += dt * 9; } });
+  const drops = (W && W.drops) || [], DO = S3.dropObjs || (S3.dropObjs = []);
+  drops.forEach((d, i) => {
+    if (!DO[i] || DO[i].kind !== d.w) { if (DO[i]) S3.scene.remove(DO[i].g); const g = makeGun(d.w, false); g.scale.setScalar(1.25); S3.scene.add(g); DO[i] = { kind: d.w, g }; }
+    const g = DO[i].g; g.visible = true; g.position.set(d.x, d.y + 0.06, d.z); g.rotation.set(0, (i * 1.7) % 6.28, Math.PI / 2);
+  });
+  for (let i = drops.length; i < DO.length; i++) DO[i].g.visible = false;
   S3.tracers.forEach((m, i) => { const t = FX.tracers[i]; m.visible = !!t; if (!t) return;
     const V = S3.tv || (S3.tv = [0, 0, 0, 0].map(() => new T3.Vector3())), a = V[0].fromArray(t.a), b = V[1].fromArray(t.b), k = Math.max(0, t.t / 0.07);
     const from = V[2].copy(a).lerp(b, 0.1 + (1 - k) * 0.5), to = V[3].copy(a).lerp(b, Math.min(1, 0.35 + (1 - k) * 0.65));

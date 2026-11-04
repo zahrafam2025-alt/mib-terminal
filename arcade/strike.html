@@ -294,12 +294,12 @@ const DIFF = [{ react: 0.75, err: 0.07, turn: 3.2, head: 0.15 }, { react: 0.42, 
 let W = null, ME = null, mode = "menu", net = null, cfg = null;
 const FX = { tracers: [], parts: [], decals: [], flash: 0, hurt: 0, feed: [], msg: null, hitT: 0, head: false };
 function newWorld(c) {
-  return { players: [], round: 0, state: "freeze", t: 5, score: [0, 0], loss: [0, 0], charge: { s: "none", by: -1, x: 0, y: 0, z: 0, t: 0, site: "" }, nades: [],
+  return { players: [], round: 0, state: "freeze", t: 5, score: [0, 0], loss: [0, 0], charge: { s: "none", by: -1, x: 0, y: 0, z: 0, t: 0, site: "" }, nades: [], drops: [],
            winner: -1, over: false, events: [], diff: c.diff, size: c.size, roundMsg: "" };
 }
 function ev(e) { W.events.push(e); applyEv(e, true); }
 function startRound() {
-  W.round++; W.state = "freeze"; W.t = W.round === 1 ? 10 : 7; W.nades = []; W.roundMsg = "";
+  W.round++; W.state = "freeze"; W.t = W.round === 1 ? 10 : 7; W.nades = []; W.drops = []; W.roundMsg = "";
   const team = [[], []]; W.players.forEach((p) => team[p.team].push(p));
   team.forEach((ps, t) => ps.forEach((p, i) => {
     const s = SPAWNS[t][i % 5], off = Math.floor(i / 5) * 1.2;
@@ -363,7 +363,9 @@ function hostTick(dt) {
     } else if (p.use && p.team === 1 && W.state === "planted" && Math.hypot(p.x - W.charge.x, p.z - W.charge.z) < 1.6) {
       p.useT += dt; p.vx = p.vz = 0;
       if (p.useT >= (p.kit ? 2.5 : 5)) { W.charge.s = "defused"; p.money += 300; ev({ k: "defused", by: p.id }); endRound(1, `${p.name} defused the charge`); }
-    } else p.useT = 0;
+    } else { p.useT = 0; if (p.use && !p.useWas) pickUp(p, 1.5); }
+    if (p.kind === "bot" && !p.prim) pickUp(p, 1.2);
+    p.useWas = p.use;
   }
   for (const n of W.nades) {
     n.t -= dt; n.vy -= 20 * dt;
@@ -378,6 +380,15 @@ function hostTick(dt) {
   }
   W.nades = W.nades.filter((n) => !n.dead);
 }
+function dropGun(p, w) { (W.drops || (W.drops = [])).push({ w, ammo: (p.ammo[w] || [WPN[w].mag, 0]).slice(), x: p.x, y: p.y, z: p.z }); if (W.drops.length > 14) W.drops.shift(); }
+const nearDrop = (p, r) => { let best = null, bd = r; for (const d of W.drops || []) { const dd = Math.hypot(d.x - p.x, d.z - p.z); if (dd < bd && Math.abs(d.y - p.y) < 1.5) { bd = dd; best = d; } } return best; };
+function pickUp(p, r) {
+  const d = nearDrop(p, r); if (!d || !WPN[d.w]) return;
+  W.drops.splice(W.drops.indexOf(d), 1);
+  if (p.prim) dropGun(p, p.prim);
+  p.prim = d.w; p.ammo[d.w] = d.ammo.slice(); p.slot = 1; p.rT = 0; p.scoped = false;
+  ev({ k: "snd", s: "buy", x: p.x, y: p.y, z: p.z, id: p.id });
+}
 function finishReload(p) { const w = WPN[wpnOf(p)], a = p.ammo[wpnOf(p)]; if (!w || !a) return; const need = w.mag - a[0], take = Math.min(need, a[1]); a[0] += take; a[1] -= take; }
 function startReload(p) { const k = wpnOf(p), w = WPN[k], a = p.ammo[k]; if (!w || !w.mag || !a || p.rT > 0 || a[0] >= w.mag || a[1] <= 0) return; p.rT = w.reload; p.scoped = false; ev({ k: "snd", s: "reload", x: p.x, y: p.y, z: p.z, id: p.id }); }
 function damage(p, by, dmg, wk, head) {
@@ -390,6 +401,7 @@ function damage(p, by, dmg, wk, head) {
     p.hp = 0; p.alive = false; p.deaths++;
     if (by && by !== p) { if (by.team !== p.team) { by.kills++; by.money = Math.min(16000, by.money + (wk === "knife" ? 1500 : (WPN[wk] && WPN[wk].kill) || 300)); } else by.money = Math.max(0, by.money - 300); }
     if (p.charge) { p.charge = false; W.charge = { s: "dropped", by: -1, x: p.x, y: p.y, z: p.z, t: 0, site: "" }; }
+    if (p.prim) { dropGun(p, p.prim); p.prim = null; p.slot = 2; }
     ev({ k: "kill", id: p.id, by: by ? by.id : -1, w: wk, head });
   }
 }
@@ -815,6 +827,8 @@ function drawHud() {
   f("", 26, COLS[0], "right"); tx(String(W.score[0]), w / 2 - 70 * k, 42 * k); f("", 26, COLS[1], "left"); tx(String(W.score[1]), w / 2 + 70 * k, 42 * k);
   f("", 22, st === "planted" ? "#f87171" : "#f8fafc", "center"); tx(st === "planted" ? "CHARGE" : st === "freeze" ? `BUY ${Math.ceil(tl)}` : mm, w / 2, 40 * k);
   for (let t = 0; t < 2; t++) { const ps = W.players.filter((q) => q.team === t); ps.forEach((q, i) => { x.fillStyle = q.alive ? COLS[t] : "rgba(148,163,184,.25)"; x.fillRect(w / 2 + (t ? 100 + i * 12 : -112 - i * 12) * k, 16 * k, 8 * k, 14 * k); }); }
+  const carrier = W.players.find((q) => q.charge && q.alive);
+  if (carrier && ME && ME.team === 0 && st !== "planted") { f("", 14, "#fca5a5", "center"); tx(carrier === ME ? "✹ YOU CARRY THE CHARGE" : `✹ ${carrier.name} carries the charge`, w / 2, 76 * k); }
   if (st === "planted") { x.fillStyle = "#f87171"; x.fillRect(w / 2 - 150 * k, 54 * k, 300 * k * clamp(W.charge.t / 40, 0, 1), 4 * k); }
   FX.feed.forEach((e, i) => {
     const y = (24 + i * 26) * k; x.fillStyle = "rgba(10,12,20,.55)"; x.fillRect(w - 340 * k, y - 18 * k, 330 * k, 24 * k);
@@ -859,6 +873,8 @@ function drawHud() {
   if (FX.msg) { const m = FX.msg; f("", 34, m.c || "#fde68a", "center"); x.globalAlpha = clamp(m.t, 0, 1); tx(m.s, w / 2, h * 0.24); if (m.sub) { f("", 16, "#e5e7eb", "center"); tx(m.sub, w / 2, h * 0.24 + 30 * k); } x.globalAlpha = 1; }
   if (FX.big) { f("", 46, "#ef4444", "center"); x.globalAlpha = clamp(FX.big.t * 2, 0, 1); tx(FX.big.s, w / 2, h * 0.4); x.globalAlpha = 1; }
   const hint = objectiveHint();
+  const gun = !hint && ME && ME.alive && !FX.buy ? nearDrop(ME, 1.5) : null;
+  if (gun && WPN[gun.w]) { f("", 17, "#fde68a", "center"); tx(`${PHONE ? "USE" : "E"}: TAKE THE ${WPN[gun.w].name.toUpperCase()}`, w / 2, h - 140 * k); }
   if (hint && !FX.buy) { f("", 17, hint[1], "center"); x.globalAlpha = hint[2] ? 0.65 + 0.35 * Math.sin(performance.now() / 160) : 1; tx(hint[0], w / 2, h - 140 * k); x.globalAlpha = 1; }
   if (ME && ME.alive && inBuy(ME) && buyTime() && !FX.buy) { f("", 14, "#fde68a", "center"); tx(`B: BUY  ·  $${ME.money}`, w / 2, h - 110 * k); }
   if (ME) { f("", 11, "#64748b"); tx("H help · B buy · V voice · Tab scores", 14 * k, h - 100 * k); }
@@ -886,7 +902,7 @@ function drawHud() {
   if (keys.has("Tab")) {
     x.fillStyle = "rgba(10,12,20,.9)"; x.fillRect(w / 2 - 300 * k, h * 0.18, 600 * k, 420 * k);
     [0, 1].forEach((t) => { f("", 18, COLS[t]); tx(`${TEAMN[t]}  ${W.score[t]}`, w / 2 - 280 * k, h * 0.18 + (36 + t * 200) * k);
-      W.players.filter((q) => q.team === t).sort((a, b) => b.kills - a.kills).forEach((q, i) => { const y = h * 0.18 + (64 + t * 200 + i * 26) * k; f("", 15, q.alive ? "#f8fafc" : "#64748b"); tx(`${q.name}${q.kind === "bot" ? " (bot)" : ""}`, w / 2 - 270 * k, y); f("", 15, "#cbd5e1", "right"); tx(`${q.kills} / ${q.deaths}`, w / 2 + 160 * k, y); tx(`$${q.money}`, w / 2 + 280 * k, y); }); });
+      W.players.filter((q) => q.team === t).sort((a, b) => b.kills - a.kills).forEach((q, i) => { const y = h * 0.18 + (64 + t * 200 + i * 26) * k; f("", 15, q.alive ? "#f8fafc" : "#64748b"); tx(`${q.name}${q.kind === "bot" ? " (bot)" : ""}${q.charge && q.alive && (!ME || ME.team === 0) ? "  ✹" : ""}`, w / 2 - 270 * k, y); f("", 15, "#cbd5e1", "right"); tx(`${q.kills} / ${q.deaths}`, w / 2 + 160 * k, y); tx(`$${q.money}`, w / 2 + 280 * k, y); }); });
   }
   if (W.state === "done") { f("", 16, "#e5e7eb", "center"); tx("Esc: back to the menu", w / 2, h * 0.24 + 60 * k); }
 }
@@ -1036,7 +1052,7 @@ function hostNet(dt) {
   snapT = 0.05;
   const P = W.players.map((p) => [p.id, p.team, +p.x.toFixed(2), +p.y.toFixed(2), +p.z.toFixed(2), +p.yaw.toFixed(3), +p.pitch.toFixed(3), Math.round(p.hp), Math.round(p.armor), p.alive ? 1 : 0,
     p.slot, p.crouch ? 1 : 0, p.money, p.kills, p.deaths, p.prim, p.nades, p.ammo, +p.rT.toFixed(2), p.charge ? 1 : 0, +p.useT.toFixed(2), p.ack, p.name, p.kind === "bot" ? 1 : 0, p.fireFx > 0 ? 1 : 0, p.helmet ? 1 : 0, p.life || 0, p.sec, p.kit ? 1 : 0, p.box ? 1 : 0]);
-  net.send("*", { t: "s", st: W.state, tl: +W.t.toFixed(2), sc: W.score, c: W.charge, n: W.nades.map((n) => [+n.x.toFixed(2), +n.y.toFixed(2), +n.z.toFixed(2)]), P, E: W.events, d: W.diff, mp: MAPN });
+  net.send("*", { t: "s", st: W.state, tl: +W.t.toFixed(2), sc: W.score, c: W.charge, n: W.nades.map((n) => [+n.x.toFixed(2), +n.y.toFixed(2), +n.z.toFixed(2)]), dr: (W.drops || []).map((d) => [d.w, +d.x.toFixed(2), +d.y.toFixed(2), +d.z.toFixed(2)]), P, E: W.events, d: W.diff, mp: MAPN });
   W.events = [];
 }
 function hostMsg(m, from) {
@@ -1062,6 +1078,7 @@ function guestSnap(m) {
   if (!W) W = newWorld({ diff: m.d, size: 5 });
   W.state = m.st; W.t = m.tl; W.score = m.sc; W.charge = m.c; W.diff = m.d;
   W.nades = m.n.map(([x, y, z]) => ({ x, y, z }));
+  W.drops = (m.dr || []).map(([w, x, y, z]) => ({ w, x, y, z, ammo: [0, 0] }));
   const seen = new Set();
   for (const a of m.P) {
     const [id, team, x, y, z, yaw, pitch, hp, armor, alive, slot, cr, money, kills, deaths, prim, nades, ammo, rT, charge, useT, ack, name, bot, ff, helmet, life, sec, kit, box] = a;
@@ -1178,7 +1195,7 @@ function joinRoom(room) {
 $("#bJoinX").onclick = () => { clearInterval(joinTimer); if (net) net.close(); net = null; showPanel("pMain"); };
 $("#bResume").onclick = () => hideMenu();
 $("#bQuit").onclick = () => quit();
-function quit() { if (net) net.close(); net = null; mode = "menu"; W = null; ME = null; FX.buy = false; FX.msg = null; FX.feed = []; showPanel("pMain"); }
+function quit() { if (net) net.close(); net = null; mode = "menu"; W = null; ME = null; FX.buy = false; FX.msg = null; FX.feed = []; location.href = (window.ARC && ARC.page ? ARC.page("hub") : "/arcade") + "?sheet=strike"; }
 addEventListener("keydown", (e) => { if (e.code === "Escape" && FX.buy) closeBuy(); if (e.code === "Escape" && W && W.state === "done") quit(); });
 
 let last = performance.now();
@@ -1270,7 +1287,8 @@ if (window.TouchPad && TouchPad.on) (() => {
   const useB = hold("USE", { right: 22, bottom: 210 }, 60, "KeyE");
   setInterval(() => {
     const h = typeof objectiveHint === "function" && ME && ME.alive ? objectiveHint() : null, act = h && h[2] ? (/DEFUSE/.test(h[0]) ? "DEFUSE" : "PLANT") : "";
-    useB.textContent = act ? "HOLD · " + act : "USE";
+    const take = !act && ME && ME.alive && W && nearDrop(ME, 1.5);
+    useB.textContent = act ? "HOLD · " + act : take ? "TAKE" : "USE";
     useB.style.background = act ? "rgba(234,179,8,.85)" : ""; useB.style.color = act ? "#111" : ""; useB.style.transform = act ? "scale(1.25)" : "";
   }, 250);
   B("SCOPE", { right: 96, bottom: 196 }, 58, () => { if (ME && WPN[wpnOf(ME)] && WPN[wpnOf(ME)].scope) ME.scoped = !ME.scoped; });

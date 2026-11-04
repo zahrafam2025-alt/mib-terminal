@@ -19,6 +19,15 @@ canvas { width:100%; height:100%; display:block; }
 .help { color:var(--muted); font:12.5px Consolas, monospace; margin-top:6px; }
 button { background:#22283d; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:5px 11px; cursor:pointer; font:13px "Segoe UI", sans-serif; }
 button:hover { border-color:var(--a); }
+/* 4 Nov (owner: "one pager wherever possible: the arcade could be the list of games with the best scores on the side,
+   instead of scrolling"): on any screen wide enough, the game on the left at the window's height, the scoreboard beside it */
+@media (min-width:640px) {
+  #wrap { max-width:1320px; display:grid; grid-template-columns:min(calc(100vw - 330px), calc((100vh - 172px) * 4 / 3)) minmax(220px, 300px); grid-template-areas:"top top" "screen board" "help board"; column-gap:14px; justify-content:center; align-items:start; }
+  #top { grid-area:top; } #screen { grid-area:screen; width:100% !important; margin:0 !important; } #help { grid-area:help; }
+  #board { grid-area:board; margin-top:0 !important; max-height:calc(100vh - 150px); overflow:auto; scrollbar-width:thin; }
+  #board .bgrid { grid-template-columns:1fr !important; }
+  body.playing #wrap { display:block; }
+}
 </style></head>
 <body>
 <script src="/header.js" data-active="arcade" onerror="void 0"></script><div id="wrap">
@@ -32,7 +41,7 @@ button:hover { border-color:var(--a); }
 <script src="touch.js"></script>
 <script src="net.js"></script>
 <script src="racer.js"></script>
-<script src="goal.js"></script>
+<script src="goal.js"></script><script src="tennis.js"></script>
 <script src="city.js"></script>
 <script>
 "use strict";
@@ -810,13 +819,15 @@ const GAMES = [
   { id: "sumo", name: "SUMO · 2P", sub: "letters vs arrows, push them out", make: Sumo, col: "#f5b83d", keys2: true },
   { id: "city", name: "CHAOS CITY", sub: "top-down city, no limits", make: () => City(), col: "#fb923c", quiet: true },
   { id: "goal", name: "GOAL RUSH", sub: "2 v 2 football, bots or online", make: () => Goal(), col: "#22c55e" },
+  { id: "tennis", name: "RALLY RUMBLE", sub: "2 v 2 party tennis: items, bananas, bombs", make: () => Tennis(), col: "#f97316" },
   { id: "strike", name: "STRIKE & DEFUSE", sub: "3D tactical shooter, bots or LAN", href: ARC.page("strike"), col: "#eab308" },
   { id: "empire", name: "CORSICAN EMPIRE", sub: "build, gather, conquer: bots or LAN", href: ARC.page("empire"), col: "#38bdf8" },
 ];
 let cur = null, paused = false, overDone = false, menuT = 0;
 const TOUCH_HELP = { blocks: "arrows: move · A: drop · B: turn  (or tap the picture: turn, slide: move, flick down: drop)", rocks: "stick: fly · A: fire · catch the capsules",
   snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
-  city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball)" };
+  city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball)",
+  tennis: "stick: move (let go: you run to the ball) · A: swing · B: use your item, or dive · first to 7" };
 const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
 function start(id) {
   const d = GAMES.find((x) => x.id === id);
@@ -879,7 +890,7 @@ function draw() {
   if (!cur) { if (!(ON && !ON.live && drawWatch())) drawMenu(); }
   else {
     cur.draw();
-    if (ON && ON.live && cur.id !== "spa" && cur.id !== "goal" && !SHARED.has(cur.id) && ON.players.length > 1) drawSplit();
+    if (ON && ON.live && cur.id !== "spa" && !HOSTED.has(cur.id) && !SHARED.has(cur.id) && ON.players.length > 1) drawSplit();
     if (ON && ON.live && SHARED.has(cur.id) && cur.net && ON.players.length > 1) drawShared();
     if (ON && ON.live && ON.players.length > 1 && performance.now() - ON.startT < 4000) {
       const a = Math.min(1, (4000 - (performance.now() - ON.startT)) / 600), n = ON.players.length; cx.globalAlpha = a;
@@ -916,7 +927,8 @@ document.getElementById("snd").onclick = () => { audioStart(); setSound(!sound);
 document.getElementById("pauseBtn").onclick = () => { if (cur && cur.id !== "sumo") paused = !paused; screenEl.focus(); };
 document.getElementById("menuBtn").onclick = () => { menu(); screenEl.focus(); };
 
-const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS · together"], ["rocksvs", "ROCKS · versus (shoot each other)"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
+const HOSTED = new Set(["goal", "tennis"]);
+const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["tennis", "RALLY RUMBLE · 2 v 2 party tennis"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS · together"], ["rocksvs", "ROCKS · versus (shoot each other)"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
 const realRandom = Math.random;
 const SHARED = new Set(["snake", "rocks", "rocksvs", "jump", "city"]), NETCOL = ["#22d3ee", "#f472b6", "#a3e635", "#fbbf24"];
 const seeded = (a) => () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
@@ -1000,7 +1012,7 @@ function onMsg(m, from) {
 }
 function lateJoin(q) {
   if (!ON || !ON.live || !cur) return;
-  if (cur.id === "goal" && cur.setSlot) {
+  if (HOSTED.has(cur.id) && cur.setSlot) {
     const slot = ON.players.findIndex((p) => p.id === q.id); if (slot < 0 || slot > 3) return;
     cur.setSlot(slot, q.id, q.name); osend({ t: "slot", i: slot, id: q.id, name: q.name });
   } else if (cur.id === "spa" && cur.addRemote) { cur.addRemote(q); osend({ t: "addcar", id: q.id, name: q.name }); }
@@ -1015,7 +1027,7 @@ const SHEET = {
   strike: { who: "1 to 8 players · bots fill the teams", opts: [["map", "Map", [["dune", "Dune"], ["villa", "Villa"], ["reactor", "Reactor"], ["port", "Port"], ["temple", "Temple"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]], ["size", "Per team", [["3", "3"], ["5", "5"]]]] },
   empire: { who: "1 to 4 players · bots take the empty seats", opts: [["mapk", "Map", [["sea", "Mare Nostrum"], ["land", "Terre Ferme"], ["isles", "Archipel"], ["river", "Deux Rivières"], ["forest", "Grande Forêt"]]], ["opp", "Opponents", [["1", "1"], ["2", "2"], ["3", "3"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
 };
-const ONLINE_OK = new Set(["strike", "empire", "goal", "spa", "blocks", "snake", "rocks", "jump", "city"]);
+const ONLINE_OK = new Set(["strike", "empire", "goal", "tennis", "spa", "blocks", "snake", "rocks", "jump", "city"]);
 function openSheet(d) {
   let sh = document.getElementById("gsheet");
   if (!sh) { sh = document.createElement("div"); sh.id = "gsheet"; screenEl.appendChild(sh); }
@@ -1047,6 +1059,11 @@ function openSheet(d) {
 #gsheet .sclose{position:absolute;right:8px;top:8px;padding:4px 9px;border-radius:8px}
 @media (max-height:480px){#gsheet .scard{width:min(640px,94%);gap:6px;padding:10px 12px}#gsheet .stitle{font-size:18px}#gsheet .sbtns{grid-auto-flow:column;grid-auto-columns:1fr}#gsheet .sbtns button{padding:9px 6px;font-size:14px}#gsheet .srow button{padding:4px 9px}}`;
   document.head.appendChild(st);
+})();
+(() => {
+  const q = new URLSearchParams(location.search), id = q.get("sheet"); if (!id) return;
+  history.replaceState(null, "", location.pathname);
+  const d = GAMES.find((g) => g.id === id); if (d) setTimeout(() => openSheet(d), 200);
 })();
 const pageRoom = (game, how, room) => { const u = new URL(ARC.page(game), location.href); u.searchParams.set("online", how); if (room) u.searchParams.set("room", room); location.href = u.href; };
 $o("oHost").onclick = () => {
@@ -1160,7 +1177,7 @@ function startOnline(m) {
   ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.startT = performance.now(); ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
-  if (m.game === "goal") { cur = Goal({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = helpOf(cur); }
+  if (HOSTED.has(m.game)) { cur = (m.game === "tennis" ? Tennis : Goal)({ me: ON.me, host: ON.host, players: m.players, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = helpOf(cur); }
   else if (m.game === "spa") {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
     music(null); document.getElementById("help").textContent = helpOf(cur);
@@ -1180,7 +1197,7 @@ const onSnap = document.createElement("canvas"); onSnap.width = 960; onSnap.heig
 const onSmall = document.createElement("canvas"); onSmall.width = 240; onSmall.height = 180;
 setInterval(() => {
   if (!ON || !ON.live || !cur) return;
-  const shared = cur.id === "spa" || cur.id === "goal" || SHARED.has(cur.id), watched = Date.now() - ON.watchT < 5000;
+  const shared = cur.id === "spa" || HOSTED.has(cur.id) || SHARED.has(cur.id), watched = Date.now() - ON.watchT < 5000;
   if (shared ? !watched : ON.players.length < 2 && !watched) return;
   onSmall.getContext("2d").drawImage(shared || ON.players.length < 2 ? cv : onSnap, 0, 0, 240, 180);
   osend({ t: "fr", img: onSmall.toDataURL("image/jpeg", 0.5), score: cur.score || 0, over: !!cur.over });
@@ -1247,14 +1264,14 @@ function askName() {
   const b = document.getElementById("nameBtn"); if (b) b.textContent = n ? "name: " + n : "pick a name";
   screenEl.focus();
 }
-const BOARD_ROWS = [["goal", "best", "GOAL RUSH"], ["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
+const BOARD_ROWS = [["goal", "best", "GOAL RUSH"], ["tennis", "best", "RALLY RUMBLE"], ["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
   ["strike", "wins", "STRIKE & DEFUSE · matches won"], ["empire", "wins", "CORSICAN EMPIRE · wins"], ["city", "best", "CHAOS CITY"], ["blocks", "best", "BLOCKS"],
   ["rocks", "best", "ROCKS"], ["snake", "best", "SNAKE"], ["jump", "best", "JUMP"]];
 function showBoard() {
   const box = document.getElementById("board"); if (!box) return;
   const me = ARC.getName(), fmt = (f, v) => f === "lap_ms" ? (v / 1000).toFixed(2) + " s" : String(v);
   const cards = BOARD_ROWS.map(([g, f, title]) => {
-    const top = ((best[g] || {}).top || {})[f] || [];
+    const top = (((best[g] || {}).top || {})[f] || []).slice(0, 3);
     const rows = top.length ? top.map((e, i) => `<li${e.n === me ? ' class="me"' : ""}><span>${i + 1}. ${esc(e.n)}</span><b>${fmt(f, e.v)}</b></li>`).join("") : '<li class="none">no score yet: be the first</li>';
     return `<div class="bcard"><div class="bt">${title}</div><ol>${rows}</ol></div>`;
   }).join("");
@@ -1276,7 +1293,7 @@ if (ARC.names) {
 }
 if (TouchPad.on) {
   const st = document.createElement("style");
-  st.textContent = "#screen{width:min(100%, calc((100vh - 70px) * 4 / 3));margin:0 auto;touch-action:none}body.playing #top,body.playing .help,body.playing #board{display:none}body.playing #wrap{padding:0;max-width:none}body.playing #screen{width:min(100vw, calc(100vh * 4 / 3));border-radius:0;border:0}body.playing.lpad #screen{width:min(calc(100vw - 250px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)), calc(100vh * 4 / 3));margin:0 env(safe-area-inset-right,0px) 0 auto}#tpad.port::after{content:'turn your phone sideways';position:fixed;left:0;right:0;top:8px;text-align:center;color:#fbbf24;font:600 13px system-ui;pointer-events:none}";
+  st.textContent = "#screen{width:min(100%, calc((100vh - 70px) * 4 / 3));margin:0 auto;touch-action:none}body.playing #top,body.playing .help,body.playing #board{display:none}body.playing #wrap{padding:0;max-width:none}body.playing #screen{width:min(100vw, calc(100vh * 4 / 3));border-radius:0;border:0}body.playing.lpad #wrap{padding-left:calc(222px + env(safe-area-inset-left,0px)) !important;padding-right:env(safe-area-inset-right,0px) !important;box-sizing:border-box}body.playing.lpad #screen{width:min(calc(100vw - 230px - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px)), calc(100vh * 4 / 3));margin:0 auto}#tpad.port::after{content:'turn your phone sideways';position:fixed;left:0;right:0;top:8px;text-align:center;color:#fbbf24;font:600 13px system-ui;pointer-events:none}";
   document.head.appendChild(st);
   const pad = document.createElement("div"); pad.id = "tpad"; document.body.appendChild(pad);
   const bt = (label, pos, size, code) => { const k = TouchPad.key(code); return TouchPad.button(label, pos, size, () => { audioStart(); k.down(); }, k.up, pad); };
@@ -1295,8 +1312,8 @@ if (TouchPad.on) {
   const any = [bt("A", { right: 20, bottom: 48 }, 82, "Space"), bt("B", { right: 112, bottom: 20 }, 62, "Enter")];
   const wpn = bt("WPN", { right: 40, bottom: 150 }, 58, "KeyE");
   const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("BOOST", { left: 22, bottom: 190 }, 70, "Space")];
-  const dpad = [bt("▲", { left: 84, bottom: 132 }, 70, "ArrowUp"), bt("▼", { left: 84, bottom: 16 }, 70, "ArrowDown"),
-    bt("◀", { left: 10, bottom: 74 }, 70, "ArrowLeft"), bt("▶", { left: 158, bottom: 74 }, 70, "ArrowRight")];
+  const dpad = [bt("▲", { left: 76, bottom: 122 }, 62, "ArrowUp"), bt("▼", { left: 76, bottom: 14 }, 62, "ArrowDown"),
+    bt("◀", { left: 10, bottom: 68 }, 62, "ArrowLeft"), bt("▶", { left: 142, bottom: 68 }, 62, "ArrowRight")];
   const blk = [bt("A ⤓", { right: 20, bottom: 48 }, 82, "Space"), bt("B ⟳", { right: 112, bottom: 20 }, 62, "ArrowUp")];
   const esc = bt("☰", { right: 12, top: 12 }, 46, "Escape");
   const snd = TouchPad.soundButton(() => sound, (on) => { audioStart(); setSound(on); }, { right: 66, top: 12 });

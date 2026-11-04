@@ -1739,7 +1739,7 @@ function joinRoom(room) {
 $("#bJoinX").onclick = () => { clearInterval(joinTimer); if (net) net.close(); net = null; showPanel("pMain"); };
 $("#bResume").onclick = () => hideMenu();
 $("#bQuit").onclick = () => quit();
-function quit() { if (net) net.close(); net = null; mode = "menu"; G = null; showPanel("pMain"); }
+function quit() { if (net) net.close(); net = null; mode = "menu"; G = null; location.href = (window.ARC && ARC.page ? ARC.page("hub") : "/arcade") + "?sheet=empire"; }
 
 let last = performance.now(), simAcc = 0;
 function frame(now) {
