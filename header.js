@@ -25,9 +25,9 @@
   if (!document.querySelector('link[rel="manifest"]')) { var mf = document.createElement("link"); mf.rel = "manifest"; mf.href = "/site.webmanifest"; document.head.appendChild(mf); }
   var css = document.createElement("style");
   css.textContent = [
-    ".mibbar{--mb-bg:#ffffff;--mb-ink:#0f172a;--mb-muted:#5b6474;--mb-raised:#eef1f6;--mb-line:#e1e5ec;--mb-brand:#e8a317;--mb-up:#0e9f5a;position:fixed;left:0;right:0;top:0;z-index:1000;background:var(--mb-bg);border-bottom:1px solid var(--mb-line);font:600 15px 'Source Sans 3','Segoe UI',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}",
-    "@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .mibbar{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}}",
-    ":root[data-theme=dark] .mibbar{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}",
+    ".mibbar,.mb-pane{--mb-bg:#ffffff;--mb-ink:#0f172a;--mb-muted:#5b6474;--mb-raised:#eef1f6;--mb-line:#e1e5ec;--mb-brand:#e8a317;--mb-up:#0e9f5a}.mibbar{position:fixed;left:0;right:0;top:0;z-index:1000;background:var(--mb-bg);border-bottom:1px solid var(--mb-line);font:600 15px 'Source Sans 3','Segoe UI',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}",
+    "@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .mibbar,:root:not([data-theme=light]) .mb-pane{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}}",
+    ":root[data-theme=dark] .mibbar,:root[data-theme=dark] .mb-pane{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}",
     "body{padding-top:calc(57px + env(safe-area-inset-top,0px)) !important}body.playing{padding-top:0 !important}",
     "html{scroll-padding-top:calc(70px + env(safe-area-inset-top,0px))}",
     ".mibbar .mb-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:content-box}",

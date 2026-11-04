@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-04T00:02:55Z",
     "date": "2026-11-04",
-    "built_at": "2026-11-04 00:04 UTC",
+    "built_at": "2026-11-04 00:10 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -80,34 +80,34 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
+      "title": "S&P 500 futures gain slightly on AMD's strong earnings as traders await election results: Live updates",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/03/stock-market-today-live-updates.html",
+      "at": "2026-11-04T00:09:30+00:00"
+    },
+    {
+      "title": "Midterm elections 2026 live updates: Polls are closing as House, Senate control hang in balance",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/03/midterm-elections-2026-live-updates.html",
+      "at": "2026-11-04T00:06:15+00:00"
+    },
+    {
+      "title": "Stock Market Election Night: AMD, Arista Earnings Lift Tech Futures, AI Stocks (Live)",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/e5be454d-07fd-3d94-8114-a4e8ff2910de/stock-market-election-night%3A.html?.tsrc=rss",
+      "at": "2026-11-04T00:01:13+00:00"
+    },
+    {
       "title": "Jim Cramer sees signs of life in tech stocks — but not from the usual winners",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/03/jim-cramer-sees-signs-of-life-in-tech-stocks-but-not-from-the-usual-winners.html",
       "at": "2026-11-03T23:58:09+00:00"
     },
     {
-      "title": "Midterm elections 2026 live updates: First polls close as House, Senate control hang in balance",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/03/midterm-elections-2026-live-updates.html",
-      "at": "2026-11-03T23:57:28+00:00"
-    },
-    {
-      "title": "S&P 500 futures gain slightly on AMD's strong earnings as traders await election results: Live updates",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/03/stock-market-today-live-updates.html",
-      "at": "2026-11-03T23:54:26+00:00"
-    },
-    {
       "title": "CrowdStrike (CRWD) stock trades down, here is why",
       "src": "Yahoo Finance",
       "url": "https://finance.yahoo.com/markets/stocks/articles/crowdstrike-crwd-stock-trades-down-234936695.html?.tsrc=rss",
       "at": "2026-11-03T23:49:36+00:00"
-    },
-    {
-      "title": "Stock Market Election Night: AMD, Arista Earnings Lift Tech Futures, AI Stocks (Live)",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/e5be454d-07fd-3d94-8114-a4e8ff2910de/stock-market-election-night%3A.html?.tsrc=rss",
-      "at": "2026-11-03T23:47:33+00:00"
     },
     {
       "title": "Cloudflare, MongoDB, Datadog, JFrog, and Elastic shares plummet, what you need to know",
@@ -716,32 +716,32 @@ window.MIB_BRIEF = {
           {
             "sym": "SPY",
             "price": 754.35,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"61.4\" x2=\"252\" y2=\"61.4\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"52.1\" x2=\"252\" y2=\"52.1\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,28.9 12.1,25.0 16.3,14.3 20.4,17.3 24.5,24.7 28.7,35.1 32.8,31.9 36.9,44.8 41.1,38.5 45.2,43.0 49.4,38.2 53.5,37.8 57.6,27.8 61.8,31.3 65.9,35.9 70.0,46.4 74.2,39.7 78.3,23.7 82.4,29.6 86.6,38.1 90.7,45.2 94.8,54.3 99.0,41.4 103.1,48.2 107.3,55.2 111.4,61.8 115.5,44.8 119.7,42.8 123.8,19.2 127.9,19.4 132.1,30.6 136.2,31.8 140.3,23.5 144.5,35.0 148.6,37.8 152.7,40.9 156.9,38.2 161.0,26.9 165.2,16.5 169.3,8.0 173.4,11.7 177.6,18.3 181.7,9.0 185.8,10.0 190.0,10.2 194.1,27.0 198.2,22.6 202.4,39.7 206.5,33.2 210.6,28.1 214.8,20.0 218.9,38.3 223.1,46.3 227.2,35.5 231.3,26.9 235.5,21.6 239.6,27.5 243.7,54.8 247.9,62.0 252.0,57.5 252.0,62.0\" fill=\"#D98A7B\" opacity=\"0.08\"/><polyline points=\"8.0,28.9 12.1,25.0 16.3,14.3 20.4,17.3 24.5,24.7 28.7,35.1 32.8,31.9 36.9,44.8 41.1,38.5 45.2,43.0 49.4,38.2 53.5,37.8 57.6,27.8 61.8,31.3 65.9,35.9 70.0,46.4 74.2,39.7 78.3,23.7 82.4,29.6 86.6,38.1 90.7,45.2 94.8,54.3 99.0,41.4 103.1,48.2 107.3,55.2 111.4,61.8 115.5,44.8 119.7,42.8 123.8,19.2 127.9,19.4 132.1,30.6 136.2,31.8 140.3,23.5 144.5,35.0 148.6,37.8 152.7,40.9 156.9,38.2 161.0,26.9 165.2,16.5 169.3,8.0 173.4,11.7 177.6,18.3 181.7,9.0 185.8,10.0 190.0,10.2 194.1,27.0 198.2,22.6 202.4,39.7 206.5,33.2 210.6,28.1 214.8,20.0 218.9,38.3 223.1,46.3 227.2,35.5 231.3,26.9 235.5,21.6 239.6,27.5 243.7,54.8 247.9,62.0 252.0,57.5\" fill=\"none\" stroke=\"#D98A7B\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"57.5\" r=\"2.6\" fill=\"#D98A7B\"/></svg>",
-            "caption": "Sits 0.78σ below its 50-day mean. In 40 past setups like today, it was higher 5 days later 55% of the time (median +0.1%, range -4.2% to +4.8%). Seasonally this window has averaged +1.9% over the next 10 days (8 years, 72% positive). Regime: range/transition, elevated vol."
+            "svg": "",
+            "caption": "Mid-range, 42% up its band — about a day from a breakout. Resistance 757.07."
           },
           {
             "sym": "QQQ",
             "price": 685.28,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"60.6\" x2=\"252\" y2=\"60.6\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"56.8\" x2=\"252\" y2=\"56.8\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,36.8 12.1,33.2 16.3,27.5 20.4,28.2 24.5,29.0 28.7,37.5 32.8,38.5 36.9,42.0 41.1,40.3 45.2,45.2 49.4,42.1 53.5,41.7 57.6,35.0 61.8,38.2 65.9,38.0 70.0,44.3 74.2,43.2 78.3,37.4 82.4,36.5 86.6,36.9 90.7,38.3 94.8,43.5 99.0,39.3 103.1,43.2 107.3,46.4 111.4,46.3 115.5,37.9 119.7,34.8 123.8,20.5 127.9,16.4 132.1,20.7 136.2,20.8 140.3,18.4 144.5,23.9 148.6,22.9 152.7,21.7 156.9,20.1 161.0,14.9 165.2,10.4 169.3,8.0 173.4,9.3 177.6,16.3 181.7,13.8 185.8,17.4 190.0,19.1 194.1,29.1 198.2,29.8 202.4,42.3 206.5,36.4 210.6,36.9 214.8,31.7 218.9,45.9 223.1,46.0 227.2,40.6 231.3,34.4 235.5,31.4 239.6,38.5 243.7,55.5 247.9,62.0 252.0,59.1 252.0,62.0\" fill=\"#D98A7B\" opacity=\"0.08\"/><polyline points=\"8.0,36.8 12.1,33.2 16.3,27.5 20.4,28.2 24.5,29.0 28.7,37.5 32.8,38.5 36.9,42.0 41.1,40.3 45.2,45.2 49.4,42.1 53.5,41.7 57.6,35.0 61.8,38.2 65.9,38.0 70.0,44.3 74.2,43.2 78.3,37.4 82.4,36.5 86.6,36.9 90.7,38.3 94.8,43.5 99.0,39.3 103.1,43.2 107.3,46.4 111.4,46.3 115.5,37.9 119.7,34.8 123.8,20.5 127.9,16.4 132.1,20.7 136.2,20.8 140.3,18.4 144.5,23.9 148.6,22.9 152.7,21.7 156.9,20.1 161.0,14.9 165.2,10.4 169.3,8.0 173.4,9.3 177.6,16.3 181.7,13.8 185.8,17.4 190.0,19.1 194.1,29.1 198.2,29.8 202.4,42.3 206.5,36.4 210.6,36.9 214.8,31.7 218.9,45.9 223.1,46.0 227.2,40.6 231.3,34.4 235.5,31.4 239.6,38.5 243.7,55.5 247.9,62.0 252.0,59.1\" fill=\"none\" stroke=\"#D98A7B\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"59.1\" r=\"2.6\" fill=\"#D98A7B\"/></svg>",
-            "caption": "Sits 1.43σ below its 50-day mean, a 5-day move in the bottom 4% of its history. In 40 past setups like today, it was higher 5 days later 60% of the time (median +0.4%, range -12.0% to +7.2%). Seasonally this window has averaged +1.7% over the next 10 days (8 years, 72% positive). Regime: range/transition, elevated vol."
+            "svg": "",
+            "caption": "Mid-range, 38% up its band — about a day from a breakout. Resistance 688.69."
           },
           {
             "sym": "SMH",
             "price": 518.52,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"58.9\" x2=\"252\" y2=\"58.9\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"55.0\" x2=\"252\" y2=\"55.0\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,34.2 12.1,29.1 16.3,27.3 20.4,27.8 24.5,25.1 28.7,35.6 32.8,39.4 36.9,38.6 41.1,39.6 45.2,45.5 49.4,41.6 53.5,41.6 57.6,34.2 61.8,42.7 65.9,41.2 70.0,46.1 74.2,43.9 78.3,43.0 82.4,36.8 86.6,33.9 90.7,33.6 94.8,39.7 99.0,36.1 103.1,47.7 107.3,47.5 111.4,46.0 115.5,39.5 119.7,34.2 123.8,24.3 127.9,19.4 132.1,22.0 136.2,22.4 140.3,19.8 144.5,22.6 148.6,19.6 152.7,18.7 156.9,14.9 161.0,9.4 165.2,8.0 169.3,8.6 173.4,11.8 177.6,19.5 181.7,21.1 185.8,26.5 190.0,27.7 194.1,37.7 198.2,40.3 202.4,48.5 206.5,44.7 210.6,45.6 214.8,41.2 218.9,55.5 223.1,53.9 227.2,47.7 231.3,40.6 235.5,36.5 239.6,39.1 243.7,55.9 247.9,62.0 252.0,57.6 252.0,62.0\" fill=\"#D98A7B\" opacity=\"0.08\"/><polyline points=\"8.0,34.2 12.1,29.1 16.3,27.3 20.4,27.8 24.5,25.1 28.7,35.6 32.8,39.4 36.9,38.6 41.1,39.6 45.2,45.5 49.4,41.6 53.5,41.6 57.6,34.2 61.8,42.7 65.9,41.2 70.0,46.1 74.2,43.9 78.3,43.0 82.4,36.8 86.6,33.9 90.7,33.6 94.8,39.7 99.0,36.1 103.1,47.7 107.3,47.5 111.4,46.0 115.5,39.5 119.7,34.2 123.8,24.3 127.9,19.4 132.1,22.0 136.2,22.4 140.3,19.8 144.5,22.6 148.6,19.6 152.7,18.7 156.9,14.9 161.0,9.4 165.2,8.0 169.3,8.6 173.4,11.8 177.6,19.5 181.7,21.1 185.8,26.5 190.0,27.7 194.1,37.7 198.2,40.3 202.4,48.5 206.5,44.7 210.6,45.6 214.8,41.2 218.9,55.5 223.1,53.9 227.2,47.7 231.3,40.6 235.5,36.5 239.6,39.1 243.7,55.9 247.9,62.0 252.0,57.6\" fill=\"none\" stroke=\"#D98A7B\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"57.6\" r=\"2.6\" fill=\"#D98A7B\"/></svg>",
-            "caption": "Sits 1.62σ below its 50-day mean, a 5-day move in the bottom 5% of its history. In 40 past setups like today, it was higher 5 days later 57% of the time (median +1.0%, range -15.3% to +12.1%). Seasonally this window has averaged +3.7% over the next 10 days (8 years, 66% positive). Regime: range/transition, high vol."
+            "svg": "",
+            "caption": "Mid-range, 33% up its band — about a day from a breakout. Resistance 524.70."
           },
           {
             "sym": "XLP",
             "price": 88.95,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"17.9\" x2=\"252\" y2=\"17.9\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"11.0\" x2=\"252\" y2=\"11.0\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,42.4 12.1,40.4 16.3,35.7 20.4,35.3 24.5,42.5 28.7,37.9 32.8,33.0 36.9,39.2 41.1,35.8 45.2,28.3 49.4,33.1 53.5,34.4 57.6,40.4 61.8,38.5 65.9,40.9 70.0,39.6 74.2,38.1 78.3,39.5 82.4,43.0 86.6,45.8 90.7,50.8 94.8,50.6 99.0,49.1 103.1,43.8 107.3,47.3 111.4,49.4 115.5,48.6 119.7,52.1 123.8,53.8 127.9,49.7 132.1,51.2 136.2,55.0 140.3,53.1 144.5,52.0 148.6,54.2 152.7,60.6 156.9,62.0 161.0,61.0 165.2,58.3 169.3,54.4 173.4,55.0 177.6,46.1 181.7,46.1 185.8,41.0 190.0,42.1 194.1,32.5 198.2,29.3 202.4,24.5 206.5,26.6 210.6,23.8 214.8,27.1 218.9,12.3 223.1,21.2 227.2,22.8 231.3,26.9 235.5,28.5 239.6,21.6 243.7,15.3 247.9,8.0 252.0,17.7 252.0,62.0\" fill=\"#5FB98F\" opacity=\"0.08\"/><polyline points=\"8.0,42.4 12.1,40.4 16.3,35.7 20.4,35.3 24.5,42.5 28.7,37.9 32.8,33.0 36.9,39.2 41.1,35.8 45.2,28.3 49.4,33.1 53.5,34.4 57.6,40.4 61.8,38.5 65.9,40.9 70.0,39.6 74.2,38.1 78.3,39.5 82.4,43.0 86.6,45.8 90.7,50.8 94.8,50.6 99.0,49.1 103.1,43.8 107.3,47.3 111.4,49.4 115.5,48.6 119.7,52.1 123.8,53.8 127.9,49.7 132.1,51.2 136.2,55.0 140.3,53.1 144.5,52.0 148.6,54.2 152.7,60.6 156.9,62.0 161.0,61.0 165.2,58.3 169.3,54.4 173.4,55.0 177.6,46.1 181.7,46.1 185.8,41.0 190.0,42.1 194.1,32.5 198.2,29.3 202.4,24.5 206.5,26.6 210.6,23.8 214.8,27.1 218.9,12.3 223.1,21.2 227.2,22.8 231.3,26.9 235.5,28.5 239.6,21.6 243.7,15.3 247.9,8.0 252.0,17.7\" fill=\"none\" stroke=\"#5FB98F\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"17.7\" r=\"2.6\" fill=\"#5FB98F\"/></svg>",
-            "caption": "Sits 1.42σ above its 50-day mean. In 40 past setups like today, it was higher 5 days later 62% of the time (median +0.6%, range -3.1% to +5.7%). Seasonally this window has averaged +1.5% over the next 10 days (8 years, 82% positive). Regime: uptrend, high vol."
+            "svg": "",
+            "caption": "Sitting near the bottom of its range — about a day from a breakout. Resistance 90.24."
           },
           {
             "sym": "BTCUSD",
             "price": 77409.0,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"60.4\" x2=\"252\" y2=\"60.4\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"46.0\" x2=\"252\" y2=\"46.0\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,41.3 12.1,38.7 16.3,44.8 20.4,48.1 24.5,49.0 28.7,57.3 32.8,54.3 36.9,53.9 41.1,56.0 45.2,49.5 49.4,62.0 53.5,59.4 57.6,58.1 61.8,36.0 65.9,34.4 70.0,34.8 74.2,8.0 78.3,10.1 82.4,18.9 86.6,18.9 90.7,20.6 94.8,18.8 99.0,18.5 103.1,23.2 107.3,22.6 111.4,23.0 115.5,16.6 119.7,18.3 123.8,17.0 127.9,8.6 132.1,12.0 136.2,13.1 140.3,24.3 144.5,32.2 148.6,27.9 152.7,26.1 156.9,22.4 161.0,31.8 165.2,25.2 169.3,32.8 173.4,29.9 177.6,33.1 181.7,33.7 185.8,30.5 190.0,31.3 194.1,26.0 198.2,20.7 202.4,34.0 206.5,35.2 210.6,36.6 214.8,40.3 218.9,40.4 223.1,36.5 227.2,34.2 231.3,51.4 235.5,54.2 239.6,53.0 243.7,49.0 247.9,56.8 252.0,53.7 252.0,62.0\" fill=\"#D98A7B\" opacity=\"0.08\"/><polyline points=\"8.0,41.3 12.1,38.7 16.3,44.8 20.4,48.1 24.5,49.0 28.7,57.3 32.8,54.3 36.9,53.9 41.1,56.0 45.2,49.5 49.4,62.0 53.5,59.4 57.6,58.1 61.8,36.0 65.9,34.4 70.0,34.8 74.2,8.0 78.3,10.1 82.4,18.9 86.6,18.9 90.7,20.6 94.8,18.8 99.0,18.5 103.1,23.2 107.3,22.6 111.4,23.0 115.5,16.6 119.7,18.3 123.8,17.0 127.9,8.6 132.1,12.0 136.2,13.1 140.3,24.3 144.5,32.2 148.6,27.9 152.7,26.1 156.9,22.4 161.0,31.8 165.2,25.2 169.3,32.8 173.4,29.9 177.6,33.1 181.7,33.7 185.8,30.5 190.0,31.3 194.1,26.0 198.2,20.7 202.4,34.0 206.5,35.2 210.6,36.6 214.8,40.3 218.9,40.4 223.1,36.5 227.2,34.2 231.3,51.4 235.5,54.2 239.6,53.0 243.7,49.0 247.9,56.8 252.0,53.7\" fill=\"none\" stroke=\"#D98A7B\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"53.7\" r=\"2.6\" fill=\"#D98A7B\"/></svg>",
-            "caption": "Sits 0.62σ below its 50-day mean. In 40 past setups like today, it was higher 5 days later 35% of the time (median -0.6%, range -8.0% to +13.7%). Seasonally this window has averaged -0.3% over the next 10 days (8 years, 50% positive). Regime: range/transition, calm vol."
+            "svg": "",
+            "caption": "Trading inside its recent range. Resistance 78,871.93."
           }
         ]
       }
