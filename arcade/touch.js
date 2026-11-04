@@ -119,6 +119,18 @@ canvas{touch-action:none}input,select,textarea{-webkit-user-select:auto;user-sel
     if (!unlocked) { unlocked = true; try { const a = new Audio(SILENT); a.setAttribute("playsinline", ""); const p = a.play(); if (p && p.catch) p.catch(() => { unlocked = false; }); } catch (e) { unlocked = false; } }
   };
   if (on) for (const ev of ["touchend", "click", "pointerup", "keydown"]) document.addEventListener(ev, T.wakeSound, { capture: true, passive: true });
+  T.sleepSound = () => {
+    for (const c of ACS) { try { if (c.state === "running") c.suspend(); } catch (e) {} }
+    for (const a of document.querySelectorAll("audio")) { try { a.pause(); } catch (e) {} }
+    if (window.menuAudio) try { window.menuAudio.pause(); } catch (e) {}
+    try { speechSynthesis.cancel(); } catch (e) {}
+    try { if (navigator.audioSession) navigator.audioSession.type = "auto"; } catch (e) {}
+    try { if (navigator.mediaSession) { navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = "none"; } } catch (e) {}
+  };
+  if (on) {
+    document.addEventListener("visibilitychange", () => { if (document.hidden) T.sleepSound(); });
+    addEventListener("pagehide", (e) => { T.sleepSound(); if (!e.persisted) for (const c of ACS) { try { c.close(); } catch (x) {} } });
+  }
   window.TouchPad = T;
   if (on) { if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", T.mobile); else T.mobile(); }
   const WORDS = [[/Space play again/g, "Tap the screen to play again"], [/Space race again/g, "Tap the screen to race again"], [/P to continue/g, "Tap the screen to continue"],

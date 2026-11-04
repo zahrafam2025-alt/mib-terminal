@@ -10,8 +10,6 @@
 html,body{margin:0;height:100%;background:#0b0d14;overflow:hidden;font:14px "Segoe UI",system-ui,sans-serif;color:#e5e7eb}
 #gl,#hud{position:fixed;inset:0;width:100%;height:100%;display:block}
 #hud{pointer-events:none}
-/* 4 Nov (owner: "icons hidden by the selfie-camera bar"): the heads-up display stays inside the screen's safe area */
-#hud{left:env(safe-area-inset-left,0px);right:env(safe-area-inset-right,0px);width:auto;bottom:env(safe-area-inset-bottom,0px);height:auto}
 
 #menu{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;background:radial-gradient(ellipse at 50% 40%,rgba(40,24,6,.25),rgba(8,10,18,.82) 75%)}
 #menu.hide{display:none}
@@ -754,7 +752,7 @@ function sound(kind, pos) {
 
 const glc = $("#gl"), hud = $("#hud"), H2 = hud.getContext("2d");
 const R = {};
-function resize() { const dpr = Math.min(window.S3 && S3.q === "low" ? 1 : 1.5, window.devicePixelRatio || 1); hud.width = Math.floor((hud.clientWidth || innerWidth) * dpr); hud.height = Math.floor((hud.clientHeight || innerHeight) * dpr); if (window.S3resize) S3resize(); }
+function resize() { const dpr = Math.min(window.S3 && S3.q === "low" ? 1 : 1.5, window.devicePixelRatio || 1); hud.width = Math.floor(innerWidth * dpr); hud.height = Math.floor(innerHeight * dpr); if (window.S3resize) S3resize(); }
 addEventListener("resize", resize); resize();
 function loadMap(name) {
   if (!GRIDS[name] && name !== "dune") name = "dune";
@@ -916,7 +914,7 @@ function objectiveHint() {
 }
 const buyBox = (w, h, k) => ({ x0: w / 2 - 260 * k, y0: h / 2 - 270 * k, bw: 520 * k, bh: 520 * k, row0: h / 2 - 185 * k, rh: 36 * k });
 function buyRowAt(e) {
-  const hr = hud.getBoundingClientRect(), s = hud.width / (hr.width || innerWidth), X = (e.clientX - hr.left) * s, Y = (e.clientY - hr.top) * s, k = hud.height / 900, L = buyBox(hud.width, hud.height, k);
+  const s = hud.width / innerWidth, X = e.clientX * s, Y = e.clientY * s, k = hud.height / 900, L = buyBox(hud.width, hud.height, k);
   if (X < L.x0 || X > L.x0 + L.bw) return -1;
   for (let i = 0; i < BUY.length; i++) { const y = L.row0 + i * L.rh; if (Y >= y - 23 * k && Y < y - 23 * k + L.rh) return i; }
   return Y >= L.y0 && Y <= L.y0 + L.bh ? -2 : -1;

@@ -126,7 +126,7 @@ function musicPump() {
     }
   }
 }
-const menuAudio = new Audio();
+const menuAudio = window.menuAudio = new Audio();
 let menuOwn = false, inMenu = false;
 menuAudio.loop = true; menuAudio.volume = 0.6;
 menuAudio.addEventListener("canplay", () => { if (!menuOwn) { menuOwn = true; if (inMenu) music("menu"); } });
@@ -814,8 +814,8 @@ const GAMES = [
   { id: "empire", name: "CORSICAN EMPIRE", sub: "build, gather, conquer: bots or LAN", href: ARC.page("empire"), col: "#38bdf8" },
 ];
 let cur = null, paused = false, overDone = false, menuT = 0;
-const TOUCH_HELP = { blocks: "tap: turn · slide sideways: move · slide down and hold: faster · flick down: drop", rocks: "stick: fly · A: fire · catch the capsules",
-  snake: "the arrows on the right turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
+const TOUCH_HELP = { blocks: "arrows: move · A: drop · B: turn  (or tap the picture: turn, slide: move, flick down: drop)", rocks: "stick: fly · A: fire · catch the capsules",
+  snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
   city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball)" };
 const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
 function start(id) {
@@ -1295,8 +1295,9 @@ if (TouchPad.on) {
   const any = [bt("A", { right: 20, bottom: 48 }, 82, "Space"), bt("B", { right: 112, bottom: 20 }, 62, "Enter")];
   const wpn = bt("WPN", { right: 40, bottom: 150 }, 58, "KeyE");
   const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("BOOST", { left: 22, bottom: 190 }, 70, "Space")];
-  const dpad = [bt("▲", { right: 84, bottom: 132 }, 70, "ArrowUp"), bt("▼", { right: 84, bottom: 16 }, 70, "ArrowDown"),
-    bt("◀", { right: 158, bottom: 74 }, 70, "ArrowLeft"), bt("▶", { right: 10, bottom: 74 }, 70, "ArrowRight")];
+  const dpad = [bt("▲", { left: 84, bottom: 132 }, 70, "ArrowUp"), bt("▼", { left: 84, bottom: 16 }, 70, "ArrowDown"),
+    bt("◀", { left: 10, bottom: 74 }, 70, "ArrowLeft"), bt("▶", { left: 158, bottom: 74 }, 70, "ArrowRight")];
+  const blk = [bt("A ⤓", { right: 20, bottom: 48 }, 82, "Space"), bt("B ⟳", { right: 112, bottom: 20 }, 62, "ArrowUp")];
   const esc = bt("☰", { right: 12, top: 12 }, 46, "Escape");
   const snd = TouchPad.soundButton(() => sound, (on) => { audioStart(); setSound(on); }, { right: 66, top: 12 });
   cv.addEventListener("click", () => { if (cur) TouchPad.full(); });
@@ -1326,7 +1327,8 @@ if (TouchPad.on) {
   setInterval(() => {
     const isGp = !!cur && cur.id === "spa", show = !!cur, blocks = !!cur && cur.id === "blocks", snake = !!cur && cur.id === "snake";
     stickZone.style.display = show && !blocks && !snake ? "" : "none";
-    dpad.forEach((b) => { b.style.display = snake ? "" : "none"; });
+    dpad.forEach((b) => { b.style.display = snake || blocks ? "" : "none"; });
+    blk.forEach((b) => { b.style.display = blocks ? "" : "none"; });
     any.forEach((b, i) => { b.style.display = show && !isGp && !blocks && !snake && !(i === 1 && cur && (cur.id === "jump" || cur.id === "rocks")) ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
     wpn.style.display = cur && cur.id === "city" ? "" : "none";

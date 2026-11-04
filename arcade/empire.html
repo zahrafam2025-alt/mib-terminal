@@ -1518,7 +1518,7 @@ addEventListener("mouseup", (e) => {
   if (!e.shiftKey) UI.sel.clear();
   if (Math.hypot(bx - ax, by - ay) < 5) {
     const t = entAt(bx, by);
-    if (t) { if (UI.lastClick && UI.lastClick.id === t.id && performance.now() - UI.lastClick.t < 350 && t.o === ME) { for (const e of G.ents.values()) if (e.o === ME && e.t === t.t) { const [sx, sy] = toScreen(...center(e)); if (sx > 0 && sx < cv.width && sy > 0 && sy < cv.height - PANEL) UI.sel.add(e.id); } } else UI.sel.add(t.id); UI.lastClick = { id: t.id, t: performance.now() }; }
+    if (t) UI.sel.add(t.id);
     const picked = [...UI.sel].map((id) => G.ents.get(id)).filter((u) => u && u.k === "u" && u.o === ME); if (picked.length) say("sel", picked);
     return;
   }
