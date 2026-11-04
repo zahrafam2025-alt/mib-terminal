@@ -2,6 +2,8 @@
    prices (data/ticker.js + its feed) and the Lounge's chat (the arcade's server). */
 (function () {
   "use strict";
+  // 4 Nov (owner: "'semis' is translated into French as semi-trailer trucks"): the sector's full name, everywhere on the page
+  try { window.MIB_BRIEF = JSON.parse(JSON.stringify(window.MIB_BRIEF || {}).replace(/\bSemis\b/g, "Semiconductors")); } catch (e) {}
   var B = window.MIB_BRIEF || {}, S = B.sections || {}, R = B.regime || {}, T = (window.MIB_TICKER || {}), NEWS = B.news || window.MIB_NEWS || [];
   var ARCHIVE = !!window.MIB_ARCHIVE_DAY;                 // an archived day: no live prices, its own comments
   var $ = function (id) { return document.getElementById(id); };
@@ -10,6 +12,18 @@
   var cls = function (v) { return v == null ? "" : v >= 0 ? "u" : "d"; };
   var items = (T.items || T.fallback || []);
   var get = function (sym) { for (var i = 0; i < items.length; i++) if (items[i].sym === sym) return items[i]; return null; };
+  // 4 Nov (owner: "Unemployment Rate: which country? For French or Polish readers it is not clear"): the brief takes only
+  // US releases (amis/market_data.py, _FF_COUNTRIES = {"USD"}), so each one says US, what it measures in plain words
+  // (the official name underneath), and the time in the reader's own time zone
+  var ABOUT = [[/non-?farm/i, "US jobs report: jobs added last month"], [/unemployment claims|jobless claims/i, "US weekly jobless claims"], [/unemployment rate/i, "US unemployment rate"],
+    [/average hourly earnings/i, "US wage growth"], [/core cpi/i, "US core inflation (without food and energy)"], [/\bcpi\b/i, "US inflation (consumer prices)"], [/core pce/i, "US core inflation, the Fed's favourite gauge"],
+    [/\bpce\b/i, "US inflation, the Fed's gauge"], [/\bppi\b/i, "US producer prices (inflation in the pipeline)"], [/fomc|federal funds|fed (chair|interest)/i, "US central bank (Fed) interest-rate decision"],
+    [/ism services/i, "US services activity survey"], [/ism manufacturing/i, "US factory activity survey"], [/flash.*pmi|\bpmi\b/i, "US business activity survey"],
+    [/inflation expectations/i, "US consumers' inflation expectations (University of Michigan)"], [/consumer sentiment/i, "US consumer confidence (University of Michigan)"],
+    [/retail sales/i, "US retail sales"], [/\bgdp\b/i, "US economic growth (GDP)"], [/jolts|job openings/i, "US job openings"], [/adp/i, "US private jobs (ADP estimate)"],
+    [/consumer confidence/i, "US consumer confidence (Conference Board)"], [/durable goods/i, "US orders for long-lasting goods"], [/housing|home sales|building permits/i, "US housing market"],
+    [/trade balance/i, "US trade balance"], [/treasury|bond auction/i, "US government bond sale"]];
+  var about = function (n) { for (var i = 0; i < ABOUT.length; i++) if (ABOUT[i][0].test(n || "")) return [ABOUT[i][1], n]; return ["US · " + (n || ""), ""]; };
 
   // the numbers strip: the build's snapshot first, then the live (15-min delayed) feed every minute
   var chg = function (t) { return t.bp != null ? (t.bp >= 0 ? "+" : "−") + Math.abs(t.bp) + " bp" : pct(t.pct); }, chc = function (t) { return t.bp != null ? cls(t.bp) : cls(t.pct); };
@@ -62,14 +76,17 @@
   var vixJump = (S.changed || []).filter(function (c) { return /^VIX/.test(c); })[0];
   var h = [];
   if (spx && spx.pct != null) h.push((spx.pct >= 0.15 ? "Stocks edge up" : spx.pct <= -0.15 ? "Stocks slip" : "Stocks go nowhere") + (br != null && br < 40 && spx.pct > 0 ? " on a handful of giants" : br != null && br > 60 ? " with most names joining in" : ""));
-  if (vixJump || (R.vix && R.vix > 20)) { var vx = (get("VIX") || {}).price || R.vix; h.push("the VIX fear gauge " + (vixJump ? "jumps to " + Number(vx).toFixed(1) : "sits above 20, at " + Number(vx).toFixed(1))); }
+  // 4 Nov (owner: "'the VIX sits above 20, at 18.4': wrong figures create serious trust issues"): one VIX figure, the
+  // newest one, both for the words and the number
+  var vx = Number((get("VIX") || {}).price || R.vix);
+  if (vx) { if (vx > 20) h.push("the VIX fear gauge " + (vixJump ? "jumps to " : "sits above 20, at ") + vx.toFixed(1)); else if (vixJump) h.push("the VIX fear gauge is at " + vx.toFixed(1) + ", below 20"); }
   $("headline").textContent = h.length ? h.join(" while ").replace(/^./, function (c) { return c.toUpperCase(); }) + "." : (S.story || {}).lede || "";
   var next = ((S.watchlist || {}).items || []).filter(function (e) { return e.impact === "high"; })[0] || ((S.watchlist || {}).items || [])[0];
   var rows = [
     ["What happened", [spx && spx.pct != null ? "S&P 500 " + pct(spx.pct) + (ndx && ndx.pct != null ? ", Nasdaq 100 " + pct(ndx.pct) : "") : "",
       br != null ? (br < 50 ? "Only " : "") + br + "% of stocks rose: " + ((tape.observations || [])[1] || "a narrow move").replace(/^Leadership /, "leadership ") : ""].filter(Boolean).join(". ")],
     ["Why it matters", (S.story || {}).interpretation || ""],
-    ["What's next", next ? next.event + ", " + next.when + (next.consensus ? " (expected " + next.consensus + ")" : "") + ". " + (next.invalidates ? "If it surprises: " + next.invalidates + "." : "") : ""],
+    ["What's next", next ? about(next.event)[0] + ", " + next.when + (next.consensus ? " (expected " + next.consensus + ")" : "") + ". " + (next.invalidates ? "If it surprises: " + next.invalidates + "." : "") : ""],
   ];
   $("three").innerHTML = rows.filter(function (r) { return r[1]; }).map(function (r) { return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("");
   };
@@ -83,7 +100,7 @@
     $("stress").innerHTML = '<svg viewBox="0 0 240 124" role="img" aria-label="stress ' + v + ' out of 100">' + arc(Math.PI, Math.PI * 0.62, "var(--up)") + arc(Math.PI * 0.6, Math.PI * 0.38, "var(--warn)") + arc(Math.PI * 0.36, 0, "var(--down)")
       + '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + (r - 24) * Math.cos(a)) + '" y2="' + (cy - (r - 24) * Math.sin(a)) + '" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><circle cx="' + cx + '" cy="' + cy + '" r="7" fill="var(--ink)"/>'
       + '<text x="20" y="122" font-size="11" fill="var(--muted)">calm</text><text x="220" y="122" font-size="11" fill="var(--muted)" text-anchor="end">stressed</text></svg>'
-      + '<div class="gtxt"><b>' + v + '</b><small>out of 100 · VIX ' + (R.vix != null ? Number(R.vix).toFixed(1) : "–") + (R.vix > 20 ? " (above its long-run 20)" : "") + "</small></div>";
+      + '<div class="gtxt"><b>' + v + '</b><small>out of 100, at the last close. About half of it is the VIX fear gauge (' + (R.vix != null ? Number(R.vix).toFixed(1) : "–") + " at that close), a third how much prices actually swung, the rest the yield curve, credit and how few stocks rose. Above 50: a stressed market." + "</small></div>";
   })();
   if (br != null) {
     $("breadthPct").textContent = br + "% rising";
@@ -113,6 +130,10 @@
   var evs = ((S.watchlist || {}).items || []).slice().sort(function (a, b) { return when(a) - when(b); }), days = {};   // soonest first
   evs.forEach(function (e) { var k = (e.when || "").split(" ").slice(0, 3).join(" "); (days[k] = days[k] || []).push(e); });
   var impc = { high: "var(--down)", medium: "var(--warn)", low: "var(--muted)" };
+  var localTime = function (e) {
+    var t = when(e); if (t >= 9e15) return "";
+    try { var s = new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); return /UTC/.test(e.when || "") && new Date().getTimezoneOffset() !== 0 ? " (" + s + " your time)" : ""; } catch (x) { return ""; }
+  };
   // 4 Nov (owner: "a coming-up event should have a simple way to set a reminder, like adding it to the calendar"): a
   // calendar file (iPhone, Android, Outlook, Mac: it opens "add to calendar") with an alert 15 minutes before, or Google
   // Calendar's own page. Nothing is sent anywhere until one is tapped.
@@ -120,17 +141,13 @@
   var remind = function (e) {
     var t = when(e); if (t >= 9e15) return "";
     var title = (e.event || "Market event") + " (MIB Terminal)", note = [e.confirms ? "As expected: " + e.confirms : "", e.invalidates ? "Surprise: " + e.invalidates : "", "https://mibterminal.com/#calendar"].filter(Boolean).join("\n");
-    var icsEsc = function (x) { return String(x).replace(/\\/g, "\\\\").replace(/[,;]/g, "\\$&").replace(/\n/g, "\\n"); };
-    var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//MIB Terminal//EN", "BEGIN:VEVENT", "UID:" + t + "-" + String(e.event || "").replace(/\W+/g, "") + "@mibterminal.com", "DTSTAMP:" + stamp(Date.now()),
-      "DTSTART:" + stamp(t), "DTEND:" + stamp(t + 30 * 60000), "SUMMARY:" + icsEsc(title), "DESCRIPTION:" + icsEsc(note),
-      "BEGIN:VALARM", "TRIGGER:-PT15M", "ACTION:DISPLAY", "DESCRIPTION:" + icsEsc(title), "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
     var g = "https://calendar.google.com/calendar/render?" + new URLSearchParams({ action: "TEMPLATE", text: title, dates: stamp(t) + "/" + stamp(t + 30 * 60000), details: note });
-    return '<span class="remind"><a class="btn" download="mib-' + stamp(t).slice(0, 8) + '.ics" href="data:text/calendar;charset=utf-8,' + encodeURIComponent(ics) + '">🔔 Add to my calendar</a>'
+    return '<span class="remind"><a class="btn" href="' + esc((window.MIB_CHAT_API || "https://mib-arcade.terminalmib.workers.dev") + "/api/ics?" + new URLSearchParams({ t: String(t), title: title, d: note })) + '">🔔 Add to my calendar</a>'
       + '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(g) + '">Google Calendar</a></span>';
   };
   $("cal").innerHTML = Object.keys(days).map(function (k) {
     return '<div class="day"><div class="dl">' + esc(k) + '</div><div class="ev">' + days[k].map(function (e) {
-      return '<details class="ev1"><summary><i class="imp" style="background:' + (impc[e.impact] || "var(--muted)") + '" title="' + esc(e.impact) + ' impact"></i><b>' + esc(e.event) + '</b><span class="tm">' + esc((e.when || "").split(" ").slice(3).join(" ")) + (e.consensus ? " · exp. " + esc(e.consensus) : "") + "</span></summary>"
+      return '<details class="ev1"><summary><i class="imp" style="background:' + (impc[e.impact] || "var(--muted)") + '" title="' + esc(e.impact) + ' impact"></i><b>' + esc(about(e.event)[0]) + '<small class="evn">' + esc(about(e.event)[1]) + '</small></b><span class="tm">' + esc((e.when || "").split(" ").slice(3).join(" ")) + localTime(e) + (e.consensus ? " · expected " + esc(e.consensus) : "") + "</span></summary>"
         + '<div class="body">' + (e.confirms ? "<span>As expected: " + esc(e.confirms) + "</span>" : "") + (e.invalidates ? "<span>Surprise: " + esc(e.invalidates) + "</span>" : "") + (!e.confirms && !e.invalidates ? "<span>" + esc(e.impact) + " impact</span>" : "") + remind(e) + "</div></details>";
     }).join("") + "</div></div>";
   }).join("") || '<p class="sub">No major event this week.</p>';

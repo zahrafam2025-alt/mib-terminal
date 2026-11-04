@@ -137,3 +137,5 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
 .remind { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .remind .btn { font-size: 13px; padding: 7px 12px; text-decoration: none; }
 .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.ev1 .evn { display: block; font: 500 12px var(--num); color: var(--muted); margin-top: 2px; }
+@media (max-width: 640px) { .ev1 summary { flex-wrap: wrap; } .ev1 .tm { flex-basis: 100%; white-space: normal; padding-left: 19px; } }

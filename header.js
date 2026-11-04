@@ -30,9 +30,9 @@
   if (!document.querySelector('link[rel="manifest"]')) { var mf = document.createElement("link"); mf.rel = "manifest"; mf.href = "/site.webmanifest"; document.head.appendChild(mf); }
   var css = document.createElement("style");
   css.textContent = [
-    ".mibbar,.mb-pane,.mb-add{--mb-bg:#ffffff;--mb-ink:#0f172a;--mb-muted:#5b6474;--mb-raised:#eef1f6;--mb-line:#e1e5ec;--mb-brand:#e8a317;--mb-up:#0e9f5a}.mibbar{position:fixed;left:0;right:0;top:0;z-index:1000;background:var(--mb-bg);border-bottom:1px solid var(--mb-line);font:600 15px 'Source Sans 3','Segoe UI',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}",
-    "@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .mibbar,:root:not([data-theme=light]) .mb-pane,:root:not([data-theme=light]) .mb-add{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}}",
-    ":root[data-theme=dark] .mibbar,:root[data-theme=dark] .mb-pane,:root[data-theme=dark] .mb-add{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}",
+    ".mibbar,.mb-pane,.mb-add,.mb-invt{--mb-bg:#ffffff;--mb-ink:#0f172a;--mb-muted:#5b6474;--mb-raised:#eef1f6;--mb-line:#e1e5ec;--mb-brand:#e8a317;--mb-up:#0e9f5a}.mibbar{position:fixed;left:0;right:0;top:0;z-index:1000;background:var(--mb-bg);border-bottom:1px solid var(--mb-line);font:600 15px 'Source Sans 3','Segoe UI',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}",
+    "@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .mibbar,:root:not([data-theme=light]) .mb-pane,:root:not([data-theme=light]) .mb-add,:root:not([data-theme=light]) .mb-invt{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}}",
+    ":root[data-theme=dark] .mibbar,:root[data-theme=dark] .mb-pane,:root[data-theme=dark] .mb-add,:root[data-theme=dark] .mb-invt{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}",
     "body{padding-top:calc(57px + env(safe-area-inset-top,0px)) !important}body.playing{padding-top:0 !important}",
     "html{scroll-padding-top:calc(70px + env(safe-area-inset-top,0px))}",
     ".mibbar .mb-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:content-box}",
@@ -54,6 +54,11 @@
     ".mb-btn.pri{background:var(--mb-brand);border-color:var(--mb-brand);color:#1a1205}",
     ".mb-who{display:grid;gap:6px;max-height:220px;overflow:auto}.mb-who div{display:flex;align-items:center;gap:8px}.mb-who b{font-size:18px}.mb-who small{color:var(--mb-muted);margin-left:auto}",
     ".mb-note{font-size:13px;color:var(--mb-muted)}",
+    ".mb-who .mb-inv{margin-left:6px;padding:3px 8px;font-size:15px}.mb-games{display:flex;flex-wrap:wrap;gap:6px}.mb-games[hidden]{display:none}.mb-games .mb-btn{padding:6px 10px;font-size:13px}",
+    ".mb-invt{position:fixed;z-index:1003;top:calc(66px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(380px,calc(100vw - 24px));background:var(--mb-bg);color:var(--mb-ink);border:2px solid var(--mb-brand);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.4);padding:12px 14px;display:flex;gap:10px;align-items:center;font:600 15px/1.35 'Source Sans 3',sans-serif}",
+    ".mb-invt b.av{font-size:26px}.mb-invt div{flex:1}.mb-invt .x{background:none;border:0;color:var(--mb-muted);font-size:20px;cursor:pointer}",
+    ".mb-up{position:fixed;inset:0;z-index:1004;background:rgba(5,8,16,.92);color:#f8fafc;display:none;align-items:center;justify-content:center;text-align:center;font:700 20px 'Source Sans 3',sans-serif;padding:24px}",
+    "@media (orientation:landscape) and (max-height:500px) and (pointer:coarse){.mb-up.on{display:flex}}",
     "body.playing .mibbar,body.playing .mb-pane{display:none}",
     // Google's translator, used inside the page: none of its own bars, logos, pop-ups or highlights
     "body{top:0 !important}.goog-te-banner-frame,iframe.skiptranslate,.skiptranslate>iframe,#goog-gt-tt,#goog-gt-vt,.goog-te-balloon-frame,.goog-tooltip,.goog-te-spinner-pos,.goog-te-gadget,#google_translate_element,.goog-logo-link,.VIpgJd-ZVi9od-ORHb-OEVmcd,.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,.VIpgJd-ZVi9od-xl07Ob-OEVmcd,.VIpgJd-yAWNEb-L7lbkb{display:none !important;visibility:hidden !important}",
@@ -75,7 +80,11 @@
   document.body.appendChild(pane);
   var name = function () { return ls("arcade-name"); }, av = function () { var i = +ls("mib-avatar"); return isNaN(i) || i < 0 || i >= AV.length ? -1 : i; };
   var cid = ls("arcade-cid"); if (!cid) { cid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); ls("arcade-cid", cid); }
-  var who = [], online = 0, deferred = null;
+  var who = [], online = 0, deferred = null, myId = "", invTo = "";
+  // 4 Nov (owner: "invite another user online to play directly: a notification on their profile, one click to join the
+  // room"): 🎮 next to a name, pick the game, the arcade opens your room and the server sends the invitation to that
+  // person only (by a public id for this visit, never the browser id)
+  var INV_GAMES = [["tennis", "Rally Rumble"], ["goal", "Goal Rush"], ["snake", "Snake"], ["rocks", "Rocks"], ["blocks", "Blocks"], ["jump", "Jump"], ["city", "Chaos City"], ["spa", "Grand Prix"]];
   var meBtn = bar.querySelector(".mb-me");
   var paintMe = function () { meBtn.querySelector("b").textContent = av() >= 0 ? AV[av()] : "👤"; meBtn.querySelector("span").textContent = name() || L("Pick a name", "Choisis un pseudo"); meBtn.querySelector("i").textContent = online ? "● " + online : ""; };
   var dark = function () { var t = document.documentElement.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
@@ -85,7 +94,8 @@
       + '<div class="mb-av notranslate" translate="no">' + AV.map(function (e, i) { return '<button type="button" data-av="' + i + '"' + (i === a ? ' class="on"' : "") + ' aria-label="avatar ' + e + '">' + e + "</button>"; }).join("") + "</div>"
       + '<div class="mb-note">' + L("Your name and avatar are used in the chat, the arcade and the scoreboards. Kept in this browser only.", "Ton pseudo et ton avatar servent dans le chat, l'arcade et les classements. Gardés dans ce navigateur seulement.") + "</div>"
       + "<h4>" + L("Online now", "En ligne") + " · " + online + "</h4>"
-      + '<div class="mb-who">' + (who.length ? who.map(function (w) { return "<div><b>" + esc(AV[w.a] || "👤") + '</b><span class="notranslate" translate="no">' + esc(w.n) + "</span><small>" + esc((fr ? { today: "accueil", week: "la semaine", archive: "archives", arcade: "arcade", page: "le site" } : { today: "home", week: "the week", archive: "archive", arcade: "arcade", page: "reading" })[w.p] || "") + "</small></div>"; }).join("") : '<span class="mb-note">' + L("Just you for now.", "Rien que toi pour l'instant.") + "</span>") + (who.length && online > who.length ? '<span class="mb-note">' + L("+ ", "+ ") + (online - who.length) + L(online - who.length > 1 ? " visitors without a name" : " visitor without a name", online - who.length > 1 ? " visiteurs sans pseudo" : " visiteur sans pseudo") + "</span>" : "") + "</div>"
+      + '<div class="mb-who">' + (who.length ? who.map(function (w) { return "<div><b>" + esc(AV[w.a] || "👤") + '</b><span class="notranslate" translate="no">' + esc(w.n) + "</span><small>" + esc((fr ? { today: "accueil", week: "la semaine", archive: "archives", arcade: "arcade", page: "le site" } : { today: "home", week: "the week", archive: "archive", arcade: "arcade", page: "reading" })[w.p] || "") + "</small>" + (w.id && w.id !== myId ? '<button class="mb-btn mb-inv" type="button" data-inv="' + esc(w.id) + '" title="' + L("Invite to play", "Inviter à jouer") + '">🎮</button>' : "") + "</div>"; }).join("")
+      + '<div class="mb-games" hidden>' + INV_GAMES.map(function (g) { return '<button class="mb-btn" type="button" data-ig="' + g[0] + '">' + g[1] + "</button>"; }).join("") + "</div>" : '<span class="mb-note">' + L("Just you for now.", "Rien que toi pour l'instant.") + "</span>") + (who.length && online > who.length ? '<span class="mb-note">' + L("+ ", "+ ") + (online - who.length) + L(online - who.length > 1 ? " visitors without a name" : " visitor without a name", online - who.length > 1 ? " visiteurs sans pseudo" : " visiteur sans pseudo") + "</span>" : "") + "</div>"
       + '<div class="mb-row"><a class="mb-btn pri" href="/arcade/">' + L("Play", "Jouer") + '</a><a class="mb-btn" href="/#lounge">Chat</a></div>'
       + "<h4>" + L("Settings", "Réglages") + "</h4>"
       + '<div class="mb-row"><button class="mb-btn" type="button" data-act="theme">' + (dark() ? L("☀ Light mode", "☀ Mode clair") : L("☾ Dark mode", "☾ Mode sombre")) + '</button>'
@@ -105,6 +115,10 @@
     window.dispatchEvent(new CustomEvent("mib-me"));
   });
   pane.addEventListener("click", function (e) {
+    var iv = e.target.closest("[data-inv]");
+    if (iv) { invTo = iv.dataset.inv; var gm = pane.querySelector(".mb-games"); if (gm) { gm.hidden = false; iv.parentNode.after(gm); } return; }
+    var ig = e.target.closest("[data-ig]");
+    if (ig && invTo) { location.href = "/arcade/?invite=" + encodeURIComponent(invTo) + "&g=" + ig.dataset.ig; return; }
     var b = e.target.closest("[data-av],[data-act]"); if (!b) return;
     if (b.dataset.av !== undefined) { ls("mib-avatar", b.dataset.av); paintMe(); paintPane(); hello(); window.dispatchEvent(new CustomEvent("mib-me")); return; }
     var act = b.dataset.act;
@@ -151,7 +165,7 @@
     var q = new URLSearchParams(location.search), shared = q.get("add") === "1";
     if (shared) { q.delete("add"); history.replaceState(null, "", location.pathname + (q.toString() ? "?" + q : "") + location.hash); }
     var visits = (+ls("mib-visits") || 0) + 1; ls("mib-visits", String(visits));
-    if (installed || !matchMedia("(pointer: coarse)").matches || ls("mib-add-no") || (!shared && visits < 2) || active === "arcade") return;
+    if (installed || !matchMedia("(pointer: coarse)").matches || ls("mib-add-no") || active === "arcade") return;
     var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
     var st = document.createElement("style");
     st.textContent = ".mb-add{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:1002;background:var(--mb-bg);color:var(--mb-ink);border:1px solid var(--mb-line);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.35);padding:12px 12px 12px 14px;display:flex;gap:10px;align-items:center;font:600 15px/1.35 'Source Sans 3',sans-serif}"
@@ -174,11 +188,27 @@
   // ---- presence: one light line to the chat server; it counts this visit (no cookie, nothing personal) and
   // says who is online. Your place shows only your chosen name, avatar and the page you are on.
   var ws = null, tries = 0;
+  var GNAME = {}; INV_GAMES.forEach(function (g) { GNAME[g[0]] = g[1]; });
+  var invited = function (d) {
+    if (!d.r) return;
+    var old = document.querySelector(".mb-invt"); if (old) old.remove();
+    var c = document.createElement("div"); c.className = "mb-invt notranslate"; c.setAttribute("translate", "no");
+    c.innerHTML = '<b class="av">' + esc(AV[d.a] || "🎮") + "</b><div>" + esc(d.from) + L(" invites you to ", " t'invite à ") + "<b>" + esc(GNAME[d.g] || "a game") + '</b></div><a class="mb-btn pri" href="/arcade/?join=' + encodeURIComponent(d.r) + '">' + L("Join", "Rejoindre") + '</a><button class="x" type="button" aria-label="close">✕</button>';
+    c.querySelector(".x").onclick = function () { c.remove(); };
+    document.body.appendChild(c); try { navigator.vibrate && navigator.vibrate(120); } catch (x) {}
+    setTimeout(function () { c.remove(); }, 120000);
+  };
+  window.MIB_INVITE = function (to, g, room) { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ t: "invite", to: to, g: g, r: room })); };
+  if (active !== "arcade") {                                          // 4 Nov (owner): back from the arcade, the phone upright again
+    var up = document.createElement("div"); up.className = "mb-up on"; up.innerHTML = "<div>📱<br>" + L("Turn your phone upright to read MIB", "Remets ton téléphone à la verticale pour lire MIB") + "</div>";
+    var putUp = function () { if (document.body && !up.parentNode) document.body.appendChild(up); };
+    if (document.body) putUp(); else addEventListener("DOMContentLoaded", putUp);
+  }
   var hello = function () { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ t: "me", n: name(), a: av(), p: active })); };
   var connect = function () {
     try { ws = new WebSocket(API.replace(/^http/, "ws") + "/chat?" + new URLSearchParams({ room: "here", name: name() || "", cid: cid, a: String(av()), p: active })); } catch (e) { return; }
     ws.onopen = function () { tries = 0; };
-    ws.onmessage = function (e) { var d; try { d = JSON.parse(e.data); } catch (x) { return; } if (d.t === "here") { who = d.who || []; online = d.n || who.length; paintMe(); if (!pane.hidden && !pane.contains(document.activeElement)) paintPane(); window.MIB_HERE = { n: online, who: who }; window.dispatchEvent(new CustomEvent("mib-here")); } };
+    ws.onmessage = function (e) { var d; try { d = JSON.parse(e.data); } catch (x) { return; } if (d.t === "you") myId = d.id; if (d.t === "invite") invited(d); if (d.t === "here") { who = d.who || []; online = d.n || who.length; paintMe(); if (!pane.hidden && !pane.contains(document.activeElement)) paintPane(); window.MIB_HERE = { n: online, who: who }; window.dispatchEvent(new CustomEvent("mib-here")); } };
     ws.onclose = function () { setTimeout(connect, Math.min(30000, 2000 * ++tries)); };
   };
   setInterval(function () { if (ws && ws.readyState === 1) ws.send("#ping"); }, 25000);
