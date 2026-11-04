@@ -1405,6 +1405,23 @@ function drawMini() {
 }
 const MM = { x: 12, s: 200 };
 function miniRect() { const y = cv.height - PANEL + 10; return { x: MM.x + MM.s / 2, y: y + 6, w: MM.s, h: MM.s / 2 }; }
+function askDemolish(b) {
+  let d = document.getElementById("demoAsk");
+  if (!d) {
+    d = document.createElement("div"); d.id = "demoAsk";
+    d.style.cssText = "position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(5,8,16,.6)";
+    document.body.appendChild(d);
+  }
+  const back = Object.entries(BT[b.t].cost || {}).map(([k, v]) => Math.floor(v / 4) + " " + ({ f: "food", w: "wood", g: "gold" }[k] || k)).join(", ") || "nothing";
+  d.innerHTML = '<div style="background:#0f172a;border:2px solid #b45309;border-radius:12px;padding:18px 20px;max-width:340px;font:15px Segoe UI,sans-serif;color:#e5e7eb;text-align:center">'
+    + "<div style='font:bold 18px Georgia;color:#fbbf24;margin-bottom:8px'>Demolish the " + BT[b.t].n + "?</div>"
+    + "<div style='margin-bottom:14px'>It is gone for good. You get back " + back + ".</div>"
+    + '<button id="demoYes" style="background:#b91c1c;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:700;margin-right:8px">Yes, demolish</button>'
+    + '<button id="demoNo" style="background:#334155;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:700">Cancel</button></div>';
+  d.style.display = "flex";
+  d.querySelector("#demoYes").onclick = () => { d.style.display = "none"; order({ k: "demolish", id: b.id }); UI.sel.clear(); };
+  d.querySelector("#demoNo").onclick = () => { d.style.display = "none"; };
+}
 function buttons() {
   const sel = [...UI.sel].map((id) => G.ents.get(id)).filter((e) => e && e.o === ME), pl = G.players[ME], out = [];
   if (!sel.length || !pl) return out;
@@ -1416,9 +1433,7 @@ function buttons() {
   if (b && b.t === "TC" && pl.age < 3) out.push([`Advance to ${AGES[pl.age + 1]}`, "U", AGECOST[pl.age + 1], () => order({ k: "age", id: b.id }), !pl.aging && afford(pl, AGECOST[pl.age + 1]), pl.aging ? "advancing..." : ""]);
   if (sel.some((e) => e.k === "u")) out.push(["Stop", "X", null, () => order({ k: "stop", ids: sel.map((e) => e.id) }), true, ""]);
   if (b && !BT[b.t].wall) out.push(["Move", "M", null, () => { UI.placing = b.t; UI.moving = b.id; }, true, "pick its new place"]);
-  if (b) out.push([UI.armed === b.id && performance.now() - UI.armedT < 3000 ? "Sure? Demolish" : "Demolish", "DELETE", null, () => {
-    if (UI.armed === b.id && performance.now() - UI.armedT < 3000) { UI.armed = null; order({ k: "demolish", id: b.id }); UI.sel.clear(); } else { UI.armed = b.id; UI.armedT = performance.now(); }
-  }, true, "a second press to confirm · a quarter of the cost back"]);
+  if (b) out.push(["Demolish", "DELETE", null, () => askDemolish(b), true, "asks first · a quarter of the cost back"]);
   return out;
 }
 function drawUI() {
@@ -1461,7 +1476,9 @@ function drawUI() {
     const x = bx0 + (i % 5) * (bw + 6), y = py + 12 + Math.floor(i / 5) * (bh + 6);
     const hov = UI.mouse[0] > x && UI.mouse[0] < x + bw && UI.mouse[1] > y && UI.mouse[1] < y + bh;
     X.fillStyle = ok ? (hov ? "#1e3a5f" : "#14223a") : "#0f172a"; X.fillRect(x, y, bw, bh); X.strokeStyle = ok ? "#2c4c78" : "#1e293b"; X.strokeRect(x + 0.5, y + 0.5, bw - 1, bh - 1);
-    X.fillStyle = ok ? "#e5e7eb" : "#475569"; X.font = "12px Segoe UI"; X.fillText(label.length > 16 ? label.slice(0, 15) + "…" : label, x + 22, y + 17); X.fillStyle = ok ? "#fde047" : "#475569"; X.font = "bold 12px Consolas"; X.fillText(key, x + 7, y + 17);
+    const kl = key.length > 2 ? "Del" : key; X.font = "bold 12px Consolas"; const kw = X.measureText(kl).width;
+    X.fillStyle = ok ? "#fde047" : "#475569"; X.fillText(kl, x + 7, y + 17);
+    X.fillStyle = ok ? "#e5e7eb" : "#475569"; X.font = "12px Segoe UI"; const room = Math.floor((bw - 14 - kw - 6) / 6.2); X.fillText(label.length > room ? label.slice(0, room - 1) + "…" : label, x + 7 + kw + 6, y + 17);
     X.fillStyle = ok ? "#94a3b8" : "#334155"; X.font = "11px Consolas"; X.fillText(fmtCost(cost) || "", x + 7, y + 33);
     UI.btn.push({ x, y, w: bw, h: bh, act, ok, key });
     if (hov) UI.tip = `${label} ${fmtCost(cost)} ${why}`;
@@ -1619,6 +1636,8 @@ if (window.TouchPad && TouchPad.on) (() => {
     if (g.mouse) { upAt(e.clientX / UIS, e.clientY / UIS); if (box) { box = false; boxBtn.classList.remove("on"); } return; }
     if (g.moved || g.long) return;
     const t = entAt(g.x, g.y), mineSel = [...UI.sel].some((id) => { const u = G.ents.get(id); return u && u.o === ME && u.k === "u"; });
+    const vilSel = [...UI.sel].some((id) => { const u = G.ents.get(id); return u && u.o === ME && u.t === "vil"; });
+    if (t && t.o === ME && t.k === "b" && (!t.done || t.hp < t.mhp) && vilSel) { rightClick(g.x, g.y); return; }
     if (!(t && t.o === ME) && mineSel) { rightClick(g.x, g.y); return; }
     send("mousedown", g.x, g.y); UI.mouse = [g.x, g.y]; upAt(g.x, g.y);
   };
