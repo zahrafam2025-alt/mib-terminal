@@ -866,7 +866,7 @@ function tick(dt = STEP) {
     if (pressed("KeyO")) document.getElementById("onlBtn").click();
     const n = ["Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9", "Digit0"].findIndex((k) => hit.has(k)),
           m = ["Numpad1", "Numpad2", "Numpad3", "Numpad4", "Numpad5", "Numpad6", "Numpad7", "Numpad8", "Numpad9", "Numpad0"].findIndex((k) => hit.has(k));
-    if (n >= 0 || m >= 0) start(GAMES[n >= 0 ? n : m].id);
+    void n; void m;
   } else {
     if (pressed("Escape")) { menu(); hit.clear(); return; }
     if (pressed("KeyP") && cur.id !== "sumo") paused = !paused;
@@ -888,7 +888,7 @@ function drawMenu() {
   shownGames().forEach((d, i) => {
     const [x, y] = cardAt(i), two = (best[d.id === "racer2" ? "duel" : "sumo"]) || {};
     rect(x, y, CARD_W, CARD_H, "#141827"); rect(x, y, CARD_W, 4, d.col);
-    txt(i < 10 ? String((i + 1) % 10) : "", x + 8, y + 28, 20, d.col);
+    rect(x + 8, y + 18, 18, 3, d.col);
     const twoLines = d.name.length > 12 && d.name.includes(" ");
     if (twoLines) { const [a, ...b] = d.name.split(" "); txt(a, x + 8, y + 47, 11); txt(b.join(" "), x + 8, y + 59, 11); }
     else txt(d.name, x + 8, y + 52, d.name.length > 9 ? 9 : d.name.length > 7 ? 11 : 13);
