@@ -17,7 +17,7 @@ function Tennis(online = null) {
     item: -1, charged: "", giantT: 0, frozenT: 0, dazed: 0, spin: 0, diveT: 0, downT: 0, err: seats[i] ? 0 : 45 }));
   const ball = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, last: -1, bounces: 0, fire: false, bomb: false, curve: 0, t: 0, held: true };
   const boxes = [], peels = [], fx = [];
-  const g = { id: "tennis", score: 0, over: false, s: [0, 0], pause: 1.2, msg: "FIRST TO 7!", flash: "", flashT: 0, result: null, sendT: 0, net: null,
+  const g = { id: "tennis", own: true, score: 0, over: false, s: [0, 0], pause: 1.2, msg: "FIRST TO 7!", flash: "", flashT: 0, result: null, sendT: 0, net: null,
     help: "arrows / W A S D move (or let go: you run to the ball) · Space swing · Enter or X: item, or dive · first to 7 · Esc menu" };
   let server = 0, serveT = 0, rally = 0, boxT = 6;
   const say = (s, t = 1.2) => { g.flash = s; g.flashT = t; };

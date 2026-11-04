@@ -9,7 +9,7 @@ function Goal(online = null) {
     x: 0, y: 0, vx: 0, vy: 0, fx: i % 2 ? -1 : 1, fy: 0, stam: 1, kickT: 0, in: { mx: 0, my: 0, sp: false, k: 0, t: 0 }, lastK: 0, lastT: 0, dashT: 0, tackT: 0, dazed: 0 }));
   let stuckT = 0;
   const ball = { x: 240, y: MY, vx: 0, vy: 0 };
-  const g = { id: "goal", score: 0, over: false, t: 0, s: [0, 0], pause: 1.5, msg: "KICK OFF!", result: null, sendT: 0, net: null,
+  const g = { id: "goal", own: true, score: 0, over: false, t: 0, s: [0, 0], pause: 1.5, msg: "KICK OFF!", result: null, sendT: 0, net: null,
     help: "arrows / W A S D run · Space shoot · Shift sprint · Enter or X tackle · run into the ball to dribble · first to 5 · Esc menu" };
   function kickoff() {
     const spots = [[150, MY - 40], [330, MY + 40], [90, MY + 50], [390, MY - 50]];

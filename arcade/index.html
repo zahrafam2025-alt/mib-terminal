@@ -43,7 +43,7 @@ button:hover { border-color:var(--a); }
 <script src="touch.js"></script>
 <script src="net.js"></script>
 <script src="racer.js"></script>
-<script src="goal.js"></script><script src="tennis.js"></script>
+<script src="goal.js"></script><script src="tennis.js"></script><script src="fight.js"></script>
 <script src="city.js"></script>
 <script>
 "use strict";
@@ -822,6 +822,7 @@ const GAMES = [
   { id: "city", name: "CHAOS CITY", sub: "top-down city, no limits", make: () => City(), col: "#fb923c", quiet: true },
   { id: "goal", name: "GOAL RUSH", sub: "2 v 2 football, bots or online", make: () => Goal(), col: "#22c55e" },
   { id: "tennis", name: "RALLY RUMBLE", sub: "2 v 2 party tennis: items, bananas, bombs", make: () => Tennis(), col: "#f97316" },
+  { id: "fight", name: "FIGHT CLUB", sub: "1 v 1 brawler, 13 crazy fighters", make: () => Fight(), col: "#e11d48" },
   { id: "strike", name: "STRIKE & DEFUSE", sub: "3D tactical shooter, bots or LAN", href: ARC.page("strike"), col: "#eab308" },
   { id: "empire", name: "CORSICAN EMPIRE", sub: "build, gather, conquer: bots or LAN", href: ARC.page("empire"), col: "#38bdf8" },
 ];
@@ -829,7 +830,8 @@ let cur = null, paused = false, overDone = false, menuT = 0;
 const TOUCH_HELP = { blocks: "arrows: move · A: drop · B: turn  (or tap the picture: turn, slide: move, flick down: drop)", rocks: "stick: fly · A: fire · catch the capsules",
   snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
   city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball)",
-  tennis: "stick: move (let go: you run to the ball) · A: swing · B: use your item, or dive · first to 7" };
+  tennis: "stick: move (let go: you run to the ball) · A: swing · B: use your item, or dive · first to 7",
+  fight: "stick: walk, jump (up), crouch (down), walk away = block · A: punch (3 = combo) · B: kick · A+B: special" };
 const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
 function start(id) {
   if (window.TouchPad && TouchPad.release) TouchPad.release();
@@ -884,12 +886,12 @@ function drawMenu() {
     else txt(d.name, x + 8, y + 52, d.name.length > 9 ? 9 : d.name.length > 7 ? 11 : 13);
     cx.font = "8.5px Segoe UI, sans-serif"; cx.fillStyle = "#8a90a2"; cx.textAlign = "left";
     const words = d.sub.split(" "); let line = "", ly = y + (twoLines ? 74 : 70);
-    words.forEach((w) => { if ((line + w).length > 13) { cx.fillText(line, x + 8, ly); line = ""; ly += 10; } line += w + " "; }); cx.fillText(line, x + 8, ly);
+    words.forEach((w) => { if ((line + w).length > 11) { cx.fillText(line, x + 8, ly); line = ""; ly += 10; } line += w + " "; }); cx.fillText(line, x + 8, ly);
     txt(d.id === "sumo" || d.id === "racer2" ? `RED ${two.p1 || 0}·BLUE ${two.p2 || 0}` : d.id === "spa" && bestOf("spa", "lap_ms") ? `LAP ${(bestOf("spa", "lap_ms") / 1000).toFixed(1)}s`
       : d.id === "city" ? `BEST $${bestOf("city")}` : d.href ? `WINS ${bestOf(d.id, "wins")}` : `BEST ${bestOf(d.id)}`, x + 8, y + CARD_H - 9, 9, "#f5b83d");
   });
 }
-const CARD_W = 72, CARD_H = 124, cardAt = (i) => [7 + (i % 6) * 78, 84 + Math.floor(i / 6) * 134];
+const CARD_W = 62, CARD_H = 124, cardAt = (i) => [8 + (i % 7) * 67, 84 + Math.floor(i / 7) * 134];
 function draw() {
   if (!cur) { if (!(ON && !ON.live && drawWatch())) drawMenu(); if (ON && ON.rqAt) { rect(0, H - 26, W, 26, "rgba(0,0,0,.78)"); txt(readyText(), W / 2, H - 9, 11, "#fde047", "center"); } }
   else {
@@ -934,8 +936,8 @@ document.getElementById("snd").onclick = () => { audioStart(); setSound(!sound);
 document.getElementById("pauseBtn").onclick = () => { if (cur && cur.id !== "sumo") paused = !paused; screenEl.focus(); };
 document.getElementById("menuBtn").onclick = () => { menu(); screenEl.focus(); };
 
-const HOSTED = new Set(["goal", "tennis"]);
-const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["tennis", "RALLY RUMBLE · 2 v 2 party tennis"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS · together"], ["rocksvs", "ROCKS · versus (shoot each other)"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
+const HOSTED = new Set(["goal", "tennis", "fight"]);
+const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["tennis", "RALLY RUMBLE · 2 v 2 party tennis"], ["fight", "FIGHT CLUB · 1 v 1"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS · together"], ["rocksvs", "ROCKS · versus (shoot each other)"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
 const realRandom = Math.random;
 const SHARED = new Set(["snake", "rocks", "rocksvs", "jump", "city"]), NETCOL = ["#22d3ee", "#f472b6", "#a3e635", "#fbbf24"];
 const seeded = (a) => () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
@@ -1069,11 +1071,12 @@ document.getElementById("onlBtn").onclick = () => { audioStart(); if (ON) showOn
 $o("oClose").onclick = hideOnline;
 const PAGE_GAMES = { strike: "STRIKE & DEFUSE", empire: "CORSICAN EMPIRE" };
 const SHEET = {
+  fight: { who: "1 v 1: you against the computer, or a friend online", opts: [["diff", "Computer", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
   tennis: { who: "bots only fill the empty places", opts: [["size", "Per side", [["1", "1 v 1"], ["2", "2 v 2"]]], ["side", "With friends", [["together", "Together vs bots"], ["vs", "Against each other"]]]] },
   strike: { who: "1 to 8 players · bots fill the teams", opts: [["map", "Map", [["dune", "Dune"], ["villa", "Villa"], ["reactor", "Reactor"], ["port", "Port"], ["temple", "Temple"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]], ["size", "Per team", [["3", "3"], ["5", "5"]]]] },
   empire: { who: "1 to 4 players · bots take the empty seats", opts: [["mapk", "Map", [["sea", "Mare Nostrum"], ["land", "Terre Ferme"], ["isles", "Archipel"], ["river", "Deux Rivières"], ["forest", "Grande Forêt"]]], ["opp", "Opponents", [["1", "1"], ["2", "2"], ["3", "3"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
 };
-const ONLINE_OK = new Set(["strike", "empire", "goal", "tennis", "spa", "blocks", "snake", "rocks", "jump", "city"]);
+const ONLINE_OK = new Set(["strike", "empire", "goal", "tennis", "fight", "spa", "blocks", "snake", "rocks", "jump", "city"]);
 function openSheet(d) {
   let sh = document.getElementById("gsheet");
   if (!sh) { sh = document.createElement("div"); sh.id = "gsheet"; screenEl.appendChild(sh); }
@@ -1238,7 +1241,7 @@ function startOnline(m) {
   ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.startT = performance.now(); ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
-  if (HOSTED.has(m.game)) { cur = (m.game === "tennis" ? Tennis : Goal)({ me: ON.me, host: ON.host, players: m.players, opt: m.opt || {}, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = helpOf(cur); }
+  if (HOSTED.has(m.game)) { cur = ({ tennis: Tennis, fight: Fight }[m.game] || Goal)({ me: ON.me, host: ON.host, players: m.players, opt: m.opt || {}, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = helpOf(cur); }
   else if (m.game === "spa") {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
     music(null); document.getElementById("help").textContent = helpOf(cur);
@@ -1338,7 +1341,7 @@ function askName() {
   const b = document.getElementById("nameBtn"); if (b) b.textContent = n ? "name: " + n : "pick a name";
   screenEl.focus();
 }
-const BOARD_ROWS = [["goal", "best", "GOAL RUSH"], ["tennis", "best", "RALLY RUMBLE"], ["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
+const BOARD_ROWS = [["goal", "best", "GOAL RUSH"], ["tennis", "best", "RALLY RUMBLE"], ["fight", "best", "FIGHT CLUB"], ["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
   ["strike", "wins", "STRIKE & DEFUSE · matches won"], ["empire", "wins", "CORSICAN EMPIRE · wins"], ["city", "best", "CHAOS CITY"], ["blocks", "best", "BLOCKS"],
   ["rocks", "best", "ROCKS"], ["snake", "best", "SNAKE"], ["jump", "best", "JUMP"]];
 let boardOpen = "";
