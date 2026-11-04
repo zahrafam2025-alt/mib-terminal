@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-04T00:02:55Z",
     "date": "2026-11-04",
-    "built_at": "2026-11-04 12:35 UTC",
+    "built_at": "2026-11-04 16:29 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -80,184 +80,184 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
-      "title": "CVS to split off drugstore business in major breakup of healthcare giant",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/04/cvs-to-split-off-drugstore-business.html",
-      "at": "2026-11-04T12:35:05+00:00"
-    },
-    {
-      "title": "Treasury yields fall after Democrats win House and Senate majorities",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/03/treasury-yields-fall-as-democrats-win-big-in-us-midterm-elections.html",
-      "at": "2026-11-04T12:25:25+00:00"
-    },
-    {
-      "title": "McDonald's earnings beat, but traffic to its U.S. restaurants falls",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/04/mcdonalds-is-about-to-report-earnings-heres-what-to-expect.html",
-      "at": "2026-11-04T12:24:23+00:00"
-    },
-    {
-      "title": "Midterm elections 2026 live updates: What's next after Democrats flip Congress in blue wave",
+      "title": "Midterm elections 2026 live updates: Vance blames Iran war for Republican losses",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/04/2026-midterm-election-results-live-updates.html",
-      "at": "2026-11-04T12:22:51+00:00"
+      "at": "2026-11-04T16:25:02+00:00"
     },
     {
-      "title": "If a Stock Market Crash Is Coming, History Says SCHD’s Dividend Grew Through the Last Two Bear Markets. But Here’s the Catch I'm Watching.",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/04/if-a-stock-market-crash-is-coming-schd-s-dividend-grew-through-the-last-two-bear-markets-but-here-s-the-catch-i-m-watching/?.tsrc=rss",
-      "at": "2026-11-04T12:20:01+00:00"
-    },
-    {
-      "title": "Donald Trump’s Midterm Defeat Tests Bitwise’s $3.67M Bitcoin Bull Case",
-      "src": "Yahoo Finance",
-      "url": "https://www.ccn.com/news/crypto/bitcoin-donald-trumps-midterm-defeat-tests-bitwises-bull-case/?.tsrc=rss",
-      "at": "2026-11-04T12:18:39+00:00"
-    },
-    {
-      "title": "Stock Market Election News: Dow Futures Jump After Democrat Sweep, But AI Stocks Fade; Elon Musk, SpaceX, Tesla Are Losers (Live)",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/e5be454d-07fd-3d94-8114-a4e8ff2910de/stock-market-election-news%3A.html?.tsrc=rss",
-      "at": "2026-11-04T12:17:19+00:00"
-    },
-    {
-      "title": "Nasdaq Sinks 5% in October as AI Stock Selloff Hits Tech",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-sinks-5-october-ai-121553717.html?.tsrc=rss",
-      "at": "2026-11-04T12:15:53+00:00"
-    },
-    {
-      "title": "Costco’s Capital Preservation Function Will Be on Display Over the Next Few Weeks",
-      "src": "Yahoo Finance",
-      "url": "https://247wallst.com/investing/2026/11/04/costcos-capital-preservation-function-will-be-on-display-over-the-next-few-weeks/?.tsrc=rss",
-      "at": "2026-11-04T12:15:49+00:00"
-    },
-    {
-      "title": "Wayfair sales jump 10% as furniture retailer says it's winning share of sluggish market",
+      "title": "10-year Treasury yield is little changed as traders mull over Democrats' midterm victories",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/04/wayfair-w-q3-2026-earnings.html",
-      "at": "2026-11-04T12:08:15+00:00"
+      "url": "https://www.cnbc.com/2026/11/03/treasury-yields-fall-as-democrats-win-big-in-us-midterm-elections.html",
+      "at": "2026-11-04T16:23:53+00:00"
     },
     {
-      "title": "My Top 5 Stocks to Buy Before 2027 and Hold for a Decade",
+      "title": "Stock Market Today: Dow, Nasdaq Flex Strength As Military, Oil Stocks Take A Dive (Live Coverage)",
       "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/04/my-top-5-stocks-to-buy-before-2027-and-hold-for-a/?.tsrc=rss",
-      "at": "2026-11-04T12:05:00+00:00"
+      "url": "https://finance.yahoo.com/m/762d358c-ec5a-3821-a3f9-e47c4e4c3f0c/stock-market-today%3A-dow%2C.html?.tsrc=rss",
+      "at": "2026-11-04T16:12:32+00:00"
     },
     {
-      "title": "Mortgage rates drop for the third straight week, but homebuyers are still leaving the market",
+      "title": "RIOT Stock Heads For Biggest Weekly Gain In 5 Months After Signing Its Largest-Ever AI Data Center Lease",
+      "src": "Yahoo Finance",
+      "url": "https://stocktwits.com/news-articles/markets/equity/riot-stock-heads-for-biggest-weekly-gain-in-5-months-after-signing-its-largest-ever-ai-data-center-lease/cNGLixuR93Y?.tsrc=rss",
+      "at": "2026-11-04T16:09:59+00:00"
+    },
+    {
+      "title": "Bitcoin Rises, Crypto Miners Sharply Divided As Midterms Dampen AI Outlook",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/c5d0833e-fe1d-3e77-b792-4b103f8d64bf/bitcoin-rises%2C-crypto-miners.html?.tsrc=rss",
+      "at": "2026-11-04T16:07:41+00:00"
+    },
+    {
+      "title": "Defense stocks slide on fear Democrats will curb spending. One analyst say it's a buying opportunity",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/04/mortgage-rates-dropped-homebuyers-still-leaving.html",
-      "at": "2026-11-04T12:00:01+00:00"
+      "url": "https://www.cnbc.com/2026/11/04/defense-stocks-slide-on-fear-democrats-will-curb-spending-one-analyst-say-its-a-buying-opportunity.html",
+      "at": "2026-11-04T16:05:08+00:00"
     },
     {
-      "title": "Treasury's Refunding Details Are Up Next as Five Large Companies Report Higher Revenue",
+      "title": "Strategy CEO puts his Bitcoin firm alongside SpaceX, Alphabet",
       "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/treasurys-refunding-details-next-five-120000883.html?.tsrc=rss",
-      "at": "2026-11-04T12:00:00+00:00"
+      "url": "https://www.thestreet.com/crypto/markets/strategy-ceo-puts-his-bitcoin-firm-alongside-spacex-alphabet?.tsrc=rss",
+      "at": "2026-11-04T16:03:03+00:00"
     },
     {
-      "title": "Rate and Compass International Holdings Make Landmark Move, Combining Their Two Joint Ventures, Creating Top 10 U.S. Retail Lending Leader: OriginPoint",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/real-estate/articles/rate-compass-international-holdings-landmark-120000876.html?.tsrc=rss",
-      "at": "2026-11-04T12:00:00+00:00"
+      "title": "Dow rallies 1,300 points as political risk eases after resounding Democratic victory in U.S. midterms: Live updates",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/03/stock-market-today-live-updates.html",
+      "at": "2026-11-04T16:03:00+00:00"
     },
     {
-      "title": "Can Casey's Stock Jump 30%?",
+      "title": "How will the midterms blue wave affect my 401(k)? Answers here",
       "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/casy/articles/622601/can-caseys-stock-jump-30/2026-11-04?.tsrc=rss",
-      "at": "2026-11-04T11:53:17+00:00"
+      "url": "https://www.usatoday.com/story/money/personal-finance/2026/11/04/stock-market-midterm-elections-bluenami-401k-trump/92608635007/?.tsrc=rss",
+      "at": "2026-11-04T15:59:55+00:00"
     },
     {
-      "title": "How Has Vertiv's Story Changed?",
+      "title": "Stock-Market Gains Are Weakest After Midterm Results Like These",
       "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/vrt/articles/622596/how-has-vertivs-story-changed/2026-11-04?.tsrc=rss",
-      "at": "2026-11-04T11:53:14+00:00"
+      "url": "https://www.wealthmanagement.com/equities/stock-market-gains-are-weakest-after-midterm-results-like-these?.tsrc=rss",
+      "at": "2026-11-04T15:48:52+00:00"
     },
     {
-      "title": "Why Every IBM Investor Is Looking At This One Number",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/ibm/articles/622589/why-every-ibm-investor-is-looking-at-this-one-number/2026-11-04?.tsrc=rss",
-      "at": "2026-11-04T11:53:10+00:00"
+      "title": "Jim Cramer's top 10 things to watch in the stock market Wednesday",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/investingclub/2026/11/04/jim-cramers-top-10-things-to-watch-in-the-stock-market-wednesday.html",
+      "at": "2026-11-04T15:46:18+00:00"
     },
     {
-      "title": "Qnity Earnings Were a Relief for the Nervous AI Trade",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/5cb78c16-895a-3e98-a7d8-53dd11c44781/qnity-earnings-were-a-relief.html?.tsrc=rss",
-      "at": "2026-11-04T11:53:00+00:00"
+      "title": "Trump hammers Fox News, blaming network for GOP losses as ratings slide",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/04/trump-fox-news-gop-midterm-losses.html",
+      "at": "2026-11-04T15:45:51+00:00"
     },
     {
-      "title": "Is Altseason Starting? What the Charts and Market Data Show",
+      "title": "Stocks shrugged off the blue wave overnight — history says don't trust the bounce yet",
       "src": "Yahoo Finance",
-      "url": "https://beincrypto.com/altcoin-season-index-bitcoin-dominance/?.tsrc=rss",
-      "at": "2026-11-04T11:46:10+00:00"
+      "url": "https://finance.yahoo.com/markets/article/stocks-shrugged-off-the-blue-wave-overnight--history-says-dont-trust-the-bounce-yet-153846605.html?.tsrc=rss",
+      "at": "2026-11-04T15:38:46+00:00"
     },
     {
-      "title": "Blue Wave Turns Markets Green as Midterm Relief Rally Kicks in",
+      "title": "Rivian Gains Another 6%, Lucid Up 12% as Markets Rally After Democrats Sweep Midterms",
       "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/49ab5ed5-0a51-3e5f-8ae3-303cee29dee9/blue-wave-turns-markets-green.html?.tsrc=rss",
-      "at": "2026-11-04T11:43:38+00:00"
+      "url": "https://www.tikr.com/blog/rivian-gains-another-6-lucid-up-12-as-markets-rally-after-democrats-sweep-midterms?ref=yahoofinance&tlnk=yf-261104-5m3q3chf&.tsrc=rss",
+      "at": "2026-11-04T15:38:39+00:00"
+    },
+    {
+      "title": "Kraft Heinz to divest its North American coffee business in $650 million deal",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/04/kraft-heinz-coffee-business-one-rock-deal.html",
+      "at": "2026-11-04T15:35:23+00:00"
+    },
+    {
+      "title": "Midterm Election Day recap: Democrats flip Senate and House in stunning victory",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/03/midterm-elections-2026-live-updates.html",
+      "at": "2026-11-04T15:35:22+00:00"
+    },
+    {
+      "title": "Stocks soar after Democrats take control of Congress",
+      "src": "Yahoo Finance",
+      "url": "https://www.cbsnews.com/news/stock-market-soar-democrats-take-control-of-congress/?.tsrc=rss",
+      "at": "2026-11-04T15:35:07+00:00"
+    },
+    {
+      "title": "Why John Stolzfus Stays Bullish",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/video/why-john-stolzfus-stays-bullish-153114363.html?.tsrc=rss",
+      "at": "2026-11-04T15:31:14+00:00"
+    },
+    {
+      "title": "BC-Most Active Stocks",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/bc-most-active-stocks-153021165.html?.tsrc=rss",
+      "at": "2026-11-04T15:30:21+00:00"
+    },
+    {
+      "title": "CVS to split off drugstore business in major breakup of healthcare giant; shares fall 10%",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/04/cvs-to-split-off-drugstore-business.html",
+      "at": "2026-11-04T15:26:08+00:00"
+    },
+    {
+      "title": "Apple, Microsoft hit all-time highs as Nasdaq surges 2% in post-election rally: AlphaCheck",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/article/apple-microsoft-hit-all-time-highs-as-nasdaq-surges-2-in-post-election-rally-alphacheck-152548814.html?.tsrc=rss",
+      "at": "2026-11-04T15:25:48+00:00"
+    },
+    {
+      "title": "Solstice Advanced Materials Reported Stong AI-Fueled Earnings. The Stock Is Down.",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/34cc631f-bb2f-339a-92ae-d0cb6757babf/solstice-advanced-materials.html?.tsrc=rss",
+      "at": "2026-11-04T15:24:00+00:00"
+    },
+    {
+      "title": "Prologis CEO says warehouse demands are shifting fast. Here's how he's keeping up",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/04/prologis-ceo-says-warehouse-demands-are-shifting-how-hes-keeping-up.html",
+      "at": "2026-11-04T15:22:59+00:00"
+    },
+    {
+      "title": "Three reasons stocks are moving higher after the midterms",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/video/three-reasons-stocks-are-moving-higher-after-the-midterms-152243298.html?.tsrc=rss",
+      "at": "2026-11-04T15:22:43+00:00"
     },
     {
       "title": "Tesla, SpaceX Stocks Are Down. It’s the Midterms.",
       "src": "Yahoo Finance",
       "url": "https://finance.yahoo.com/m/04e06d67-ec16-37a7-9d3f-5114954b5d68/tesla%2C-spacex-stocks-are.html?.tsrc=rss",
-      "at": "2026-11-04T11:41:00+00:00"
+      "at": "2026-11-04T15:22:00+00:00"
     },
     {
-      "title": "SpaceX, Tesla fall over 4% on Democrats' big win; AI stocks mixed",
+      "title": "Bitcoin Recovers Despite Democratic Midterm Gains",
+      "src": "Yahoo Finance",
+      "url": "https://www.cryptoprowl.com/releases/bitcoin-recovers-despite-democratic-midterm-gains-7656?.tsrc=rss",
+      "at": "2026-11-04T15:21:00+00:00"
+    },
+    {
+      "title": "Qnity Earnings Were a Relief for the Nervous AI Trade",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/5cb78c16-895a-3e98-a7d8-53dd11c44781/qnity-earnings-were-a-relief.html?.tsrc=rss",
+      "at": "2026-11-04T15:19:00+00:00"
+    },
+    {
+      "title": "McDonald's stock rises as earnings beat, U.S. restaurants show improvement",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/04/ai-stocks-texas-governor-data-centers.html",
-      "at": "2026-11-04T11:35:52+00:00"
+      "url": "https://www.cnbc.com/2026/11/04/mcdonalds-is-about-to-report-earnings-heres-what-to-expect.html",
+      "at": "2026-11-04T15:05:28+00:00"
     },
     {
-      "title": "Compass Pathways to Participate in Stifel 2026 Healthcare Conference on November 11th",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/healthcare/articles/compass-pathways-participate-stifel-2026-113000335.html?.tsrc=rss",
-      "at": "2026-11-04T11:30:00+00:00"
-    },
-    {
-      "title": "US Elections, Tech Optimism Lift Wall Street Pre-Bell; Asia Mixed, Europe Up",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/us-elections-tech-optimism-lift-111414286.html?.tsrc=rss",
-      "at": "2026-11-04T11:14:14+00:00"
-    },
-    {
-      "title": "What Could Derail KLA Stock?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/klac/articles/622549/what-could-derail-kla-stock/2026-11-04?.tsrc=rss",
-      "at": "2026-11-04T11:06:53+00:00"
-    },
-    {
-      "title": "Is Royal Caribbean Stock Increasing Your Market Risk?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/rcl/articles/622570/is-royal-caribbean-stock-increasing-your-market-risk/2026-11-04?.tsrc=rss",
-      "at": "2026-11-04T11:06:48+00:00"
-    },
-    {
-      "title": "What Could Stop Lowe's Stock Over The Next Six Months?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/low/articles/622561/what-could-stop-lowes-stock-over-the-next-six-months/2026-11-04?.tsrc=rss",
-      "at": "2026-11-04T11:06:41+00:00"
-    },
-    {
-      "title": "Elon Musk’s record election bet backfired. The backlash may reach beyond one billionaire",
+      "title": "Analysis: The Democrats have one chance to extract concessions from Trump. Markets will hate it",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/04/elon-musk-midterms-ai-data-centers.html",
-      "at": "2026-11-04T10:54:53+00:00"
+      "url": "https://www.cnbc.com/2026/11/04/democrats-trump-debt-ceiling-fight.html",
+      "at": "2026-11-04T15:05:19+00:00"
     },
     {
-      "title": "Euro zone inflation hits 4% for first time in three years as interest rate hike looms",
+      "title": "Caitlin Clark signs as first-ever brand partner with Dick's and Foot Locker",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/04/euro-zone-cpi-inflation-october-ecb-rate-hike.html",
-      "at": "2026-11-04T10:47:30+00:00"
-    },
-    {
-      "title": "U.S. midterm elections in pictures: Democrats' sweeping victories deliver rebuke to Trump",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/04/us-midterm-elections-in-pictures-democrats-republicans-trump.html",
-      "at": "2026-11-04T10:47:19+00:00"
+      "url": "https://www.cnbc.com/2026/11/04/caitlin-clark-signs-as-first-brand-partner-with-dicks-foot-locker-.html",
+      "at": "2026-11-04T15:00:01+00:00"
     }
   ],
   "footer": {

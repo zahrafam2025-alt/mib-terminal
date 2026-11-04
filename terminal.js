@@ -138,11 +138,14 @@
   // calendar file (iPhone, Android, Outlook, Mac: it opens "add to calendar") with an alert 15 minutes before, or Google
   // Calendar's own page. Nothing is sent anywhere until one is tapped.
   var stamp = function (t) { return new Date(t).toISOString().replace(/[-:]/g, "").replace(/\.\d+/, ""); };
+  document.addEventListener("click", function (ev) {                  // the calendar link follows the server in use (/arcade/api.json)
+    var a = ev.target.closest && ev.target.closest("a[data-ics]"); if (a && window.MIB_CHAT_API) a.href = a.href.replace(/^https:\/\/[^/]+/, window.MIB_CHAT_API);
+  }, true);
   var remind = function (e) {
     var t = when(e); if (t >= 9e15) return "";
     var title = (e.event || "Market event") + " (MIB Terminal)", note = [e.confirms ? "As expected: " + e.confirms : "", e.invalidates ? "Surprise: " + e.invalidates : "", "https://mibterminal.com/#calendar"].filter(Boolean).join("\n");
     var g = "https://calendar.google.com/calendar/render?" + new URLSearchParams({ action: "TEMPLATE", text: title, dates: stamp(t) + "/" + stamp(t + 30 * 60000), details: note });
-    return '<span class="remind"><a class="btn" href="' + esc((window.MIB_CHAT_API || "https://mib-arcade.terminalmib.workers.dev") + "/api/ics?" + new URLSearchParams({ t: String(t), title: title, d: note })) + '">🔔 Add to my calendar</a>'
+    return '<span class="remind"><a class="btn" data-ics="1" href="' + esc((window.MIB_CHAT_API || "https://mib-arcade.terminalmib.workers.dev") + "/api/ics?" + new URLSearchParams({ t: String(t), title: title, d: note })) + '">🔔 Add to my calendar</a>'
       + '<a class="btn ghost" target="_blank" rel="noopener" href="' + esc(g) + '">Google Calendar</a></span>';
   };
   $("cal").innerHTML = Object.keys(days).map(function (k) {
@@ -226,10 +229,11 @@
     document.querySelector("#send .btn").textContent = nameMode ? "Join" : "Send";
   };
   var connect = function () {
+    if (!window.MIB_API_DONE) { (window.MIB_API_READY || Promise.resolve()).then(function () { window.MIB_API_DONE = true; connect(); }); return; }
     if (ws) { ws.onclose = null; try { ws.close(); } catch (e) {} }
     var r = room;
     state("connecting…");
-    ws = new WebSocket(API.replace(/^http/, "ws") + "/chat?" + new URLSearchParams({ room: roomOf[r], name: ls("arcade-name") || "Guest", cid: cid, a: String(myAv()) }));
+    ws = new WebSocket((window.MIB_CHAT_API || API).replace(/^http/, "ws") + "/chat?" + new URLSearchParams({ room: roomOf[r], name: ls("arcade-name") || "Guest", cid: cid, a: String(myAv()) }));
     ws.onmessage = function (e) {
       var d; try { d = JSON.parse(e.data); } catch (x) { return; }
       if (r !== room) return;

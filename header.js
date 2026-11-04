@@ -15,6 +15,25 @@
   var me = document.currentScript, active = (me && me.dataset.active) || "page";
   var home = location.pathname === "/" || location.pathname === "/index.html";
   var API = window.MIB_CHAT_API || "https://mib-arcade.terminalmib.workers.dev";
+  // 4 Nov (owner's second Cloudflare account): the server's address is published with the arcade (/arcade/api.json), so
+  // when the arcade workflow moves to the other account the whole site follows without a code change. Used before any
+  // connection is made; on any problem the built-in address stays.
+  // 4 Nov (owner: "MIB must be one: main server always, the second account only while the main one is limited, and back as
+  // soon as it answers"): /arcade/api.json lists both; the main one is used when it answers, else the backup. Asked on every
+  // page load (kept 2 minutes); a chat line that keeps failing flips to the other one by itself.
+  var SRV = /^https:\/\/[a-z0-9.-]+\.workers\.dev$/, MAIN = API, BACKUP = "";
+  var alive = function (u) { var c = new AbortController(), t = setTimeout(function () { c.abort(); }, 4000); return fetch(u + "/api/chat/recent?room=markets", { cache: "no-store", signal: c.signal }).then(function (r) { clearTimeout(t); return r.ok; }, function () { return false; }); };
+  window.MIB_API_READY = Promise.race([
+    fetch("/arcade/api.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j) return;
+      if (SRV.test(j.api || "")) MAIN = j.api; if (SRV.test(j.backup || "")) BACKUP = j.backup; API = MAIN;
+      var c = null; try { c = JSON.parse(sessionStorage.getItem("mib-api-pick") || "null"); } catch (x) {}
+      if (c && Date.now() - c.t < 120000 && (c.u === MAIN || c.u === BACKUP)) { API = c.u; return; }
+      if (!BACKUP) return;
+      return alive(MAIN).then(function (ok) { return ok ? true : alive(BACKUP).then(function (ok2) { if (ok2) API = BACKUP; return false; }); }).then(function () { try { sessionStorage.setItem("mib-api-pick", JSON.stringify({ u: API, t: Date.now() })); } catch (x) {} });
+    }).then(function () { window.MIB_CHAT_API = API; }),
+    new Promise(function (ok) { setTimeout(ok, 6000); })]).catch(function () {});
+  window.MIB_FLIP = function () { if (!BACKUP) return; API = API === MAIN ? BACKUP : MAIN; window.MIB_CHAT_API = API; try { sessionStorage.setItem("mib-api-pick", JSON.stringify({ u: API, t: Date.now() })); } catch (x) {} };
   var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k) || ""; if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return ""; } };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var AV = ["🦊", "🐸", "🐼", "🦁", "🐙", "🤖", "👽", "🦄", "🐵", "🐯", "🐧", "🦖", "🐻", "🐷", "🦉", "🐳", "🦈", "🐲", "🥷", "🧙", "🤠", "🧛", "🦸", "💀"];
@@ -206,10 +225,11 @@
   }
   var hello = function () { if (ws && ws.readyState === 1) ws.send(JSON.stringify({ t: "me", n: name(), a: av(), p: active })); };
   var connect = function () {
+    if (!window.MIB_API_DONE) { window.MIB_API_READY.then(function () { window.MIB_API_DONE = true; connect(); }); return; }
     try { ws = new WebSocket(API.replace(/^http/, "ws") + "/chat?" + new URLSearchParams({ room: "here", name: name() || "", cid: cid, a: String(av()), p: active })); } catch (e) { return; }
     ws.onopen = function () { tries = 0; };
     ws.onmessage = function (e) { var d; try { d = JSON.parse(e.data); } catch (x) { return; } if (d.t === "you") myId = d.id; if (d.t === "invite") invited(d); if (d.t === "here") { who = d.who || []; online = d.n || who.length; paintMe(); if (!pane.hidden && !pane.contains(document.activeElement)) paintPane(); window.MIB_HERE = { n: online, who: who }; window.dispatchEvent(new CustomEvent("mib-here")); } };
-    ws.onclose = function () { setTimeout(connect, Math.min(30000, 2000 * ++tries)); };
+    ws.onclose = function () { if (tries >= 2 && tries % 2 === 0 && window.MIB_FLIP) window.MIB_FLIP(); setTimeout(connect, Math.min(30000, 2000 * ++tries)); };
   };
   setInterval(function () { if (ws && ws.readyState === 1) ws.send("#ping"); }, 25000);
   paintMe(); connect();
