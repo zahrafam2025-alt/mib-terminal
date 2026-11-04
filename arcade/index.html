@@ -909,7 +909,7 @@ cv.addEventListener("click", (e) => {
   }
   if (cur) return;
   const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
-  shownGames().forEach((d, i) => { const [gx, gy] = cardAt(i); if (x >= gx && x <= gx + CARD_W && y >= gy && y <= gy + CARD_H) start(d.id); });
+  shownGames().forEach((d, i) => { const [gx, gy] = cardAt(i); if (x >= gx && x <= gx + CARD_W && y >= gy && y <= gy + CARD_H) openSheet(d); });
 });
 focusEl.addEventListener("click", () => { audioStart(); screenEl.focus(); });
 document.getElementById("snd").onclick = () => { audioStart(); setSound(!sound); screenEl.focus(); };
@@ -1011,6 +1011,42 @@ $o("oName").value = ARC.getName();
 document.getElementById("onlBtn").onclick = () => { audioStart(); if (ON) showOnline("oRoom"); else showOnline("oMain"); };
 $o("oClose").onclick = hideOnline;
 const PAGE_GAMES = { strike: "STRIKE & DEFUSE", empire: "CORSICAN EMPIRE" };
+const SHEET = {
+  strike: { who: "1 to 8 players · bots fill the teams", opts: [["map", "Map", [["dune", "Dune"], ["villa", "Villa"], ["reactor", "Reactor"], ["port", "Port"], ["temple", "Temple"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]], ["size", "Per team", [["3", "3"], ["5", "5"]]]] },
+  empire: { who: "1 to 4 players · bots take the empty seats", opts: [["mapk", "Map", [["sea", "Mare Nostrum"], ["land", "Terre Ferme"], ["isles", "Archipel"], ["river", "Deux Rivières"], ["forest", "Grande Forêt"]]], ["opp", "Opponents", [["1", "1"], ["2", "2"], ["3", "3"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
+};
+const ONLINE_OK = new Set(["strike", "empire", "goal", "spa", "blocks", "snake", "rocks", "jump", "city"]);
+function openSheet(d) {
+  let sh = document.getElementById("gsheet");
+  if (!sh) { sh = document.createElement("div"); sh.id = "gsheet"; screenEl.appendChild(sh); }
+  const S = SHEET[d.id], pick = {};
+  try { Object.assign(pick, JSON.parse(localStorage.getItem("arcade-sheet-" + d.id) || "{}")); } catch (e) {}
+  const opts = S ? S.opts.map(([k, label, vals]) => { if (!pick[k]) pick[k] = ({ map: "dune", diff: "1", size: "5", mapk: "sea", opp: "1" })[k] || vals[0][0]; return '<div class="srow"><span>' + label + "</span>" + vals.map(([v, n]) => '<button data-k="' + k + '" data-v="' + v + '"' + (pick[k] === v ? ' class="on"' : "") + ">" + n + "</button>").join("") + "</div>"; }).join("") : "";
+  sh.innerHTML = '<div class="scard"><div class="stitle" style="color:' + d.col + '">' + d.name + '</div><div class="ssub">' + (S ? S.who : d.keys2 ? "two players on one keyboard" : ONLINE_OK.has(d.id) ? "alone, or up to 4 friends online" : "") + "</div>"
+    + opts + '<div class="sbtns"><button class="pri" data-go="bots">▶ ' + (S ? "Play vs bots" : "Play now") + "</button>"
+    + (ONLINE_OK.has(d.id) ? '<button data-go="host">🌐 Host online</button><button data-go="join">🔗 Join a friend</button>' : "") + '</div><button class="sclose" data-go="close" aria-label="close">✕</button></div>';
+  sh.classList.add("open");
+  sh.onclick = (e) => {
+    const b = e.target.closest("button"); if (!b) { if (e.target === sh) sh.classList.remove("open"); return; }
+    if (b.dataset.k) { pick[b.dataset.k] = b.dataset.v; sh.querySelectorAll('[data-k="' + b.dataset.k + '"]').forEach((x) => x.classList.toggle("on", x === b)); try { localStorage.setItem("arcade-sheet-" + d.id, JSON.stringify(pick)); } catch (x) {} return; }
+    const go = b.dataset.go; sh.classList.remove("open"); audioStart();
+    if (go === "close") return;
+    if (S) { const u = new URL(ARC.page(d.id), location.href); Object.entries(pick).forEach(([k, v]) => u.searchParams.set(k, v)); if (go === "bots") u.searchParams.set("play", "bots"); else if (go === "host") u.searchParams.set("online", "host"); else { showOnline("oMain"); $o("oJoin").click(); return; } location.href = u.href; return; }
+    if (go === "bots") { start(d.id); if (window.TouchPad && TouchPad.on) TouchPad.full(); return; }
+    showOnline("oMain"); $o("oGame").value = d.id; if (go === "host") $o("oHost").click(); else $o("oJoin").click();
+  };
+}
+(() => {
+  const st = document.createElement("style");
+  st.textContent = `#gsheet{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(5,7,13,.72)}#gsheet.open{display:flex}
+#gsheet .scard{position:relative;width:min(420px,92%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;display:grid;gap:10px;font:14px "Segoe UI",sans-serif}
+#gsheet .stitle{font:800 22px Consolas,monospace;letter-spacing:.06em}#gsheet .ssub{color:var(--muted);margin-top:-6px}
+#gsheet .srow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}#gsheet .srow span{width:80px;color:var(--muted);font-size:13px}
+#gsheet .srow button{padding:6px 10px;border-radius:999px}#gsheet .srow button.on{background:#b45309;border-color:#f59e0b;color:#fff}
+#gsheet .sbtns{display:grid;gap:8px;margin-top:4px}#gsheet .sbtns button{padding:12px;font-size:16px;font-weight:700;border-radius:10px}#gsheet .sbtns .pri{background:#b45309;border-color:#f59e0b;color:#fff}
+#gsheet .sclose{position:absolute;right:8px;top:8px;padding:4px 9px;border-radius:8px}`;
+  document.head.appendChild(st);
+})();
 const pageRoom = (game, how, room) => { const u = new URL(ARC.page(game), location.href); u.searchParams.set("online", how); if (room) u.searchParams.set("room", room); location.href = u.href; };
 $o("oHost").onclick = () => {
   if (ON && ON.host && ON.net && !ON.net.quit) { showOnline("oRoom"); return; }

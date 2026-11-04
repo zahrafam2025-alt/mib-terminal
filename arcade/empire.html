@@ -1706,6 +1706,8 @@ $("#bShare").onclick = async () => {
 };
 setTimeout(() => {
   const q = new URLSearchParams(location.search), o = q.get("online"), room = (q.get("room") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  for (const k of ["mapk", "diff", "opp"]) { const v = q.get(k), el = document.getElementById(k); if (v && el && [...el.options].some((x) => x.value === v)) el.value = v; }
+  if (q.get("play") === "bots") { history.replaceState(null, "", location.pathname); $("#bSolo").onclick(); return; }
   if (!o) return;
   history.replaceState(null, "", location.pathname);
   if (o === "host") $("#bHost").onclick();
