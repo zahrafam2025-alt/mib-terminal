@@ -220,6 +220,7 @@
   var paintHere = function () {
     var h = window.MIB_HERE || { n: 0, who: [] }, el = $("here"); if (!el) return;
     el.innerHTML = '<div class="label">Online now · ' + h.n + "</div>" + (h.who.length ? '<div class="chips">' + h.who.map(function (w) { return '<span class="chip">' + esc((AVS[w.a] || "👤") + " " + w.n) + (w.p === "arcade" ? ' <small style="color:var(--up)">playing</small>' : "") + "</span>"; }).join("") + "</div>"
+      + (h.n > h.who.length ? '<p style="color:var(--muted);margin:4px 0 0;font-size:14px">+ ' + (h.n - h.who.length) + " visitor" + (h.n - h.who.length > 1 ? "s" : "") + " without a name</p>" : "")
       : '<p style="color:var(--muted);margin:4px 0 0;font-size:14px">' + (h.n > 1 ? h.n + " people here, none has picked a name yet." : "Just you for now. Share the site and play together.") + "</p>");
   };
   addEventListener("mib-here", paintHere); paintHere();

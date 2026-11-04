@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-04T00:02:55Z",
     "date": "2026-11-04",
-    "built_at": "2026-11-04 00:10 UTC",
+    "built_at": "2026-11-04 01:09 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -80,22 +80,34 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
-      "title": "S&P 500 futures gain slightly on AMD's strong earnings as traders await election results: Live updates",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/03/stock-market-today-live-updates.html",
-      "at": "2026-11-04T00:09:30+00:00"
-    },
-    {
-      "title": "Midterm elections 2026 live updates: Polls are closing as House, Senate control hang in balance",
+      "title": "Midterm elections 2026 live updates: Ossoff wins Georgia Senate, House control 'leans' Dem",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/03/midterm-elections-2026-live-updates.html",
-      "at": "2026-11-04T00:06:15+00:00"
+      "at": "2026-11-04T01:08:04+00:00"
     },
     {
-      "title": "Stock Market Election Night: AMD, Arista Earnings Lift Tech Futures, AI Stocks (Live)",
+      "title": "Google responds to political backlash over removing search from schools that ban AI",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/03/google-responds-to-outrage-over-removing-search-in-schools-that-ban-ai.html",
+      "at": "2026-11-04T01:07:01+00:00"
+    },
+    {
+      "title": "The 7,500 BTC That Left Binance’s SAFU Fund Has Moved Again, to an Unlabeled Address",
       "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/e5be454d-07fd-3d94-8114-a4e8ff2910de/stock-market-election-night%3A.html?.tsrc=rss",
-      "at": "2026-11-04T00:01:13+00:00"
+      "url": "https://unchainedcrypto.com/the-7500-btc-that-left-binances-safu-fund-has-moved-again-to-an-unlabeled-address/?.tsrc=rss",
+      "at": "2026-11-04T00:35:00+00:00"
+    },
+    {
+      "title": "The S&P 500 Fell in Both September and October for Only the 17th Time Since 1950. Here's What Usually Followed.",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/investing/2026/11/03/the-s-and-p-500-fell-in-both-september-and-october-for-only-the-17th-time-since-1950-here-s-what-usually-followed/?.tsrc=rss",
+      "at": "2026-11-04T00:28:02+00:00"
+    },
+    {
+      "title": "Wednesday's big stock stories: What’s likely to move the market in the next trading session",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/03/wednesdays-big-stock-stories-whats-likely-to-move-the-market.html",
+      "at": "2026-11-04T00:12:42+00:00"
     },
     {
       "title": "Jim Cramer sees signs of life in tech stocks — but not from the usual winners",
@@ -126,12 +138,6 @@ window.MIB_BRIEF = {
       "src": "Yahoo Finance",
       "url": "https://247wallst.com/investing/cryptocurrency/2026/11/03/if-you-had-bought-xrp-the-day-ripple-won-its-sec-case-how-much-would-you-have-now/?.tsrc=rss",
       "at": "2026-11-03T23:31:24+00:00"
-    },
-    {
-      "title": "Stocks making the biggest moves after hours: Arista Networks, CVS Health, AMD, Super Micro, Skyworks Solutions & more",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/03/stocks-making-the-biggest-moves-after-hours-anet-amd-smci-swks.html",
-      "at": "2026-11-03T23:30:34+00:00"
     },
     {
       "title": "S&P 500, Nasdaq Recover From AI Rout On US Midterm Election Day — META, AAPL, AMD, SKHY In Focus",
@@ -174,6 +180,12 @@ window.MIB_BRIEF = {
       "src": "Yahoo Finance",
       "url": "https://247wallst.com/investing/cryptocurrency/2026/11/03/bitcoin-vs-nvidia-10000-invested-5-years-ago-which-is-worth-more-now/?.tsrc=rss",
       "at": "2026-11-03T22:47:30+00:00"
+    },
+    {
+      "title": "Greenlight Capital Discussed PG&E Corporation (PCG) in Its Q3 2026 Investor Letter",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/greenlight-capital-discussed-pg-e-184605050.html?.tsrc=rss",
+      "at": "2026-11-03T22:46:05+00:00"
     },
     {
       "title": "Tether Holds 150,000 Bitcoin, CEO Says—About 50,000 More Than Its Reserve Report Shows",
@@ -246,18 +258,6 @@ window.MIB_BRIEF = {
       "src": "Yahoo Finance",
       "url": "https://finance.yahoo.com/markets/stocks/articles/superior-group-sgc-stock-declines-221502830.html?.tsrc=rss",
       "at": "2026-11-03T22:15:02+00:00"
-    },
-    {
-      "title": "PagSeguro Digital Ltd. (PAGS) Stock Falls Amid Market Uptick: What Investors Need to Know",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/pagseguro-digital-ltd-pags-stock-221502354.html?.tsrc=rss",
-      "at": "2026-11-03T22:15:02+00:00"
-    },
-    {
-      "title": "Lennar (LEN) Stock Sinks As Market Gains: What You Should Know",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/lennar-len-stock-sinks-market-221501027.html?.tsrc=rss",
-      "at": "2026-11-03T22:15:01+00:00"
     }
   ],
   "footer": {

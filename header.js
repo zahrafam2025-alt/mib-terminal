@@ -5,7 +5,11 @@
    <script src="/header.js" data-active="today|week|archive|arcade|page"></script>, first thing in <body>.
    2026-11-04 (owner's list): the bar stays on screen (fixed, not sticky), light/dark switch, Français (the browser's
    own translation through Google's page translator), your name and a funny avatar (shared with the arcade and the
-   chat), who is online right now, install on the home screen, share with a friend, privacy. */
+   chat), who is online right now, install on the home screen, share with a friend, privacy.
+   2026-11-04 (owner: "dark mode by default"; "with the translator the Google bar or logo shows and lots breaks: dark
+   mode lost, the avatar options dead, text left in English"): dark unless you chose light; Français no longer sends
+   the page to Google's site (another address: your settings were not there and the scripts broke) but runs Google's
+   translator inside this page, its bar and logo hidden, and keeps translating what the page adds later. */
 (function () {
   "use strict";
   var me = document.currentScript, active = (me && me.dataset.active) || "page";
@@ -15,8 +19,9 @@
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var AV = ["🦊", "🐸", "🐼", "🦁", "🐙", "🤖", "👽", "🦄", "🐵", "🐯", "🐧", "🦖", "🐻", "🐷", "🦉", "🐳", "🦈", "🐲", "🥷", "🧙", "🤠", "🧛", "🦸", "💀"];
   window.MIB_AV = AV;
-  // the theme: the viewer's choice wins over the phone's setting, kept in this browser
-  var th = ls("mib-theme"); if (th) document.documentElement.setAttribute("data-theme", th);
+  // the theme: dark unless the viewer chose light (kept in this browser)
+  document.documentElement.setAttribute("data-theme", ls("mib-theme") === "light" ? "light" : "dark");
+  var fr = ls("mib-lang") === "fr", L = function (en, f) { return fr ? f : en; };   // the bar and the pane have their own French
   if (!document.querySelector('link[href*="fonts.googleapis.com/css2?family=Archivo"]')) {
     var f = document.createElement("link"); f.rel = "stylesheet";
     f.href = "https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap";
@@ -50,41 +55,44 @@
     ".mb-who{display:grid;gap:6px;max-height:220px;overflow:auto}.mb-who div{display:flex;align-items:center;gap:8px}.mb-who b{font-size:18px}.mb-who small{color:var(--mb-muted);margin-left:auto}",
     ".mb-note{font-size:13px;color:var(--mb-muted)}",
     "body.playing .mibbar,body.playing .mb-pane{display:none}",
+    // Google's translator, used inside the page: none of its own bars, logos, pop-ups or highlights
+    "body{top:0 !important}.goog-te-banner-frame,iframe.skiptranslate,.skiptranslate>iframe,#goog-gt-tt,#goog-gt-vt,.goog-te-balloon-frame,.goog-tooltip,.goog-te-spinner-pos,.goog-te-gadget,#google_translate_element,.goog-logo-link,.VIpgJd-ZVi9od-ORHb-OEVmcd,.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,.VIpgJd-ZVi9od-xl07Ob-OEVmcd,.VIpgJd-yAWNEb-L7lbkb{display:none !important;visibility:hidden !important}",
+    "font{background:none !important;box-shadow:none !important}.VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q{background:none !important;box-shadow:none !important}",
     "@media (max-width:640px){.mibbar .mb-me span{display:none}.mibbar .mb-me{padding-right:8px}}",
   ].join("\n");
   document.head.appendChild(css);
   var H = home ? "" : "/";
-  var links = [["today", "Today", H + (home ? "#today" : "")], ["news", "News", H + "#news"], ["money", "Money", H + "#money"], ["calendar", "Calendar", H + "#calendar"],
-    ["dives", "Deep dive", H + "#dives"], ["week", "The Week", "/weekly.html"], ["archive", "Archive", "/archive/"], ["arcade", "Arcade", "/arcade/"], ["lounge", "Lounge · chat & play", H + "#lounge"]];
-  var bar = document.createElement("div"); bar.className = "mibbar";
-  bar.innerHTML = '<div class="mb-in"><a class="mb-logo" href="/" aria-label="MIB Terminal, home">MIB<i></i></a><nav aria-label="Site">'
+  var links = [["today", L("Today", "Aujourd'hui"), H + (home ? "#today" : "")], ["news", L("News", "Actus"), H + "#news"], ["money", L("Money", "Marchés"), H + "#money"], ["calendar", L("Calendar", "Agenda"), H + "#calendar"],
+    ["dives", L("Deep dive", "Analyses"), H + "#dives"], ["week", L("The Week", "La semaine"), "/weekly.html"], ["archive", L("Archive", "Archives"), "/archive/"], ["arcade", "Arcade", "/arcade/"], ["lounge", L("Lounge · chat & play", "Lounge · chat & jeux"), H + "#lounge"]];
+  var bar = document.createElement("div"); bar.className = "mibbar notranslate"; bar.setAttribute("translate", "no");
+  bar.innerHTML = '<div class="mb-in"><a class="mb-logo notranslate" translate="no" href="/" aria-label="MIB Terminal, home">MIB<i></i></a><nav aria-label="Site">'
     + links.map(function (l) { return '<a href="' + (l[2] || "/") + '" data-k="' + l[0] + '"' + (l[0] === "lounge" ? ' class="go"' : l[0] === active ? ' class="on"' : "") + ">" + l[1] + "</a>"; }).join("")
-    + '</nav><button class="mb-me" type="button" aria-haspopup="dialog" aria-label="Your name, who is online, settings"><b></b><span></span><i></i></button></div>';
+    + '</nav><button class="mb-me notranslate" translate="no" type="button" aria-haspopup="dialog" aria-label="Your name, who is online, settings"><b></b><span></span><i></i></button></div>';
   if (me && me.parentNode) me.parentNode.insertBefore(bar, me); else document.body.insertBefore(bar, document.body.firstChild);
 
   // ---- you: name, avatar; settings; who is online
-  var pane = document.createElement("div"); pane.className = "mb-pane"; pane.hidden = true; pane.setAttribute("role", "dialog"); pane.setAttribute("aria-label", "You and who is online");
+  var pane = document.createElement("div"); pane.className = "mb-pane notranslate"; pane.setAttribute("translate", "no"); pane.hidden = true; pane.setAttribute("role", "dialog"); pane.setAttribute("aria-label", "You and who is online");
   document.body.appendChild(pane);
   var name = function () { return ls("arcade-name"); }, av = function () { var i = +ls("mib-avatar"); return isNaN(i) || i < 0 || i >= AV.length ? -1 : i; };
   var cid = ls("arcade-cid"); if (!cid) { cid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); ls("arcade-cid", cid); }
   var who = [], online = 0, deferred = null;
   var meBtn = bar.querySelector(".mb-me");
-  var paintMe = function () { meBtn.querySelector("b").textContent = av() >= 0 ? AV[av()] : "👤"; meBtn.querySelector("span").textContent = name() || "Pick a name"; meBtn.querySelector("i").textContent = online ? "● " + online : ""; };
+  var paintMe = function () { meBtn.querySelector("b").textContent = av() >= 0 ? AV[av()] : "👤"; meBtn.querySelector("span").textContent = name() || L("Pick a name", "Choisis un pseudo"); meBtn.querySelector("i").textContent = online ? "● " + online : ""; };
   var dark = function () { var t = document.documentElement.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
   var paintPane = function () {
     var a = av();
-    pane.innerHTML = '<h4>You</h4><input id="mbName" maxlength="16" placeholder="Pick a name (a nickname, not your real name)" value="' + esc(name()) + '">'
-      + '<div class="mb-av">' + AV.map(function (e, i) { return '<button type="button" data-av="' + i + '"' + (i === a ? ' class="on"' : "") + ' aria-label="avatar ' + e + '">' + e + "</button>"; }).join("") + "</div>"
-      + '<div class="mb-note">Your name and avatar are used in the chat, the arcade and the scoreboards. Kept in this browser only.</div>'
-      + "<h4>Online now · " + online + "</h4>"
-      + '<div class="mb-who">' + (who.length ? who.map(function (w) { return "<div><b>" + esc(AV[w.a] || "👤") + "</b><span>" + esc(w.n) + "</span><small>" + esc(w.p || "") + "</small></div>"; }).join("") : '<span class="mb-note">Just you for now.</span>') + "</div>"
-      + '<div class="mb-row"><a class="mb-btn pri" href="/arcade/">Play</a><a class="mb-btn" href="/#lounge">Chat</a></div>'
-      + "<h4>Settings</h4>"
-      + '<div class="mb-row"><button class="mb-btn" type="button" data-act="theme">' + (dark() ? "☀ Light mode" : "☾ Dark mode") + '</button>'
-      + '<a class="mb-btn" href="https://translate.google.com/translate?sl=en&tl=fr&u=' + encodeURIComponent(location.href) + '" rel="noopener">🇫🇷 Français</a></div>'
-      + '<div class="mb-row"><button class="mb-btn" type="button" data-act="install">📲 Add to home screen</button><button class="mb-btn" type="button" data-act="share">↗ Share with a friend</button></div>'
+    pane.innerHTML = "<h4>" + L("You", "Toi") + '</h4><input id="mbName" maxlength="16" placeholder="' + L("Pick a name (a nickname, not your real name)", "Choisis un pseudo (pas ton vrai nom)") + '" value="' + esc(name()) + '">'
+      + '<div class="mb-av notranslate" translate="no">' + AV.map(function (e, i) { return '<button type="button" data-av="' + i + '"' + (i === a ? ' class="on"' : "") + ' aria-label="avatar ' + e + '">' + e + "</button>"; }).join("") + "</div>"
+      + '<div class="mb-note">' + L("Your name and avatar are used in the chat, the arcade and the scoreboards. Kept in this browser only.", "Ton pseudo et ton avatar servent dans le chat, l'arcade et les classements. Gardés dans ce navigateur seulement.") + "</div>"
+      + "<h4>" + L("Online now", "En ligne") + " · " + online + "</h4>"
+      + '<div class="mb-who">' + (who.length ? who.map(function (w) { return "<div><b>" + esc(AV[w.a] || "👤") + '</b><span class="notranslate" translate="no">' + esc(w.n) + "</span><small>" + esc((fr ? { today: "accueil", week: "la semaine", archive: "archives", arcade: "arcade", page: "le site" } : { today: "home", week: "the week", archive: "archive", arcade: "arcade", page: "reading" })[w.p] || "") + "</small></div>"; }).join("") : '<span class="mb-note">' + L("Just you for now.", "Rien que toi pour l'instant.") + "</span>") + (who.length && online > who.length ? '<span class="mb-note">' + L("+ ", "+ ") + (online - who.length) + L(online - who.length > 1 ? " visitors without a name" : " visitor without a name", online - who.length > 1 ? " visiteurs sans pseudo" : " visiteur sans pseudo") + "</span>" : "") + "</div>"
+      + '<div class="mb-row"><a class="mb-btn pri" href="/arcade/">' + L("Play", "Jouer") + '</a><a class="mb-btn" href="/#lounge">Chat</a></div>'
+      + "<h4>" + L("Settings", "Réglages") + "</h4>"
+      + '<div class="mb-row"><button class="mb-btn" type="button" data-act="theme">' + (dark() ? L("☀ Light mode", "☀ Mode clair") : L("☾ Dark mode", "☾ Mode sombre")) + '</button>'
+      + '<button class="mb-btn notranslate" translate="no" type="button" data-act="lang">' + (fr ? "🇬🇧 English" : "🇫🇷 Français") + "</button></div>"
+      + '<div class="mb-row"><button class="mb-btn" type="button" data-act="install">' + L("📲 Add to home screen", "📲 Sur l'écran d'accueil") + '</button><button class="mb-btn" type="button" data-act="share">' + L("↗ Share with a friend", "↗ Partager avec un ami") + "</button></div>"
       + '<div class="mb-note" id="mbMsg"></div>'
-      + '<div class="mb-row"><a class="mb-btn" href="/privacy.html">Privacy</a></div>';
+      + '<div class="mb-row"><a class="mb-btn" href="/privacy.html">' + L("Privacy", "Confidentialité") + "</a></div>";
   };
   meBtn.addEventListener("click", function (e) { e.stopPropagation(); pane.hidden = !pane.hidden; if (!pane.hidden) { paintPane(); var n = pane.querySelector("#mbName"); if (!name()) n.focus(); } });
   document.addEventListener("click", function (e) { if (!pane.hidden && !pane.contains(e.target) && e.target !== meBtn) pane.hidden = true; });
@@ -93,25 +101,45 @@
   pane.addEventListener("change", function (e) {
     if (e.target.id !== "mbName") return;
     var n = e.target.value.replace(/[^\p{L}\p{N} _.\-]/gu, "").trim().slice(0, 16);
-    ls("arcade-name", n || null); e.target.value = n; paintMe(); hello(); say(n ? "Saved." : "Name removed.");
+    ls("arcade-name", n || null); e.target.value = n; paintMe(); hello(); say(n ? L("Saved.", "Enregistré.") : L("Name removed.", "Pseudo effacé."));
     window.dispatchEvent(new CustomEvent("mib-me"));
   });
   pane.addEventListener("click", function (e) {
     var b = e.target.closest("[data-av],[data-act]"); if (!b) return;
     if (b.dataset.av !== undefined) { ls("mib-avatar", b.dataset.av); paintMe(); paintPane(); hello(); window.dispatchEvent(new CustomEvent("mib-me")); return; }
     var act = b.dataset.act;
+    if (act === "lang") {
+      if (fr) { ls("mib-lang", null); clearGt(); location.reload(); return; }
+      ls("mib-lang", "fr"); location.reload(); return;
+    }
     if (act === "theme") { var t = dark() ? "light" : "dark"; document.documentElement.setAttribute("data-theme", t); ls("mib-theme", t); paintPane(); }
     if (act === "install") {
       if (deferred) { deferred.prompt(); deferred = null; return; }
-      say(/iPhone|iPad/.test(navigator.userAgent) ? "On iPhone: tap Share ⬆︎ at the bottom of Safari, then “Add to Home Screen”." : "In your browser's menu (⋮), choose “Install app” or “Add to Home screen”.");
+      say(/iPhone|iPad/.test(navigator.userAgent) ? L("On iPhone: tap Share ⬆︎ at the bottom of Safari, then “Add to Home Screen”.", "Sur iPhone : touche Partager ⬆︎ en bas de Safari, puis « Sur l'écran d'accueil ».") : L("In your browser's menu (⋮), choose “Install app” or “Add to Home screen”.", "Dans le menu du navigateur (⋮), choisis « Installer l'application » ou « Ajouter à l'écran d'accueil »."));
     }
     if (act === "share") {
       var d = { title: "MIB Terminal", text: "The market in 3 minutes, then chat and play together", url: "https://mibterminal.com/" };
       if (navigator.share) navigator.share(d).catch(function () {});
-      else if (navigator.clipboard) navigator.clipboard.writeText(d.url).then(function () { say("Link copied: send it to a friend."); }, function () { say(d.url); });
+      else if (navigator.clipboard) navigator.clipboard.writeText(d.url).then(function () { say(L("Link copied: send it to a friend.", "Lien copié : envoie-le à un ami.")); }, function () { say(d.url); });
       else say(d.url);
     }
   });
+  // ---- French: Google's translator inside this page, started only when the viewer asks for it (until then Google sees
+  // nothing). The language is kept in this browser; English clears it and reloads the original page.
+  var clearGt = function () { var x = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"; document.cookie = x; document.cookie = x + "; domain=" + location.hostname; document.cookie = x + "; domain=." + location.hostname.replace(/^www\./, ""); };
+  var pickFr = function (n) {
+    var c = document.querySelector(".goog-te-combo");
+    if (!c || ![].some.call(c.options, function (o) { return o.value === "fr"; })) { if (n < 75) setTimeout(function () { pickFr(n + 1); }, 200); return; }
+    if (c.value !== "fr") { c.value = "fr"; c.dispatchEvent(new Event("change")); }
+  };
+  var translate = function () {
+    if (window.google && google.translate && google.translate.TranslateElement) { pickFr(0); return; }
+    if (document.getElementById("google_translate_element")) return;
+    var box = document.createElement("div"); box.id = "google_translate_element"; document.body.appendChild(box);
+    window.mibTranslate = function () { try { new google.translate.TranslateElement({ pageLanguage: "en", includedLanguages: "fr", autoDisplay: false }, "google_translate_element"); } catch (e) { return; } pickFr(0); };
+    var sc = document.createElement("script"); sc.src = "https://translate.google.com/translate_a/element.js?cb=mibTranslate"; sc.async = true; document.head.appendChild(sc);
+  };
+  if (fr) translate();
   addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; });
 
   // ---- presence: one light line to the chat server; it counts this visit (no cookie, nothing personal) and
