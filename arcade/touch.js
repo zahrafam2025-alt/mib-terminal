@@ -17,14 +17,19 @@
 .tp-knob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.45)}`;
     document.head.appendChild(s);
   };
+  const RELEASE = [];
+  T.release = () => { for (const f of RELEASE) { try { f(); } catch (e) {} } };
+  addEventListener("blur", () => T.release()); document.addEventListener("visibilitychange", () => { if (document.hidden) T.release(); });
   T.button = (label, pos, size, down, up, parent) => {
     T.css();
     const b = document.createElement("div"); b.className = "tp-b"; b.textContent = label;
     Object.assign(b.style, { width: size + "px", height: size + "px" }, Object.fromEntries(Object.entries(pos).map(([k, v]) => [k, typeof v === "number" ? "calc(" + v + "px + env(safe-area-inset-" + k + ", 0px))" : v])));
     let held = null;
-    b.addEventListener("pointerdown", (e) => { e.preventDefault(); if (held !== null) return; held = e.pointerId; try { b.setPointerCapture(e.pointerId); } catch (er) {} b.classList.add("on"); if (down) down(e); });
+    const end0 = () => { if (held === null) return; held = null; b.classList.remove("on"); if (up) up({}); };
+    b.addEventListener("pointerdown", (e) => { e.preventDefault(); if (held !== null) end0(); held = e.pointerId; try { b.setPointerCapture(e.pointerId); } catch (er) {} b.classList.add("on"); if (down) down(e); });
     const end = (e) => { if (held !== e.pointerId) return; held = null; b.classList.remove("on"); if (up) up(e); };
-    b.addEventListener("pointerup", end); b.addEventListener("pointercancel", end);
+    b.addEventListener("pointerup", end); b.addEventListener("pointercancel", end); b.addEventListener("lostpointercapture", end);
+    RELEASE.push(end0);
     (parent || document.body).appendChild(b);
     return b;
   };
@@ -33,12 +38,14 @@
     const ring = document.createElement("div"); ring.className = "tp-stick"; const knob = document.createElement("div"); knob.className = "tp-knob";
     ring.appendChild(knob); document.body.appendChild(ring);
     let id = null, ox = 0, oy = 0;
-    zone.addEventListener("pointerdown", (e) => { if (id !== null) return; e.preventDefault(); id = e.pointerId; ox = e.clientX; oy = e.clientY; try { zone.setPointerCapture(id); } catch (er) {}
+    const stop0 = () => { if (id === null) return; id = null; ring.style.display = "none"; knob.style.left = knob.style.top = "35px"; end(); };
+    RELEASE.push(stop0);
+    zone.addEventListener("pointerdown", (e) => { if (id !== null) stop0(); e.preventDefault(); id = e.pointerId; ox = e.clientX; oy = e.clientY; try { zone.setPointerCapture(id); } catch (er) {}
       Object.assign(ring.style, { left: ox + "px", top: oy + "px", display: "block" }); move(0, 0); });
     zone.addEventListener("pointermove", (e) => { if (e.pointerId !== id) return; let dx = (e.clientX - ox) / 50, dy = (e.clientY - oy) / 50; const m = Math.hypot(dx, dy); if (m > 1) { dx /= m; dy /= m; }
       knob.style.left = 35 + dx * 35 + "px"; knob.style.top = 35 + dy * 35 + "px"; move(dx, dy); });
     const stop = (e) => { if (e.pointerId !== id) return; id = null; ring.style.display = "none"; knob.style.left = knob.style.top = "35px"; end(); };
-    zone.addEventListener("pointerup", stop); zone.addEventListener("pointercancel", stop);
+    zone.addEventListener("pointerup", stop); zone.addEventListener("pointercancel", stop); zone.addEventListener("lostpointercapture", stop);
   };
   T.drag = (zone, onMove, onTap) => {
     const fingers = new Map();

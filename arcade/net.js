@@ -69,7 +69,7 @@ const Net = {
     connect();
     Net.conns.add(c);
     document.addEventListener("visibilitychange", () => { if (!document.hidden && c.lost && !c.quit && c.ws && c.ws.readyState > 1) connect(); });
-    c.close = () => { c.quit = true; Net.conns.delete(c); try { c.ws.close(); } catch (e) {} };
+    c.close = () => { c.quit = true; Net.conns.delete(c); try { if (c.ws.readyState === 1) c.ws.send("#bye"); } catch (e) {} try { c.ws.close(); } catch (e) {} };
     return c;
   },
   host(game, name, on) {

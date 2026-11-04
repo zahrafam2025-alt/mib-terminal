@@ -90,11 +90,12 @@ function Goal(online = null) {
       }
     }
     const nearWall = ball.y < Y0 + 14 || ball.y > Y1 - 14 || ((ball.x < X0 + 14 || ball.x > X1 - 14) && Math.abs(ball.y - MY) > MOUTH);
-    stuckT = nearWall && Math.hypot(ball.vx, ball.vy) < 60 ? stuckT + dt : 0;
+    stuckT = Math.hypot(ball.vx, ball.vy) < 60 ? stuckT + dt * (nearWall ? 1 : 0.72) : 0;
     if (stuckT > 2.5) {
-      stuckT = 0; const dx = 240 - ball.x, dy = MY - ball.y, d = Math.hypot(dx, dy) || 1;
-      ball.x += dx / d * 14; ball.y += dy / d * 14; ball.vx = dx / d * 170; ball.vy = dy / d * 170;
-      g.msg = "THROW-IN"; tone(660, 0.08, "square", 0.05);
+      stuckT = 0; const a = Math.atan2(MY - ball.y, 240 - ball.x) + (Math.random() - 0.5) * 2.2, sp = 190 + Math.random() * 110;
+      ball.x += Math.cos(a) * 16; ball.y += Math.sin(a) * 16; ball.vx = Math.cos(a) * sp; ball.vy = Math.sin(a) * sp;
+      for (const p of P) if (Math.hypot(p.x - ball.x, p.y - ball.y) < PR + BR + 10) { p.x -= Math.cos(a) * 12; p.y -= Math.sin(a) * 12; }
+      g.msg = nearWall ? "THROW-IN" : "LOOSE BALL!"; tone(660, 0.08, "square", 0.05);
     }
     ball.x += ball.vx * dt; ball.y += ball.vy * dt;
     const fr = Math.exp(-1.15 * dt); ball.vx *= fr; ball.vy *= fr;
@@ -200,7 +201,7 @@ function Goal(online = null) {
     txt(`RED ${g.s[0]}`, 180, 26, 13, "#fff", "center"); txt(`${g.s[1]} BLUE`, 300, 26, 13, "#fff", "center");
     const left = Math.max(0, TIME - g.t); txt(`${Math.floor(left / 60)}:${String(Math.floor(left % 60)).padStart(2, "0")}`, 240, 26, 13, "#fde047", "center");
     if (g.pause > 0 && !g.over) { txt(g.msg, 241, 121, 20, "rgba(0,0,0,.6)", "center"); txt(g.msg, 240, 120, 20, "#fde047", "center"); }
-    if (g.over && g.result) banner(["FULL TIME", ...g.result], online ? "Esc: back to the online room" : "Space play again · Esc menu");
+    if (g.over && g.result) banner(["FULL TIME", ...g.result], online ? (window.againLine ? againLine() : "Tap to play again") : "Space play again · Esc menu");
   };
   g.dbg = () => ({ ball: [ball.x, ball.y, ball.vx, ball.vy].map((v) => Math.round(v)), p: P.map((p) => [Math.round(p.x), Math.round(p.y)]) });
   return g;

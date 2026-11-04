@@ -5,11 +5,16 @@ function Tennis(online = null) {
   const COL = ["#f97316", "#22d3ee"], NAMES = ["ORANGE", "BLUE"];
   const host = !online || online.host, me = online ? online.me : 0;
   const humans = online ? online.players.slice(0, 4) : [{ id: 0, name: (window.ARC && ARC.getName()) || "YOU" }];
+  let OPT = {}; try { OPT = (online && online.opt) || JSON.parse(localStorage.getItem("arcade-sheet-tennis") || "{}"); } catch (e) {}
+  const SIZE = humans.length > 2 || OPT.size !== "1" ? 2 : 1, N = SIZE * 2;
+  const seats = new Array(N).fill(null);
+  if (OPT.side === "together" && humans.length <= SIZE) humans.forEach((h, k) => { seats[k * 2] = h; });
+  else humans.slice(0, N).forEach((h, k) => { seats[k] = h; });
   const BOTN = ["Rafa", "Serena", "Roger", "Venus", "Novak", "Andy"];
   const ITEMS = ["🍌", "🔥", "🍄", "❄️", "💣", "🌀"];
-  const P = [0, 1, 2, 3].map((i) => ({ i, team: i % 2, human: i < humans.length ? humans[i] : null, name: i < humans.length ? humans[i].name : BOTN[i] + " (bot)",
+  const P = [...Array(N).keys()].map((i) => ({ i, team: i % 2, human: seats[i], name: seats[i] ? seats[i].name : BOTN[i] + " (bot)",
     x: 0, y: 0, vx: 0, vy: 0, fx: i % 2 ? -1 : 1, fy: 0, in: { mx: 0, my: 0, k: 0, b: 0 }, lastK: 0, lastB: 0, swingT: 0, swingA: 0,
-    item: -1, charged: "", giantT: 0, frozenT: 0, dazed: 0, spin: 0, diveT: 0, downT: 0, err: i < humans.length ? 0 : 45 }));
+    item: -1, charged: "", giantT: 0, frozenT: 0, dazed: 0, spin: 0, diveT: 0, downT: 0, err: seats[i] ? 0 : 45 }));
   const ball = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, last: -1, bounces: 0, fire: false, bomb: false, curve: 0, t: 0, held: true };
   const boxes = [], peels = [], fx = [];
   const g = { id: "tennis", score: 0, over: false, s: [0, 0], pause: 1.2, msg: "FIRST TO 7!", flash: "", flashT: 0, result: null, sendT: 0, net: null,
@@ -40,11 +45,11 @@ function Tennis(online = null) {
     let tx = NX + side * (25 + deep * (X1 - NX - 35)), ty;
     if (p.human && Math.abs(p.in.my) > 0.3) ty = p.in.my < 0 ? Y0 + 22 : Y1 - 22;
     else { const oy = opp.reduce((a, q) => a + q.y, 0) / opp.length; ty = oy > MY ? Y0 + 20 + Math.random() * 60 : Y1 - 20 - Math.random() * 60; }
-    const reach = p.giantT > 0 ? 30 : 20, q = 1 - Math.min(1, Math.hypot(ball.x - p.x, ball.y - p.y) / reach);
+    const reach = p.giantT > 0 ? 38 : 27, q = 1 - Math.min(1, Math.hypot(ball.x - p.x, ball.y - p.y) / reach);
     if (!serve && q < 0.25) { tx += (Math.random() - 0.3) * 70 * side; ty += (Math.random() - 0.5) * 90; }
     if (!p.human) { tx += (Math.random() - 0.5) * p.err; ty += (Math.random() - 0.5) * p.err; }
     const smash = !serve && ball.z > 17, kind = p.charged; p.charged = "";
-    let sp = (serve ? 250 : 235) + Math.min(90, rally * 7) + (smash ? 150 : 0);
+    let sp = (serve ? 230 : 205) + Math.min(80, rally * 6) + (smash ? 140 : 0);
     if (kind === "fire") sp = 440;
     if (ball.fire && !serve) { sp *= 0.55; p.dazed = 0.9; p.spin = 1; p.vx -= side * 160; say("BURNT!"); boom(p.x, p.y, "#f97316", 10); }
     const dist = Math.hypot(tx - ball.x, ty - ball.y), T = Math.max(0.35, dist / sp);
@@ -64,7 +69,7 @@ function Tennis(online = null) {
     if (team === (mine() || P[0]).team) [523, 659, 784].forEach((f, i) => tone(f, 0.12, "square", 0.05, 0, i * 0.07)); else [330, 262].forEach((f, i) => tone(f, 0.16, "square", 0.05, 0, i * 0.1));
     noise(0.6, 0.05, 700);
     if (g.s[team] >= WIN) { end(); return; }
-    const n = g.s[0] + g.s[1]; server = [0, 1, 2, 3][Math.floor(n / 2) % 4];
+    const n = g.s[0] + g.s[1]; server = Math.floor(n / 2) % N;
     setUp();
   }
   function end() {
@@ -95,7 +100,8 @@ function Tennis(online = null) {
     let tx = p.team ? 350 : 130, ty = MY + (p.i > 1 ? 40 : -40);
     if (coming) {
       const [lx, ly] = landing(p.team);
-      const mine2 = Math.hypot(lx - p.x, ly - p.y) <= Math.hypot(lx - mate.x, ly - mate.y) || (mate.human && mate.downT > 0);
+      const dMe = Math.hypot(lx - p.x, ly - p.y), dMate = mate ? Math.hypot(lx - mate.x, ly - mate.y) : 1e9;
+      const mine2 = !mate || (mate.human ? dMe + 70 < dMate || mate.downT > 0 || mate.dazed > 0 : dMe <= dMate);
       if (mine2) { tx = lx + (p.team ? 7 : -7); ty = ly; }
       if (p.item >= 0 && Math.random() < 0.004) useItem(p);
       const d = Math.hypot(ball.x - p.x, ball.y - p.y);
@@ -121,7 +127,7 @@ function Tennis(online = null) {
       }
       p.giantT = Math.max(0, p.giantT - dt); p.frozenT = Math.max(0, p.frozenT - dt); p.dazed = Math.max(0, p.dazed - dt); p.downT = Math.max(0, p.downT - dt);
       p.swingT = Math.max(0, p.swingT - dt); p.spin = Math.max(0, p.spin - dt);
-      if (p.in.k > p.lastK) { p.lastK = p.in.k; if (!p.downT && !p.dazed) { p.swingT = 0.32; p.swingA = 1; } }
+      if (p.in.k > p.lastK) { p.lastK = p.in.k; if (!p.downT && !p.dazed) { p.swingT = 0.42; p.swingA = 1; } }
       if (p.in.b > p.lastB) {
         p.lastB = p.in.b;
         if (p.item >= 0) useItem(p);
@@ -136,7 +142,7 @@ function Tennis(online = null) {
         let mx = p.in.mx, my = p.in.my;
         if (p.human && Math.hypot(mx, my) < 0.2 && !ball.held && ball.last !== p.team) {
           const [lx, ly] = landing(p.team), mate = P.find((q) => q !== p && q.team === p.team);
-          if (Math.hypot(lx - p.x, ly - p.y) <= Math.hypot(lx - mate.x, ly - mate.y) + 10) { const dx = lx + (p.team ? 7 : -7) - p.x, dy = ly - p.y, L = Math.hypot(dx, dy); if (L > 4) { mx = dx / L * 0.85; my = dy / L * 0.85; } }
+          if (!mate || mate.human === null || Math.hypot(lx - p.x, ly - p.y) <= Math.hypot(lx - mate.x, ly - mate.y) + 10) { const dx = lx + (p.team ? 7 : -7) - p.x, dy = ly - p.y, L = Math.hypot(dx, dy); if (L > 4) { mx = dx / L * 0.85; my = dy / L * 0.85; } }
         }
         const L = Math.hypot(mx, my), sp = (p.human ? 135 : 118) * (p.frozenT > 0 ? 0.4 : 1);
         const wx = L > 0.05 ? mx / Math.max(1, L) * sp : 0, wy = L > 0.05 ? my / Math.max(1, L) * sp : 0;
@@ -147,8 +153,8 @@ function Tennis(online = null) {
       if (p.team === 0 && p.x > NX - PR) p.x = NX - PR; if (p.team === 1 && p.x < NX + PR) p.x = NX + PR;
       for (const pl of peels) if (!pl.gone && Math.hypot(pl.x - p.x, pl.y - p.y) < 10) { pl.gone = true; p.dazed = 1.1; p.spin = 1.1; say(`${p.name.replace(" (bot)", "")} SLIPPED!`, 0.9); tone(700, 0.25, "sawtooth", 0.05, -500); }
       for (const b of boxes) if (!b.gone && p.item < 0 && Math.hypot(b.x - p.x, b.y - p.y) < 14) { b.gone = true; giveItem(p); }
-      const reach = (p.giantT > 0 ? 30 : 20) + (p.diveT > 0 ? 8 : 0);
-      if (p.swingT > 0 && !ball.held && ball.last !== p.team && ball.z < (p.giantT > 0 ? 36 : 26) && Math.hypot(ball.x - p.x, ball.y - p.y) < reach && (p.team ? ball.x > NX - 4 : ball.x < NX + 4)) shoot(p);
+      const reach = (p.giantT > 0 ? 38 : 27) + (p.diveT > 0 ? 8 : 0);
+      if (p.swingT > 0 && !ball.held && ball.last !== p.team && ball.z < (p.giantT > 0 ? 42 : 32) && Math.hypot(ball.x - p.x, ball.y - p.y) < reach && (p.team ? ball.x > NX - 4 : ball.x < NX + 4)) shoot(p);
     }
     for (let i = peels.length - 1; i >= 0; i--) if (peels[i].gone) peels.splice(i, 1);
     for (let i = boxes.length - 1; i >= 0; i--) if (boxes[i].gone) boxes.splice(i, 1);
@@ -276,7 +282,7 @@ function Tennis(online = null) {
     if (ball.held && P[server].human && P[server].human.id === me && !g.over && g.pause <= 0) txt(window.TouchPad && TouchPad.on ? "A: SERVE" : "SPACE: SERVE", 240, 344, 12, "#fde047", "center");
     if (g.flashT > 0) { const s = 1 + (1 - Math.min(1, g.flashT)) * 0.2; txt(g.flash, 241, 61, Math.round(16 * s), "rgba(0,0,0,.6)", "center"); txt(g.flash, 240, 60, Math.round(16 * s), "#fde047", "center"); }
     if (g.pause > 0 && !g.over) { txt(g.msg, 241, 191, 15, "rgba(0,0,0,.6)", "center"); txt(g.msg, 240, 190, 15, "#fde047", "center"); }
-    if (g.over && g.result) banner(["GAME, SET, MATCH", ...g.result], online ? "Esc: back to the online room" : "Space play again · Esc menu");
+    if (g.over && g.result) banner(["GAME, SET, MATCH", ...g.result], online ? (window.againLine ? againLine() : "Tap to play again") : "Space play again · Esc menu");
   };
   g.dbg = () => ({ ball: [ball.x, ball.y, ball.z].map((v) => Math.round(v)), held: ball.held, last: ball.last, rally, s: g.s.slice(), p: P.map((p) => [Math.round(p.x), Math.round(p.y), p.item]) });
   return g;

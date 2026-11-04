@@ -49,10 +49,10 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}
       B buy (in your spawn, start of the round) · 1 2 3 4 or mouse wheel: weapons · R reload · right click scope<br>WASD move · Space jump · C crouch · X hide in a box · Shift walk · Tab scores · H help in game · V announcer · Esc menu</div>
     <div style="margin-top:12px"><a href="/arcade">◀ back to the arcade</a><a href="sfx/CREDITS.txt" class="credlink" style="margin-left:14px">sound credits</a><dialog id="credDlg" style="max-width:min(640px,92vw);max-height:80vh;background:#141827;color:#e5e7eb;border:1px solid #26304a;border-radius:12px;padding:14px"><button type="button" onclick="this.closest('dialog').close()" style="float:right">✕ close</button><pre style="white-space:pre-wrap;font:12px Consolas,monospace;margin:30px 0 0"></pre></dialog><script>document.querySelectorAll(".credlink").forEach(function(a){a.onclick=function(e){e.preventDefault();var d=document.getElementById("credDlg");fetch(a.getAttribute("href")).then(function(r){return r.text()}).then(function(t){d.querySelector("pre").textContent=t;d.showModal()})}})</script></div>
   </div>
-  <div id="pHost" class="hide"><div>Room code (friends join it from the arcade's PLAY ONLINE, or with your invite link):</div><div class="code" id="hCode">····</div><div class="row" style="margin:4px 0"><button id="bShare">SHARE INVITE</button></div>
+  <div id="pHost" class="hide"><div>Room code (friends join it from the arcade's PLAY ONLINE, or with your invite link):</div><div class="code notranslate" translate="no" id="hCode">····</div><div class="row" style="margin:4px 0"><button id="bShare">SHARE INVITE</button></div>
     <div class="list" id="hList"></div><div class="row"><button id="bStart" class="pri">START</button><button id="bHostX">CANCEL</button></div>
     <div class="help">Empty places are filled with bots. Players can only join from your home network.</div></div>
-  <div id="pJoin" class="hide"><div>Games on your network:</div><div class="list" id="jList"></div><div id="jMsg" class="help"></div><div class="row"><button id="bJoinX">BACK</button></div></div>
+  <div id="pJoin" class="hide"><div>Games on your network:</div><div class="list notranslate" translate="no" id="jList"></div><div id="jMsg" class="help"></div><div class="row"><button id="bJoinX">BACK</button></div></div>
   <div id="pPause" class="hide"><div class="row"><button id="bResume" class="pri">RESUME</button><button id="bQuit">LEAVE THE MATCH</button><button id="bFull2">FULL SCREEN</button><button id="bSnd2">SOUND: ON</button></div><div class="help">Click the game to look around again.</div></div>
 </div></div>
 <script>
@@ -1030,7 +1030,7 @@ function myTick(dt) {
     if (wk === "nade") { if (!FX.fired) { FX.fired = true; const d = dirOf(p.yaw, p.pitch + 0.15), o = [p.x, eyeY(p), p.z], v = [d[0] * 15 + p.vx, d[1] * 15 + 2, d[2] * 15 + p.vz]; mode === "guest" ? (OUT.nade = { o, v }) : throwNade(p, o, v); setSlot(p.prim ? 1 : 2); } }
     else if (w && (w.auto || !FX.fired) && p.fT <= 0) {
       const a = p.ammo[wk];
-      if (wk === "knife") { FX.fired = true; p.fT = w.rate; mode === "guest" ? OUT.shots.push({ o: [p.x, eyeY(p), p.z], d: dirOf(p.yaw, p.pitch), w: wk, q: ++SEQ }) : hostFire(p, [p.x, eyeY(p), p.z], dirOf(p.yaw, p.pitch), wk, true); if (mode === "guest") sound("knife"); }
+      if (wk === "knife") { FX.fired = true; if (mode === "guest") { p.fT = w.rate; OUT.shots.push({ o: [p.x, eyeY(p), p.z], d: dirOf(p.yaw, p.pitch), w: wk, q: ++SEQ }); sound("knife"); } else hostFire(p, [p.x, eyeY(p), p.z], dirOf(p.yaw, p.pitch), wk, true); }
       else if (a && a[0] - (mode === "guest" ? pendingShots() : 0) > 0 && p.rT <= 0) {
         FX.fired = true;
         const o = [p.x, eyeY(p), p.z], d = jitter(dirOf(p.yaw, p.pitch + (FX.punch || 0)), spreadOf(p));
