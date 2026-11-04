@@ -339,9 +339,9 @@ function command(o, c) {
     return;
   }
   if (c.k === "age") { const b = G.ents.get(c.id); const cost = AGECOST[pl.age + 1]; if (b && b.o === o && b.t === "TC" && b.done && cost && !pl.aging && afford(pl, cost)) { pay(pl, cost); pl.aging = true; pl.ageT = AGET; b.aging = true; } return; }
-  if (c.k === "demolish") { const b = G.ents.get(c.id); if (!b || b.k !== "b" || b.o !== o) return; const k = BT[b.t].cost || {}; for (const [r, v] of Object.entries(k)) pl.res[r] += Math.floor(v / 4); G.fx.push({ k: "dust", x: b.x + (b.sz || 1) / 2, y: b.y + (b.sz || 1) / 2, t: 0.8, s: 1.6 }); remove(b); if (o === ME) sfx("fall"); return; }
+  if (c.k === "demolish") { const b = G.ents.get(c.id); if (!b || b.k !== "b" || b.o !== o || b.hp < b.mhp) { if (o === ME) sfx("cant"); return; } const k = BT[b.t].cost || {}; for (const [r, v] of Object.entries(k)) pl.res[r] += Math.floor(v / 4); G.fx.push({ k: "dust", x: b.x + (b.sz || 1) / 2, y: b.y + (b.sz || 1) / 2, t: 0.8, s: 1.6 }); remove(b); if (o === ME) sfx("fall"); return; }
   if (c.k === "relocate") {
-    const b = G.ents.get(c.id); if (!b || b.k !== "b" || b.o !== o || !b.done) return;
+    const b = G.ents.get(c.id); if (!b || b.k !== "b" || b.o !== o || !b.done || b.hp < b.mhp) { if (o === ME) sfx("cant"); return; }
     occupy(b, 0); const ok = canPlace(b.t, c.x, c.y, o);
     if (!ok) { occupy(b, b.id); if (o === ME) sfx("cant"); return; }
     b.x = c.x; b.y = c.y; occupy(b, b.id); b.rally = null; if (o === ME) sfx("done");
@@ -1432,8 +1432,9 @@ function buttons() {
   if (b && b.t === "TC" && pl.heroDown) out.push([`Revive ${CIVS[pl.civ].hero.split(" ")[0]}`, "E", { f: 200, g: 150 }, () => order({ k: "revive", id: b.id }), afford(pl, { f: 200, g: 150 }), "your hero, back on his feet"]);
   if (b && b.t === "TC" && pl.age < 3) out.push([`Advance to ${AGES[pl.age + 1]}`, "U", AGECOST[pl.age + 1], () => order({ k: "age", id: b.id }), !pl.aging && afford(pl, AGECOST[pl.age + 1]), pl.aging ? "advancing..." : ""]);
   if (sel.some((e) => e.k === "u")) out.push(["Stop", "X", null, () => order({ k: "stop", ids: sel.map((e) => e.id) }), true, ""]);
-  if (b && !BT[b.t].wall) out.push(["Move", "M", null, () => { UI.placing = b.t; UI.moving = b.id; }, true, "pick its new place"]);
-  if (b) out.push(["Demolish", "DELETE", null, () => askDemolish(b), true, "asks first · a quarter of the cost back"]);
+  const whole = b && b.hp >= b.mhp;
+  if (b && !BT[b.t].wall) out.push(["Move", "M", null, () => { if (whole) { UI.placing = b.t; UI.moving = b.id; } }, whole, whole ? "pick its new place" : "only at full health"]);
+  if (b) out.push(["Demolish", "DELETE", null, () => { if (whole) askDemolish(b); }, whole, whole ? "asks first · a quarter of the cost back" : "only at full health"]);
   return out;
 }
 function drawUI() {
