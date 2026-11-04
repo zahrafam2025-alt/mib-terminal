@@ -1134,7 +1134,9 @@ function leaveOnline() {
 }
 $o("oLeave").onclick = leaveOnline;
 const adminApi = async (body) => {
-  const r = await fetch((window.ARC ? ARC.url("") : "") + "/api/arcade/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ key: Net.adminKey() }, body)) });
+  if (window.ARC && ARC.ready) await ARC.ready;
+  const send = () => fetch((window.ARC ? ARC.url("") : "") + "/api/arcade/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ key: Net.adminKey() }, body)) });
+  let r; try { r = await send(); } catch (e) { if (window.ARC && ARC.pick) { await ARC.pick(true); r = await send(); } else throw e; }
   const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || "HTTP " + r.status); return d;
 };
 let admTimer = null;
@@ -1158,7 +1160,7 @@ $o("oAdmOut").onclick = () => { try { localStorage.removeItem("arcade-admin"); }
   const q = new URLSearchParams(location.search); if (!q.has("admin")) return;
   history.replaceState(null, "", location.pathname);
   const k = (prompt("Admin key:", "") || "").trim(); if (!k) return;
-  try { localStorage.setItem("arcade-admin", k); await adminApi({ act: "rooms" }); audioStart(); showOnline("oMain"); $o("oAdmBtn").click(); }
+  try { await adminApi({ act: "rooms", key: k }); localStorage.setItem("arcade-admin", k); $o("oAdmBtn").style.display = ""; audioStart(); showOnline("oMain"); $o("oAdmBtn").click(); }
   catch (e) { try { localStorage.removeItem("arcade-admin"); } catch (x) {} alert("Admin: " + e.message); }
 })();
 $o("oShare").onclick = async () => {
