@@ -891,7 +891,7 @@ function drawMenu() {
 }
 const CARD_W = 72, CARD_H = 124, cardAt = (i) => [7 + (i % 6) * 78, 84 + Math.floor(i / 6) * 134];
 function draw() {
-  if (!cur) { if (!(ON && !ON.live && drawWatch())) drawMenu(); }
+  if (!cur) { if (!(ON && !ON.live && drawWatch())) drawMenu(); if (ON && ON.rqAt) { rect(0, H - 26, W, 26, "rgba(0,0,0,.78)"); txt(readyText(), W / 2, H - 9, 11, "#fde047", "center"); } }
   else {
     cur.draw();
     if (ON && ON.live && cur.id !== "spa" && !HOSTED.has(cur.id) && !SHARED.has(cur.id) && (ON.round || ON.players).length > 1) drawSplit();
@@ -924,6 +924,7 @@ cv.addEventListener("click", (e) => {
     else if (cur.over && ON && ON.live) tapAgain();
   }
   if (cur && cur.over && ON && ON.live && !(window.TouchPad && TouchPad.on)) tapAgain();
+  if (!cur && ON && ON.rqAt) { tapReady(); return; }
   if (cur) return;
   const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
   shownGames().forEach((d, i) => { const [gx, gy] = cardAt(i); if (x >= gx && x <= gx + CARD_W && y >= gy && y <= gy + CARD_H) openSheet(d); });
@@ -957,7 +958,7 @@ let ON = null;
     <label>Game<select id="oGame">${ONLINE_GAMES.map(([id, n]) => `<option value="${id}">${n}</option>`).join("")}</select></label>
     <div class="orow"><button id="oHost" class="pri">HOST A GAME</button><button id="oJoin">JOIN A GAME</button><button id="oAdmBtn" style="display:none">ADMIN</button><button id="oClose">CLOSE</button></div></div>
   <div id="oRoom" class="hide"><div>Room code <span class="ocode notranslate" translate="no" id="oCode">····</span></div><div class="help" id="oWhat" style="margin:4px 0"></div><div id="oList"></div>
-    <div class="orow"><button id="oStart" class="pri">START</button><button id="oPlayNow" class="pri" style="display:none">PLAY NOW</button><button id="oShare">SHARE INVITE</button><button id="oLeave">LEAVE</button></div><div class="help" id="oMsg"></div></div>
+    <div class="orow"><button id="oReady" class="pri" style="display:none">TAP TO PLAY</button><button id="oStart" class="pri">START</button><button id="oPlayNow" class="pri" style="display:none">PLAY NOW</button><button id="oShare">SHARE INVITE</button><button id="oLeave">LEAVE</button></div><div class="help" id="oMsg"></div></div>
   <div id="oAdm" class="hide"><div class="ot" style="font-size:14px">ADMIN · every game being played</div><div id="oAdmList" style="min-height:40px"></div>
     <div class="orow"><button id="oAdmBack">BACK</button><button id="oAdmOut">LOG OUT</button></div><div class="help" id="oAdmMsg"></div></div>
   <div id="oJoinP" class="hide"><div>Open games:</div><div id="oRooms" class="notranslate" translate="no" style="min-height:40px"></div><div class="orow"><button id="oBack">BACK</button></div><div class="help" id="oJMsg"></div></div></div>`;
@@ -974,7 +975,7 @@ function hideOnline() { $o("onl").classList.add("hide"); screenEl.focus(); }
 function drawRoom() {
   $o("oCode").textContent = ON.code || "····";
   const g = ONLINE_GAMES.find((x) => x[0] === ON.game);
-  $o("oWhat").textContent = `${g ? g[1] : ""}${ON.host ? " · press START when everyone is in" : " · the host starts the game"}`;
+  $o("oWhat").textContent = `${g ? g[1] : ""}${ON.host ? " · press START: everyone then taps to play" : " · the host starts, then tap to play"}`; drawReady();
   $o("oList").innerHTML = ON.players.map((q) => `<div class="oitem"><span>${String(q.name).replace(/[<>&]/g, "")}${q.id === ON.me ? " (you)" : ""}</span><span class="help" style="margin:0">${q.id === 0 ? "host" : "joined"}${ON.scores.has(q.id) ? " · " + ON.scores.get(q.id).score : ""}</span></div>`).join("");
   $o("oStart").style.display = ON.host ? "" : "none";
 }
@@ -990,21 +991,48 @@ function onlineName() {
   if (!n) n = prompt("Your name (up to 16 letters or digits):", "") || "";
   n = ARC.setName(n) || "Player"; $o("oName").value = n; return n;
 }
-function againFrom(id) {
-  if (!ON || !ON.live) return;
-  (ON.again || (ON.again = new Set())).add(id);
-  if (ON.host) {
-    osend({ t: "againN", n: ON.again.size, of: ON.players.length });
-    if (ON.players.every((q) => ON.again.has(q.id))) { ON.again = new Set(); setTimeout(() => $o("oStart").onclick(), 400); }
-  }
+const READY_WAIT = 30000;
+function readyFrom(id) {
+  if (!ON || !ON.host) return;
+  if (!ON.ready) ON.ready = new Set();
+  ON.ready.add(id); if (!ON.rqT) ON.rqT = Date.now();
+  readyOut(); readyCheck();
 }
-function tapAgain() { if (!ON || !ON.live || !cur || !cur.over || (ON.again && ON.again.has(ON.me))) return; if (ON.host) againFrom(ON.me); else { (ON.again || (ON.again = new Set())).add(ON.me); osend({ t: "again" }); } }
+function readyOut() { osend({ t: "rq", ids: ON.rqT ? [...ON.ready] : [], left: ON.rqT ? Math.max(0, READY_WAIT - (Date.now() - ON.rqT)) : 0 }); ON.rq = { ids: ON.rqT ? [...ON.ready] : [], left: ON.rqT ? Math.max(0, READY_WAIT - (Date.now() - ON.rqT)) : 0 }; ON.rqAt = ON.rqT; drawReady(); }
+function readyCheck() {
+  if (!ON || !ON.host || !ON.rqT) return;
+  const all = ON.players.every((q) => ON.ready.has(q.id));
+  if (!all && Date.now() - ON.rqT < READY_WAIT) return;
+  const players = ON.players.filter((q) => ON.ready.has(q.id));
+  ON.ready = new Set(); ON.rqT = 0; readyOut();
+  if (players.length) goRound(players);
+}
+setInterval(() => { if (ON && ON.host && ON.rqT) { readyCheck(); if (ON.rqT) readyOut(); } }, 1000);
+function tapReady() {
+  if (!ON || (ON.rq && ON.rq.ids.includes(ON.me) && ON.rqAt)) return;
+  if (ON.live && cur && !cur.over) return;
+  if (ON.host) readyFrom(ON.me); else { osend({ t: "ready" }); ON.rq = { ids: [...((ON.rq && ON.rq.ids) || []), ON.me], left: 0 }; ON.rqAt = ON.rqAt || Date.now(); drawReady(); }
+}
+const tapAgain = tapReady;
+function readyText() {
+  if (!ON) return "";
+  const ids = (ON.rq && ON.rqAt && ON.rq.ids) || [], waiting = ON.players.filter((q) => !ids.includes(q.id));
+  if (!ON.rqAt) return "";
+  const secs = Math.max(0, Math.ceil(((ON.rq && ON.rq.left) || READY_WAIT) / 1000));
+  return (ids.includes(ON.me) ? "Ready ✔ " : "Tap to play · ") + (waiting.length ? "waiting for " + waiting.map((q) => q.name).join(", ") + ` · ${secs} s` : "starting…");
+}
+function drawReady() {
+  const b = document.getElementById("oReady"); if (!b) return;
+  const on = ON && ON.rqAt && !(ON.live && cur && !cur.over), mine = on && ON.rq && ON.rq.ids.includes(ON.me);
+  b.style.display = on ? "" : "none"; b.textContent = mine ? "READY ✔" : "TAP TO PLAY"; b.disabled = !!mine;
+  $o("oMsg").textContent = on ? readyText() : $o("oMsg").textContent;
+}
 function onMsg(m, from) {
   if (!ON) return;
   if (ON.host && from) {
     if (m.t === "in") { if (ON.live && cur && cur.netInput) cur.netInput(from, m); return; }
     if (m.t === "late") { const q = ON.players.find((x) => x.id === from); if (q && ON.live) lateJoin(q); return; }
-    if (m.t === "again") { againFrom(from); return; }
+    if (m.t === "again" || m.t === "ready") { readyFrom(from); return; }
     if (m.t === "watch") { if (ON.live) ON.watchT = Date.now(); if (!m.d) ON.net.send("*", Object.assign({}, m, { from })); return; }
     if (m.t === "st" || m.t === "fr" || m.t === "atk") { if (!m.d) ON.net.send("*", Object.assign({}, m, { from })); }
     else return;
@@ -1015,8 +1043,8 @@ function onMsg(m, from) {
   else if (m.t === "slot") { if (ON.live && cur && cur.setSlot) cur.setSlot(m.i, m.id, m.name); }
   else if (m.t === "addcar") { if (ON.live && cur && cur.addRemote && m.id !== ON.me) cur.addRemote({ id: m.id, name: m.name }); }
   else if (m.t === "wait") { $o("oMsg").textContent = "A round is being played: you are in for the next one (the host presses START)."; }
-  else if (m.t === "againN") { ON.againN = m; }
-  else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); }
+  else if (m.t === "rq") { ON.rq = m; ON.rqAt = m.ids.length ? ON.rqAt || Date.now() : 0; drawReady(); if (m.ids.length && !ON.live) Net.note(readyText(), 2500); }
+  else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); else { if (cur) { engineSet(false); cur = null; } ON.live = false; ON.rq = null; ON.rqAt = 0; drawReady(); Net.note("This round started without you: watch it, then tap to join the next one", 5000); } }
   else if (m.t === "room") { if (ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); } }
   else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); if (m.score !== undefined && SHARED.has(ON.game)) ON.scores.set(from, { score: m.score, over: !!m.over }); }
   else if (m.t === "watch") { if (ON.live) ON.watchT = Date.now(); }
@@ -1195,16 +1223,18 @@ $o("oShare").onclick = async () => {
     joinOnline(code);
   }, 300);
 })();
-$o("oStart").onclick = () => {
+$o("oStart").onclick = () => { if (ON && ON.host) readyFrom(ON.me); };
+function goRound(players) {
   if (!ON || !ON.host) return;
   let opt = {}; try { opt = JSON.parse(localStorage.getItem("arcade-sheet-" + ON.game) || "{}"); } catch (e) {}
-  const m = { t: "go", game: ON.game, seed: Math.floor(realRandom() * 2 ** 31), rain: realRandom() < 0.25, players: ON.players, opt };
-  osend(m); startOnline(m);
+  const m = { t: "go", game: ON.game, seed: Math.floor(realRandom() * 2 ** 31), rain: realRandom() < 0.25, players, opt };
+  osend(m); if (players.some((q) => q.id === ON.me)) startOnline(m); else { ON.live = false; }
   ON.net.started();
-};
-const againLine = window.againLine = () => { const n = ON && ON.host ? (ON.again ? ON.again.size : 0) : ON && ON.againN ? ON.againN.n : (ON && ON.again ? ON.again.size : 0), of = ON ? ON.players.length : 0; return (ON && ON.again && ON.again.has(ON.me) ? "Ready! Waiting for the others" : "Tap the screen to play again") + ` · ${n} of ${of} ready`; };
+}
+const againLine = window.againLine = () => readyText() || "Tap the screen to play again";
+$o("oReady").onclick = () => tapReady();
 function startOnline(m) {
-  if (ON) { ON.again = new Set(); ON.againN = null; ON.opt = m.opt || {}; ON.round = m.players.slice(); }
+  if (ON) { ON.rq = null; ON.rqAt = 0; drawReady(); ON.opt = m.opt || {}; ON.round = m.players.slice(); }
   ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.startT = performance.now(); ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;

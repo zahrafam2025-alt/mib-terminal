@@ -1282,7 +1282,7 @@ if (window.TouchPad && TouchPad.on) (() => {
     const el = $("#" + id); el.value = opt(k, d); el.onchange = () => { try { localStorage.setItem(k, el.value); } catch (e) {} };
   }
   hold("JUMP", { right: 132, bottom: 28 }, 64, "Space");
-  hold("DUCK", { right: 210, bottom: 18 }, 58, "KeyC");
+  hold("DUCK", { left: 16, bottom: 16 }, 58, "KeyC");
   hold("R", { right: 132, bottom: 112 }, 54, "KeyR");
   const useB = hold("USE", { right: 22, bottom: 210 }, 60, "KeyE");
   setInterval(() => {
@@ -1302,6 +1302,7 @@ if (window.TouchPad && TouchPad.on) (() => {
   setInterval(() => {
     const play = mode !== "menu" && $("#menu").classList.contains("hide");
     [look, left, ...btns].forEach((el) => { el.style.display = play ? "" : "none"; });
+    if (play && FX.buy) left.style.display = "none";
     if (play) { locked = true; FX.relock = false; }
   }, 200);
 })();

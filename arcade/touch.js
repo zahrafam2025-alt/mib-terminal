@@ -52,7 +52,7 @@
     zone.addEventListener("pointerdown", (e) => { e.preventDefault(); fingers.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t: performance.now() }); try { zone.setPointerCapture(e.pointerId); } catch (er) {} });
     zone.addEventListener("pointermove", (e) => { const f = fingers.get(e.pointerId); if (!f) return; onMove(e.clientX - f.x, e.clientY - f.y, e); f.x = e.clientX; f.y = e.clientY; });
     const up = (e) => { const f = fingers.get(e.pointerId); if (!f) return; fingers.delete(e.pointerId);
-      if (onTap && Math.hypot(e.clientX - f.x0, e.clientY - f.y0) < 12 && performance.now() - f.t < 350) onTap(e); };
+      if (onTap && Math.hypot(e.clientX - f.x0, e.clientY - f.y0) < 18 && performance.now() - f.t < 500) onTap(e); };
     zone.addEventListener("pointerup", up); zone.addEventListener("pointercancel", (e) => fingers.delete(e.pointerId));
   };
   T.zone = (style) => { T.css(); const z = document.createElement("div"); z.className = "tp"; Object.assign(z.style, style); document.body.appendChild(z); return z; };
