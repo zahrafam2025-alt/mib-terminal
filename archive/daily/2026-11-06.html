@@ -1,0 +1,80 @@
+<!doctype html><!-- mib-public-archive-v2 --><!-- mib-fr-ok -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The tape is risk-off with VIX 25.49. — MIB Terminal, 2026-11-06</title>
+<meta name="description" content="The tape is risk-off with VIX 25.49. Defensive conditions dominate: volatility is elevated and de-risking flows lead.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="theme-color" content="#060d1a">
+<link rel="canonical" href="https://mibterminal.com/archive/daily/2026-11-06.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="MIB Terminal">
+<meta property="og:title" content="The tape is risk-off with VIX 25.49.">
+<meta property="og:description" content="The tape is risk-off with VIX 25.49. Defensive conditions dominate: volatility is elevated and de-risking flows lead.">
+<meta property="og:url" content="https://mibterminal.com/archive/daily/2026-11-06.html">
+<meta property="og:image" content="https://mibterminal.com/og.png">
+<meta property="article:published_time" content="2026-11-06T18:49:26Z">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The tape is risk-off with VIX 25.49.">
+<meta name="twitter:description" content="The tape is risk-off with VIX 25.49. Defensive conditions dominate: volatility is elevated and de-risking flows lead.">
+<meta name="twitter:image" content="https://mibterminal.com/og.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "NewsArticle", "headline": "The tape is risk-off with VIX 25.49.", "description": "The tape is risk-off with VIX 25.49. Defensive conditions dominate: volatility is elevated and de-risking flows lead.", "datePublished": "2026-11-06T18:49:26Z", "dateModified": "2026-11-06T18:49:26Z", "url": "https://mibterminal.com/archive/daily/2026-11-06.html", "mainEntityOfPage": "https://mibterminal.com/archive/daily/2026-11-06.html", "image": ["https://mibterminal.com/og.png"], "inLanguage": "en", "isAccessibleForFree": true, "author": {"@type": "Organization", "name": "MIB Terminal", "url": "https://mibterminal.com/"}, "publisher": {"@type": "Organization", "name": "MIB Terminal", "logo": {"@type": "ImageObject", "url": "https://mibterminal.com/apple-touch-icon.png"}}}</script>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="/terminal.css">
+</head>
+<body>
+<script src="/header.js" data-active="archive"></script>
+<div class="tape gut"><div class="in" id="tape"></div></div>
+
+<main class="gut"><div class="in">
+  <section id="today" class="hero" style="margin-top:0">
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span class="label" id="date"></span><span class="pill" id="regime"></span></div>
+      <h1 id="headline"></h1>
+      <dl class="three" id="three" style="margin:0"></dl>
+    </div>
+    <div class="gauges">
+      <div class="card gauge"><div class="label">Market stress</div><div id="stress"></div></div>
+      <div class="card"><div class="label">How many stocks joined in</div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 6px"><b class="tnum" id="breadthPct" style="font-size:24px"></b><small style="color:var(--muted)" id="breadthTxt"></small></div>
+        <div class="bar" id="breadthBar"></div></div>
+      <div class="card"><div class="label" style="margin-bottom:8px">Changed since yesterday</div><div class="chips" id="changed"></div></div>
+    </div>
+  </section>
+
+  <section id="news"><h2>The news that matters</h2><p class="sub">The headlines moving markets today, newest first.</p><div class="news" id="newsList"></div></section>
+
+  <section id="money"><h2>Where the money went</h2><p class="sub">Each sector's momentum today, from −1 (selling) to +1 (buying).</p>
+    <div class="split"><div class="card" id="sectors"></div>
+      <div class="card"><div class="label" style="margin-bottom:8px">Leading</div><div class="lead-list" id="leaders"></div>
+        <div class="label" style="margin:16px 0 8px">Lagging</div><div class="lead-list" id="laggards"></div></div></div></section>
+
+  <section id="calendar"><h2>Coming up</h2><p class="sub">The events that can move markets this week. Tap one to see what a beat or a miss would mean.</p><div class="cal" id="cal"></div></section>
+
+  <section id="dives"><h2>Deep dive</h2><p class="sub">One subject at a time. Open the ones you care about.</p><div class="dives" id="diveList"></div></section>
+
+  <section id="lounge"><h2>The Lounge</h2><p class="sub">Talk about the day with everyone reading it, then play a round together.</p>
+    <div class="lounge">
+      <div class="card chat">
+        <header><div class="rooms" id="rooms"><button class="on" data-room="today">Today's brief</button><button data-room="markets">Markets</button><button data-room="crypto">Crypto</button><button data-room="games">Games</button></div><span class="example" id="chatState">connecting…</span></header>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        <form class="send" id="send"><input id="msg" maxlength="280" placeholder="Say something about today's market…" autocomplete="off"><button class="btn" type="submit">Send</button></form>
+      </div>
+      <div class="card" style="display:grid;gap:12px;align-content:start">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="label">Play together</div><div style="color:var(--muted);font-size:14px">Up to 4 friends online, phones welcome.</div></div><a class="btn alt" href="/arcade/">Open arcade</a></div>
+        <div class="games" id="games"></div>
+      </div>
+    </div></section>
+
+  <section id="premium" class="card prem"><div><div class="label" id="premEyebrow"></div><h2 id="premTitle" style="margin-top:4px"></h2><p class="sub" id="premTag" style="margin:0"></p></div><div class="chips" id="premChips" style="max-width:560px"></div></section>
+
+  <footer id="foot"></footer>
+</div></main>
+  <script>window.MIB_ARCHIVE_DAY = 1;</script>
+  <script src="/archive/daily/data/2026-11-06.js"></script>
+  <script src="/terminal.js"></script>
+</body>
+</html>
