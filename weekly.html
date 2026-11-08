@@ -2,38 +2,381 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Week · MIB Terminal</title>
-<meta name="description" content="MIB Weekly Intelligence: the week's markets in one page, every Sunday.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MIB Terminal — Weekly Intelligence</title>
+<meta property="og:title" content="MIB Terminal — Weekly Intelligence">
+<meta name="description" content="The market, explained in plain English. Daily brief before the US open; full weekly brief free. Built from validated market data — zero hype.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MARKET INTELLIGENCE BRIEF">
+<meta property="og:description" content="The market, explained in plain English. Daily brief before the US open; full weekly brief free. Built from validated market data — zero hype.">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://mibterminal.com/weekly.html">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
-<link rel="stylesheet" href="/terminal.css">
+<meta property="og:url" content="https://mibterminal.com/weekly.html">
+<meta property="og:image" content="https://mibterminal.com/og.png">
+<meta name="twitter:image" content="https://mibterminal.com/og.png">
 <style>
-  /* 2026-11-04: stands in for the weekly page until the next Sunday edition replaces it (the last one was from
-     September, in the old layout, and could not be rebuilt: its daily briefs are no longer in the archive) */
-  .doc { max-width: 720px; margin: 0 auto; padding-block: 28px 60px; }
-  .doc h1 { font: 800 clamp(28px, 4vw, 38px)/1.1 var(--display); margin: 0 0 10px; }
-  .doc p { color: var(--muted); }
-  .kick { font: 600 12px var(--num); letter-spacing: .14em; text-transform: uppercase; color: var(--brand); }
-  .days { display: grid; gap: 8px; margin-top: 14px; }
-  .days a { display: flex; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 600; }
-  .days a:hover { border-color: var(--brand); }
-  .days small { color: var(--muted); font-weight: 400; }
+  /* tokens + chrome mirror the homepage's styles.css exactly */
+  :root {
+    --bg:        #091426;
+    --bg-deep:   #060d1a;
+    --panel:     rgba(14, 28, 51, .72);
+    --panel-line:rgba(88, 116, 152, .22);
+    --ink:       #f4f7fa;
+    --muted:     #96a8be;
+    --faint:     #5b7292;
+    --gold:      #e9b949;
+    --gold-dk:   #bf9534;
+    --up:        #3cc48d;
+    --down:      #e85a5e;
+    --serif:     Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans:      -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono:      ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --ease:      cubic-bezier(.22, .61, .2, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg-deep);
+    color: var(--ink);
+    font: 17px/1.7 var(--sans);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(233, 185, 73, .28); }
+  #vignette {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(120% 90% at 50% 30%, transparent 55%, rgba(3, 7, 15, .55) 100%);
+  }
+
+  /* ── graded photo backdrop (homepage #hero-art) ───────────── */
+  #hero-art {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    opacity: 0; transition: opacity 1.2s var(--ease);
+    overflow: hidden;
+  }
+  #hero-art.on { opacity: .92; }
+  #hero-art .art {
+    position: absolute; inset: -8%;
+    background-size: cover; background-position: center 38%;
+    will-change: transform;
+  }
+  #hero-art.alive .art { animation: heroDrift 70s ease-in-out infinite alternate; }
+  @keyframes heroDrift {
+    from { scale: 1.06; translate: 0 0; }
+    to   { scale: 1.13; translate: -1.6% -1.2%; }
+  }
+  #hero-art.grade-neutral .art {
+    filter: grayscale(1) brightness(.68) contrast(1.16) sepia(.3)
+            hue-rotate(175deg) saturate(1.2);
+  }
+  #hero-art::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      rgba(9, 20, 38, .38) 0%, rgba(9, 20, 38, .12) 40%,
+      rgba(6, 13, 26, .94) 96%);
+  }
+
+  /* ── fixed chrome ─────────────────────────────────────────── */
+  header.masthead {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+    display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;
+    padding: 16px clamp(20px, 4vw, 44px);
+    background: linear-gradient(180deg, rgba(6, 13, 26, .82), transparent);
+    pointer-events: none; white-space: nowrap;
+  }
+  @media (max-width: 1500px) { header.masthead .brand { display: none; } }
+  header.masthead > * { pointer-events: auto; }
+  .home { display: inline-flex; align-items: center; gap: 12px;
+          text-decoration: none; color: inherit; }
+  .mark { font: 800 22px/1 var(--sans); letter-spacing: 1px; }
+  .mark b { color: var(--gold); }
+  .brand {
+    color: var(--muted); font: 11px/1 var(--mono);
+    letter-spacing: 2.5px; text-transform: uppercase;
+    translate: 0 -1px;
+  }
+  .stamp { color: var(--muted); font: 11px/1 var(--mono); letter-spacing: 1px; }
+
+  nav.menu { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  nav.menu a {
+    color: var(--muted); text-decoration: none; white-space: nowrap;
+    font: 700 10.5px/1 var(--mono); letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 9px 12px; border: 1px solid transparent; border-radius: 999px;
+    transition: color .4s var(--ease), border-color .4s var(--ease);
+  }
+  nav.menu a:hover { color: var(--ink); border-color: var(--panel-line); }
+  nav.menu a.on, nav.menu a.active { color: var(--bg-deep); background: var(--gold); }
+  nav.menu a.cta { color: var(--gold); border-color: rgba(233, 185, 73, .45); }
+  nav.menu a.cta:hover { color: var(--bg-deep); background: var(--gold); border-color: var(--gold); }
+  nav.menu + .stamp { margin-left: 14px; }
+
+  .menu-toggle {
+    display: none; margin-left: auto; background: var(--panel);
+    border: 1px solid var(--panel-line); border-radius: 999px;
+    width: 42px; height: 42px; cursor: pointer;
+    flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  }
+  .menu-toggle i { display: block; width: 16px; height: 1.5px; background: var(--gold); transition: translate .4s var(--ease), rotate .4s var(--ease); }
+  .menu-toggle[aria-expanded="true"] i:first-child { translate: 0 3.75px; rotate: 45deg; }
+  .menu-toggle[aria-expanded="true"] i:last-child { translate: 0 -3.75px; rotate: -45deg; }
+
+  .menu-overlay {
+    position: fixed; inset: 0; z-index: 45;
+    background: rgba(6, 13, 26, .92); backdrop-filter: blur(14px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .55s var(--ease);
+  }
+  .menu-overlay.open { opacity: 1; pointer-events: auto; }
+  .menu-overlay nav { display: flex; flex-direction: column; gap: 10px; text-align: center; }
+  .menu-overlay a {
+    color: var(--muted); text-decoration: none;
+    font: 400 clamp(26px, 6vw, 40px)/1.5 var(--serif);
+    opacity: 0; translate: 0 18px;
+    transition: opacity .6s var(--ease), translate .6s var(--ease), color .3s;
+    transition-delay: calc(var(--i, 0) * 70ms);
+  }
+  .menu-overlay.open a { opacity: 1; translate: 0 0; }
+  .menu-overlay a:hover { color: var(--ink); }
+  .menu-overlay a.on, .menu-overlay a.active, .menu-overlay a.cta { color: var(--gold); }
+  @media (max-width: 1180px) {
+    nav.menu, header.masthead .stamp { display: none; }
+    .menu-toggle { display: flex; }
+  }
+
+  /* ── content in open space (homepage scene scaffolding) ───── */
+  main { position: relative; z-index: 10;
+         padding: clamp(110px, 16vh, 170px) clamp(22px, 6vw, 72px) 140px; }
+  .scene-inner { width: min(860px, 100%); margin: 0 auto; }
+
+  .hero { padding: 0 0 9vh; }
+  .hero h1 {
+    font: 400 clamp(34px, 5.4vw, 62px)/1.16 var(--serif);
+    letter-spacing: -.01em; text-wrap: balance; max-width: 20ch;
+    text-shadow: 0 2px 40px rgba(3, 7, 15, .8);
+  }
+  .hero .lead { margin-top: 30px; color: var(--muted);
+                font: 400 15px/1.7 var(--sans); max-width: 60ch; }
+  .hero .lead strong { color: var(--gold); font-weight: 600; }
+  .hero .proof {
+    margin-top: 26px; color: var(--faint);
+    font: 600 10px/1.8 var(--mono); letter-spacing: 2px; text-transform: uppercase;
+  }
+
+  /* section headings render as homepage kickers */
+  h2 {
+    display: flex; align-items: center; gap: 14px;
+    color: var(--gold); font: 700 12px/1.4 var(--mono);
+    letter-spacing: 4px; text-transform: uppercase;
+    margin: 64px 0 26px;
+  }
+  h2::after {
+    content: ""; height: 1px; flex: 0 0 64px;
+    background: linear-gradient(90deg, var(--gold-dk), transparent);
+  }
+  h2:first-child { margin-top: 0; }
+
+  /* editorial prose, straight from the homepage .prose voice */
+  p {
+    font: 400 clamp(19px, 2.1vw, 24px)/1.62 var(--serif);
+    color: var(--ink); margin: 0 0 1.2em;
+    text-wrap: pretty;
+    text-shadow: 0 1px 20px rgba(3, 7, 15, .95);
+  }
+  .muted, p.muted { color: var(--muted); font: 400 14px/1.7 var(--sans);
+                    text-shadow: none; }
+
+  /* observation bullets (homepage ul.obs) */
+  ul { list-style: none; margin: 6px 0 30px; }
+  li {
+    position: relative; padding: 10px 0 10px 26px;
+    color: #cdd8e4; font-size: 16px;
+    border-bottom: 1px dashed rgba(88, 116, 152, .18);
+  }
+  li::before { content: "▸"; position: absolute; left: 2px; color: var(--gold); }
+  li:last-child { border-bottom: 0; }
+
+  hr { border: 0; border-top: 1px solid var(--panel-line); margin: 40px 0; }
+  strong { color: var(--ink); font-weight: 700; }
+  em { color: var(--muted); font-style: normal; }
+
+  /* CTA buttons (homepage close scene) */
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 44px; }
+  .btn {
+    display: inline-block; text-decoration: none; border-radius: 999px;
+    font: 700 14px/1 var(--sans); padding: 17px 34px; letter-spacing: .3px;
+    background: var(--gold); color: var(--bg-deep);
+    box-shadow: 0 12px 40px rgba(233, 185, 73, .25);
+    transition: transform .4s var(--ease), box-shadow .4s var(--ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover { transform: translateY(-2px); }
+  }
+  .btn.ghost { color: var(--ink); border: 1px solid var(--panel-line);
+               background: var(--panel); box-shadow: none; }
+
+  /* archive listing — editorial links, no chrome */
+  .arch-list li { padding: 14px 0 14px 26px; }
+  .arch-list a { color: var(--ink); text-decoration: none;
+                 font: 400 clamp(18px, 2vw, 22px)/1.5 var(--serif);
+                 transition: color .3s var(--ease); }
+  .arch-list a:hover { color: var(--gold); }
+
+  footer.colophon { margin-top: 90px; color: var(--faint);
+                    font: 500 12px/2 var(--mono); }
+  footer.colophon a { color: var(--faint); }
+
+  /* legibility over the photo, as on the homepage's photo mode */
+  h2, li, .hero .proof { text-shadow: 0 1px 20px rgba(3, 7, 15, .95); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    #hero-art.alive .art { animation: none; }
+    .menu-overlay, .menu-overlay a, .btn { transition: none; }
+  }
+
+  /* 2026-11-04 (owner: "the week and the archive on the old layout should match the rest"): the new site's look,
+     light or dark like the homepage, no photo backdrop, the text on a card */
+  :root { --bg-deep: #f4f6f9; --panel: #ffffff; --panel-line: #e1e5ec; --ink: #0f172a; --muted: #5b6474; --faint: #5b6474; --gold: #b7791f; --gold-dk: #e8a317;
+    --serif: "Archivo", "Segoe UI", sans-serif; --sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) { --bg-deep: #0b0f17; --panel: #121826; --panel-line: #232c40; --ink: #e8ecf3; --muted: #95a0b4; --faint: #95a0b4; --gold: #f5b53b; color-scheme: dark; } }
+  :root[data-theme=dark] { --bg-deep: #0b0f17; --panel: #121826; --panel-line: #232c40; --ink: #e8ecf3; --muted: #95a0b4; --faint: #95a0b4; --gold: #f5b53b; color-scheme: dark; }
+  #hero-art, #vignette { display: none !important; }
+  main { padding: 28px max(16px, env(safe-area-inset-right, 0px)) 80px max(16px, env(safe-area-inset-left, 0px)); }
+  .scene-inner { background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; padding: clamp(18px, 4vw, 40px); }
+  .hero { padding-bottom: 24px; }
+  .hero h1 { font: 800 clamp(28px, 4vw, 42px)/1.15 var(--serif); text-shadow: none; letter-spacing: -.01em; }
+  p { font: 400 18px/1.65 var(--sans); text-shadow: none; }
+  h2, li, .hero .proof { text-shadow: none; }
+  li { color: var(--ink); }
+  .arch-list a { font: 600 18px/1.5 var(--sans); }
+  .btn { box-shadow: none; color: #1a1205; background: var(--gold-dk); }
 </style>
 </head>
 <body>
-<script src="/header.js" data-active="week"></script>
-<main class="gut"><div class="doc card">
-  <div class="kick">The Week</div>
-  <h1>The weekly review is back on Sunday</h1>
-  <p>Every Sunday, MIB Weekly Intelligence turns the week's daily briefs into one page: what moved, why, and what comes next. The next edition comes out on <b>Sunday 8 November</b>.</p>
-  <p>Until then, this week's daily briefs:</p>
-  <div class="days">
-    <a href="/archive/daily/2026-11-04.html">Wednesday 4 November <small>the full daily brief →</small></a>
-    <a href="/archive/daily/2026-11-03.html">Tuesday 3 November <small>the full daily brief →</small></a>
-  </div>
-  <p style="margin-top:18px"><a href="/">Today's market in 3 minutes →</a> · <a href="/archive/">All past briefs →</a></p>
-</div></main>
+  <div id="hero-art" class="on alive grade-neutral" aria-hidden="true"><div class="art" style="background-image:url('assets/weekly/2026-11-06.jpg')"></div></div>
+  <div id="vignette" aria-hidden="true"></div>
+
+<script src="/header.js" data-active="week"></script><noscript><nav class="menu" aria-label="Site"><a href="./">Today</a> · <a href="weekly.html">The Week</a> · <a href="archive/">Archive</a> · <a href="/arcade/">Arcade</a></nav></noscript>
+
+  <main>
+    <div class="scene-inner">
+
+<style>
+  .wk-fig { margin: 6px 0 30px; padding: 18px 6px;
+            background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);
+            border-radius: 14px; overflow: hidden; }
+  .wk-take { color: #96a8be; font: 400 15px/1.6 var(--sans);
+             margin: -14px 0 30px; }
+  .wk-health { display: flex; gap: 30px; align-items: center;
+               flex-wrap: wrap; margin: 4px 0 14px; padding: 20px;
+               background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);
+               border-radius: 16px; }
+  .wk-gauge { flex: 0 0 260px; }
+  .wk-pillars { flex: 1 1 340px; display: flex; flex-direction: column;
+                gap: 14px; }
+  .wk-pill-top { display: flex; justify-content: space-between;
+                 align-items: baseline; }
+  .wk-pill-name { color: #f4f7fa; font: 600 14px/1.3 var(--sans); }
+  .wk-pill-val { color: #e9b949; font: 700 15px/1 var(--mono); }
+  .wk-pill-track { height: 8px; border-radius: 6px; margin: 5px 0 4px;
+                   background: rgba(88,116,152,.28); overflow: hidden; }
+  .wk-pill-fill { height: 100%; border-radius: 6px;
+                  background: linear-gradient(90deg,#bf9534,#e9b949); }
+  .wk-pill-cap { color: #96a8be; font: 400 12px/1.4 var(--sans); }
+  .wk-drag { color: #f4f7fa; font: 400 15px/1.6 var(--sans) !important;
+             margin: 4px 0 14px; text-shadow: none !important; }
+  .wk-drag strong { color: #e85a5e; }
+  .wk-legend { margin: 4px 0 30px; padding: 14px 16px; background: rgba(14,28,51,.55);
+               border: 1px solid rgba(88,116,152,.28); border-radius: 12px; }
+  .wk-legend-h { color: #e9b949; font: 700 11px/1 var(--mono);
+                 letter-spacing: 2px; text-transform: uppercase;
+                 margin-bottom: 7px; }
+  .wk-legend-body { color: #96a8be; font: 400 14px/1.6 var(--sans) !important;
+                    margin: 0 0 10px; text-shadow: none !important; }
+  .wk-bands { display: flex; flex-wrap: wrap; gap: 7px; }
+  .wk-band { color: #96a8be; font: 400 12px/1 var(--sans);
+             background: rgba(88,116,152,.28); border-radius: 999px; padding: 5px 10px;
+             white-space: nowrap; }
+  .wk-band b { color: #f4f7fa; font-family: var(--mono); font-weight: 700; }
+  .wk-trans { display: flex; flex-direction: column; gap: 0;
+              margin: 4px 0 30px; }
+  .wk-tr { display: grid; grid-template-columns: 1fr auto 22px auto;
+           gap: 10px; align-items: center; padding: 11px 2px;
+           border-bottom: 1px dashed rgba(88,116,152,.28); }
+  .wk-tr-what { color: #96a8be; font: 400 14px/1.4 var(--sans); }
+  .wk-tr-a { color: #5b7292; font: 600 14px/1 var(--mono);
+             text-align: right; }
+  .wk-tr-arw { color: #e9b949; text-align: center; }
+  .wk-tr-b { color: #f4f7fa; font: 700 14px/1 var(--mono); }
+  @media (max-width: 640px) {
+    .wk-health { gap: 16px; } .wk-gauge { flex-basis: 100%; text-align: center; }
+  }
+</style>
+<div class="hero"><h1>The Week Beneath the Surface</h1><p class="lead">MIB Weekly Intelligence · <strong>Nov 03 – Nov 06</strong> · 4 trading days. What the market was doing under the headlines — merged, ranked and read as one week.</p></div>
+<h2>📈 The Week in One Chart</h2>
+<p class="muted">If you only looked at one chart this week, it should be this one.</p>
+<p><strong>How many stocks were actually rising</strong></p>
+<figure class="wk-fig"><svg viewBox="0 0 820 240" width="100%" role="img" preserveAspectRatio="xMidYMid meet">
+  <defs><linearGradient id="wkla" x1="0" x2="0" y1="0" y2="1">
+    <stop offset="0" stop-color="#e9b949" stop-opacity=".26"/>
+    <stop offset="1" stop-color="#e9b949" stop-opacity="0"/>
+  </linearGradient></defs>
+  <line x1="44" y1="206" x2="768" y2="206" stroke="rgba(88,116,152,.28)" stroke-width="1"/>
+  <polygon points="44.0,206.0 44.0,145.6 285.3,89.1 526.7,188.6 768.0,43.4 768.0,206.0" fill="url(#wkla)"/>
+  <polyline points="44.0,145.6 285.3,89.1 526.7,188.6 768.0,43.4" fill="none" stroke="#e9b949" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="44.0" cy="145.6" r="3.4" fill="#e9b949"/><circle cx="285.3" cy="89.1" r="3.4" fill="#e9b949"/><circle cx="526.7" cy="188.6" r="3.4" fill="#e9b949"/><circle cx="768.0" cy="43.4" r="3.4" fill="#e9b949"/><text x="48.0" y="136.6" text-anchor="start" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">32%</text><text x="764.0" y="34.4" text-anchor="end" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">70%</text><text x="44.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Tue</text><text x="285.3" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Wed</text><text x="526.7" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Thu</text><text x="768.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Fri</text>
+</svg></figure>
+<p class="wk-take">Participation swung from 70% to 16% and ended at 70% — the index never showed you that.</p>
+<h2>The Week&#x27;s Verdict</h2>
+<p>The market ended the week divergent on our health read (39/100). The week belonged to Midterm elections 2026 live updates: Economy, inflation and other voter concerns. But fewer stocks were doing the work — the share still rising fell 32% → 70%, so the gains were resting on a shrinking group of names like chipmakers (SOXX), biotech (XBI) and chipmakers (SMH).</p>
+<h2>MiB Market Health</h2>
+<p>the surface and the internals disagree — divergent on our five-part read.</p>
+<div class="wk-health"><div class="wk-gauge"><svg viewBox="0 0 260 208" width="260" role="img">
+  <path d="M 34 150 A 96 96 0 0 1 226 150" fill="none" stroke="rgba(88,116,152,.28)" stroke-width="14" stroke-linecap="round"/><path d="M 34.0 150.0 A 96 96 0 0 1 97.5 59.7" fill="none" stroke="#e9b949" stroke-width="14" stroke-linecap="round"/>
+  <text x="130" y="144" text-anchor="middle" fill="#f4f7fa" font-family="var(--serif),Georgia,serif" font-size="58" font-weight="400">39</text>
+  <text x="130" y="172" text-anchor="middle" fill="#e9b949" font-family="ui-monospace,Menlo,monospace" font-size="13" letter-spacing="3">DIVERGENT</text>
+</svg></div><div class="wk-pillars"><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Participation</span><span class="wk-pill-val">56</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:56%"></div></div><div class="wk-pill-cap">share of stocks actually rising</div></div><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Breadth</span><span class="wk-pill-val">75</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:75%"></div></div><div class="wk-pill-cap">how often the broad market confirmed the index</div></div><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Leadership</span><span class="wk-pill-val">55</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:55%"></div></div><div class="wk-pill-cap">how many names carry the upside</div></div><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Risk Appetite</span><span class="wk-pill-val">7</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:7%"></div></div><div class="wk-pill-cap">offense vs defense, fear gauge, mood stability</div></div><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Cross Asset</span><span class="wk-pill-val">0</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:2%"></div></div><div class="wk-pill-cap">are stocks, crypto and commodities telling one story?</div></div></div></div><p class="wk-drag"><strong>Biggest drag:</strong> Cross Asset — asset classes are 67 points apart on momentum; market stress rose 56 → 66 over the week, so stocks, bonds and commodities weren&#x27;t confirming each other — a choppier, less reliable backdrop.</p><div class="wk-legend"><div class="wk-legend-h">How to read this</div><p class="wk-legend-body">One score, 0–100, built from five things a healthy market needs at once. Higher means the advance is broader, calmer and better backed by the tape.</p><div class="wk-bands"><span class="wk-band"><b>70+</b> Healthy</span><span class="wk-band"><b>55–69</b> Steady</span><span class="wk-band"><b>40–54</b> Tiring</span><span class="wk-band"><b>25–39</b> Divergent</span><span class="wk-band"><b>&lt;25</b> Stressed</span></div></div>
+<h2>What the Headlines Missed</h2>
+<figure class="wk-fig"><svg viewBox="0 0 820 240" width="100%" role="img" preserveAspectRatio="xMidYMid meet">
+  <defs><linearGradient id="wkla" x1="0" x2="0" y1="0" y2="1">
+    <stop offset="0" stop-color="#e9b949" stop-opacity=".26"/>
+    <stop offset="1" stop-color="#e9b949" stop-opacity="0"/>
+  </linearGradient></defs>
+  <line x1="44" y1="206" x2="768" y2="206" stroke="rgba(88,116,152,.28)" stroke-width="1"/>
+  <polygon points="44.0,206.0 44.0,145.6 285.3,89.1 526.7,188.6 768.0,43.4 768.0,206.0" fill="url(#wkla)"/>
+  <polyline points="44.0,145.6 285.3,89.1 526.7,188.6 768.0,43.4" fill="none" stroke="#e9b949" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="44.0" cy="145.6" r="3.4" fill="#e9b949"/><circle cx="285.3" cy="89.1" r="3.4" fill="#e9b949"/><circle cx="526.7" cy="188.6" r="3.4" fill="#e9b949"/><circle cx="768.0" cy="43.4" r="3.4" fill="#e9b949"/><text x="48.0" y="136.6" text-anchor="start" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">32%</text><text x="764.0" y="34.4" text-anchor="end" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">70%</text><text x="44.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">11-03</text><text x="285.3" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">11-04</text><text x="526.7" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">11-05</text><text x="768.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">11-06</text>
+</svg></figure>
+<p>The index grabbed the headlines, but underneath it fewer and fewer stocks were actually rising — just 70% by Friday, down from 32% and as low as 16% mid-week. A rally that thins out like that is easier to knock over. The gains kept coming from the same narrow group — names like chipmakers (SOXX), biotech (XBI) and chipmakers (SMH) — while materials stocks (XLB), consumer-discretionary (XLY) and regional banks (KRE) were left behind.</p>
+<h2>One Story, Properly Told</h2>
+<p>One story dominated the week and kept shifting under people&#x27;s feet: it began as Midterm elections 2026 live updates: Economy, inflation and other voter concerns and by Friday had become Dow tumbles 1,700 points, erasing its postelection rally; Nasdaq plummets 5%: Live updates. It topped the week because it was the one force reshaping which corners of the market investors wanted to own.</p>
+<h2>The Rotation Map</h2>
+<figure class="wk-fig"><svg viewBox="0 0 820 320" width="100%" role="img" preserveAspectRatio="xMidYMid meet"><text x="240" y="18" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="2">WEEK START</text><text x="610" y="18" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="2">WEEK END</text><line x1="240" y1="34.0" x2="610" y2="152.2" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="34.0" r="4" fill="#e85a5e"/><circle cx="610" cy="152.2" r="4" fill="#e85a5e"/><text x="228" y="38.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Big Tech</text><text x="622" y="136.2" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#6</text><line x1="240" y1="57.6" x2="610" y2="199.5" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="57.6" r="4" fill="#e85a5e"/><circle cx="610" cy="199.5" r="4" fill="#e85a5e"/><text x="228" y="61.6" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Healthcare/Biotech</text><text x="622" y="183.5" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#8</text><line x1="240" y1="104.9" x2="610" y2="246.7" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="104.9" r="4" fill="#e85a5e"/><circle cx="610" cy="246.7" r="4" fill="#e85a5e"/><text x="228" y="108.9" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Broad Index</text><text x="622" y="230.7" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#10</text><line x1="240" y1="270.4" x2="610" y2="104.9" stroke="#3cc48d" stroke-width="2" opacity=".85"/><circle cx="240" cy="270.4" r="4" fill="#3cc48d"/><circle cx="610" cy="104.9" r="4" fill="#3cc48d"/><text x="228" y="274.4" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Clean Energy</text><text x="622" y="88.9" text-anchor="start" fill="#3cc48d" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#4</text><line x1="240" y1="199.5" x2="610" y2="294.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="199.5" r="4" fill="#e85a5e"/><circle cx="610" cy="294.0" r="4" fill="#e85a5e"/><text x="228" y="203.5" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Financials</text><text x="622" y="278.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#12</text><line x1="240" y1="199.5" x2="610" y2="294.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="199.5" r="4" fill="#e85a5e"/><circle cx="610" cy="294.0" r="4" fill="#e85a5e"/><text x="228" y="225.5" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Energy</text><text x="622" y="298.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#12</text><line x1="240" y1="199.5" x2="610" y2="152.2" stroke="#3cc48d" stroke-width="2" opacity=".85"/><circle cx="240" cy="199.5" r="4" fill="#3cc48d"/><circle cx="610" cy="152.2" r="4" fill="#3cc48d"/><text x="228" y="247.5" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Gold/Metals</text><text x="622" y="156.2" text-anchor="start" fill="#3cc48d" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#6</text></svg></figure>
+<ul><li>Money moved INTO: Clean Energy (climbed from #11 to #4), Gold/Metals (climbed from #8 to #6)</li><li>And OUT OF: Big Tech (slipped from #1 to #6), Healthcare/Biotech (slipped from #2 to #8), Broad Index (slipped from #4 to #10)</li><li>The winners were the aggressive, growth-heavy corners — a sign investors were genuinely willing to take risk, not just hide.</li></ul>
+<h2>Where Conviction Grew</h2>
+<ul><li>stocks broadly: conviction lower — sold with conviction, every day (0 up-days vs 4 down-days)</li><li>crypto: conviction lower — sold with conviction, every day (0 up-days vs 4 down-days)</li><li>gold: conviction higher — a steady, one-way bid all week (4 up-days vs 0 down-days)</li></ul>
+<h2>Expected vs Delivered</h2>
+<ul><li>Little of what the market was waiting on actually reported this week — the big tests are still ahead.</li></ul>
+<h2>The Disconnect</h2>
+<p>Crowding (proxy): 6 of 7 equities signals short at elevated attention — consensus is one-sided</p>
+<h2>What Died / What Was Born</h2>
+<div class="wk-trans"><div class="wk-tr"><span class="wk-tr-what">Mood</span><span class="wk-tr-a">Risk-off (early)</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">Risk-off</span></div><div class="wk-tr"><span class="wk-tr-what">Fear gauge (VIX)</span><span class="wk-tr-a">21.0</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">25.5</span></div><div class="wk-tr"><span class="wk-tr-what">Market stress</span><span class="wk-tr-a">56</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">66</span></div><div class="wk-tr"><span class="wk-tr-what">Stocks rising</span><span class="wk-tr-a">32%</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">70%</span></div><div class="wk-tr"><span class="wk-tr-what">Top-3 share of gains</span><span class="wk-tr-a">59%</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">43%</span></div></div>
+<p class="muted">Newly born: Physical Oil Just Went From a Bidding War to a Fire Sale, Stocks plunge as election outcome and AI worries crush tech shares - NBC News, “We Need to Break Up Big Medicine”: Warren Targets UnitedHealth as Democrats Win Congress.</p>
+<h2>Next Week&#x27;s Test</h2>
+<h2>Bottom Line</h2>
+<p>Our health read sits at 39/100 (divergent): the market isn&#x27;t broken, but it&#x27;s working through friction. The tell for the week ahead is simple — do more stocks start joining the move, or do the few leaders keep carrying it alone?</p>
+<h2>In Plain English</h2>
+<ul><li><strong>consensus</strong> — the average analyst forecast. Markets move on the result vs this expectation, not the result alone.</li><li><strong>risk-off</strong> — money rotating OUT of risky assets (stocks, crypto) into safe havens (cash, gold, dollar). &#x27;Transition&#x27; means it&#x27;s only just starting.</li><li><strong>VIX</strong> — the market&#x27;s &#x27;fear gauge&#x27;. Higher = traders expect bigger swings; ~20 is the long-run average.</li><li><strong>breadth</strong> — how many stocks are participating in a move; narrow breadth means a few names are masking a weak market underneath.</li><li><strong>rotation</strong> — money moving from one sector into another rather than leaving the market — tells you what leadership is forming.</li><li><strong>XLY</strong> — consumer discretionary — non-essential spending (retail, autos, travel).</li><li><strong>XLB</strong> — the materials sector (chemicals, metals, mining).</li><li><strong>SMH</strong> — a basket of semiconductor (chip) stocks — the core of the AI trade.</li></ul>
+      <div class="cta-row"></div>
+      <footer class="colophon">
+        @mib.terminal · <span data-i18n="Commentaire de marché éducatif — pas un conseil en investissement.">Educational market commentary — not investment advice.</span>
+      </footer>
+    </div>
+  </main>
+
+
 </body>
 </html>

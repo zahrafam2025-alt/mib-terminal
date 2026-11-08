@@ -237,41 +237,34 @@
     .menu-overlay, .menu-overlay a, .btn { transition: none; }
   }
 
-  .lang-toggle { display: inline-flex; gap: 2px; align-items: center;
-    border: 1px solid var(--panel-line); border-radius: 999px; padding: 2px;
-    background: rgba(9,20,38,.5); }
-  .lang-toggle button { appearance: none; border: 0; cursor: pointer;
-    background: transparent; color: var(--muted);
-    font: 700 11px/1 var(--mono); letter-spacing: 1px; padding: 6px 10px;
-    border-radius: 999px; transition: color .2s, background .2s; }
-  .lang-toggle button.on { color: var(--bg-deep); background: var(--gold); }
-  @media (hover:hover){ .lang-toggle button:not(.on):hover{ color: var(--ink);} }
-
+  /* 2026-11-04 (owner: "the week and the archive on the old layout should match the rest"): the new site's look,
+     light or dark like the homepage, no photo backdrop, the text on a card */
+  :root { --bg-deep: #f4f6f9; --panel: #ffffff; --panel-line: #e1e5ec; --ink: #0f172a; --muted: #5b6474; --faint: #5b6474; --gold: #b7791f; --gold-dk: #e8a317;
+    --serif: "Archivo", "Segoe UI", sans-serif; --sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", Consolas, monospace; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme=light]) { --bg-deep: #0b0f17; --panel: #121826; --panel-line: #232c40; --ink: #e8ecf3; --muted: #95a0b4; --faint: #95a0b4; --gold: #f5b53b; color-scheme: dark; } }
+  :root[data-theme=dark] { --bg-deep: #0b0f17; --panel: #121826; --panel-line: #232c40; --ink: #e8ecf3; --muted: #95a0b4; --faint: #95a0b4; --gold: #f5b53b; color-scheme: dark; }
+  #hero-art, #vignette { display: none !important; }
+  main { padding: 28px max(16px, env(safe-area-inset-right, 0px)) 80px max(16px, env(safe-area-inset-left, 0px)); }
+  .scene-inner { background: var(--panel); border: 1px solid var(--panel-line); border-radius: 16px; padding: clamp(18px, 4vw, 40px); }
+  .hero { padding-bottom: 24px; }
+  .hero h1 { font: 800 clamp(28px, 4vw, 42px)/1.15 var(--serif); text-shadow: none; letter-spacing: -.01em; }
+  p { font: 400 18px/1.65 var(--sans); text-shadow: none; }
+  h2, li, .hero .proof { text-shadow: none; }
+  li { color: var(--ink); }
+  .arch-list a { font: 600 18px/1.5 var(--sans); }
+  .btn { box-shadow: none; color: #1a1205; background: var(--gold-dk); }
 </style>
 </head>
 <body>
-<script src="/header.js" data-active="archive"></script>
   <div id="hero-art" class="on alive grade-neutral" aria-hidden="true"><div class="art" style="background-image:url('../assets/weekly/2026-09-11.jpg')"></div></div>
   <div id="vignette" aria-hidden="true"></div>
 
-  <header class="masthead">
-    <a class="home" href="../index.html" aria-label="MARKET INTELLIGENCE BRIEF — home">
-      <span class="mark">MIB<b>▮</b></span>
-      <span class="brand">MARKET INTELLIGENCE BRIEF · Terminal</span>
-    </a>
-<nav class="menu" aria-label="Site"><a href="../" data-i18n="Aujourd’hui">Today</a><a href="../weekly.html" data-i18n="La Semaine">The Week</a><a class="on" href="../archive/" data-i18n="Archives">Archive</a></nav>
-    <span class="stamp">2026-09-11</span>
-    <span class="lang-toggle" role="group" aria-label="Language / Langue"><button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="fr">FR</button></span>
-    <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
-      <i></i><i></i>
-    </button>
-  </header>
-  <div class="menu-overlay" aria-hidden="true"><nav aria-label="Site"></nav></div>
+<script src="/header.js" data-active="archive"></script><noscript><nav class="menu" aria-label="Site"><a href="../">Today</a> · <a href="../weekly.html">The Week</a> · <a href="../archive/">Archive</a> · <a href="/arcade/">Arcade</a></nav></noscript>
 
   <main>
     <div class="scene-inner">
 
-<div data-lang="en"><style>
+<style>
   .wk-fig { margin: 6px 0 30px; padding: 18px 6px;
             background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);
             border-radius: 14px; overflow: hidden; }
@@ -336,11 +329,11 @@
   <polyline points="44.0,47.6 225.0,130.5 406.0,188.6 587.0,143.0 768.0,43.4" fill="none" stroke="#e9b949" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
   <circle cx="44.0" cy="47.6" r="3.4" fill="#e9b949"/><circle cx="225.0" cy="130.5" r="3.4" fill="#e9b949"/><circle cx="406.0" cy="188.6" r="3.4" fill="#e9b949"/><circle cx="587.0" cy="143.0" r="3.4" fill="#e9b949"/><circle cx="768.0" cy="43.4" r="3.4" fill="#e9b949"/><text x="48.0" y="38.6" text-anchor="start" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">43%</text><text x="764.0" y="34.4" text-anchor="end" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">44%</text><text x="44.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Mon</text><text x="225.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Tue</text><text x="406.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Wed</text><text x="587.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Thu</text><text x="768.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Fri</text>
 </svg></figure>
-<p class="wk-take">Wednesday&#x27;s 9% participation rate — invisible in the index — was the week&#x27;s real story: the market was nearly empty of buyers at its worst.</p>
+<p class="wk-take">Participation swung from 44% to 9% and ended at 44% — the index never showed you that.</p>
 <h2>The Week&#x27;s Verdict</h2>
-<p>A week defined by one thing: Brent crude surging from $97 to above $107 as US-Iran strikes escalated. Everything else — the ECB, Friday&#x27;s CPI — played second fiddle to an oil shock that is now sitting directly in front of the Fed&#x27;s September 16 rate decision.</p>
+<p>The market ended the week tiring on our health read (49/100). The week belonged to US-Iran military escalation driving Brent above $101–$102/bbl; Iranian officials signal readiness for prolonged conflict, keeping energy risk-premium elevated. But fewer stocks were doing the work — the share still rising fell 43% → 44%, so the gains were resting on a shrinking group of names like chipmakers (SOXX), chipmakers (SMH) and the Nasdaq 100 (QQQ).</p>
 <h2>MiB Market Health</h2>
-<p>Market is tiring: only 28% of stocks rose on average, stress quietly climbed all week.</p>
+<p>the rally is running out of participants — tiring on our five-part read.</p>
 <div class="wk-health"><div class="wk-gauge"><svg viewBox="0 0 260 208" width="260" role="img">
   <path d="M 34 150 A 96 96 0 0 1 226 150" fill="none" stroke="rgba(88,116,152,.28)" stroke-width="14" stroke-linecap="round"/><path d="M 34.0 150.0 A 96 96 0 0 1 127.0 54.0" fill="none" stroke="#e9b949" stroke-width="14" stroke-linecap="round"/>
   <text x="130" y="144" text-anchor="middle" fill="#f4f7fa" font-family="var(--serif),Georgia,serif" font-size="58" font-weight="400">49</text>
@@ -357,9 +350,9 @@
   <polyline points="44.0,47.6 225.0,130.5 406.0,188.6 587.0,143.0 768.0,43.4" fill="none" stroke="#e9b949" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
   <circle cx="44.0" cy="47.6" r="3.4" fill="#e9b949"/><circle cx="225.0" cy="130.5" r="3.4" fill="#e9b949"/><circle cx="406.0" cy="188.6" r="3.4" fill="#e9b949"/><circle cx="587.0" cy="143.0" r="3.4" fill="#e9b949"/><circle cx="768.0" cy="43.4" r="3.4" fill="#e9b949"/><text x="48.0" y="38.6" text-anchor="start" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">43%</text><text x="764.0" y="34.4" text-anchor="end" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">44%</text><text x="44.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-07</text><text x="225.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-08</text><text x="406.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-09</text><text x="587.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-10</text><text x="768.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-11</text>
 </svg></figure>
-<p>The index looked almost unchanged Monday to Friday, but that calm was a mirage. On Wednesday, only 9% of stocks were actually rising — meaning 9 in 10 were flat or falling while the headline number held up. By Friday that recovered to 44%, but the week&#x27;s average was just 28%. Early in the week, the top 3 names were responsible for 88% of all gains. That kind of narrow market doesn&#x27;t signal strength — it signals fragility, because one stumble from a leader and there&#x27;s nothing underneath to catch the fall.</p>
+<p>The index grabbed the headlines, but underneath it fewer and fewer stocks were actually rising — just 44% by Friday, down from 43% and as low as 9% mid-week. A rally that thins out like that is easier to knock over. The gains kept coming from the same narrow group — names like chipmakers (SOXX), chipmakers (SMH) and the Nasdaq 100 (QQQ) — while consumer-staples stocks (XLP), healthcare stocks (XLV) and regional banks (KRE) were left behind.</p>
 <h2>One Story, Properly Told</h2>
-<p>Brent crude opened the week at $97 a barrel and never looked back. US naval strikes on Iranian tankers, Iranian ballistic missiles fired at a US warship, and Houthi attacks on Saudi energy facilities stacked on top of each other day by day. By Thursday Brent crossed $105, and by Friday it was above $107 — a 10% move in five sessions. That is not a blip; that is an oil shock. The direct consequence: inflation fears that markets had been slowly relaxing about are back, and they arrive one week before the Federal Reserve meets to decide whether to raise interest rates again.</p>
+<p>One story dominated the week and kept shifting under people&#x27;s feet: it began as US-Iran Naval Strikes and by Friday had become Iran Conflict. You could read it straight off the price — $97 → $107 (+10%) — which is why it kept pulling money toward the sectors it helped and away from the ones it threatened.</p>
 <figure class="wk-fig"><svg viewBox="0 0 820 240" width="100%" role="img" preserveAspectRatio="xMidYMid meet">
   <defs><linearGradient id="wkla" x1="0" x2="0" y1="0" y2="1">
     <stop offset="0" stop-color="#e9b949" stop-opacity=".26"/>
@@ -372,141 +365,24 @@
 </svg></figure>
 <h2>The Rotation Map</h2>
 <figure class="wk-fig"><svg viewBox="0 0 820 320" width="100%" role="img" preserveAspectRatio="xMidYMid meet"><text x="240" y="18" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="2">WEEK START</text><text x="610" y="18" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="2">WEEK END</text><line x1="240" y1="294.0" x2="610" y2="114.0" stroke="#3cc48d" stroke-width="2" opacity=".85"/><circle cx="240" cy="294.0" r="4" fill="#3cc48d"/><circle cx="610" cy="114.0" r="4" fill="#3cc48d"/><text x="228" y="298.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Financials</text><text x="622" y="118.0" text-anchor="start" fill="#3cc48d" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#6</text><line x1="240" y1="34.0" x2="610" y2="194.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="34.0" r="4" fill="#e85a5e"/><circle cx="610" cy="194.0" r="4" fill="#e85a5e"/><text x="228" y="38.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Crypto</text><text x="622" y="198.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#10</text><line x1="240" y1="34.0" x2="610" y2="194.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="34.0" r="4" fill="#e85a5e"/><circle cx="610" cy="194.0" r="4" fill="#e85a5e"/><text x="228" y="60.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Cybersecurity</text><text x="622" y="218.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#10</text><line x1="240" y1="34.0" x2="610" y2="134.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="34.0" r="4" fill="#e85a5e"/><circle cx="610" cy="134.0" r="4" fill="#e85a5e"/><text x="228" y="82.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Semis</text><text x="622" y="138.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#7</text><line x1="240" y1="214.0" x2="610" y2="274.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="214.0" r="4" fill="#e85a5e"/><circle cx="610" cy="274.0" r="4" fill="#e85a5e"/><text x="228" y="220.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Utilities</text><text x="622" y="278.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#14</text><line x1="240" y1="154.0" x2="610" y2="74.0" stroke="#3cc48d" stroke-width="2" opacity=".85"/><circle cx="240" cy="154.0" r="4" fill="#3cc48d"/><circle cx="610" cy="74.0" r="4" fill="#3cc48d"/><text x="228" y="158.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Big Tech</text><text x="622" y="78.0" text-anchor="start" fill="#3cc48d" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#4</text><line x1="240" y1="194.0" x2="610" y2="154.0" stroke="#3cc48d" stroke-width="2" opacity=".85"/><circle cx="240" cy="194.0" r="4" fill="#3cc48d"/><circle cx="610" cy="154.0" r="4" fill="#3cc48d"/><text x="228" y="198.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Broad Index</text><text x="622" y="158.0" text-anchor="start" fill="#3cc48d" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#8</text></svg></figure>
-<p>Money moved decisively into energy stocks — the energy ETF (XLE) saw persistent inflows across two days with zero outflow days, the clearest directional bet of the week. Gold and metals also attracted buyers. On the other side, financials shed allocation sharply, falling from 15% to 6% of the active mix, while big tech trimmed. Crypto and cybersecurity actually grew their share, which gives the week a mixed character — part defensive oil hedge, part speculative growth bet — rather than a clean flight to safety.</p>
+<ul><li>Money moved INTO: Financials (climbed from #15 to #6), Big Tech (climbed from #8 to #4), Broad Index (climbed from #10 to #8)</li><li>And OUT OF: Crypto (slipped from #2 to #10), Cybersecurity (slipped from #2 to #10), Semis (slipped from #2 to #7)</li><li>The mix of winners had no clear signal — neither a confident push into risk nor a clear dash for safety.</li><li>Day after day, the same funds told the same story: energy stocks (XLE) kept attracting money — a real trend, not a one-day blip.</li></ul>
 <h2>Where Conviction Grew</h2>
-<p>Commodities were the only area where conviction was absolute: four up-days, zero down-days, no second-guessing. Everything else was murkier. The US dollar drifted lower across the week without a single strong up-day, suggesting investors aren&#x27;t sure whether an oil shock means &#x27;buy dollars as a safe haven&#x27; or &#x27;sell dollars because the Fed is trapped.&#x27; That uncertainty about the dollar is worth watching — it usually resolves sharply once the Fed speaks.</p>
+<ul><li>the US dollar: leaning lower (0 up-days vs 1 down-day)</li><li>commodities (oil, metals): conviction higher — a steady, one-way bid all week (4 up-days vs 0 down-days)</li></ul>
 <h2>Expected vs Delivered</h2>
-<p>There were no major corporate earnings beats or misses to score this week — the calendar was light. The one macro surprise that landed was the ECB holding its rate at 2.00% on Thursday when markets had expected a quarter-point hike to 2.25%. European bonds rallied briefly on that news, but the relief was quickly swamped by the oil story. Friday&#x27;s US inflation reading came in exactly at 3.4% year-over-year, inline with forecasts — which under normal circumstances would have been calming, but with crude above $107, the forward inflation picture looks worse than the backward-looking number suggests.</p>
+<ul><li>Little of what the market was waiting on actually reported this week — the big tests are still ahead.</li></ul>
 <h2>The Disconnect</h2>
-<p>Every single crypto signal tracked this week was positioned for a fall — 6 out of 6 short, all at the same time. When an entire market leans one way that completely, it becomes dangerous in the opposite direction: if anything nudges crypto upward, all those short positions have to be unwound simultaneously, which can produce a sharp, fast move higher that has nothing to do with fundamentals. One-sided crowds tend to get squeezed.</p>
+<p>Crowding (proxy): 6 of 6 crypto signals short at elevated attention — consensus is one-sided</p>
 <h2>What Died / What Was Born</h2>
 <div class="wk-trans"><div class="wk-tr"><span class="wk-tr-what">Fear gauge (VIX)</span><span class="wk-tr-a">15.3</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">15.8</span></div><div class="wk-tr"><span class="wk-tr-what">Market stress</span><span class="wk-tr-a">50</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">53</span></div><div class="wk-tr"><span class="wk-tr-what">Stocks rising</span><span class="wk-tr-a">43%</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">44%</span></div><div class="wk-tr"><span class="wk-tr-what">Leading sector</span><span class="wk-tr-a">Crypto</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">Semis</span></div><div class="wk-tr"><span class="wk-tr-what">Top-3 share of gains</span><span class="wk-tr-a">88%</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">40%</span></div></div>
-<p>The US-Iran military escalation story didn&#x27;t die — it just got absorbed into the furniture. Markets stopped reacting to each new headline because the conflict became the assumed backdrop rather than a shock. What was born in its place: the ECB decision and Friday&#x27;s CPI reading shifted attention toward central banks, setting up next week&#x27;s Fed meeting as the event that will either validate or break the current uneasy calm.</p>
+<p class="muted">Faded from view: US-Iran Military Escalation.</p>
+<p class="muted">Newly born: ECB Rate Decision, US CPI YoY.</p>
 <h2>Next Week&#x27;s Test</h2>
-<p>Wednesday September 16 is the only event that matters: the Federal Reserve&#x27;s interest rate decision. Markets are priced for a quarter-point hike to 3.75-4.00%. If the Fed delivers exactly that, nothing changes. If the Fed skips the hike because oil is already squeezing the economy, or hikes more aggressively because $107 crude is re-igniting inflation, either outcome reshuffles the deck.</p>
 <ul><li><strong>Wed Sep 16</strong> — FOMC Interest Rate Decision (September) (cons. 25bp hike to 3.75–4.00%)</li></ul>
 <p class="muted">What would flip the picture: A fresh oil spike from Iran reignites inflation fears, forcing the Fed to actually hike — and this relief rally reverses fast.</p>
 <h2>Bottom Line</h2>
-<p>The market is priced for a tidy, predictable Fed hike on Wednesday — but it is pricing that in with Brent above $107 and climbing. That combination, a central bank expected to tighten into an oil shock, is where the consensus looks most fragile heading into next week.</p>
+<p>Our health read sits at 49/100 (tiring): the market isn&#x27;t broken, but it&#x27;s working through friction. The tell for the week ahead is simple — do more stocks start joining the move, or do the few leaders keep carrying it alone?</p>
 <h2>In Plain English</h2>
-<ul><li><strong>ECB</strong> — European Central Bank, sets interest rates for the eurozone economy</li><li><strong>cons.</strong> — &#x27;consensus&#x27; — the average analyst forecast. Markets move on the RESULT vs this expectation, not the result alone.</li><li><strong>FOMC</strong> — the US Federal Reserve committee that sets interest rates — its decisions move nearly every market.</li><li><strong>CPI</strong> — the headline inflation reading (consumer price index) — moves rate expectations and therefore stocks and bonds.</li><li><strong>breadth</strong> — how many stocks are participating in a move; narrow breadth means a few names are masking a weak market underneath.</li><li><strong>rotation</strong> — money moving from one sector into another rather than leaving the market — tells you what leadership is forming.</li><li><strong>safe haven</strong> — assets investors buy when scared (gold, the dollar, Treasuries) — a rising safe-haven bid signals risk-off.</li><li><strong>XLE</strong> — the energy sector (oil &amp; gas producers).</li></ul></div>
-<div data-lang="fr" hidden><style>
-  .wk-fig { margin: 6px 0 30px; padding: 18px 6px;
-            background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);
-            border-radius: 14px; overflow: hidden; }
-  .wk-take { color: #96a8be; font: 400 15px/1.6 var(--sans);
-             margin: -14px 0 30px; }
-  .wk-health { display: flex; gap: 30px; align-items: center;
-               flex-wrap: wrap; margin: 4px 0 14px; padding: 20px;
-               background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);
-               border-radius: 16px; }
-  .wk-gauge { flex: 0 0 260px; }
-  .wk-pillars { flex: 1 1 340px; display: flex; flex-direction: column;
-                gap: 14px; }
-  .wk-pill-top { display: flex; justify-content: space-between;
-                 align-items: baseline; }
-  .wk-pill-name { color: #f4f7fa; font: 600 14px/1.3 var(--sans); }
-  .wk-pill-val { color: #e9b949; font: 700 15px/1 var(--mono); }
-  .wk-pill-track { height: 8px; border-radius: 6px; margin: 5px 0 4px;
-                   background: rgba(88,116,152,.28); overflow: hidden; }
-  .wk-pill-fill { height: 100%; border-radius: 6px;
-                  background: linear-gradient(90deg,#bf9534,#e9b949); }
-  .wk-pill-cap { color: #96a8be; font: 400 12px/1.4 var(--sans); }
-  .wk-drag { color: #f4f7fa; font: 400 15px/1.6 var(--sans) !important;
-             margin: 4px 0 14px; text-shadow: none !important; }
-  .wk-drag strong { color: #e85a5e; }
-  .wk-legend { margin: 4px 0 30px; padding: 14px 16px; background: rgba(14,28,51,.55);
-               border: 1px solid rgba(88,116,152,.28); border-radius: 12px; }
-  .wk-legend-h { color: #e9b949; font: 700 11px/1 var(--mono);
-                 letter-spacing: 2px; text-transform: uppercase;
-                 margin-bottom: 7px; }
-  .wk-legend-body { color: #96a8be; font: 400 14px/1.6 var(--sans) !important;
-                    margin: 0 0 10px; text-shadow: none !important; }
-  .wk-bands { display: flex; flex-wrap: wrap; gap: 7px; }
-  .wk-band { color: #96a8be; font: 400 12px/1 var(--sans);
-             background: rgba(88,116,152,.28); border-radius: 999px; padding: 5px 10px;
-             white-space: nowrap; }
-  .wk-band b { color: #f4f7fa; font-family: var(--mono); font-weight: 700; }
-  .wk-trans { display: flex; flex-direction: column; gap: 0;
-              margin: 4px 0 30px; }
-  .wk-tr { display: grid; grid-template-columns: 1fr auto 22px auto;
-           gap: 10px; align-items: center; padding: 11px 2px;
-           border-bottom: 1px dashed rgba(88,116,152,.28); }
-  .wk-tr-what { color: #96a8be; font: 400 14px/1.4 var(--sans); }
-  .wk-tr-a { color: #5b7292; font: 600 14px/1 var(--mono);
-             text-align: right; }
-  .wk-tr-arw { color: #e9b949; text-align: center; }
-  .wk-tr-b { color: #f4f7fa; font: 700 14px/1 var(--mono); }
-  @media (max-width: 640px) {
-    .wk-health { gap: 16px; } .wk-gauge { flex-basis: 100%; text-align: center; }
-  }
-</style>
-<div class="hero"><h1>La semaine sous la surface</h1><p class="lead">MIB Weekly Intelligence · <strong>Sep 07 – Sep 11</strong> · 5 séances. Ce que faisait le marché sous les gros titres — fusionné, hiérarchisé et lu comme une seule semaine.</p></div>
-<h2>📈 Le graphique de la semaine</h2>
-<p class="muted">Si vous ne deviez regarder qu’un seul graphique cette semaine, ce serait celui-ci.</p>
-<p><strong>Combien d’actions montaient vraiment</strong></p>
-<figure class="wk-fig"><svg viewBox="0 0 820 240" width="100%" role="img" preserveAspectRatio="xMidYMid meet">
-  <defs><linearGradient id="wkla" x1="0" x2="0" y1="0" y2="1">
-    <stop offset="0" stop-color="#e9b949" stop-opacity=".26"/>
-    <stop offset="1" stop-color="#e9b949" stop-opacity="0"/>
-  </linearGradient></defs>
-  <line x1="44" y1="206" x2="768" y2="206" stroke="rgba(88,116,152,.28)" stroke-width="1"/>
-  <polygon points="44.0,206.0 44.0,47.6 225.0,130.5 406.0,188.6 587.0,143.0 768.0,43.4 768.0,206.0" fill="url(#wkla)"/>
-  <polyline points="44.0,47.6 225.0,130.5 406.0,188.6 587.0,143.0 768.0,43.4" fill="none" stroke="#e9b949" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-  <circle cx="44.0" cy="47.6" r="3.4" fill="#e9b949"/><circle cx="225.0" cy="130.5" r="3.4" fill="#e9b949"/><circle cx="406.0" cy="188.6" r="3.4" fill="#e9b949"/><circle cx="587.0" cy="143.0" r="3.4" fill="#e9b949"/><circle cx="768.0" cy="43.4" r="3.4" fill="#e9b949"/><text x="48.0" y="38.6" text-anchor="start" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">43%</text><text x="764.0" y="34.4" text-anchor="end" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">44%</text><text x="44.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Lun</text><text x="225.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Mar</text><text x="406.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Mer</text><text x="587.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Jeu</text><text x="768.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">Ven</text>
-</svg></figure>
-<p class="wk-take">Le taux de participation de 9 % mercredi — invisible dans l&#x27;indice — était la vraie histoire de la semaine : le marché était presque vide d&#x27;acheteurs à son pire moment.</p>
-<h2>Le verdict de la semaine</h2>
-<p>Une semaine résumée en un seul événement : le Brent qui bondit de 97 $ à plus de 107 $ au fil de l&#x27;escalade militaire entre les États-Unis et l&#x27;Iran. Tout le reste — la BCE, l&#x27;IPC de vendredi — est passé au second plan derrière un choc pétrolier qui se retrouve désormais en plein milieu de la décision de taux de la Fed du 16 septembre.</p>
-<h2>Santé du marché MiB</h2>
-<p>Le marché s&#x27;essouffle : seulement 28 % des actions ont progressé en moyenne, et le stress a grimpé discrètement tout au long de la semaine.</p>
-<div class="wk-health"><div class="wk-gauge"><svg viewBox="0 0 260 208" width="260" role="img">
-  <path d="M 34 150 A 96 96 0 0 1 226 150" fill="none" stroke="rgba(88,116,152,.28)" stroke-width="14" stroke-linecap="round"/><path d="M 34.0 150.0 A 96 96 0 0 1 127.0 54.0" fill="none" stroke="#e9b949" stroke-width="14" stroke-linecap="round"/>
-  <text x="130" y="144" text-anchor="middle" fill="#f4f7fa" font-family="var(--serif),Georgia,serif" font-size="58" font-weight="400">49</text>
-  <text x="130" y="172" text-anchor="middle" fill="#e9b949" font-family="ui-monospace,Menlo,monospace" font-size="13" letter-spacing="3">S’ESSOUFFLE</text>
-</svg></div><div class="wk-pillars"><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Participation</span><span class="wk-pill-val">36</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:36%"></div></div><div class="wk-pill-cap">part des actions réellement en hausse</div></div><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Ampleur</span><span class="wk-pill-val">80</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:80%"></div></div><div class="wk-pill-cap">à quelle fréquence le marché large a confirmé l’indice</div></div><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Leadership</span><span class="wk-pill-val">44</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:44%"></div></div><div class="wk-pill-cap">combien de valeurs portent la hausse</div></div><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Appétit pour le risque</span><span class="wk-pill-val">85</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:85%"></div></div><div class="wk-pill-cap">offensif vs défensif, indice de peur, stabilité de l’humeur</div></div><div class="wk-pill"><div class="wk-pill-top"><span class="wk-pill-name">Cohérence des actifs</span><span class="wk-pill-val">0</span></div><div class="wk-pill-track"><div class="wk-pill-fill" style="width:2%"></div></div><div class="wk-pill-cap">actions, crypto et matières premières racontent-elles la même histoire ?</div></div></div></div><p class="wk-drag"><strong>Plus gros frein :</strong> Cohérence des actifs — actions, obligations et matières premières ne se confirmaient pas — un décor plus incertain.</p><div class="wk-legend"><div class="wk-legend-h">Comment le lire</div><p class="wk-legend-body">Un seul score, 0–100, bâti sur cinq choses qu’un marché sain réunit en même temps. Plus il est haut, plus la hausse est large, calme et confirmée par le marché.</p><div class="wk-bands"><span class="wk-band"><b>70+</b> Saine</span><span class="wk-band"><b>55–69</b> Stable</span><span class="wk-band"><b>40–54</b> S’essouffle</span><span class="wk-band"><b>25–39</b> Divergente</span><span class="wk-band"><b>&lt;25</b> Sous tension</span></div></div>
-<h2>Ce que les gros titres ont manqué</h2>
-<figure class="wk-fig"><svg viewBox="0 0 820 240" width="100%" role="img" preserveAspectRatio="xMidYMid meet">
-  <defs><linearGradient id="wkla" x1="0" x2="0" y1="0" y2="1">
-    <stop offset="0" stop-color="#e9b949" stop-opacity=".26"/>
-    <stop offset="1" stop-color="#e9b949" stop-opacity="0"/>
-  </linearGradient></defs>
-  <line x1="44" y1="206" x2="768" y2="206" stroke="rgba(88,116,152,.28)" stroke-width="1"/>
-  <polygon points="44.0,206.0 44.0,47.6 225.0,130.5 406.0,188.6 587.0,143.0 768.0,43.4 768.0,206.0" fill="url(#wkla)"/>
-  <polyline points="44.0,47.6 225.0,130.5 406.0,188.6 587.0,143.0 768.0,43.4" fill="none" stroke="#e9b949" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-  <circle cx="44.0" cy="47.6" r="3.4" fill="#e9b949"/><circle cx="225.0" cy="130.5" r="3.4" fill="#e9b949"/><circle cx="406.0" cy="188.6" r="3.4" fill="#e9b949"/><circle cx="587.0" cy="143.0" r="3.4" fill="#e9b949"/><circle cx="768.0" cy="43.4" r="3.4" fill="#e9b949"/><text x="48.0" y="38.6" text-anchor="start" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">43%</text><text x="764.0" y="34.4" text-anchor="end" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">44%</text><text x="44.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-07</text><text x="225.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-08</text><text x="406.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-09</text><text x="587.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-10</text><text x="768.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-11</text>
-</svg></figure>
-<p>L&#x27;indice a semblé presque inchangé du lundi au vendredi, mais ce calme était un mirage. Mercredi, seulement 9 % des actions montaient réellement — autrement dit, 9 titres sur 10 stagnaient ou reculaient pendant que le chiffre de l&#x27;indice tenait bon. Vendredi, ce taux est remonté à 44 %, mais la moyenne hebdomadaire n&#x27;était que de 28 %. En début de semaine, les 3 premières valeurs représentaient 88 % de la totalité des gains. Ce type de marché étroit ne traduit pas la force — il traduit la fragilité, car un faux pas d&#x27;un leader et il n&#x27;y a rien en dessous pour amortir la chute.</p>
-<h2>Une histoire, bien racontée</h2>
-<p>Le Brent a ouvert la semaine à 97 $ le baril et n&#x27;a plus regardé en arrière. Des frappes navales américaines sur des pétroliers iraniens, des missiles balistiques iraniens tirés sur un navire de guerre américain, et des attaques houthies sur des installations énergétiques saoudiennes se sont empilés jour après jour. Jeudi, le Brent a franchi 105 $, et vendredi il dépassait 107 $ — un mouvement de 10 % en cinq séances. Ce n&#x27;est pas un soubresaut ; c&#x27;est un choc pétrolier. La conséquence directe : les craintes d&#x27;inflation que les marchés avaient progressivement mises de côté sont de retour, et elles arrivent une semaine avant que la Réserve fédérale se réunisse pour décider si elle relève à nouveau ses taux.</p>
-<figure class="wk-fig"><svg viewBox="0 0 820 240" width="100%" role="img" preserveAspectRatio="xMidYMid meet">
-  <defs><linearGradient id="wkla" x1="0" x2="0" y1="0" y2="1">
-    <stop offset="0" stop-color="#e9b949" stop-opacity=".26"/>
-    <stop offset="1" stop-color="#e9b949" stop-opacity="0"/>
-  </linearGradient></defs>
-  <line x1="44" y1="206" x2="768" y2="206" stroke="rgba(88,116,152,.28)" stroke-width="1"/>
-  <polygon points="44.0,206.0 44.0,188.6 406.0,67.1 768.0,43.4 768.0,206.0" fill="url(#wkla)"/>
-  <polyline points="44.0,188.6 406.0,67.1 768.0,43.4" fill="none" stroke="#e9b949" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-  <circle cx="44.0" cy="188.6" r="3.4" fill="#e9b949"/><circle cx="406.0" cy="67.1" r="3.4" fill="#e9b949"/><circle cx="768.0" cy="43.4" r="3.4" fill="#e9b949"/><text x="48.0" y="179.6" text-anchor="start" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">97$</text><text x="764.0" y="34.4" text-anchor="end" fill="#f4f7fa" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">107$</text><text x="44.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-07</text><text x="406.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-10</text><text x="768.0" y="230.0" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1">09-11</text>
-</svg></figure>
-<h2>La carte des rotations</h2>
-<figure class="wk-fig"><svg viewBox="0 0 820 320" width="100%" role="img" preserveAspectRatio="xMidYMid meet"><text x="240" y="18" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="2">WEEK START</text><text x="610" y="18" text-anchor="middle" fill="#5b7292" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="2">WEEK END</text><line x1="240" y1="294.0" x2="610" y2="114.0" stroke="#3cc48d" stroke-width="2" opacity=".85"/><circle cx="240" cy="294.0" r="4" fill="#3cc48d"/><circle cx="610" cy="114.0" r="4" fill="#3cc48d"/><text x="228" y="298.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Financials</text><text x="622" y="118.0" text-anchor="start" fill="#3cc48d" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#6</text><line x1="240" y1="34.0" x2="610" y2="194.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="34.0" r="4" fill="#e85a5e"/><circle cx="610" cy="194.0" r="4" fill="#e85a5e"/><text x="228" y="38.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Crypto</text><text x="622" y="198.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#10</text><line x1="240" y1="34.0" x2="610" y2="194.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="34.0" r="4" fill="#e85a5e"/><circle cx="610" cy="194.0" r="4" fill="#e85a5e"/><text x="228" y="60.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Cybersecurity</text><text x="622" y="218.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#10</text><line x1="240" y1="34.0" x2="610" y2="134.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="34.0" r="4" fill="#e85a5e"/><circle cx="610" cy="134.0" r="4" fill="#e85a5e"/><text x="228" y="82.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Semis</text><text x="622" y="138.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#7</text><line x1="240" y1="214.0" x2="610" y2="274.0" stroke="#e85a5e" stroke-width="2" opacity=".85"/><circle cx="240" cy="214.0" r="4" fill="#e85a5e"/><circle cx="610" cy="274.0" r="4" fill="#e85a5e"/><text x="228" y="220.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Utilities</text><text x="622" y="278.0" text-anchor="start" fill="#e85a5e" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#14</text><line x1="240" y1="154.0" x2="610" y2="74.0" stroke="#3cc48d" stroke-width="2" opacity=".85"/><circle cx="240" cy="154.0" r="4" fill="#3cc48d"/><circle cx="610" cy="74.0" r="4" fill="#3cc48d"/><text x="228" y="158.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Big Tech</text><text x="622" y="78.0" text-anchor="start" fill="#3cc48d" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#4</text><line x1="240" y1="194.0" x2="610" y2="154.0" stroke="#3cc48d" stroke-width="2" opacity=".85"/><circle cx="240" cy="194.0" r="4" fill="#3cc48d"/><circle cx="610" cy="154.0" r="4" fill="#3cc48d"/><text x="228" y="198.0" text-anchor="end" fill="#f4f7fa" font-family="var(--sans),sans-serif" font-size="14">Broad Index</text><text x="622" y="158.0" text-anchor="start" fill="#3cc48d" font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="700">#8</text></svg></figure>
-<p>L&#x27;argent s&#x27;est déplacé de façon décisive vers les valeurs énergétiques — l&#x27;ETF énergie (XLE) a enregistré des entrées persistantes sur deux jours sans aucune journée de sortie, le pari directionnel le plus net de la semaine. L&#x27;or et les métaux ont également attiré des acheteurs. À l&#x27;inverse, les financières ont perdu une part importante de l&#x27;allocation, tombant de 15 % à 6 % du mix actif, tandis que les grandes technologiques ont légèrement réduit leur poids. La crypto et la cybersécurité ont en revanche accru leur part, ce qui donne à la semaine un caractère mixte — mi-couverture défensive sur le pétrole, mi-pari spéculatif sur la croissance — plutôt qu&#x27;une fuite franche vers la sécurité.</p>
-<h2>Où la conviction a grandi</h2>
-<p>Les matières premières ont été le seul domaine où la conviction était absolue : quatre journées de hausse, zéro journée de baisse, aucune hésitation. Tout le reste était plus flou. Le dollar américain a dérivé à la baisse tout au long de la semaine sans une seule journée de hausse marquée, ce qui suggère que les investisseurs ne savent pas si un choc pétrolier signifie « acheter des dollars comme valeur refuge » ou « vendre des dollars parce que la Fed est coincée ». Cette incertitude autour du dollar mérite d&#x27;être surveillée — elle se résout généralement brutalement dès que la Fed prend la parole.</p>
-<h2>Attendu vs livré</h2>
-<p>Il n&#x27;y a eu aucune surprise majeure à la hausse ou à la baisse sur les résultats d&#x27;entreprises cette semaine — le calendrier était léger. La seule surprise macro qui s&#x27;est matérialisée a été la BCE maintenant son taux à 2,00 % jeudi, alors que les marchés anticipaient une hausse d&#x27;un quart de point à 2,25 %. Les obligations européennes ont brièvement rebondi sur cette nouvelle, mais le soulagement a rapidement été noyé par l&#x27;histoire pétrolière. La lecture de l&#x27;inflation américaine de vendredi est ressortie exactement à 3,4 % en glissement annuel, conforme aux prévisions — ce qui, en temps normal, aurait été rassurant, mais avec le brut au-dessus de 107 $, les perspectives d&#x27;inflation à venir paraissent bien plus préoccupantes que ce chiffre rétrospectif ne le laisse entendre.</p>
-<h2>Le grand décalage</h2>
-<p>Chaque signal crypto suivi cette semaine était positionné à la baisse — 6 sur 6 à la vente, tous en même temps. Quand l&#x27;ensemble d&#x27;un marché penche aussi unanimement d&#x27;un côté, cela devient dangereux dans la direction opposée : si quoi que ce soit pousse la crypto à la hausse, toutes ces positions vendeuses doivent être débouclées simultanément, ce qui peut produire un mouvement rapide et violent à la hausse qui n&#x27;a rien à voir avec les fondamentaux. Les foules trop unanimes finissent généralement par se faire piéger.</p>
-<h2>Ce qui meurt / ce qui naît</h2>
-<div class="wk-trans"><div class="wk-tr"><span class="wk-tr-what">Fear gauge (VIX)</span><span class="wk-tr-a">15.3</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">15.8</span></div><div class="wk-tr"><span class="wk-tr-what">Market stress</span><span class="wk-tr-a">50</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">53</span></div><div class="wk-tr"><span class="wk-tr-what">Stocks rising</span><span class="wk-tr-a">43%</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">44%</span></div><div class="wk-tr"><span class="wk-tr-what">Leading sector</span><span class="wk-tr-a">Crypto</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">Semis</span></div><div class="wk-tr"><span class="wk-tr-what">Top-3 share of gains</span><span class="wk-tr-a">88%</span><span class="wk-tr-arw">→</span><span class="wk-tr-b">40%</span></div></div>
-<p>L&#x27;histoire de l&#x27;escalade militaire entre les États-Unis et l&#x27;Iran n&#x27;est pas morte — elle a simplement été absorbée dans le décor. Les marchés ont cessé de réagir à chaque nouveau titre parce que le conflit est devenu la toile de fond supposée plutôt qu&#x27;un choc. Ce qui est né à sa place : la décision de la BCE et la lecture de l&#x27;IPC de vendredi ont déplacé l&#x27;attention vers les banques centrales, positionnant la réunion de la Fed de la semaine prochaine comme l&#x27;événement qui validera ou brisera le calme précaire actuel.</p>
-<h2>Le test de la semaine prochaine</h2>
-<p>Le mercredi 16 septembre est le seul événement qui compte : la décision de taux de la Réserve fédérale. Les marchés anticipent une hausse d&#x27;un quart de point à 3,75-4,00 %. Si la Fed livre exactement cela, rien ne change. Si la Fed passe son tour parce que le pétrole pèse déjà sur l&#x27;économie, ou si elle monte plus agressivement parce que le brut à 107 $ ravive l&#x27;inflation, chacun de ces scénarios rebat les cartes.</p>
-<ul><li><strong>mer. sept. 16</strong> — Décision de la Fed sur les taux d&#x27;intérêt (septembre) (prév. hausse de 25pb à 3,75–4,00%)</li></ul>
-<p class="muted">Ce qui renverserait le tableau : A fresh oil spike from Iran reignites inflation fears, forcing the Fed to actually hike — and this relief rally reverses fast.</p>
-<h2>En résumé</h2>
-<p>Le marché est valorisé pour une hausse Fed bien ordonnée et prévisible mercredi — mais il l&#x27;intègre avec le Brent au-dessus de 107 $ et en hausse. Cette combinaison — une banque centrale censée resserrer en plein choc pétrolier — est là où le consensus paraît le plus fragile à l&#x27;approche de la semaine prochaine.</p></div>
+<ul><li><strong>cons.</strong> — &#x27;consensus&#x27; — the average analyst forecast. Markets move on the RESULT vs this expectation, not the result alone.</li><li><strong>bbl</strong> — one barrel of oil (42 gallons) — oil is priced per barrel.</li><li><strong>YoY</strong> — year-over-year — compared with the same period last year.</li><li><strong>FOMC</strong> — the US Federal Reserve committee that sets interest rates — its decisions move nearly every market.</li><li><strong>VIX</strong> — the market&#x27;s &#x27;fear gauge&#x27;. Higher = traders expect bigger swings; ~20 is the long-run average.</li><li><strong>CPI</strong> — the headline inflation reading (consumer price index) — moves rate expectations and therefore stocks and bonds.</li><li><strong>breadth</strong> — how many stocks are participating in a move; narrow breadth means a few names are masking a weak market underneath.</li><li><strong>rotation</strong> — money moving from one sector into another rather than leaving the market — tells you what leadership is forming.</li></ul>
       <div class="cta-row"></div>
       <footer class="colophon">
         @mib.terminal · <span data-i18n="Commentaire de marché éducatif — pas un conseil en investissement.">Educational market commentary — not investment advice.</span>
@@ -514,61 +390,6 @@
     </div>
   </main>
 
-  <script>
-    // burger + overlay, mirroring the homepage's buildMenu wiring; the
-    // overlay links are cloned from the masthead menu so both stay one list
-    (function () {
-      var btn = document.querySelector(".menu-toggle");
-      var ovl = document.querySelector(".menu-overlay");
-      var ovlNav = ovl.querySelector("nav");
-      var bar = document.querySelector("nav.menu");
-      if (bar) {
-        ovlNav.innerHTML = bar.innerHTML;
-        Array.prototype.forEach.call(ovlNav.querySelectorAll("a"),
-          function (a, i) { a.style.setProperty("--i", i); });
-      }
-      btn.addEventListener("click", function () {
-        var open = ovl.classList.toggle("open");
-        btn.setAttribute("aria-expanded", String(open));
-        ovl.setAttribute("aria-hidden", String(!open));
-      });
-      ovl.addEventListener("click", function (e) {
-        if (e.target === ovl || e.target.tagName === "A") {
-          ovl.classList.remove("open");
-          btn.setAttribute("aria-expanded", "false");
-          ovl.setAttribute("aria-hidden", "true");
-        }
-      });
-    })();
-  </script>
-<script>
-(function(){
-  var KEY="mib_lang", LANGS=["en","fr"];
-  function apply(l){
-    if(LANGS.indexOf(l)<0) l="en";
-    document.documentElement.setAttribute("lang", l);
-    document.querySelectorAll("[data-i18n]").forEach(function(e){
-      if(e.getAttribute("data-en")===null) e.setAttribute("data-en", e.textContent);
-      e.textContent = (l==="fr") ? e.getAttribute("data-i18n") : e.getAttribute("data-en");
-    });
-    document.querySelectorAll("[data-lang]").forEach(function(e){
-      var show = e.getAttribute("data-lang")===l;
-      e.hidden = !show; e.style.display = show ? "" : "none";
-    });
-    document.querySelectorAll("[data-lang-btn]").forEach(function(b){
-      b.classList.toggle("on", b.getAttribute("data-lang-btn")===l);
-    });
-    try{ localStorage.setItem(KEY, l); }catch(_){}
-  }
-  var init="en"; try{ init=localStorage.getItem(KEY)||"en"; }catch(_){}
-  document.addEventListener("click", function(ev){
-    var b=ev.target.closest && ev.target.closest("[data-lang-btn]");
-    if(b){ ev.preventDefault(); apply(b.getAttribute("data-lang-btn")); }
-  });
-  if(document.readyState==="loading")
-    document.addEventListener("DOMContentLoaded", function(){ apply(init); });
-  else apply(init);
-})();
-</script>
+
 </body>
 </html>
