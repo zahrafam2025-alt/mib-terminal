@@ -571,7 +571,7 @@ function Jump() {
     help: "← → run · Space or ↑ jump · again in the air: double jump · stomp the blobs · grab the bubbles: E-scooter, E-bike, tip magnet · coins are tips · Esc menu" };
   const RIDES = { scooter: { name: "E-SCOOTER", t: 8, v: 310, jumps: 2 }, bike: { name: "E-BIKE", t: 10, v: 255, jumps: 3 } };
   const wr = seeded(Math.floor(Math.random() * 2 ** 31)), R = (a, b) => a + wr() * (b - a), RI = (a, b) => Math.floor(R(a, b + 1));
-  g.joinNet = (o) => { g.net = o; g.remote = new Map(); g.bonkQ = []; g.col = NETCOL[Math.max(0, o.players.findIndex((q) => q.id === o.me)) % 4]; };
+  g.joinNet = (o) => { g.net = o; g.together = !!o.together; g.remote = new Map(); g.bonkQ = []; g.col = NETCOL[Math.max(0, o.players.findIndex((q) => q.id === o.me)) % 4]; };
   g.netState = (from, m) => {
     if (m.x === undefined) return;
     g.remote.set(from, { x: m.x, y: m.y, face: m.face, on: m.on, ride: m.ride, over: m.over, col: m.col, t: performance.now() });
@@ -950,6 +950,7 @@ function draw() {
     if (paused && document.getElementById("rconf").style.display !== "flex") banner(pausedBy ? ["PAUSED", "by " + pausedBy] : ["PAUSED"], window.TouchPad && TouchPad.on ? "⏸ or a tap to continue · ☰ menu" : "P or ⏸ to continue · Esc menu");
     if (cur.over && !cur.race && !cur.own && !(ON && ON.live && ON.players.length > 1)) banner(["GAME OVER", `${cur.score}${cur.score > 0 && cur.score >= bestOf(cur.id) ? "  NEW BEST!" : ""}`], "Space play again · Esc menu");
   }
+  if (cur && cur.over && ON && ON.live && h2hText()) { rect(0, H - 22, W, 22, "rgba(5,7,13,.85)"); txt(h2hText(), W / 2, H - 8, 10, "#fde047", "center"); }
   focusEl.style.display = document.hasFocus() ? "none" : "flex";
 }
 let last = performance.now(), FPS = 60, fpsN = 0, fpsT = performance.now();
@@ -1074,6 +1075,61 @@ function drawRoom() {
   $o("oWhat").textContent = `${g ? g[1] : ""}${ON.host ? " · press START: everyone then taps to play" : " · the host starts, then tap to play"}`; drawReady();
   $o("oList").innerHTML = ON.players.map((q) => `<div class="oitem"><span>${String(q.name).replace(/[<>&]/g, "")}${q.id === ON.me ? " (you)" : ""}</span><span class="help" style="margin:0">${q.id === 0 ? "host" : "joined"}${ON.scores.has(q.id) ? " · " + ON.scores.get(q.id).score : ""}</span></div>`).join("");
   $o("oStart").style.display = ON.host ? "" : "none";
+  roomH2h();
+}
+const LMS = new Set(["snake", "blocks", "rocksvs"]), TOPSCORE = new Set(["jump", "city"]);
+const pName = (id) => ((ON && (ON.players.find((q) => q.id === id) || (ON.round || []).find((q) => q.id === id))) || {}).name || "";
+const winName = () => pName(ON.winner) || "?";
+function roundPeople() { return (ON.round || ON.players).filter((q) => ON.players.some((p) => p.id === q.id)); }
+function stateOf(q) { return q.id === ON.me ? { score: (cur && cur.score) || 0, over: !!(cur && cur.over) } : ON.scores.get(q.id) || { score: 0, over: false }; }
+function onWin(id) {
+  if (!ON || ON.winner === id) return;
+  ON.winner = id;
+  if (cur && !cur.over && id === ON.me) cur.over = true;
+  if (id === ON.me) SFX.win();
+}
+function roundCheck() {
+  if (!ON || !ON.live || !ON.host || !cur) return;
+  const RP = roundPeople(); if (RP.length < 2) return;
+  if (LMS.has(ON.game) && ON.winner == null) {
+    const alive = RP.filter((q) => !stateOf(q).over);
+    if (alive.length <= 1) {
+      const win = alive.length === 1 ? alive[0] : RP.slice().sort((a, b) => stateOf(b).score - stateOf(a).score)[0];
+      osend({ t: "win", id: win.id }); onWin(win.id);
+      h2hReport(ON.game, [win.id], RP.filter((q) => q.id !== win.id).map((q) => q.id));
+    }
+  } else if (HOSTED.has(cur.id) || cur.id === "spa") {
+    if (cur.over && cur.h2h) { const r = cur.h2h(); if (r) h2hReport(ON.game, r.w, r.l); }
+  } else if (TOPSCORE.has(ON.game) && (ON.opt || {}).side !== "together" && RP.every((q) => stateOf(q).over)) {
+    const rank = RP.slice().sort((a, b) => stateOf(b).score - stateOf(a).score);
+    if (stateOf(rank[0]).score > stateOf(rank[1]).score) h2hReport(ON.game, [rank[0].id], rank.slice(1).map((q) => q.id));
+  }
+}
+setInterval(roundCheck, 250);
+function h2hReport(game, w, l) {
+  if (!ON || !ON.host || ON.h2hDone || !w.length || !l.length || !window.ARC || !ARC.h2hPost) return;
+  ON.h2hDone = true;
+  const posts = [];
+  for (const a of w) for (const b of l) { const x = pName(a), y = pName(b); if (x && y && x !== y) posts.push(ARC.h2hPost(game, x, y)); }
+  Promise.all(posts).then((rs) => {
+    const m = new Map(); for (const r of rs) for (const pr of (r && r.pairs) || []) m.set(pr[0] + "|" + pr[1], pr);
+    ON.h2h = [...m.values()]; ON.h2hGame = game; osend({ t: "h2h", game, pairs: ON.h2h });
+  });
+}
+function h2hText(pairs = ON && ON.h2h) {
+  if (!pairs || !pairs.length) return "";
+  return "All-time: " + pairs.slice(0, 3).map(([a, b, x, y]) => (x >= y ? `${a} ${x} - ${y} ${b}` : `${b} ${y} - ${x} ${a}`)).join("  ·  ");
+}
+let roomH2hAt = 0;
+function roomH2h() {
+  if (!ON || !window.ARC || !ARC.h2h || ON.players.length < 2) { const e = document.getElementById("oH2h"); if (e) e.textContent = ""; return; }
+  if (Date.now() - roomH2hAt < 4000) return; roomH2hAt = Date.now();
+  const game = ON.game;
+  ARC.h2h(game, ON.players.map((q) => q.name)).then((r) => {
+    let e = document.getElementById("oH2h");
+    if (!e) { e = document.createElement("div"); e.id = "oH2h"; e.className = "help"; e.style.margin = "6px 0"; $o("oList").after(e); }
+    e.textContent = r && r.pairs && r.pairs.length && ON && ON.game === game ? h2hText(r.pairs) : "";
+  });
 }
 const FANOUT = new Set(["st", "fr", "atk", "watch"]);
 function osend(obj) {
@@ -1142,6 +1198,8 @@ function onMsg(m, from) {
   else if (m.t === "addcar") { if (ON.live && cur && cur.addRemote && m.id !== ON.me) cur.addRemote({ id: m.id, name: m.name }); }
   else if (m.t === "wait") { $o("oMsg").textContent = "A round is being played: you are in for the next one (the host presses START)."; }
   else if (m.t === "rq") { ON.rq = m; ON.rqAt = m.ids.length ? ON.rqAt || Date.now() : 0; drawReady(); if (m.ids.length && !ON.live) Net.note(readyText(), 2500); }
+  else if (m.t === "win") { if (ON.live) onWin(m.id); }
+  else if (m.t === "h2h") { ON.h2h = m.pairs || []; ON.h2hGame = m.game; }
   else if (m.t === "pz") { if (ON.live) { paused = !!m.on; pausedBy = m.on ? m.name || "a player" : null; } }
   else if (m.t === "rvs") { if (ON.live) Net.note(rvText(m.ids), 4000); }
   else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); else { if (cur) { engineSet(false); cur = null; } ON.live = false; ON.rq = null; ON.rqAt = 0; drawReady(); Net.note("This round started without you: watch it, then tap to join the next one", 5000); } }
@@ -1171,14 +1229,18 @@ const PAGE_GAMES = { strike: "STRIKE & DEFUSE", empire: "CORSICAN EMPIRE" };
 const SHEET = {
   fight: { who: "1 v 1: you against the computer, or a friend online", opts: [["diff", "Computer", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
   tennis: { who: "bots only fill the empty places", opts: [["size", "Per side", [["1", "1 v 1"], ["2", "2 v 2"]]], ["side", "With friends", [["together", "Together vs bots"], ["vs", "Against each other"]]]] },
-  strike: { who: "1 to 8 players · bots fill the teams", opts: [["map", "Map", [["dune", "Dune"], ["villa", "Villa"], ["reactor", "Reactor"], ["port", "Port"], ["temple", "Temple"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]], ["size", "Per team", [["3", "3"], ["5", "5"]]]] },
+  strike: { who: "1 to 8 players · bots fill the teams", opts: [["mates", "With friends", [["vs", "Against each other"], ["together", "Same team vs bots"]]], ["map", "Map", [["dune", "Dune"], ["villa", "Villa"], ["reactor", "Reactor"], ["port", "Port"], ["temple", "Temple"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]], ["size", "Per team", [["3", "3"], ["5", "5"]]]] },
+  goal: { who: "2 v 2 · bots fill the empty places", opts: [["side", "With friends", [["vs", "Against each other"], ["together", "Together vs bots"]]]] },
+  city: { who: "alone, or up to 4 friends online", opts: [["side", "With friends", [["vs", "Against each other"], ["together", "Together"]]]] },
+  jump: { who: "alone, or up to 4 friends online", opts: [["side", "With friends", [["vs", "Against each other (bonk them)"], ["together", "Together (no bonking)"]]]] },
   kop: { who: "1 to 4 players · bots fill the squad · online: friends take the bots' places", def: { size: "2", opp: "par", venue: "home", diff: "1" },
     opts: [["team", "Your club", KOP_TEAMS.map((t) => [t.k, t.city]), "select"], ["opp", "Opponent", KOP_TEAMS.map((t) => [t.k, t.city]), "select"],
-      ["venue", "Venue", [["home", "Home"], ["away", "Away"]]], ["size", "Squad", [["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"]]], ["diff", "Rivals", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]],
+      ["venue", "Venue", [["home", "Home"], ["away", "Away"]]], ["size", "Squad", [["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"]]], ["diff", "Rivals", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]],
+      ["side", "With friends", [["together", "Together"], ["against", "Against (one in two joins the rivals)"]]]],
     prep: (pick) => { let n = null; try { n = JSON.parse(localStorage.getItem("kop-names-" + pick.team) || "null"); } catch (e) {} pick.names = Array.isArray(n) && n.length === 4 ? n : kopNames(pick.team); },
     extra: (pick) => '<div class="srow"><span>Key players</span>' + pick.names.map((n, i) => '<input data-name="' + i + '" maxlength="16" value="' + String(n).replace(/[&<>"]/g, "") + '">').join("") + "</div>",
     name: (pick, i, v) => { pick.names[i] = v.trim().slice(0, 16) || kopNames(pick.team)[i]; try { localStorage.setItem("kop-names-" + pick.team, JSON.stringify(pick.names)); } catch (e) {} } },
-  empire: { who: "1 to 4 players · bots take the empty seats", opts: [["mapk", "Map", [["sea", "Mare Nostrum"], ["land", "Terre Ferme"], ["isles", "Archipel"], ["river", "Deux Rivières"], ["forest", "Grande Forêt"]]], ["opp", "Opponents", [["1", "1"], ["2", "2"], ["3", "3"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
+  empire: { who: "1 to 4 players · bots take the empty seats", opts: [["teams", "With friends", [["ffa", "Every one for themselves"], ["allies", "Together vs bots"], ["2v2", "2 v 2"]]], ["mapk", "Map", [["sea", "Mare Nostrum"], ["land", "Terre Ferme"], ["isles", "Archipel"], ["river", "Deux Rivières"], ["forest", "Grande Forêt"]]], ["opp", "Opponents", [["1", "1"], ["2", "2"], ["3", "3"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
 };
 const ONLINE_OK = new Set(["strike", "empire", "goal", "tennis", "fight", "kop", "spa", "blocks", "snake", "rocks", "jump", "city"]);
 function openSheet(d) {
@@ -1357,6 +1419,7 @@ const againLine = window.againLine = () => readyText() || "Tap the screen to pla
 $o("oReady").onclick = () => tapReady();
 function startOnline(m) {
   if (ON) { ON.rq = null; ON.rqAt = 0; drawReady(); ON.opt = m.opt || {}; ON.round = m.players.slice(); }
+  ON.winner = null; ON.h2hDone = false;
   ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.startT = performance.now(); ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
@@ -1365,7 +1428,7 @@ function startOnline(m) {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
     music(null); document.getElementById("help").textContent = helpOf(cur);
   } else start(m.game === "rocksvs" ? "rocks" : m.game);
-  if (cur && SHARED.has(cur.id) && cur.joinNet) cur.joinNet({ me: ON.me, host: ON.host, players: m.players, versus: m.game === "rocksvs", name: (id) => ((ON && ON.players.find((q) => q.id === id)) || {}).name || "?" });
+  if (cur && SHARED.has(cur.id) && cur.joinNet) cur.joinNet({ me: ON.me, host: ON.host, players: m.players, versus: m.game === "rocksvs", together: (m.opt || {}).side === "together", name: (id) => ((ON && ON.players.find((q) => q.id === id)) || {}).name || "?" });
   if (cur && cur.id === "blocks" && m.players.length > 1) cur.onAttack = (n) => {
     const sc = (q) => (q.id === ON.me ? cur.score : (ON.scores.get(q.id) || {}).score || 0);
     const others = ON.players.filter((q) => q.id !== ON.me && !(ON.scores.get(q.id) || {}).over).sort((a, b) => sc(b) - sc(a));
@@ -1417,7 +1480,8 @@ function drawShared() {
   const rows = ON.players.map((q, i) => ({ q, i, sc: q.id === ON.me ? { score: cur.score || 0, over: !!cur.over } : ON.scores.get(q.id) || { score: 0, over: false } })).sort((a, b) => b.sc.score - a.sc.score);
   rows.forEach((r, k) => { const y = 34 + k * 12; rect(W - 114, y - 9, 110, 11, "rgba(0,0,0,.55)"); txt(`${k === 0 && r.sc.score > 0 ? "👑 " : ""}${r.q.name}${r.q.id === ON.me ? " (you)" : ""}${r.sc.over ? " ✖" : ""}`, W - 110, y, 8, NETCOL[r.i % 4]); txt(String(r.sc.score), W - 7, y, 8, "#fff", "right"); });
   if (!cur.over) return;
-  if (rows.every((r) => r.sc.over)) banner([`${rows[0].q.name.toUpperCase()} WINS!`, rows.map((r, k) => `${k + 1}. ${r.q.name} ${r.sc.score}`).join("   ")], againLine());
+  if (ON.winner != null) banner([`${winName().toUpperCase()} WINS!`, rows.map((r, k) => `${k + 1}. ${r.q.name} ${r.sc.score}`).join("   ")], againLine());
+  else if (rows.every((r) => r.sc.over)) banner([`${rows[0].q.name.toUpperCase()} WINS!`, rows.map((r, k) => `${k + 1}. ${r.q.name} ${r.sc.score}`).join("   ")], againLine());
   else { rect(0, H / 2 - 16, W, 28, "rgba(0,0,0,.6)"); txt("YOU'RE OUT · watching the others", W / 2, H / 2 + 3, 13, "#f87171", "center"); }
 }
 const BLOCKS_CROP = [148, 8, 286, 344];
@@ -1448,10 +1512,10 @@ function drawSplit() {
   });
   if (tall) { for (let i = 1; i < order.length; i++) rect(i * W / order.length - 0.5, 0, 1, H, "#26304a"); }
   else { rect(W / 2 - 0.5, 0, 1, H, "#26304a"); if (n > 2) rect(0, H / 2 - 0.5, W, 1, "#26304a"); }
-  const done = cur.over && order.every((q) => scoreOf(q).over);
+  const done = cur.over && (ON.winner != null || order.every((q) => scoreOf(q).over));
   if (done) {
     const rank = order.map((q) => ({ name: q.name, score: scoreOf(q).score })).sort((a, b) => b.score - a.score);
-    banner([`${rank[0].name.toUpperCase()} WINS!`, rank.map((r, i) => `${i + 1}. ${r.name} ${r.score}`).join("   ")], againLine());
+    banner([`${(ON.winner != null ? winName() : rank[0].name).toUpperCase()} WINS!`, rank.map((r, i) => `${i + 1}. ${r.name} ${r.score}`).join("   ")], againLine());
   }
 }
 

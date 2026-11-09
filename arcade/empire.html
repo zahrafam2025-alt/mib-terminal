@@ -37,7 +37,7 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}.hide{display:none}
     <div class="row"><label>Your name<input id="name" maxlength="16"></label>
       <label>Opponents<select id="opp"><option value="1" selected>1 bot</option><option value="2">2 bots</option><option value="3">3 bots</option></select></label>
       <label>Bots<select id="diff"><option value="0">Easy</option><option value="1" selected>Normal</option><option value="2">Hard</option></select></label>
-      <label>Teams<select id="teams"><option value="ffa">Everyone for themselves</option><option value="2v2">2 v 2 (with 4 players)</option></select></label>
+      <label>Teams<select id="teams"><option value="ffa">Everyone for themselves</option><option value="2v2">2 v 2 (with 4 players)</option><option value="allies">Friends together vs the bots</option></select></label>
       <label title="as in Age of Empires III: nobody can attack anybody until the treaty ends; build your economy and defences in peace">Peace treaty<select id="treaty"><option value="0" selected>No treaty</option><option value="300">5 min</option><option value="600">10 min</option><option value="1200">20 min</option><option value="2400">40 min</option></select></label></div>
     <div class="row"><label>Your nation<select id="civ"></select></label>
       <label>Map<select id="mapk"><option value="sea" selected>Mare Nostrum · a sea, the egg island, fords</option><option value="land">Terre Ferme · land and lakes</option><option value="isles">Archipel · an island each, causeways to the middle</option><option value="river">Deux Rivières · four lands, rivers and fords</option><option value="forest">Grande Forêt · deep woods, clearings, roads</option></select></label></div>
@@ -153,7 +153,7 @@ let G = null, mode = "menu", net = null, ME = 0;
 const inTreaty = () => !!G && G.t < (G.treaty || 0);
 function newGame(seed, slots, diff, teams, mapk, treaty) {
   G = { seed, t: 0, ents: new Map(), next: 1, terr: new Uint8Array(N * N), occ: new Int32Array(N * N), players: [], diff, shots: [], fx: [], events: [], resDelta: new Map(), removed: [], over: false, winner: -1, mapk: mapk || "sea", heroAt: [] };
-  slots.forEach((s, i) => G.players.push({ i, name: s.name, kind: s.kind, net: s.net, civ: CIVS[s.civ] ? s.civ : "cor", team: teams === "2v2" && slots.length === 4 ? i % 2 : i, res: { f: 200, w: 200, g: 100 }, age: 0, ageT: 0, pop: 0, cap: 0, dead: false,
+  slots.forEach((s, i) => G.players.push({ i, name: s.name, kind: s.kind, net: s.net, civ: CIVS[s.civ] ? s.civ : "cor", team: teams === "allies" ? (s.kind === "bot" ? 1 : 0) : teams === "2v2" && slots.length === 4 ? i % 2 : i, res: { f: 200, w: 200, g: 100 }, age: 0, ageT: 0, pop: 0, cap: 0, dead: false,
     ai: s.kind === "bot" ? { t: rnd(0, 1), wave: 0, nextWave: [600, 380, 260][diff], waveSize: [7, 9, 12][diff], rally: null, defend: 0 } : null,
     vis: new Uint8Array(N * N), exp: new Uint8Array(N * N) }));
   G.treaty = Math.max(0, +treaty || 0);
@@ -599,7 +599,12 @@ function tick(dt) {
     if (!tc && !vil) { pl.dead = true; for (const e of [...G.ents.values()]) if (e.o === pl.i) remove(e); G.events.push({ k: "out", o: pl.i }); }
   }
   const alive = G.players.filter((p) => !p.dead), teams = new Set(alive.map((p) => p.team));
-  if (!G.over && teams.size <= 1) { G.over = true; G.winner = alive.length ? alive[0].team : -1; G.events.push({ k: "over", team: G.winner }); }
+  if (!G.over && teams.size <= 1) { G.over = true; G.winner = alive.length ? alive[0].team : -1; G.events.push({ k: "over", team: G.winner }); if (mode === "host" && G.winner >= 0) h2hMatch("empire", G.players.filter((p) => p.kind !== "bot"), G.winner); }
+}
+function h2hMatch(game, people, winTeam) {
+  if (!window.ARC || !ARC.h2hPost) return;
+  const w = people.filter((p) => p.team === winTeam).map((p) => p.name), l = people.filter((p) => p.team !== winTeam).map((p) => p.name);
+  for (const a of w) for (const b of l) if (a && b && a !== b) ARC.h2hPost(game, a, b);
 }
 function stepDeer(d, dt) {
   if ((d.wT = (d.wT || rnd(2, 6)) - dt) <= 0) { d.wT = rnd(3, 8); d.dx = rnd(-0.3, 0.3); d.dy = rnd(-0.3, 0.3); }
@@ -1771,7 +1776,7 @@ $("#bShare").onclick = async () => {
 };
 setTimeout(() => {
   const q = new URLSearchParams(location.search), o = q.get("online"), room = (q.get("room") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-  for (const k of ["mapk", "diff", "opp", "treaty"]) { const v = q.get(k), el = document.getElementById(k); if (v && el && [...el.options].some((x) => x.value === v)) el.value = v; }
+  for (const k of ["mapk", "diff", "opp", "treaty", "teams"]) { const v = q.get(k), el = document.getElementById(k); if (v && el && [...el.options].some((x) => x.value === v)) el.value = v; }
   if (q.get("play") === "bots") { history.replaceState(null, "", location.pathname); $("#bSolo").onclick(); return; }
   if (!o) return;
   history.replaceState(null, "", location.pathname);

@@ -39,6 +39,7 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}
   <div id="pMain">
     <div class="row"><label>Your name<input id="name" maxlength="16"></label>
       <label>Side<select id="side"><option value="0">Attack</option><option value="1">Defend</option></select></label>
+      <label>With friends<select id="mates"><option value="vs">Against each other</option><option value="together">Same team, vs bots</option></select></label>
       <label>Players per team<select id="size"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option></select></label>
       <label>Bots<select id="diff"><option value="0">Easy</option><option value="1" selected>Normal</option><option value="2">Hard</option></select></label>
       <label>Map<select id="map"><option value="dune">DUNE · desert town</option><option value="villa">VILLA · Mediterranean village</option><option value="reactor">REACTOR · power plant</option><option value="port">PORT · container docks</option><option value="temple">TEMPLE · jungle ruins</option></select></label>
@@ -275,6 +276,11 @@ const BUY = [["heavy", 700], ["smg", 1250], ["shotgun", 1100], ["rifle", 2700], 
 const BUYN = { vest: "VEST", armor: "VEST + HELMET", nade: "GRENADE", kit: "DEFUSE KIT" }, itemName = (it) => BUYN[it] || WPN[it].name;
 const BUY_S = 25;
 const COLS = ["#f59e0b", "#60a5fa"], TEAMN = ["ATTACK", "DEFEND"];
+function h2hMatch(game, people, winTeam) {
+  if (!window.ARC || !ARC.h2hPost) return;
+  const w = people.filter((p) => p.team === winTeam).map((p) => p.name), l = people.filter((p) => p.team !== winTeam).map((p) => p.name);
+  for (const a of w) for (const b of l) if (a && b && a !== b) ARC.h2hPost(game, a, b);
+}
 function mkPlayer(id, name, team, kind) {
   return { id, name, team, kind, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: 0, crouch: false, walk: false, ground: true, hp: 100, armor: 0, helmet: false,
     alive: false, money: 800, kills: 0, deaths: 0, prim: null, sec: "pistol", kit: false, nades: 0, slot: 2, last: 3, ammo: { pistol: [12, 36] }, rT: 0, fT: 0, rec: 0, charge: false, useT: 0,
@@ -327,7 +333,7 @@ function endRound(winTeam, why) {
   W.players.forEach((p) => { p.money = Math.min(16000, p.money + (p.team === winTeam ? 3250 : 1400 + 500 * (W.loss[lose] - 1))); });
   if (W.charge.s === "planted" && lose === 0) {} // nothing extra
   ev({ k: "end", win: winTeam, why });
-  if (W.score[winTeam] >= 8) { W.state = "over"; W.t = 8; ev({ k: "over", win: winTeam }); }
+  if (W.score[winTeam] >= 8) { W.state = "over"; W.t = 8; ev({ k: "over", win: winTeam }); if (mode === "host") h2hMatch("strike", W.players.filter((p) => p.kind !== "bot"), winTeam); }
 }
 function hostTick(dt) {
   W.t -= dt;
@@ -1115,14 +1121,14 @@ if (ARC.names) { nameEl.placeholder = "pick a name"; nameEl.addEventListener("ch
 const saveName = () => { if (ARC.names) { if (!nameEl.value.trim()) nameEl.value = ARC.getName() || prompt("Your name for the scoreboard (up to 16 letters or digits):", "") || ""; const n = ARC.setName(nameEl.value) || "Player"; nameEl.value = n === "Player" ? "" : n; return n; } const n = nameEl.value.trim() || "MoonxZara"; localStorage.setItem("strike-name", n); return n; };
 function showPanel(id) { $("#menu").classList.remove("hide"); ["pMain", "pHost", "pJoin", "pPause"].forEach((x) => $("#" + x).classList.toggle("hide", x !== id)); if (document.pointerLockElement) document.exitPointerLock(); }
 function hideMenu() { $("#menu").classList.add("hide"); try { const r = glc.requestPointerLock && glc.requestPointerLock(); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
-function readCfg() { const map = $("#map").value; try { localStorage.setItem("strike-map", map); } catch (e) {} return { side: +$("#side").value, size: +$("#size").value, diff: +$("#diff").value, map }; }
+function readCfg() { const map = $("#map").value; try { localStorage.setItem("strike-map", map); } catch (e) {} return { side: +$("#side").value, size: +$("#size").value, diff: +$("#diff").value, map, mates: $("#mates").value }; }
 $("#map").value = MAPN;
 const BOTN = ["Gaylord", "Lim", "McGregor", "Maitre Oeufier", "General Sopot", "Barillon", "Solid Snake", "Big Boss", "Revolver Ocelot", "Liquid Snake",
   "Psycho Mantis", "Sniper Wolf", "Gray Fox", "Otacon", "Meryl", "Raiden", "Vulcan Raven"];
 function startMatch(humans, c) {
   loadMap(c.map || MAPN); W = newWorld(c); cfg = c;
   const teams = [[], []];
-  humans.forEach((h, i) => { const t = i === 0 ? c.side : teams[0].length <= teams[1].length ? 0 : 1; const p = mkPlayer(h.id, h.name, t, h.id === 0 ? "me" : "net"); p.net = h.net; teams[t].push(p); W.players.push(p); });
+  humans.forEach((h, i) => { const t = i === 0 || c.mates === "together" ? c.side : teams[0].length <= teams[1].length ? 0 : 1; const p = mkPlayer(h.id, h.name, t, h.id === 0 ? "me" : "net"); p.net = h.net; teams[t].push(p); W.players.push(p); });
   const size = Math.max(c.size, teams[0].length, teams[1].length); let bi = 0;
   for (let t = 0; t < 2; t++) while (teams[t].length < size) { const p = mkPlayer(100 + bi, BOTN[bi % BOTN.length], t, "bot"); bi++; teams[t].push(p); W.players.push(p); }
   ME = W.players[0];
@@ -1164,7 +1170,7 @@ $("#bShare").onclick = async () => {
 };
 setTimeout(() => {
   const q = new URLSearchParams(location.search), o = q.get("online"), room = (q.get("room") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-  for (const k of ["map", "diff", "size"]) { const v = q.get(k), el = document.getElementById(k); if (v && el && [...el.options].some((x) => x.value === v)) el.value = v; }
+  for (const k of ["map", "diff", "size", "mates"]) { const v = q.get(k), el = document.getElementById(k); if (v && el && [...el.options].some((x) => x.value === v)) el.value = v; }
   if (q.get("play") === "bots") { history.replaceState(null, "", location.pathname); $("#bSolo").onclick(); return; }
   if (!o) return;
   history.replaceState(null, "", location.pathname);

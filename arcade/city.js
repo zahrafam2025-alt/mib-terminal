@@ -842,6 +842,7 @@ function City() {
   for (let n = 0; n < 18; n++) { const s = roadSpot(90, 650); if (s) mkCar(Math.random() < 0.55 ? "sedan" : any(["taxi", "van", "sport", "suv", "cabrio"]), s.x, s.y, s.a, { drv: "ai", ai: s.ai }); }
   for (let n = 0; n < 160 && peds.length < 40; n++) { const x = pl.x + rnd(-520, 520), y = pl.y + rnd(-420, 420), t = tileAt(x, y); if ((t === WALK || t === GRASS) && Math.hypot(x - pl.x, y - pl.y) > 40) mkPed(x, y); }
   g.joinNet = (o) => {
+    g.together = !!o.together;
     const slot = Math.max(0, o.players.findIndex((q) => q.id === o.me));
     g.net = o; g.remote = new Map(); g.shotQ = []; pl.shirt = ["#f97316", "#ec4899", "#84cc16", "#eab308"][slot % 4];
     pl.x += (slot % 2) * 26; pl.y += Math.floor(slot / 2) * 26;

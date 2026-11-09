@@ -262,6 +262,7 @@ function Racer(two = false, online = null) {
     else if (two && g.firstDone && g.t - g.firstDone > 30) finish();
   };
   let sendT = 0;
+  g.h2h = () => (online && g.over && g.order && g.order.length > 1 ? { w: [g.order[0]], l: g.order.slice(1) } : null);
   g.netState = (id, m) => { const r = RP.find((x) => x.id === id); if (r) r.net = m; };
   g.addRemote = (q) => {
     if (RP.some((r) => r.id === q.id) || all.length >= 4) return;
@@ -300,6 +301,7 @@ function Racer(two = false, online = null) {
       g.result = [`${ord[0].name.toUpperCase()} WINS!`, ord.map((c, i) => `${i + 1}. ${c.name}${c.bestLap ? " " + c.bestLap.toFixed(2) + " s" : ""}`).join("   ")];
       if (p.bestLap) record("spa", "lap_ms", Math.round(p.bestLap * 1000));
       if (ord[0] === p) SFX.win(); else SFX.over();
+      g.order = ord.map((c) => (c.remote ? c.id : online.me));
       return;
     }
     if (!two) {
