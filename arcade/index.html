@@ -60,7 +60,7 @@ button:hover { border-color:var(--a); }
 <script src="touch.js"></script>
 <script src="net.js"></script>
 <script src="racer.js"></script>
-<script src="goal.js"></script><script src="tennis.js"></script><script src="fight.js"></script>
+<script src="goal.js"></script><script src="tennis.js"></script><script src="fight.js"></script><script src="kop.js"></script>
 <script src="city.js"></script>
 <script>
 "use strict";
@@ -845,6 +845,7 @@ const GAMES = [
   { id: "goal", name: "GOAL RUSH", sub: "2 v 2 football, bots or online", make: () => Goal(), col: "#22c55e" },
   { id: "tennis", name: "RALLY RUMBLE", sub: "2 v 2 party tennis: items, bananas, bombs", make: () => Tennis(), col: "#f97316" },
   { id: "fight", name: "FIGHT CLUB", sub: "1 v 1 brawler, 13 crazy fighters", make: () => Fight(), col: "#e11d48" },
+  { id: "kop", name: "KOP COMMANDO", sub: "run & gun through Ligue 1 cities", make: () => Kop(), col: "#0ea5e9", quiet: true },
   { id: "strike", name: "STRIKE & DEFUSE", sub: "3D tactical shooter, bots or LAN", href: ARC.page("strike"), col: "#eab308" },
   { id: "empire", name: "CORSICAN EMPIRE", sub: "build, gather, conquer: bots or LAN", href: ARC.page("empire"), col: "#38bdf8" },
 ];
@@ -853,6 +854,7 @@ const TOUCH_HELP = { blocks: "◀ ▶: move · ▼: faster · A: drop · B: turn
   snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS, BRAKE and BOOST on the right",
   city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball) · ⟲ BALLE (top left): ball back to the centre",
   tennis: "stick: move · A: shot and serve · B: lob (over a player at the net) · C: your item, or a dive · first to 7",
+  kop: "stick: run and aim (up, diagonals, down = crouch) · A: fire (hold) · B: jump · C: firecracker · beat the rival mascot-mech",
   fight: "stick: walk, jump (up), crouch (down), walk away = block · A: punch (3 = combo) · B: kick · C: special · block then A/B: counter" };
 const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
 function start(id) {
@@ -1001,8 +1003,8 @@ setInterval(() => {
   document.getElementById("gPause").textContent = paused ? "▶" : "⏸";
 }, 250);
 
-const HOSTED = new Set(["goal", "tennis", "fight"]);
-const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["tennis", "RALLY RUMBLE · 2 v 2 party tennis"], ["fight", "FIGHT CLUB · 1 v 1"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS · together"], ["rocksvs", "ROCKS · versus (shoot each other)"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
+const HOSTED = new Set(["goal", "tennis", "fight", "kop"]);
+const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["tennis", "RALLY RUMBLE · 2 v 2 party tennis"], ["fight", "FIGHT CLUB · 1 v 1"], ["kop", "KOP COMMANDO · co-op run & gun"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS · together"], ["rocksvs", "ROCKS · versus (shoot each other)"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
 const realRandom = Math.random;
 const SHARED = new Set(["snake", "rocks", "rocksvs", "jump", "city"]), NETCOL = ["#22d3ee", "#f472b6", "#a3e635", "#fbbf24"];
 const seeded = (a) => () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
@@ -1141,19 +1143,39 @@ const SHEET = {
   fight: { who: "1 v 1: you against the computer, or a friend online", opts: [["diff", "Computer", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
   tennis: { who: "bots only fill the empty places", opts: [["size", "Per side", [["1", "1 v 1"], ["2", "2 v 2"]]], ["side", "With friends", [["together", "Together vs bots"], ["vs", "Against each other"]]]] },
   strike: { who: "1 to 8 players · bots fill the teams", opts: [["map", "Map", [["dune", "Dune"], ["villa", "Villa"], ["reactor", "Reactor"], ["port", "Port"], ["temple", "Temple"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]], ["size", "Per team", [["3", "3"], ["5", "5"]]]] },
+  kop: { who: "1 to 4 players · bots fill the squad · online: friends take the bots' places", def: { size: "2", opp: "par", venue: "home", diff: "1" },
+    opts: [["team", "Your club", KOP_TEAMS.map((t) => [t.k, t.city]), "select"], ["opp", "Opponent", KOP_TEAMS.map((t) => [t.k, t.city]), "select"],
+      ["venue", "Venue", [["home", "Home"], ["away", "Away"]]], ["size", "Squad", [["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"]]], ["diff", "Rivals", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]],
+    prep: (pick) => { let n = null; try { n = JSON.parse(localStorage.getItem("kop-names-" + pick.team) || "null"); } catch (e) {} pick.names = Array.isArray(n) && n.length === 4 ? n : kopNames(pick.team); },
+    extra: (pick) => '<div class="srow"><span>Key players</span>' + pick.names.map((n, i) => '<input data-name="' + i + '" maxlength="16" value="' + String(n).replace(/[&<>"]/g, "") + '">').join("") + "</div>",
+    name: (pick, i, v) => { pick.names[i] = v.trim().slice(0, 16) || kopNames(pick.team)[i]; try { localStorage.setItem("kop-names-" + pick.team, JSON.stringify(pick.names)); } catch (e) {} } },
   empire: { who: "1 to 4 players · bots take the empty seats", opts: [["mapk", "Map", [["sea", "Mare Nostrum"], ["land", "Terre Ferme"], ["isles", "Archipel"], ["river", "Deux Rivières"], ["forest", "Grande Forêt"]]], ["opp", "Opponents", [["1", "1"], ["2", "2"], ["3", "3"]]], ["diff", "Bots", [["0", "Easy"], ["1", "Normal"], ["2", "Hard"]]]] },
 };
-const ONLINE_OK = new Set(["strike", "empire", "goal", "tennis", "fight", "spa", "blocks", "snake", "rocks", "jump", "city"]);
+const ONLINE_OK = new Set(["strike", "empire", "goal", "tennis", "fight", "kop", "spa", "blocks", "snake", "rocks", "jump", "city"]);
 function openSheet(d) {
   let sh = document.getElementById("gsheet");
   if (!sh) { sh = document.createElement("div"); sh.id = "gsheet"; screenEl.appendChild(sh); }
   const S = SHEET[d.id], pick = {};
   try { Object.assign(pick, JSON.parse(localStorage.getItem("arcade-sheet-" + d.id) || "{}")); } catch (e) {}
-  const opts = S ? S.opts.map(([k, label, vals]) => { if (!pick[k]) pick[k] = ({ map: "dune", diff: "1", size: "5", mapk: "sea", opp: "1" })[k] || vals[0][0]; return '<div class="srow"><span>' + label + "</span>" + vals.map(([v, n]) => '<button data-k="' + k + '" data-v="' + v + '"' + (pick[k] === v ? ' class="on"' : "") + ">" + n + "</button>").join("") + "</div>"; }).join("") : "";
+  const opts = S ? S.opts.map(([k, label, vals, how]) => {
+    if (!pick[k] || !vals.some(([v]) => v === pick[k])) pick[k] = (S.def && S.def[k]) || ({ map: "dune", diff: "1", size: "5", mapk: "sea", opp: "1" })[k] || vals[0][0];
+    if (!vals.some(([v]) => v === pick[k])) pick[k] = vals[0][0];
+    if (how === "select") return '<div class="srow"><span>' + label + '</span><select data-ks="' + k + '">' + vals.map(([v, n]) => '<option value="' + v + '"' + (pick[k] === v ? " selected" : "") + ">" + n + "</option>").join("") + "</select></div>";
+    return '<div class="srow"><span>' + label + "</span>" + vals.map(([v, n]) => '<button data-k="' + k + '" data-v="' + v + '"' + (pick[k] === v ? ' class="on"' : "") + ">" + n + "</button>").join("") + "</div>"; }).join("") : "";
+  const save = () => { try { localStorage.setItem("arcade-sheet-" + d.id, JSON.stringify(pick)); } catch (x) {} };
+  if (S && S.prep) S.prep(pick);
+  const extra = () => (S && S.extra ? '<div class="sextra">' + S.extra(pick) + "</div>" : "");
+  save();
   sh.innerHTML = '<div class="scard"><div class="stitle" style="color:' + d.col + '">' + d.name + '</div><div class="ssub">' + (S ? S.who : d.keys2 ? "two players on one keyboard" : ONLINE_OK.has(d.id) ? "alone, or up to 4 friends online" : "") + "</div>"
-    + opts + '<div class="sbtns"><button class="pri" data-go="bots">▶ ' + (S ? "Play vs bots" : "Play now") + "</button>"
+    + opts + extra() + '<div class="sbtns"><button class="pri" data-go="bots">▶ ' + (S ? "Play vs bots" : "Play now") + "</button>"
     + (ONLINE_OK.has(d.id) ? '<button data-go="host">🌐 Host online</button><button data-go="join">🔗 Join a friend</button>' : "") + '</div><button class="sclose" data-go="close" aria-label="close">✕</button></div>';
   sh.classList.add("open");
+  sh.onchange = (e) => {
+    const t = e.target;
+    if (t.dataset.ks) { pick[t.dataset.ks] = t.value; if (S.prep) { S.prep(pick); const x = sh.querySelector(".sextra"); if (x) x.outerHTML = extra(); } save(); }
+    if (t.dataset.name !== undefined && S.name) { S.name(pick, +t.dataset.name, t.value); save(); }
+  };
+  sh.onkeydown = (e) => e.stopPropagation();
   sh.onclick = (e) => {
     const b = e.target.closest("button"); if (!b) { if (e.target === sh) sh.classList.remove("open"); return; }
     if (b.dataset.k) { pick[b.dataset.k] = b.dataset.v; sh.querySelectorAll('[data-k="' + b.dataset.k + '"]').forEach((x) => x.classList.toggle("on", x === b)); try { localStorage.setItem("arcade-sheet-" + d.id, JSON.stringify(pick)); } catch (x) {} return; }
@@ -1173,6 +1195,7 @@ function openSheet(d) {
 #gsheet .srow button{padding:6px 10px;border-radius:999px}#gsheet .srow button.on{background:#b45309;border-color:#f59e0b;color:#fff}
 #gsheet .sbtns{display:grid;gap:8px;margin-top:4px}#gsheet .sbtns button{padding:12px;font-size:16px;font-weight:700;border-radius:10px}#gsheet .sbtns .pri{background:#b45309;border-color:#f59e0b;color:#fff}
 #gsheet .sclose{position:absolute;right:8px;top:8px;padding:4px 9px;border-radius:8px}
+#gsheet select,#gsheet input{background:#22283d;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:13px "Segoe UI",sans-serif}#gsheet input{width:92px}
 @media (max-height:480px){#gsheet .scard{width:min(640px,94%);gap:6px;padding:10px 12px}#gsheet .stitle{font-size:18px}#gsheet .sbtns{grid-auto-flow:column;grid-auto-columns:1fr}#gsheet .sbtns button{padding:9px 6px;font-size:14px}#gsheet .srow button{padding:4px 9px}}`;
   document.head.appendChild(st);
 })();
@@ -1308,7 +1331,7 @@ function startOnline(m) {
   ON.players = m.players; ON.game = m.game; ON.seed = m.seed; ON.rain = m.rain; ON.live = true; ON.startT = performance.now(); ON.frames.clear(); ON.scores.clear(); ON.seen.clear(); ON.watchT = 0;
   Math.random = seeded(m.seed);
   hideOnline(); engineSet(false); paused = false; overDone = false;
-  if (HOSTED.has(m.game)) { cur = ({ tennis: Tennis, fight: Fight }[m.game] || Goal)({ me: ON.me, host: ON.host, players: m.players, opt: m.opt || {}, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = helpOf(cur); }
+  if (HOSTED.has(m.game)) { cur = ({ tennis: Tennis, fight: Fight, kop: Kop }[m.game] || Goal)({ me: ON.me, host: ON.host, players: m.players, opt: m.opt || {}, send: (o) => osend(o) }); music(null); document.getElementById("help").textContent = helpOf(cur); }
   else if (m.game === "spa") {
     cur = Racer(false, { me: ON.me, players: m.players, rain: m.rain, send: (s) => osend(Object.assign({ t: "st" }, s)) });
     music(null); document.getElementById("help").textContent = helpOf(cur);
@@ -1408,7 +1431,7 @@ function askName() {
   const b = document.getElementById("nameBtn"); if (b) b.textContent = n ? "name: " + n : "pick a name";
   screenEl.focus();
 }
-const BOARD_ROWS = [["goal", "best", "GOAL RUSH"], ["tennis", "best", "RALLY RUMBLE"], ["fight", "best", "FIGHT CLUB"], ["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
+const BOARD_ROWS = [["kop", "best", "KOP COMMANDO"], ["goal", "best", "GOAL RUSH"], ["tennis", "best", "RALLY RUMBLE"], ["fight", "best", "FIGHT CLUB"], ["spa", "lap_ms", "GRAND PRIX · best lap"], ["spa", "best", "GRAND PRIX · points"], ["strike", "best", "STRIKE & DEFUSE · kills in a match"],
   ["strike", "wins", "STRIKE & DEFUSE · matches won"], ["empire", "wins", "CORSICAN EMPIRE · wins"], ["city", "best", "CHAOS CITY"], ["blocks", "best", "BLOCKS"],
   ["rocks", "best", "ROCKS"], ["snake", "best", "SNAKE"], ["jump", "best", "JUMP"]];
 let boardOpen = "";
@@ -1496,7 +1519,7 @@ if (TouchPad.on) {
     blk.forEach((b) => { b.style.display = blocks ? "" : "none"; });
     any.forEach((b, i) => { b.style.display = show && !isGp && !blocks && !snake && !(i === 1 && cur && (cur.id === "jump" || cur.id === "rocks")) ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
-    wpn.style.display = cur && cur.id === "city" ? "" : "none"; cBtn.style.display = cur && (cur.id === "fight" || cur.id === "tennis") ? "" : "none";
+    wpn.style.display = cur && cur.id === "city" ? "" : "none"; cBtn.style.display = cur && (cur.id === "fight" || cur.id === "tennis" || cur.id === "kop") ? "" : "none";
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
     pz.style.display = show && canPause() ? "" : "none"; pz.textContent = paused ? "▶" : "⏸"; rs.style.display = show ? "" : "none";
     pad.classList.toggle("port", innerHeight > innerWidth);
