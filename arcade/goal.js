@@ -8,6 +8,7 @@ function Goal(online = null) {
   const P = [0, 1, 2, 3].map((i) => ({ i, team: i % 2, human: i < humans.length ? humans[i] : null, name: i < humans.length ? humans[i].name : BOTN[i] + " (bot)",
     x: 0, y: 0, vx: 0, vy: 0, fx: i % 2 ? -1 : 1, fy: 0, stam: 1, kickT: 0, in: { mx: 0, my: 0, sp: false, k: 0, t: 0 }, lastK: 0, lastT: 0, dashT: 0, tackT: 0, dazed: 0 }));
   let stuckT = 0;
+  const anc = { x: 0, y: 0, t: 0 };
   const ball = { x: 240, y: MY, vx: 0, vy: 0 };
   const g = { id: "goal", own: true, score: 0, over: false, t: 0, s: [0, 0], pause: 1.5, msg: "KICK OFF!", result: null, sendT: 0, net: null,
     help: "arrows / W A S D run · Space shoot · Shift sprint · Enter or X tackle · R or ⟲ BALLE: ball back to the centre · first to 5 · Esc menu" };
@@ -94,10 +95,11 @@ function Goal(online = null) {
     }
     const nearWall = ball.y < Y0 + 14 || ball.y > Y1 - 14 || ((ball.x < X0 + 14 || ball.x > X1 - 14) && Math.abs(ball.y - MY) > MOUTH);
     stuckT = Math.hypot(ball.vx, ball.vy) < 60 ? stuckT + dt * (nearWall ? 1 : 0.72) : 0;
-    if (stuckT > 2.5) {
-      stuckT = 0; const a = Math.atan2(MY - ball.y, 240 - ball.x) + (Math.random() - 0.5) * 2.2, sp = 190 + Math.random() * 110;
+    if (Math.hypot(ball.x - anc.x, ball.y - anc.y) > 36) { anc.x = ball.x; anc.y = ball.y; anc.t = 0; } else anc.t += dt * (nearWall ? 1.5 : 1);
+    if (stuckT > 2.5 || anc.t > 3) {
+      stuckT = 0; anc.t = 0; const a = Math.atan2(MY - ball.y, 240 - ball.x) + (Math.random() - 0.5) * 2.2, sp = 190 + Math.random() * 110;
       ball.x += Math.cos(a) * 16; ball.y += Math.sin(a) * 16; ball.vx = Math.cos(a) * sp; ball.vy = Math.sin(a) * sp;
-      for (const p of P) if (Math.hypot(p.x - ball.x, p.y - ball.y) < PR + BR + 10) { p.x -= Math.cos(a) * 12; p.y -= Math.sin(a) * 12; }
+      for (const p of P) if (Math.hypot(p.x - ball.x, p.y - ball.y) < PR + BR + 22) { p.x -= Math.cos(a) * 22; p.y -= Math.sin(a) * 22; p.kickT = 0.6; }
       g.msg = nearWall ? "THROW-IN" : "LOOSE BALL!"; tone(660, 0.08, "square", 0.05);
     }
     ball.x += ball.vx * dt; ball.y += ball.vy * dt;

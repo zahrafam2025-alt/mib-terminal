@@ -37,7 +37,8 @@ a{color:#a78bfa;font-size:13px;text-decoration:none}.hide{display:none}
     <div class="row"><label>Your name<input id="name" maxlength="16"></label>
       <label>Opponents<select id="opp"><option value="1" selected>1 bot</option><option value="2">2 bots</option><option value="3">3 bots</option></select></label>
       <label>Bots<select id="diff"><option value="0">Easy</option><option value="1" selected>Normal</option><option value="2">Hard</option></select></label>
-      <label>Teams<select id="teams"><option value="ffa">Everyone for themselves</option><option value="2v2">2 v 2 (with 4 players)</option></select></label></div>
+      <label>Teams<select id="teams"><option value="ffa">Everyone for themselves</option><option value="2v2">2 v 2 (with 4 players)</option></select></label>
+      <label title="as in Age of Empires III: nobody can attack anybody until the treaty ends; build your economy and defences in peace">Peace treaty<select id="treaty"><option value="0" selected>No treaty</option><option value="300">5 min</option><option value="600">10 min</option><option value="1200">20 min</option><option value="2400">40 min</option></select></label></div>
     <div class="row"><label>Your nation<select id="civ"></select></label>
       <label>Map<select id="mapk"><option value="sea" selected>Mare Nostrum · a sea, the egg island, fords</option><option value="land">Terre Ferme · land and lakes</option><option value="isles">Archipel · an island each, causeways to the middle</option><option value="river">Deux Rivières · four lands, rivers and fords</option><option value="forest">Grande Forêt · deep woods, clearings, roads</option></select></label></div>
     <div class="help" id="civInfo" style="margin-top:4px"></div>
@@ -149,11 +150,14 @@ const PCOL = ["#2563eb", "#dc2626", "#16a34a", "#eab308"], PNAME = ["BLUE", "RED
 const fmtCost = (c) => (c ? Object.entries(c).map(([k, v]) => `${v}${{ f: "F", w: "W", g: "G" }[k]}`).join(" ") : "");
 
 let G = null, mode = "menu", net = null, ME = 0;
-function newGame(seed, slots, diff, teams, mapk) {
+const inTreaty = () => !!G && G.t < (G.treaty || 0);
+function newGame(seed, slots, diff, teams, mapk, treaty) {
   G = { seed, t: 0, ents: new Map(), next: 1, terr: new Uint8Array(N * N), occ: new Int32Array(N * N), players: [], diff, shots: [], fx: [], events: [], resDelta: new Map(), removed: [], over: false, winner: -1, mapk: mapk || "sea", heroAt: [] };
   slots.forEach((s, i) => G.players.push({ i, name: s.name, kind: s.kind, net: s.net, civ: CIVS[s.civ] ? s.civ : "cor", team: teams === "2v2" && slots.length === 4 ? i % 2 : i, res: { f: 200, w: 200, g: 100 }, age: 0, ageT: 0, pop: 0, cap: 0, dead: false,
     ai: s.kind === "bot" ? { t: rnd(0, 1), wave: 0, nextWave: [600, 380, 260][diff], waveSize: [7, 9, 12][diff], rally: null, defend: 0 } : null,
     vis: new Uint8Array(N * N), exp: new Uint8Array(N * N) }));
+  G.treaty = Math.max(0, +treaty || 0);
+  for (const p of G.players) if (p.ai) p.ai.nextWave = Math.max(p.ai.nextWave, G.treaty + 45);
   mapgen(seed, slots.length, G.mapk);
   for (const p of G.players) if (p.ai) p.exp.fill(1);
 }
@@ -366,7 +370,7 @@ function command(o, c) {
       else if (t && t.k === "b" && t.o === o && t.t === "FARM" && u.t === "vil") { u.st = "gather"; u.tgt = t.id; u.gtype = "farm"; goTo(u, ...center(t)); }
       else if (t && t.k === "b" && t.o === o && BT[t.t].drop && u.t === "vil" && u.carry) { u.st = "return"; u.tgt = t.id; goTo(u, ...center(t), adjGoal(t)); }
       else if (t && t.k === "r" && t.t === "fish" && u.t === "fishb") { u.st = "gather"; u.tgt = t.id; u.gtype = "fish"; goTo(u, t.x, t.y); }
-      else if (t && (t.k === "u" || t.k === "b") && t.o !== o && t.o >= 0 && G.players[t.o].team !== pl.team && canHit(u, t)) { u.st = "attack"; u.tgt = t.id; chase(u, t); }
+      else if (t && (t.k === "u" || t.k === "b") && t.o !== o && t.o >= 0 && G.players[t.o].team !== pl.team && canHit(u, t) && !inTreaty()) { u.st = "attack"; u.tgt = t.id; chase(u, t); }
       else { const ring = Math.ceil(Math.sqrt(i)), a = i * 2.4, r = i ? 0.45 + ring * 0.42 : 0; u.st = "move"; goTo(u, c.x + Math.cos(a) * r, c.y + Math.sin(a) * r); u.attackMove = !!c.am; }
     });
   }
@@ -388,9 +392,10 @@ const dist = (a, b) => { const [ax, ay] = center(a), [bx, by] = center(b); retur
 const reach = (u, t) => { if (t.k === "b" || (t.k === "r" && t.t !== "deer")) { const s = t.sz || 1; const dx = Math.max(t.x - u.x, 0, u.x - (t.x + s)), dy = Math.max(t.y - u.y, 0, u.y - (t.y + s)); return Math.hypot(dx, dy); } return Math.hypot(t.x - u.x, t.y - u.y); };
 const open = (e) => { if (e.k !== "r" || e.t === "deer") return true; const s = e.sz || 1; for (let i = -1; i <= s; i++) for (const [x, y] of [[e.x + i, e.y - 1], [e.x + i, e.y + s], [e.x - 1, e.y + i], [e.x + s, e.y + i]]) if (passable(x, y)) return true; return false; };
 function nearest(u, test, maxD = 99) { let best = null, bd = maxD; for (const e of G.ents.values()) { if (!test(e)) continue; const d = dist(u, e); if (d < bd) { bd = d; best = e; } } return best; }
-const enemy = (a, b) => b.o >= 0 && a.o >= 0 && b.o !== a.o && G.players[a.o].team !== G.players[b.o].team;
+const enemy = (a, b) => !inTreaty() && b.o >= 0 && a.o >= 0 && b.o !== a.o && G.players[a.o].team !== G.players[b.o].team;
 function hurt(t, dmg, by) {
   if (t.hp <= 0) return;
+  if (inTreaty() && by && by.o >= 0 && t.o >= 0 && by.o !== t.o) return;
   t.hp -= dmg;
   if (t.hp <= 0 && t.k === "u") G.events.push({ k: "die", o: t.o, t: t.t, x: t.x, y: t.y });
   if (t.hp <= 0 && t.t === "hero") { const pl = G.players[t.o]; if (pl) { pl.heroDown = true; G.events.push({ k: "herodown", o: t.o }); } }
@@ -1491,6 +1496,12 @@ function drawUI() {
     if (hint) { X.font = "bold 12px Segoe UI"; const tw = X.measureText(hint).width; X.fillStyle = "rgba(0,0,0,.75)"; X.fillRect(UI.mouse[0] + 14, UI.mouse[1] + 8, tw + 12, 20); X.fillStyle = hv.k === "r" ? "#fde047" : "#fca5a5"; X.fillText(hint, UI.mouse[0] + 20, UI.mouse[1] + 22); }
   }
   if (UI.tip) { X.fillStyle = "rgba(0,0,0,.8)"; X.font = "12px Segoe UI"; const tw = X.measureText(UI.tip).width; X.fillRect(UI.mouse[0] - tw / 2 - 6, py - 26, tw + 12, 20); X.fillStyle = "#fff"; X.textAlign = "center"; X.fillText(UI.tip, UI.mouse[0], py - 12); X.textAlign = "left"; }
+  if (G.treaty && !UI.treatyDone && G.t >= G.treaty) { UI.treatyDone = true; banner("TREATY OVER: the war begins!", 4); sfx("alert"); }
+  if (inTreaty()) {
+    const left = Math.ceil(G.treaty - G.t), tx = `☮ PEACE TREATY · ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")} · no attacks`;
+    X.font = "bold 13px Segoe UI"; X.textAlign = "center"; const tw = X.measureText(tx).width;
+    X.fillStyle = "rgba(10,30,20,.8)"; X.fillRect(W0 / 2 - tw / 2 - 10, 40, tw + 20, 22); X.fillStyle = left <= 30 && Math.floor(G.t * 2) % 2 ? "#fbbf24" : "#86efac"; X.fillText(tx, W0 / 2, 56); X.textAlign = "left";
+  }
   if (UI.banner) { UI.banner.t -= 1 / 60; X.globalAlpha = clamp(UI.banner.t, 0, 1); X.font = "bold 30px Georgia, serif";
     const bw2 = X.measureText(UI.banner.s).width; if (bw2 > W0 - 60) X.font = `bold ${Math.max(14, Math.floor(30 * (W0 - 60) / bw2))}px Georgia, serif`; X.textAlign = "center"; X.fillStyle = "#000"; X.fillText(UI.banner.s, W0 / 2 + 2, 92); X.fillStyle = "#fde68a"; X.fillText(UI.banner.s, W0 / 2, 90); X.globalAlpha = 1; X.textAlign = "left"; if (UI.banner.t <= 0) UI.banner = null; }
   if (G.over) { X.font = "15px Segoe UI"; X.textAlign = "center"; X.fillStyle = "#e5e7eb"; X.fillText(window.TouchPad && TouchPad.on ? "☰: back to the menu" : "Esc: back to the menu", W0 / 2, 120); X.textAlign = "left"; }
@@ -1707,8 +1718,8 @@ function slotsFor(humans) {
   let b = 0; while (slots.length < total) slots.push({ name: BOTN[b++], kind: "bot", civ: left.shift() || pick(CIVK) });
   return slots;
 }
-function begin(slots, seed, me, diff, teams, mapk) {
-  newGame(seed, slots, diff, teams, mapk); ME = me; UI.sel.clear(); UI.placing = null; UI.banner = null; UI.chat = [];
+function begin(slots, seed, me, diff, teams, mapk, treaty) {
+  newGame(seed, slots, diff, teams, mapk, treaty); UI.treatyDone = !G.treaty; ME = me; UI.sel.clear(); UI.placing = null; UI.banner = null; UI.chat = [];
   for (const p of G.players) fog(p.i);
   const h = G.players[ME].home; lookAt(h[0], h[1]); hideMenu();
   const tc = [...G.ents.values()].find((e) => e.o === ME && e.t === "TC"); if (tc) UI.sel.add(tc.id);
@@ -1718,7 +1729,7 @@ function begin(slots, seed, me, diff, teams, mapk) {
     : G.mapk === "forest" ? "GRANDE FORÊT: deep woods everywhere · roads lead to the middle · each clearing hides a gold mine"
     : `You lead the ${CIVS[G.players[ME].civ].n}: gather, build houses, advance through the ages`, 6);
 }
-$("#bSolo").onclick = () => { audio(); const slots = slotsFor([{ name: saveName() }]); mode = "solo"; begin(slots, Math.floor(Math.random() * 1e9), 0, +$("#diff").value, $("#teams").value, $("#mapk").value); };
+$("#bSolo").onclick = () => { audio(); const slots = slotsFor([{ name: saveName() }]); mode = "solo"; begin(slots, Math.floor(Math.random() * 1e9), 0, +$("#diff").value, $("#teams").value, $("#mapk").value, +$("#treaty").value); };
 $("#bFull").onclick = () => { if (window.TouchPad) TouchPad.toggleFull(); else (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}); };
 $("#bFull2").onclick = () => $("#bFull").onclick();
 const sndLabel = () => document.querySelectorAll("#bSnd, #bSnd2").forEach((b) => { b.textContent = soundOn ? "SOUND: ON" : "SOUND: OFF"; });
@@ -1747,9 +1758,9 @@ $("#bHost").onclick = () => {
 };
 $("#bStart").onclick = () => {
   if (!net || !net.live) return;
-  const slots = slotsFor(lobby), seed = Math.floor(Math.random() * 1e9), diff = +$("#diff").value, teams = $("#teams").value, mapk = $("#mapk").value;
-  slots.forEach((s, i) => { if (s.net) net.send(s.net, { t: "start", seed, slots: slots.map((x) => ({ name: x.name, kind: x.kind === "me" ? "net" : x.kind, civ: x.civ })), me: i, diff, teams, mapk }); });
-  net.started(); mode = "host"; begin(slots, seed, 0, diff, teams, mapk); G.start = { seed, diff, teams, mapk };
+  const slots = slotsFor(lobby), seed = Math.floor(Math.random() * 1e9), diff = +$("#diff").value, teams = $("#teams").value, mapk = $("#mapk").value, treaty = +$("#treaty").value;
+  slots.forEach((s, i) => { if (s.net) net.send(s.net, { t: "start", seed, slots: slots.map((x) => ({ name: x.name, kind: x.kind === "me" ? "net" : x.kind, civ: x.civ })), me: i, diff, teams, mapk, treaty }); });
+  net.started(); mode = "host"; begin(slots, seed, 0, diff, teams, mapk, treaty); G.start = { seed, diff, teams, mapk, treaty };
 };
 for (const id of ["bHost", "bJoin"]) { const b = document.getElementById(id); if (b) b.style.display = "none"; }
 $("#bShare").onclick = async () => {
@@ -1760,7 +1771,7 @@ $("#bShare").onclick = async () => {
 };
 setTimeout(() => {
   const q = new URLSearchParams(location.search), o = q.get("online"), room = (q.get("room") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-  for (const k of ["mapk", "diff", "opp"]) { const v = q.get(k), el = document.getElementById(k); if (v && el && [...el.options].some((x) => x.value === v)) el.value = v; }
+  for (const k of ["mapk", "diff", "opp", "treaty"]) { const v = q.get(k), el = document.getElementById(k); if (v && el && [...el.options].some((x) => x.value === v)) el.value = v; }
   if (q.get("play") === "bots") { history.replaceState(null, "", location.pathname); $("#bSolo").onclick(); return; }
   if (!o) return;
   history.replaceState(null, "", location.pathname);
@@ -1782,7 +1793,7 @@ function joinRoom(room) {
   clearInterval(joinTimer); $("#jMsg").textContent = `Joined ${room}. Waiting for the host to start...`;
   net = Net.join("empire", room, saveName(), {
     msg: (m) => {
-      if (m.t === "start") { mode = "guest"; begin(m.slots, m.seed, m.me, m.diff, m.teams, m.mapk); for (const p of G.players) p.ai = null; for (const e of [...G.ents.values()]) if (e.k === "u" || e.k === "b" || e.t === "deer") { G.ents.delete(e.id); if (e.k === "b") occupy(e, 0); } }
+      if (m.t === "start") { mode = "guest"; begin(m.slots, m.seed, m.me, m.diff, m.teams, m.mapk, m.treaty); for (const p of G.players) p.ai = null; for (const e of [...G.ents.values()]) if (e.k === "u" || e.k === "b" || e.t === "deer") { G.ents.delete(e.id); if (e.k === "b") occupy(e, 0); } }
       else if (m.t === "s" && mode === "guest") guestSnap(m);
     },
     error: (m) => { $("#jMsg").textContent = "Could not join: " + m.why; },

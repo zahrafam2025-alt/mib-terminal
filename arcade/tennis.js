@@ -39,13 +39,14 @@ function Tennis(online = null) {
     }
     return [team ? 360 : 120, MY];
   }
+  const REACH = (p) => (p.giantT > 0 ? 46 : 34);
   function shoot(p, serve = false, lob = false) {
     const opp = P.filter((q) => q.team !== p.team), side = p.team ? -1 : 1;
     const deep = serve ? 0.55 + Math.random() * 0.35 : lob ? 0.7 + Math.random() * 0.25 : 0.35 + Math.random() * 0.6;
     let tx = NX + side * (25 + deep * (X1 - NX - 35)), ty;
     if (p.human && Math.abs(p.in.my) > 0.3) ty = p.in.my < 0 ? Y0 + 22 : Y1 - 22;
     else { const oy = opp.reduce((a, q) => a + q.y, 0) / opp.length; ty = oy > MY ? Y0 + 20 + Math.random() * 60 : Y1 - 20 - Math.random() * 60; }
-    const reach = p.giantT > 0 ? 38 : 27, q = 1 - Math.min(1, Math.hypot(ball.x - p.x, ball.y - p.y) / reach);
+    const reach = REACH(p), q = 1 - Math.min(1, Math.hypot(ball.x - p.x, ball.y - p.y) / reach);
     if (!serve && q < 0.25) { tx += (Math.random() - 0.3) * 70 * side; ty += (Math.random() - 0.5) * 90; }
     if (!p.human) { tx += (Math.random() - 0.5) * p.err; ty += (Math.random() - 0.5) * p.err; }
     const smash = !serve && ball.z > 17, kind = p.charged; p.charged = "";
@@ -108,7 +109,7 @@ function Tennis(online = null) {
       const d = Math.hypot(ball.x - p.x, ball.y - p.y);
       const atNet = P.some((q) => q.team !== p.team && Math.abs(q.x - NX) < 90);
       if (d < (p.giantT > 0 ? 28 : 18) && ball.z < 26 && Math.random() < 0.5) { if (atNet && Math.random() < 0.3) p.in.l++; else p.in.k++; }
-      if (mine2 && d > 26 && d < 46 && ball.z < 10 && ball.vz < 0 && Math.random() < 0.02) p.in.b++;
+      if (mine2 && d > 33 && d < 52 && ball.z < 10 && ball.vz < 0 && Math.random() < 0.02) p.in.b++;
     } else if (p.item >= 0 && Math.random() < 0.006) useItem(p);
     const dx = tx - p.x, dy = ty - p.y, L = Math.hypot(dx, dy);
     p.in.mx = L > 3 ? dx / L : 0; p.in.my = L > 3 ? dy / L : 0;
@@ -142,7 +143,7 @@ function Tennis(online = null) {
       else if (p.downT > 0 || p.dazed > 0) { p.vx *= 0.85; p.vy *= 0.85; }
       else {
         let mx = p.in.mx, my = p.in.my;
-        const L = Math.hypot(mx, my), sp = (p.human ? 135 : 118) * (p.frozenT > 0 ? 0.4 : 1);
+        const L = Math.hypot(mx, my), sp = (p.human ? 165 : 126) * (p.frozenT > 0 ? 0.4 : 1);
         const wx = L > 0.05 ? mx / Math.max(1, L) * sp : 0, wy = L > 0.05 ? my / Math.max(1, L) * sp : 0;
         p.vx += (wx - p.vx) * Math.min(1, dt * 12); p.vy += (wy - p.vy) * Math.min(1, dt * 12);
         if (L > 0.2) { p.fx = mx / L; p.fy = my / L; }
@@ -151,8 +152,8 @@ function Tennis(online = null) {
       if (p.team === 0 && p.x > NX - PR) p.x = NX - PR; if (p.team === 1 && p.x < NX + PR) p.x = NX + PR;
       for (const pl of peels) if (!pl.gone && Math.hypot(pl.x - p.x, pl.y - p.y) < 10) { pl.gone = true; p.dazed = 1.1; p.spin = 1.1; say(`${p.name.replace(" (bot)", "")} SLIPPED!`, 0.9); tone(700, 0.25, "sawtooth", 0.05, -500); }
       for (const b of boxes) if (!b.gone && p.item < 0 && Math.hypot(b.x - p.x, b.y - p.y) < 14) { b.gone = true; giveItem(p); }
-      const reach = (p.giantT > 0 ? 38 : 27) + (p.diveT > 0 ? 8 : 0);
-      if (p.swingT > 0 && !ball.held && ball.last !== p.team && ball.z < (p.giantT > 0 ? 10 : 0) + (Math.abs(p.x - NX) < 80 ? 95 : 32) && Math.hypot(ball.x - p.x, ball.y - p.y) < reach && (p.team ? ball.x > NX - 4 : ball.x < NX + 4)) shoot(p, false, p.lob);
+      const reach = REACH(p) + (p.diveT > 0 ? 8 : 0);
+      if (p.swingT > 0 && !ball.held && ball.last !== p.team && ball.z < (p.giantT > 0 ? 10 : 0) + (Math.abs(p.x - NX) < 80 ? 95 : 42) && Math.hypot(ball.x - p.x, ball.y - p.y) < reach && (p.team ? ball.x > NX - 4 : ball.x < NX + 4)) shoot(p, false, p.lob);
     }
     for (let i = peels.length - 1; i >= 0; i--) if (peels[i].gone) peels.splice(i, 1);
     for (let i = boxes.length - 1; i >= 0; i--) if (boxes[i].gone) boxes.splice(i, 1);

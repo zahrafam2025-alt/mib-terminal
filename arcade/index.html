@@ -25,6 +25,14 @@ button:hover { border-color:var(--a); }
    on the left only the sound, as an icon, and the best scores, thin; the list of games bigger") */
 #onlBtn, #nameBtn { display:none !important; }
 #snd { font-size:18px; padding:2px 10px; }
+/* 9 Nov (bug list: "add a pause button"; owner: "a reset button in every game: online every player must press it, with bots
+   only you, after a small popup asking to confirm"): two small buttons in the game's corner (phones: next to ☰ and 🔊) */
+#gctl { position:absolute; top:50%; right:6px; transform:translateY(-50%); display:none; flex-direction:column; gap:6px; z-index:5; }   /* the right edge's middle: no game puts its score or map there */
+#gctl button { background:rgba(13,16,32,.72); border-color:rgba(255,255,255,.18); font-size:15px; padding:3px 10px; }
+#rconf { position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); }
+#rconf > div { background:#141827; border:1px solid #fbbf24; border-radius:14px; padding:16px 18px; width:min(340px,88vw); color:#e5e7eb; font:15px/1.45 "Segoe UI", sans-serif; text-align:center; }
+#rconf b { display:block; font-size:17px; margin-bottom:4px; } #rconf .row { display:flex; gap:10px; justify-content:center; margin-top:14px; }
+#rconf button { padding:8px 18px; font-size:15px; } #rconf .yes { background:#b91c1c; border-color:#ef4444; }
 /* 4 Nov (owner: "one pager wherever possible: the arcade could be the list of games with the best scores on the side,
    instead of scrolling"): on any screen wide enough, the game on the left at the window's height, the scoreboard beside it */
 @media (min-width:640px) {
@@ -42,7 +50,9 @@ button:hover { border-color:var(--a); }
 <script src="/header.js" data-active="arcade" onerror="void 0"></script><div id="wrap">
   <div id="top"><b>MIB ARCADE</b><span class="help" style="margin:0">by MoonxZara</span><span class="help" id="rec"></span><span style="flex:1"></span>
     <button id="onlBtn" title="play with friends">PLAY ONLINE</button><button id="snd" title="M">sound on</button><button id="pauseBtn" title="P">pause</button><button id="menuBtn" title="Esc">menu</button></div>
-  <div id="screen" tabindex="0"><canvas id="c" width="960" height="720"></canvas><div id="focus">click here to play</div></div>
+  <div id="screen" tabindex="0"><canvas id="c" width="960" height="720"></canvas><div id="focus">click here to play</div>
+    <div id="gctl"><button id="gPause" title="pause (P)">⏸</button><button id="gReset" title="restart the game (R)">⟲</button></div></div>
+  <div id="rconf"><div><b id="rcT">Restart the game?</b><span id="rcS">Your current game is lost.</span><div class="row"><button id="rcNo">No</button><button class="yes" id="rcYes">Restart</button></div></div></div>
   <div class="help" id="help"></div><div class="help"><a href="sfx/CREDITS.txt" class="credlink" style="margin-left:14px">sound credits</a><dialog id="credDlg" style="max-width:min(640px,92vw);max-height:80vh;background:#141827;color:#e5e7eb;border:1px solid #26304a;border-radius:12px;padding:14px"><button type="button" onclick="this.closest('dialog').close()" style="float:right">✕ close</button><pre style="white-space:pre-wrap;font:12px Consolas,monospace;margin:30px 0 0"></pre></dialog><script>document.querySelectorAll(".credlink").forEach(function(a){a.onclick=function(e){e.preventDefault();var d=document.getElementById("credDlg");fetch(a.getAttribute("href")).then(function(r){return r.text()}).then(function(t){d.querySelector("pre").textContent=t;d.showModal()})}})</script></div>
 </div>
 <script>window.ARC_CONFIG = {"api": "https://mib-arcade.terminalmib.workers.dev", "names": true, "sounds": false, "sfx": "sfx/", "music": false, "lan": true, "net": "auto", "pages": {"hub": "./", "strike": "strike.html", "empire": "empire.html"}};</script>
@@ -577,7 +587,9 @@ function Jump() {
     if (pressed("Space", "ArrowUp", "KeyW")) {
       if (p.on) { p.vy = -480; p.on = false; p.jumps = 1; SFX.jump(); } else if (p.jumps < (R ? R.jumps : 2)) { p.vy = -420; p.jumps++; SFX.jump(); }
     }
-    if (g.ride && (g.ride.t -= dt) <= 0) { g.ride = null; tone(520, 0.12, "triangle", 0.06, -260); g.msg = "BACK ON FOOT"; g.msgT = 1; }
+    if (g.ride && g.ride.t > 3 && g.ride.t - dt <= 3) { g.msg = RIDES[g.ride.k].name + " ENDING!"; g.msgT = 1.2; tone(880, 0.07, "square", 0.05); }
+    if (g.ride && (g.ride.t -= dt) <= 0) { g.ride = null; g.safe = 1.5; tone(520, 0.12, "triangle", 0.06, -260); g.msg = "BACK ON FOOT"; g.msgT = 1; }
+    g.safe = Math.max(0, (g.safe || 0) - dt);
     g.mag = Math.max(0, g.mag - dt);
     g.items.forEach((it) => {
       if (it.got || Math.abs(it.x - (p.x + 8)) > 18 || Math.abs(it.y - (p.y + 12)) > 26) return;
@@ -596,6 +608,7 @@ function Jump() {
       if (f.dead || Math.abs(f.x + 8 - (p.x + 8)) > 16 || Math.abs(GY - 9 - (p.y + 12)) > 20) return;
       if (p.vy > 0 && prevB <= GY - 14) { f.dead = true; g.stomps++; p.vy = -380; p.jumps = 1; SFX.stomp(); }
       else if (g.ride) { f.dead = true; g.stomps++; SFX.stomp(); g.msg = "RAMMED!"; g.msgT = 0.6; }
+      else if (g.safe > 0) return;
       else g.over = true;
     });
     if (g.net) for (const [id, r] of g.remote) {
@@ -639,9 +652,10 @@ function Jump() {
     const p = g.p, SK = "#5a3825", GRN = "#06c167", run = g.ride ? 0 : Math.floor(g.t * 12) % 2;
     cx.save(); cx.translate(X(p.x) + 8, 0); cx.scale(p.face, 1);
     if (g.ride) {
-      if (g.ride.t < 2 && Math.floor(g.t * 8) % 2) cx.globalAlpha = 0.45;
+      if (g.ride.t < 3 && Math.floor(g.t * (g.ride.t < 1.5 ? 14 : 8)) % 2) cx.globalAlpha = 0.3;
       vehicle(g.ride.k, 0, p.y + 24.5, 1); cx.globalAlpha = 1; cx.translate(0, g.ride.k === "bike" ? -5 : -3);
     }
+    if (!g.ride && g.safe > 0 && Math.floor(g.t * 14) % 2) cx.globalAlpha = 0.35;
     const l1 = g.ride ? 0 : p.on ? (run ? 2 : 0) : 1, l2 = g.ride ? 0 : p.on ? (run ? 0 : 2) : -1;
     rect(-5, p.y + 17, 4, 6 - l1, "#2e3440"); rect(1, p.y + 17, 4, 6 - l2, "#2e3440");
     rect(-6, p.y + 23 - l1, 6, 2.5, "#f8fafc"); rect(1, p.y + 23 - l2, 6, 2.5, "#f8fafc");
@@ -835,8 +849,8 @@ const GAMES = [
   { id: "empire", name: "CORSICAN EMPIRE", sub: "build, gather, conquer: bots or LAN", href: ARC.page("empire"), col: "#38bdf8" },
 ];
 let cur = null, paused = false, overDone = false, menuT = 0;
-const TOUCH_HELP = { blocks: "arrows: move · A: drop · B: turn  (or tap the picture: turn, slide: move, flick down: drop)", rocks: "stick: fly · A: fire · catch the capsules",
-  snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS and BRAKE on the right · BOOST on the left",
+const TOUCH_HELP = { blocks: "◀ ▶: move · ▼: faster · A: drop · B: turn  (or slide on the picture: move, flick down: drop)", rocks: "stick: fly · A: fire · catch the capsules",
+  snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS, BRAKE and BOOST on the right",
   city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball) · ⟲ BALLE (top left): ball back to the centre",
   tennis: "stick: move · A: shot and serve · B: lob (over a player at the net) · C: your item, or a dive · first to 7",
   fight: "stick: walk, jump (up), crouch (down), walk away = block · A: punch (3 = combo) · B: kick · C: special · block then A/B: counter" };
@@ -869,7 +883,8 @@ function tick(dt = STEP) {
     void n; void m;
   } else {
     if (pressed("Escape")) { menu(); hit.clear(); return; }
-    if (pressed("KeyP") && cur.id !== "sumo") paused = !paused;
+    if (pressed("KeyP") && canPause()) paused = !paused;
+    if (pressed("KeyR") && cur.id !== "goal" && cur.id !== "sumo" && cur.id !== "racer2") { askReset(); hit.clear(); return; }
     if (!paused) {
       if (!cur.over) cur.update(dt);
       else {
@@ -912,7 +927,7 @@ function draw() {
       ON.players.forEach((q, i) => { const c = NETCOL[i % 4]; rect(W / 2 - 92, H / 2 + 2 - n * 9 + i * 18, 10, 10, c); txt(`${q.name}${q.id === ON.me ? "  ← YOU" : ""}`, W / 2 - 74, H / 2 + 11 - n * 9 + i * 18, 12, q.id === ON.me ? "#fde047" : "#e5e7eb"); });
       cx.globalAlpha = 1;
     }
-    if (paused) banner(["PAUSED"], "P to continue · Esc menu");
+    if (paused && document.getElementById("rconf").style.display !== "flex") banner(["PAUSED"], window.TouchPad && TouchPad.on ? "⏸ or a tap to continue · ☰ menu" : "P or ⏸ to continue · Esc menu");
     if (cur.over && !cur.race && !cur.own && !(ON && ON.live && ON.players.length > 1)) banner(["GAME OVER", `${cur.score}${cur.score > 0 && cur.score >= bestOf(cur.id) ? "  NEW BEST!" : ""}`], "Space play again · Esc menu");
   }
   focusEl.style.display = document.hasFocus() ? "none" : "flex";
@@ -944,6 +959,47 @@ focusEl.addEventListener("click", () => { audioStart(); screenEl.focus(); });
 document.getElementById("snd").onclick = () => { audioStart(); setSound(!sound); screenEl.focus(); };
 document.getElementById("pauseBtn").onclick = () => { if (cur && cur.id !== "sumo") paused = !paused; screenEl.focus(); };
 document.getElementById("menuBtn").onclick = () => { menu(); screenEl.focus(); };
+const canPause = () => !!cur && cur.id !== "sumo" && !(ON && ON.live);
+function togglePause() { if (canPause()) paused = !paused; screenEl.focus(); }
+function askReset() {
+  if (!cur) return;
+  if (ON && ON.live) { voteReset(); return; }
+  const was = paused; paused = true;
+  const box = document.getElementById("rconf"), done = (yes) => {
+    box.style.display = "none"; paused = was;
+    if (yes && cur) { const id = cur.id; if (window.TouchPad && TouchPad.release) TouchPad.release(); start(id); }
+    screenEl.focus();
+  };
+  document.getElementById("rcT").textContent = "Restart the game?"; document.getElementById("rcS").textContent = "Your current game is lost.";
+  document.getElementById("rcYes").onclick = () => done(true); document.getElementById("rcNo").onclick = () => done(false);
+  box.onclick = (e) => { if (e.target === box) done(false); };
+  box.style.display = "flex";
+}
+function rvPlayers() { return (ON.round || ON.players).filter((q) => ON.players.some((p) => p.id === q.id)); }
+function rvText(ids) {
+  const wait = rvPlayers().filter((q) => !ids.includes(q.id)).map((q) => q.name);
+  return wait.length ? `Reset: ${ids.length}/${ids.length + wait.length} · waiting for ${wait.join(", ")} (press ⟲)` : "Reset: everyone agreed";
+}
+function voteReset() {
+  if (ON.host) resetFrom(ON.me);
+  else { osend({ t: "rv" }); Net.note("Reset asked: every player must press ⟲", 3500); }
+}
+function resetFrom(id) {
+  if (!ON || !ON.host || !ON.live) return;
+  if (!ON.rv || Date.now() - ON.rv.t > 30000) ON.rv = { ids: new Set(), t: Date.now() };
+  ON.rv.ids.add(id);
+  const players = rvPlayers(), ids = [...ON.rv.ids], all = players.every((q) => ON.rv.ids.has(q.id));
+  osend({ t: "rvs", ids }); Net.note(rvText(ids), 4000);
+  if (all) { ON.rv = null; goRound(players); }
+}
+document.getElementById("gPause").onclick = (e) => { e.stopPropagation(); audioStart(); togglePause(); };
+document.getElementById("gReset").onclick = (e) => { e.stopPropagation(); audioStart(); askReset(); };
+setInterval(() => {
+  const g = document.getElementById("gctl"), touch = window.TouchPad && TouchPad.on;
+  g.style.display = cur && !touch ? "flex" : "none";
+  document.getElementById("gPause").style.display = canPause() ? "" : "none";
+  document.getElementById("gPause").textContent = paused ? "▶" : "⏸";
+}, 250);
 
 const HOSTED = new Set(["goal", "tennis", "fight"]);
 const ONLINE_GAMES = [["strike", "STRIKE & DEFUSE · up to 8"], ["empire", "CORSICAN EMPIRE · up to 4"], ["goal", "GOAL RUSH · 2 v 2 football"], ["tennis", "RALLY RUMBLE · 2 v 2 party tennis"], ["fight", "FIGHT CLUB · 1 v 1"], ["spa", "GRAND PRIX · race each other"], ["blocks", "BLOCKS"], ["snake", "SNAKE"], ["rocks", "ROCKS · together"], ["rocksvs", "ROCKS · versus (shoot each other)"], ["jump", "JUMP"], ["city", "CHAOS CITY"]];
@@ -1044,6 +1100,7 @@ function onMsg(m, from) {
     if (m.t === "in") { if (ON.live && cur && cur.netInput) cur.netInput(from, m); return; }
     if (m.t === "late") { const q = ON.players.find((x) => x.id === from); if (q && ON.live) lateJoin(q); return; }
     if (m.t === "again" || m.t === "ready") { readyFrom(from); return; }
+    if (m.t === "rv") { resetFrom(from); return; }
     if (m.t === "watch") { if (ON.live) ON.watchT = Date.now(); if (!m.d) ON.net.send("*", Object.assign({}, m, { from })); return; }
     if (m.t === "st" || m.t === "fr" || m.t === "atk") { if (!m.d) ON.net.send("*", Object.assign({}, m, { from })); }
     else return;
@@ -1055,6 +1112,7 @@ function onMsg(m, from) {
   else if (m.t === "addcar") { if (ON.live && cur && cur.addRemote && m.id !== ON.me) cur.addRemote({ id: m.id, name: m.name }); }
   else if (m.t === "wait") { $o("oMsg").textContent = "A round is being played: you are in for the next one (the host presses START)."; }
   else if (m.t === "rq") { ON.rq = m; ON.rqAt = m.ids.length ? ON.rqAt || Date.now() : 0; drawReady(); if (m.ids.length && !ON.live) Net.note(readyText(), 2500); }
+  else if (m.t === "rvs") { if (ON.live) Net.note(rvText(m.ids), 4000); }
   else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); else { if (cur) { engineSet(false); cur = null; } ON.live = false; ON.rq = null; ON.rqAt = 0; drawReady(); Net.note("This round started without you: watch it, then tap to join the next one", 5000); } }
   else if (m.t === "room") { if (ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); } }
   else if (m.t === "st") { if (ON.live && cur && cur.netState) cur.netState(from, m); if (m.score !== undefined && SHARED.has(ON.game)) ON.scores.set(from, { score: m.score, over: !!m.over }); }
@@ -1400,12 +1458,14 @@ if (TouchPad.on) {
   const any = [bt("A", { right: 20, bottom: 48 }, 82, "Space"), bt("B", { right: 112, bottom: 20 }, 62, "Enter")];
   const wpn = bt("WPN", { right: 40, bottom: 150 }, 58, "KeyE");
   const cBtn = bt("C", { right: 34, bottom: 150 }, 62, "KeyE");
-  const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("BOOST", { left: 22, bottom: 190 }, 70, "Space")];
+  const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("BOOST", { right: 32, bottom: 152 }, 70, "Space")];
   const dpad = [bt("▲", { left: 76, bottom: 122 }, 62, "ArrowUp"), bt("▼", { left: 76, bottom: 14 }, 62, "ArrowDown"),
     bt("◀", { left: 10, bottom: 68 }, 62, "ArrowLeft"), bt("▶", { left: 142, bottom: 68 }, 62, "ArrowRight")];
   const blk = [bt("A ⤓", { right: 20, bottom: 48 }, 82, "Space"), bt("B ⟳", { right: 112, bottom: 20 }, 62, "ArrowUp")];
   const esc = bt("☰", { right: 12, top: 12 }, 46, "Escape");
   const snd = TouchPad.soundButton(() => sound, (on) => { audioStart(); setSound(on); }, { right: 66, top: 12 });
+  const pz = TouchPad.button("⏸", { right: 120, top: 12 }, 46, () => { audioStart(); togglePause(); }, null, pad);
+  const rs = TouchPad.button("⟲", { right: 174, top: 12 }, 46, () => { audioStart(); askReset(); }, null, pad);
   cv.addEventListener("click", () => { if (cur) TouchPad.full(); });
   const pq = []; let pqT = null;
   const pulse = (c) => { pq.push(c); if (!pqT) pqT = setInterval(() => { const n = pq.shift(); if (!n) { clearInterval(pqT); pqT = null; return; } const k = TouchPad.key(n); k.down(); setTimeout(k.up, 35); }, 60); };
@@ -1426,19 +1486,19 @@ if (TouchPad.on) {
     const dt = performance.now() - bf.t, dy = e.clientY - bf.y0;
     if (bf.down) TouchPad.key("ArrowDown").up();
     if (dy > 60 && dt < 250) pulse("Space");
-    else if (!bf.moved && dt < 300) pulse("ArrowUp");
     bf = null;
   };
   cv.addEventListener("pointerup", bEnd); cv.addEventListener("pointercancel", bEnd);
   const padTick = () => {
     const isGp = !!cur && cur.id === "spa", show = !!cur, blocks = !!cur && cur.id === "blocks", snake = !!cur && cur.id === "snake";
     stickZone.style.display = show && !blocks && !snake ? "" : "none";
-    dpad.forEach((b) => { b.style.display = snake || blocks ? "" : "none"; });
+    dpad.forEach((b, i) => { b.style.display = snake || (blocks && i !== 0) ? "" : "none"; });
     blk.forEach((b) => { b.style.display = blocks ? "" : "none"; });
     any.forEach((b, i) => { b.style.display = show && !isGp && !blocks && !snake && !(i === 1 && cur && (cur.id === "jump" || cur.id === "rocks")) ? "" : "none"; });
     gp.forEach((b) => { b.style.display = isGp ? "" : "none"; });
     wpn.style.display = cur && cur.id === "city" ? "" : "none"; cBtn.style.display = cur && (cur.id === "fight" || cur.id === "tennis") ? "" : "none";
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
+    pz.style.display = show && canPause() ? "" : "none"; pz.textContent = paused ? "▶" : "⏸"; rs.style.display = show ? "" : "none";
     pad.classList.toggle("port", innerHeight > innerWidth);
     document.body.classList.toggle("playing", show);
     document.body.classList.toggle("lpad", snake);
