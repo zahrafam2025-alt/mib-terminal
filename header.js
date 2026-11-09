@@ -36,7 +36,7 @@
   window.MIB_FLIP = function () { if (!BACKUP) return; API = API === MAIN ? BACKUP : MAIN; window.MIB_CHAT_API = API; try { sessionStorage.setItem("mib-api-pick", JSON.stringify({ u: API, t: Date.now() })); } catch (x) {} };
   var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k) || ""; if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return ""; } };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
-  var AV = ["🦊", "🐸", "🐼", "🦁", "🐙", "🤖", "👽", "🦄", "🐵", "🐯", "🐧", "🦖", "🐻", "🐷", "🦉", "🐳", "🦈", "🐲", "🥷", "🧙", "🤠", "🧛", "🦸", "💀"];
+  var AV = ["🦊", "🐸", "🐼", "🦁", "🐙", "🤖", "👽", "🦄", "🐵", "🐯", "🐧", "🦖", "🐻", "🐷", "🦉", "🐳", "🦈", "🐲", "🥷", "🧙", "🤠", "🧛", "🦸", "💀", "🐶"];   // 9 Nov (bug list: "add a dog avatar, unforgivable!"): added last so every saved choice keeps its picture
   window.MIB_AV = AV;
   // the theme: dark unless the viewer chose light (kept in this browser)
   document.documentElement.setAttribute("data-theme", ls("mib-theme") === "light" ? "light" : "dark");

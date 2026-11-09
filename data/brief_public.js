@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-06T18:49:26Z",
     "date": "2026-11-06",
-    "built_at": "2026-11-06 18:51 UTC",
+    "built_at": "2026-11-09 14:25 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -80,184 +80,184 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
-      "title": "Data center double-down: Hassett says blue wave won't stop AI build-out",
+      "title": "Amazon's Astro home robot has fans but looks destined for the 'trash heap.' Why it's trying again",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/data-centers-ai-elections-hassett.html",
-      "at": "2026-11-06T18:51:13+00:00"
+      "url": "https://www.cnbc.com/2026/11/08/amazon-home-robot-fauna-sprout.html",
+      "at": "2026-11-09T14:24:34+00:00"
     },
     {
-      "title": "San Francisco Fed President Daly says higher rates 'are likely to be needed' in inflation fight",
+      "title": "Why tech workers are flocking to NYC",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/fed-daly-interest-rates-inflation.html",
-      "at": "2026-11-06T18:42:45+00:00"
+      "url": "https://www.cnbc.com/make-it/2026/11/09/new-york-city-tech-workers-jobs.html",
+      "at": "2026-11-09T14:15:02+00:00"
     },
     {
-      "title": "Microsoft plans to use fewer neoclouds as AI buildout shows signs of strain",
+      "title": "Exchange-Traded Funds, Equity Futures Higher Pre-Bell Monday Amid Global Market Recovery",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/exchange-traded-funds-equity-futures-141309144.html?.tsrc=rss",
+      "at": "2026-11-09T14:13:09+00:00"
+    },
+    {
+      "title": "5 Best Value Stocks Legendary Investor Donald Yacktman Was Buying Before AI Crash",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/5-best-value-stocks-legendary-141103201.html?.tsrc=rss",
+      "at": "2026-11-09T14:11:03+00:00"
+    },
+    {
+      "title": "Nasdaq Stock Market Correction: 3 AI Stocks You Can Buy Right Now and Hold Forever",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/investing/2026/11/09/nasdaq-stock-market-correction-3-ai-stocks-you-can-buy-right-now-and-hold-forever/?.tsrc=rss",
+      "at": "2026-11-09T14:03:46+00:00"
+    },
+    {
+      "title": "Coop Pank AS own shares acquisition transactions",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/coop-pank-own-shares-acquisition-140000245.html?.tsrc=rss",
+      "at": "2026-11-09T14:00:00+00:00"
+    },
+    {
+      "title": "Regions Financial Corp. to Participate in Goldman Sachs 2026 Financial Services Conference",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/regions-financial-corp-participate-goldman-140000262.html?.tsrc=rss",
+      "at": "2026-11-09T14:00:00+00:00"
+    },
+    {
+      "title": "Update: US Equity Futures Higher Pre-Bell as Traders Assess Oil Price Drop, Await AI-Related Earnings This Week",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/us-equity-futures-higher-pre-135516996.html?.tsrc=rss",
+      "at": "2026-11-09T13:55:16+00:00"
+    },
+    {
+      "title": "Strive’s Weekly Bitcoin Buying Shrinks for a Second Straight Week, to 29 BTC",
+      "src": "Yahoo Finance",
+      "url": "https://unchainedcrypto.com/strives-weekly-bitcoin-buying-shrinks-for-a-second-straight-week-to-29-btc/?.tsrc=rss",
+      "at": "2026-11-09T13:55:00+00:00"
+    },
+    {
+      "title": "Home listings pile up in October, but sellers won't slash prices",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/microsoft-moves-to-consolidate-its-relationships-with-neoclouds-in-ai.html",
-      "at": "2026-11-06T18:40:58+00:00"
+      "url": "https://www.cnbc.com/2026/11/09/home-listings-pile-up-in-october-but-sellers-wont-slash-prices.html",
+      "at": "2026-11-09T13:54:29+00:00"
     },
     {
-      "title": "Bitcoin ETFs Bleed $430 Million as Tech Rout Tests Wall Street Buyers",
+      "title": "Stock Market Today: Dow Rallies As Oil Prices Slide; Nvidia Stock Dives On CEO Huang Probe (Live Coverage)",
       "src": "Yahoo Finance",
-      "url": "https://decrypt.co/382733/bitcoin-etfs-bleed-430-million-tech-rout-tests-wall-street?.tsrc=rss",
-      "at": "2026-11-06T18:36:03+00:00"
+      "url": "https://finance.yahoo.com/m/6fc3228f-8806-33c0-9e3b-4402850ebacd/stock-market-today%3A-dow.html?.tsrc=rss",
+      "at": "2026-11-09T13:53:00+00:00"
     },
     {
-      "title": "OpenAI, Arm and Qualcomm executives react to post-midterm AI sell-off",
+      "title": "Cipher Digital and BitMine Fall 4% as Ethereum Slides in Crypto Sell-Off; Strategy Drops 3%",
+      "src": "Yahoo Finance",
+      "url": "https://247wallst.com/investing/2026/11/09/cipher-digital-and-bitmine-fall-4-as-ethereum-slides-in-crypto-sell-off-strategy-drops-3/?.tsrc=rss",
+      "at": "2026-11-09T13:52:28+00:00"
+    },
+    {
+      "title": "Analysts say Huang scandal could hang over Nvidia and chips industry for a while. Here's why",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/tech-executives-ai-data-center-selloff-midterms.html",
-      "at": "2026-11-06T18:35:08+00:00"
+      "url": "https://www.cnbc.com/2026/11/09/nvidia-stock-faces-huang-investigation-overhang-analysts.html",
+      "at": "2026-11-09T13:51:54+00:00"
     },
     {
-      "title": "Axon Enterprise earnings analysis: questions answered and next catalysts",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/axon-enterprise-earnings-analysis-questions-183440738.html?.tsrc=rss",
-      "at": "2026-11-06T18:34:40+00:00"
-    },
-    {
-      "title": "Monster earnings analysis: questions answered and next catalysts",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/monster-earnings-analysis-questions-answered-183406487.html?.tsrc=rss",
-      "at": "2026-11-06T18:34:06+00:00"
-    },
-    {
-      "title": "Sector Update: Tech Stocks Rise Friday Afternoon",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/sector-tech-stocks-rise-friday-183139661.html?.tsrc=rss",
-      "at": "2026-11-06T18:31:39+00:00"
-    },
-    {
-      "title": "Why Oklo Stock Is Up 21.8% Today",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/06/why-oklo-stock-is-up-today/?.tsrc=rss",
-      "at": "2026-11-06T18:30:01+00:00"
-    },
-    {
-      "title": "Economist who predicted 2008 crash issues stark Bitcoin bubble warning",
-      "src": "Yahoo Finance",
-      "url": "https://www.thestreet.com/crypto/markets/economist-who-predicted-2008-crash-issues-stark-bitcoin-bubble-warning?.tsrc=rss",
-      "at": "2026-11-06T18:28:36+00:00"
-    },
-    {
-      "title": "Nasdaq Entered Correction Territory: What History Says Usually Happens After the Sell-Off",
-      "src": "Yahoo Finance",
-      "url": "https://www.ibtimes.com/nasdaq-correction-more-selling-before-rebound-3809496?.tsrc=rss",
-      "at": "2026-11-06T18:23:58+00:00"
-    },
-    {
-      "title": "Stock Market Today: Dow Wobbles, Nasdaq Rises After AI Rout; Nvidia, Intel Lead Chip Rebound (Live Coverage)",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/259a2432-7041-3624-978f-9a7336f10b31/stock-market-today%3A-dow.html?.tsrc=rss",
-      "at": "2026-11-06T18:21:24+00:00"
-    },
-    {
-      "title": "Qualcomm Faces Worst Day Since 2020 as Chips Crater",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/technology/articles/qualcomm-faces-worst-day-since-181632192.html?.tsrc=rss",
-      "at": "2026-11-06T18:16:32+00:00"
-    },
-    {
-      "title": "AI crush is powering one stock to sky-high valuations",
+      "title": "Nvidia stock falls 5% as scrutiny turns to Jensen Huang’s relationship with alleged Chinese spy",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/ai-crush-is-powering-one-stock-to-sky-high-valuations.html",
-      "at": "2026-11-06T18:15:44+00:00"
+      "url": "https://www.cnbc.com/2026/11/09/nvidia-jensen-huang-chinese-spy-investigation.html",
+      "at": "2026-11-09T13:46:19+00:00"
     },
     {
-      "title": "Exchange-Traded Funds Higher as US Equities Advance After Midday",
+      "title": "3 Reasons Strategy and Other Crypto Stocks Are Dropping",
       "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/exchange-traded-funds-higher-us-181230703.html?.tsrc=rss",
-      "at": "2026-11-06T18:12:30+00:00"
+      "url": "https://finance.yahoo.com/m/566e2326-b2dc-35ab-9243-e9e0f70ea231/3-reasons-strategy-and-other.html?.tsrc=rss",
+      "at": "2026-11-09T13:45:00+00:00"
     },
     {
-      "title": "Why The Blue Tsunami Rattled AI Stocks",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/2a20f777-960c-3d7a-96cf-82a659aedcc7/why-the-blue-tsunami-rattled.html?.tsrc=rss",
-      "at": "2026-11-06T18:04:45+00:00"
-    },
-    {
-      "title": "Mississippi Senate: Longshot Ty Pinkins says he aimed to spoil Hyde-Smith, boost Colom vote",
+      "title": "Dow futures rally 600 points as oil prices drop; traders brace for more data and earnings: Live updates",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/mississippi-senate-ty-pinkins-colom-hyde-smith.html",
-      "at": "2026-11-06T18:03:13+00:00"
+      "url": "https://www.cnbc.com/2026/11/08/stock-market-today-live-updates.html",
+      "at": "2026-11-09T13:44:41+00:00"
     },
     {
-      "title": "Bitcoin Under $76,000 After $430M ETF Outflows. Has It Bottomed?",
+      "title": "BlackRock Sees Billions in Crypto ETF Conversions. Security Fears Are Driving the Trade.",
       "src": "Yahoo Finance",
-      "url": "https://247wallst.com/investing/cryptocurrency/2026/11/06/bitcoin-under-76000-after-430m-etf-outflows-has-it-bottomed/?.tsrc=rss",
-      "at": "2026-11-06T18:01:24+00:00"
+      "url": "https://finance.yahoo.com/m/963202aa-8e5d-3d45-8922-598dad653ced/blackrock-sees-billions-in.html?.tsrc=rss",
+      "at": "2026-11-09T13:43:00+00:00"
     },
     {
-      "title": "Stay In, Keep Buying: The Best Days Hide Nearby",
+      "title": "Core Scientific: 3 Key Takeaways for Long-Term Investors",
       "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/06/stay-in-keep-buying-the-best-days-hide-nearby/?.tsrc=rss",
-      "at": "2026-11-06T18:01:01+00:00"
+      "url": "https://www.fool.com/earnings/takeaways/2026/11/09/core-scientific-3-key-takeaways-for-long-term-investors/?.tsrc=rss",
+      "at": "2026-11-09T13:41:40+00:00"
     },
     {
-      "title": "Update: Wall Street Rises as Tech Stocks Rebound",
+      "title": "Here's the Thing iShares' Emerging Markets ETF (IEMG) ETF Has That Vanguard's VWO Doesn't",
       "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-rises-tech-stocks-175946005.html?.tsrc=rss",
-      "at": "2026-11-06T17:59:46+00:00"
+      "url": "https://www.fool.com/coverage/etfs/2026/11/09/here-s-the-thing-ishares-emerging-markets-etf-iemg-etf-has-that-vanguard-s-vwo-doesn-t/?.tsrc=rss",
+      "at": "2026-11-09T13:35:02+00:00"
     },
     {
-      "title": "What Changed In Arista's Story?",
+      "title": "GeoVax Announces 1-for-24 Reverse Stock Split to Regain Compliance With Nasdaq Minimum Bid Requirement",
       "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/anet/articles/623302/what-changed-in-aristas-story/2026-11-06?.tsrc=rss",
-      "at": "2026-11-06T17:57:22+00:00"
+      "url": "https://finance.yahoo.com/markets/stocks/articles/geovax-announces-1-24-reverse-133000066.html?.tsrc=rss",
+      "at": "2026-11-09T13:30:00+00:00"
     },
     {
-      "title": "Musk Kills Tesla Cybertruck. Why He Had to Shoot the Elephant.",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/06aa7a72-3f3b-3740-ba90-e5a9da6f4d4f/musk-kills-tesla-cybertruck..html?.tsrc=rss",
-      "at": "2026-11-06T17:57:00+00:00"
-    },
-    {
-      "title": "The Great Stock Reversal Has Hit Wall Street. One Chart Spells It Out.",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/c2d3f140-b6e1-3343-9bc8-3aefd9c7db7b/the-great-stock-reversal-has.html?.tsrc=rss",
-      "at": "2026-11-06T17:54:00+00:00"
-    },
-    {
-      "title": "Hims & Hers Gained as the Market Dipped. Here’s What the November 9 Report Must Prove",
-      "src": "Yahoo Finance",
-      "url": "https://www.tikr.com/blog/hims-hers-gained-as-the-market-dipped-heres-what-the-november-9-report-must-prove?ref=yahoofinance&tlnk=yf-261106-3x47j4hm&.tsrc=rss",
-      "at": "2026-11-06T17:51:09+00:00"
-    },
-    {
-      "title": "Meet the High-Yield Dividend Stock Quietly Crushing the S&P 500. Here's Why It Has Room to Run.",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/06/meet-the-high-yield-dividend-stock-quietly-crushin/?.tsrc=rss",
-      "at": "2026-11-06T17:50:00+00:00"
-    },
-    {
-      "title": "Strive Adds 15,124 BTC in October After Reporting $509M Q3 Profit",
-      "src": "Yahoo Finance",
-      "url": "https://www.cryptoprowl.com/releases/strive-adds-15124-btc-in-october-after-reporting-509m-q3-profit-7746?.tsrc=rss",
-      "at": "2026-11-06T17:50:00+00:00"
-    },
-    {
-      "title": "Watch the Annual Meeting: Cramer on the fate of the AI buildout and stocks to buy now",
+      "title": "Could supplements be the next big opportunity in the GLP-1 weight-loss drug boom?",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/investingclub/2026/11/06/watch-jim-cramer-live.html",
-      "at": "2026-11-06T17:48:16+00:00"
+      "url": "https://www.cnbc.com/2026/11/09/novonesis-glp1-weight-loss-drugs-supplements-probiotics.html",
+      "at": "2026-11-09T13:27:57+00:00"
     },
     {
-      "title": "SpaceX is down big on fears of Dem 'retribution' against Musk. Deutsche Bank says buy the dip",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/spacex-is-down-big-on-dem-retribution-fears-against-musk-deutsche-bank-says-buy-the-dip.html",
-      "at": "2026-11-06T17:43:28+00:00"
+      "title": "US Stocks Set for Higher Opening With Technology Trade in Focus Amid Nvidia CEO Scandal",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/us-stocks-set-higher-opening-132647644.html?.tsrc=rss",
+      "at": "2026-11-09T13:26:47+00:00"
     },
     {
-      "title": "Stocks making the biggest moves midday: Nvidia, Moderna, IonQ, Airbnb, Firefly Aerospace & more",
+      "title": "Stocks making the biggest moves premarket: Nvidia, AMD, Eli Lilly, Berkshire — Live updates",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/stocks-making-the-biggest-moves-midday-nvda-mrna-ionq-abnb-fly.html",
-      "at": "2026-11-06T17:35:33+00:00"
+      "url": "https://www.cnbc.com/2026/11/09/stock-market-movers-live-updates.html",
+      "at": "2026-11-09T13:25:06+00:00"
     },
     {
-      "title": "OpenAI will keep investing in AI data centers despite election results, CFO tells CNBC",
+      "title": "Strategy Buys $82M in Bitcoin, Buys Back $188M of STRC",
+      "src": "Yahoo Finance",
+      "url": "https://decrypt.co/382820/strategy-buys-82m-in-bitcoin-buys-back-188m-of-strc?.tsrc=rss",
+      "at": "2026-11-09T13:24:29+00:00"
+    },
+    {
+      "title": "Wall Street's Earnings Wins Hide a Troubling Signal for Investors",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/wall-streets-earnings-wins-hide-132422348.html?.tsrc=rss",
+      "at": "2026-11-09T13:24:22+00:00"
+    },
+    {
+      "title": "Here are Monday's biggest analyst calls: Nvidia, SpaceX, Apple, Oracle, AMD, Bullish, Meta, Rollins & more",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/06/open-ai-data-centers-election.html",
-      "at": "2026-11-06T17:24:48+00:00"
+      "url": "https://www.cnbc.com/2026/11/09/big-monday-wall-street-calls-like-nvidia.html",
+      "at": "2026-11-09T13:22:14+00:00"
+    },
+    {
+      "title": "Nvidia Slides Premarket as Stock Futures Rally",
+      "src": "Yahoo Finance",
+      "url": "https://www.wsj.com/finance/stocks/stock-futures-treasurys-steady-but-nvidia-slides-premarket-on-huang-probe-31deea55?.tsrc=rss",
+      "at": "2026-11-09T13:20:00+00:00"
+    },
+    {
+      "title": "Nvidia's CEO turmoil gives newly empowered Democrats fresh ammunition in pursuit of oversight",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/09/nvidia-jensen-huang-affair-congress-scrutiny.html",
+      "at": "2026-11-09T13:13:52+00:00"
+    },
+    {
+      "title": "Wall Street strategists say S&P 500 correction is likely nearing an end",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/wall-street-strategists-p-500-131059916.html?.tsrc=rss",
+      "at": "2026-11-09T13:10:59+00:00"
+    },
+    {
+      "title": "US Stock Market Today: S&P 500 Futures Nudge Higher On Jobs Strength Fed Uncertainty",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/us-stock-market-today-p-130935908.html?.tsrc=rss",
+      "at": "2026-11-09T13:09:35+00:00"
     }
   ],
   "footer": {
@@ -602,32 +602,32 @@ window.MIB_BRIEF = {
           {
             "sym": "SPY",
             "price": 738.11,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"60.1\" x2=\"252\" y2=\"60.1\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"51.2\" x2=\"252\" y2=\"51.2\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,13.5 12.1,17.8 16.3,23.9 20.4,22.0 24.5,29.5 28.7,25.9 32.8,28.5 36.9,25.7 41.1,25.5 45.2,19.6 49.4,21.6 53.5,24.3 57.6,30.5 61.8,26.5 65.9,17.2 70.0,20.7 74.2,25.6 78.3,29.8 82.4,35.1 86.6,27.6 90.7,31.5 94.8,35.6 99.0,39.5 103.1,29.5 107.3,28.4 111.4,14.5 115.5,14.7 119.7,21.2 123.8,22.0 127.9,17.1 132.1,23.8 136.2,25.4 140.3,27.3 144.5,25.7 148.6,19.1 152.7,13.0 156.9,8.0 161.0,10.2 165.2,14.0 169.3,8.6 173.4,9.2 177.6,9.3 181.7,19.1 185.8,16.6 190.0,26.6 194.1,22.8 198.2,19.8 202.4,15.0 206.5,25.7 210.6,30.4 214.8,24.1 218.9,19.0 223.1,15.9 227.2,19.4 231.3,35.4 235.5,39.6 239.6,37.0 243.7,22.4 247.9,62.0 252.0,56.1 252.0,62.0\" fill=\"#D98A7B\" opacity=\"0.08\"/><polyline points=\"8.0,13.5 12.1,17.8 16.3,23.9 20.4,22.0 24.5,29.5 28.7,25.9 32.8,28.5 36.9,25.7 41.1,25.5 45.2,19.6 49.4,21.6 53.5,24.3 57.6,30.5 61.8,26.5 65.9,17.2 70.0,20.7 74.2,25.6 78.3,29.8 82.4,35.1 86.6,27.6 90.7,31.5 94.8,35.6 99.0,39.5 103.1,29.5 107.3,28.4 111.4,14.5 115.5,14.7 119.7,21.2 123.8,22.0 127.9,17.1 132.1,23.8 136.2,25.4 140.3,27.3 144.5,25.7 148.6,19.1 152.7,13.0 156.9,8.0 161.0,10.2 165.2,14.0 169.3,8.6 173.4,9.2 177.6,9.3 181.7,19.1 185.8,16.6 190.0,26.6 194.1,22.8 198.2,19.8 202.4,15.0 206.5,25.7 210.6,30.4 214.8,24.1 218.9,19.0 223.1,15.9 227.2,19.4 231.3,35.4 235.5,39.6 239.6,37.0 243.7,22.4 247.9,62.0 252.0,56.1\" fill=\"none\" stroke=\"#D98A7B\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"56.1\" r=\"2.6\" fill=\"#D98A7B\"/></svg>",
-            "caption": "Sits 1.27σ below its 50-day mean. In 40 past setups like today, it was higher 5 days later 48% of the time (median -0.2%, range -11.5% to +7.4%). Seasonally this window has averaged +1.8% over the next 10 days (8 years, 72% positive). Regime: range/transition, high vol."
+            "svg": "",
+            "caption": "Mid-range, 46% up its band — about a day from a breakout. Resistance 742.21."
           },
           {
             "sym": "QQQ",
             "price": 657.76,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"58.7\" x2=\"252\" y2=\"58.7\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"53.6\" x2=\"252\" y2=\"53.6\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,22.1 12.1,22.6 16.3,28.6 20.4,29.3 24.5,31.7 28.7,30.5 32.8,33.9 36.9,31.8 41.1,31.5 45.2,26.8 49.4,29.1 53.5,28.9 57.6,33.3 61.8,32.5 65.9,28.5 70.0,27.9 74.2,28.2 78.3,29.1 82.4,32.8 86.6,29.8 90.7,32.6 94.8,34.8 99.0,34.7 103.1,28.9 107.3,26.7 111.4,16.7 115.5,13.9 119.7,16.8 123.8,16.9 127.9,15.3 132.1,19.1 136.2,18.4 140.3,17.5 144.5,16.5 148.6,12.8 152.7,9.7 156.9,8.0 161.0,8.9 165.2,13.8 169.3,12.0 173.4,14.5 177.6,15.7 181.7,22.7 185.8,23.2 190.0,31.9 194.1,27.8 198.2,28.2 202.4,24.5 206.5,34.5 210.6,34.5 214.8,30.8 218.9,26.4 223.1,24.3 227.2,29.3 231.3,41.2 235.5,45.7 239.6,43.7 243.7,40.5 247.9,62.0 252.0,56.9 252.0,62.0\" fill=\"#D98A7B\" opacity=\"0.08\"/><polyline points=\"8.0,22.1 12.1,22.6 16.3,28.6 20.4,29.3 24.5,31.7 28.7,30.5 32.8,33.9 36.9,31.8 41.1,31.5 45.2,26.8 49.4,29.1 53.5,28.9 57.6,33.3 61.8,32.5 65.9,28.5 70.0,27.9 74.2,28.2 78.3,29.1 82.4,32.8 86.6,29.8 90.7,32.6 94.8,34.8 99.0,34.7 103.1,28.9 107.3,26.7 111.4,16.7 115.5,13.9 119.7,16.8 123.8,16.9 127.9,15.3 132.1,19.1 136.2,18.4 140.3,17.5 144.5,16.5 148.6,12.8 152.7,9.7 156.9,8.0 161.0,8.9 165.2,13.8 169.3,12.0 173.4,14.5 177.6,15.7 181.7,22.7 185.8,23.2 190.0,31.9 194.1,27.8 198.2,28.2 202.4,24.5 206.5,34.5 210.6,34.5 214.8,30.8 218.9,26.4 223.1,24.3 227.2,29.3 231.3,41.2 235.5,45.7 239.6,43.7 243.7,40.5 247.9,62.0 252.0,56.9\" fill=\"none\" stroke=\"#D98A7B\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"56.9\" r=\"2.6\" fill=\"#D98A7B\"/></svg>",
-            "caption": "Sits 2.1σ below its 50-day mean, a 5-day move in the bottom 5% of its history. In 40 past setups like today, it was higher 5 days later 57% of the time (median +0.5%, range -12.0% to +6.9%). Seasonally this window has averaged +1.7% over the next 10 days (8 years, 72% positive). Regime: range/transition, high vol."
+            "svg": "",
+            "caption": "Mid-range, 36% up its band — about a day from a breakout. Resistance 664.52."
           },
           {
             "sym": "SMH",
             "price": 462.3,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"59.5\" x2=\"252\" y2=\"59.5\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"53.7\" x2=\"252\" y2=\"53.7\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,21.4 12.1,19.6 16.3,26.6 20.4,29.2 24.5,28.7 28.7,29.3 32.8,33.3 36.9,30.6 41.1,30.7 45.2,25.7 49.4,31.4 53.5,30.4 57.6,33.7 61.8,32.2 65.9,31.6 70.0,27.4 74.2,25.5 78.3,25.3 82.4,29.4 86.6,27.0 90.7,34.8 94.8,34.6 99.0,33.6 103.1,29.3 107.3,25.7 111.4,19.0 115.5,15.7 119.7,17.4 123.8,17.7 127.9,15.9 132.1,17.8 136.2,15.8 140.3,15.2 144.5,12.7 148.6,9.0 152.7,8.0 156.9,8.4 161.0,10.6 165.2,15.7 169.3,16.9 173.4,20.4 177.6,21.3 181.7,28.1 185.8,29.8 190.0,35.3 194.1,32.8 198.2,33.4 202.4,30.4 206.5,40.1 210.6,38.9 214.8,34.8 218.9,30.0 223.1,27.2 227.2,29.0 231.3,40.3 235.5,44.4 239.6,41.5 243.7,45.6 247.9,62.0 252.0,57.8 252.0,62.0\" fill=\"#D98A7B\" opacity=\"0.08\"/><polyline points=\"8.0,21.4 12.1,19.6 16.3,26.6 20.4,29.2 24.5,28.7 28.7,29.3 32.8,33.3 36.9,30.6 41.1,30.7 45.2,25.7 49.4,31.4 53.5,30.4 57.6,33.7 61.8,32.2 65.9,31.6 70.0,27.4 74.2,25.5 78.3,25.3 82.4,29.4 86.6,27.0 90.7,34.8 94.8,34.6 99.0,33.6 103.1,29.3 107.3,25.7 111.4,19.0 115.5,15.7 119.7,17.4 123.8,17.7 127.9,15.9 132.1,17.8 136.2,15.8 140.3,15.2 144.5,12.7 148.6,9.0 152.7,8.0 156.9,8.4 161.0,10.6 165.2,15.7 169.3,16.9 173.4,20.4 177.6,21.3 181.7,28.1 185.8,29.8 190.0,35.3 194.1,32.8 198.2,33.4 202.4,30.4 206.5,40.1 210.6,38.9 214.8,34.8 218.9,30.0 223.1,27.2 227.2,29.0 231.3,40.3 235.5,44.4 239.6,41.5 243.7,45.6 247.9,62.0 252.0,57.8\" fill=\"none\" stroke=\"#D98A7B\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"57.8\" r=\"2.6\" fill=\"#D98A7B\"/></svg>",
-            "caption": "Sits 2.76σ below its 50-day mean, a 5-day move in the bottom 1% of its history. In 40 past setups like today, it was higher 5 days later 65% of the time (median +3.1%, range -15.3% to +11.8%). Seasonally this window has averaged +3.3% over the next 10 days (8 years, 67% positive). Regime: range/transition, high vol."
+            "svg": "",
+            "caption": "Mid-range, 30% up its band — about a day from a breakout. Resistance 476.25."
           },
           {
             "sym": "BUG",
             "price": 43.62,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"44.5\" x2=\"252\" y2=\"44.5\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><line x1=\"8\" y1=\"41.8\" x2=\"252\" y2=\"41.8\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,46.3 12.1,51.3 16.3,50.4 20.4,54.5 24.5,58.6 28.7,56.5 32.8,59.2 36.9,62.0 41.1,59.2 45.2,42.0 49.4,46.9 53.5,43.7 57.6,52.8 61.8,56.8 65.9,52.2 70.0,53.5 74.2,55.7 78.3,55.5 82.4,56.5 86.6,59.0 90.7,41.3 94.8,37.2 99.0,38.6 103.1,37.1 107.3,41.2 111.4,34.4 115.5,33.3 119.7,29.7 123.8,31.6 127.9,39.6 132.1,36.8 136.2,36.6 140.3,33.6 144.5,32.3 148.6,30.5 152.7,27.1 156.9,23.0 161.0,26.6 165.2,26.3 169.3,17.4 173.4,23.2 177.6,23.7 181.7,32.0 185.8,31.0 190.0,41.2 194.1,39.0 198.2,37.5 202.4,30.4 206.5,27.8 210.6,18.0 214.8,11.9 218.9,8.0 223.1,9.8 227.2,13.5 231.3,20.3 235.5,32.3 239.6,30.9 243.7,30.2 247.9,43.3 252.0,43.8 252.0,62.0\" fill=\"#5FB98F\" opacity=\"0.08\"/><polyline points=\"8.0,46.3 12.1,51.3 16.3,50.4 20.4,54.5 24.5,58.6 28.7,56.5 32.8,59.2 36.9,62.0 41.1,59.2 45.2,42.0 49.4,46.9 53.5,43.7 57.6,52.8 61.8,56.8 65.9,52.2 70.0,53.5 74.2,55.7 78.3,55.5 82.4,56.5 86.6,59.0 90.7,41.3 94.8,37.2 99.0,38.6 103.1,37.1 107.3,41.2 111.4,34.4 115.5,33.3 119.7,29.7 123.8,31.6 127.9,39.6 132.1,36.8 136.2,36.6 140.3,33.6 144.5,32.3 148.6,30.5 152.7,27.1 156.9,23.0 161.0,26.6 165.2,26.3 169.3,17.4 173.4,23.2 177.6,23.7 181.7,32.0 185.8,31.0 190.0,41.2 194.1,39.0 198.2,37.5 202.4,30.4 206.5,27.8 210.6,18.0 214.8,11.9 218.9,8.0 223.1,9.8 227.2,13.5 231.3,20.3 235.5,32.3 239.6,30.9 243.7,30.2 247.9,43.3 252.0,43.8\" fill=\"none\" stroke=\"#5FB98F\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"43.8\" r=\"2.6\" fill=\"#5FB98F\"/></svg>",
-            "caption": "Sits 0.87σ below its 50-day mean, a 5-day move in the bottom 1% of its history. In 40 past setups like today, it was higher 5 days later 70% of the time (median +3.4%, range -5.9% to +11.5%). Seasonally this window has averaged +1.8% over the next 10 days (7 years, 66% positive). Regime: range/transition, high vol."
+            "svg": "",
+            "caption": "Sitting near the bottom of its range — about a day from a breakout. Resistance 44.20."
           },
           {
             "sym": "BTCUSD",
             "price": 75811.0,
-            "svg": "<svg viewBox=\"0 0 260 70\" width=\"100%\" preserveAspectRatio=\"none\" xmlns=\"http://www.w3.org/2000/svg\" class=\"spark\" aria-hidden=\"true\"><line x1=\"8\" y1=\"54.0\" x2=\"252\" y2=\"54.0\" stroke=\"#5b7498\" stroke-width=\"0.7\" stroke-dasharray=\"3 3\" opacity=\"0.55\"/><polygon points=\"8.0,62.0 8.0,48.1 12.1,49.0 16.3,57.3 20.4,54.3 24.5,53.9 28.7,56.0 32.8,49.5 36.9,62.0 41.1,59.4 45.2,58.1 49.4,36.0 53.5,34.4 57.6,34.8 61.8,8.0 65.9,10.1 70.0,18.9 74.2,18.9 78.3,20.6 82.4,18.8 86.6,18.5 90.7,23.2 94.8,22.6 99.0,23.0 103.1,16.6 107.3,18.3 111.4,17.0 115.5,8.6 119.7,12.0 123.8,13.1 127.9,24.3 132.1,32.2 136.2,27.9 140.3,26.1 144.5,22.4 148.6,31.8 152.7,25.2 156.9,32.8 161.0,29.9 165.2,33.1 169.3,33.7 173.4,30.5 177.6,31.3 181.7,26.0 185.8,20.7 190.0,34.0 194.1,35.2 198.2,36.6 202.4,40.3 206.5,40.4 210.6,36.5 214.8,34.2 218.9,51.4 223.1,54.2 227.2,53.0 231.3,49.0 235.5,56.8 239.6,53.5 243.7,38.5 247.9,60.4 252.0,61.7 252.0,62.0\" fill=\"#D98A7B\" opacity=\"0.08\"/><polyline points=\"8.0,48.1 12.1,49.0 16.3,57.3 20.4,54.3 24.5,53.9 28.7,56.0 32.8,49.5 36.9,62.0 41.1,59.4 45.2,58.1 49.4,36.0 53.5,34.4 57.6,34.8 61.8,8.0 65.9,10.1 70.0,18.9 74.2,18.9 78.3,20.6 82.4,18.8 86.6,18.5 90.7,23.2 94.8,22.6 99.0,23.0 103.1,16.6 107.3,18.3 111.4,17.0 115.5,8.6 119.7,12.0 123.8,13.1 127.9,24.3 132.1,32.2 136.2,27.9 140.3,26.1 144.5,22.4 148.6,31.8 152.7,25.2 156.9,32.8 161.0,29.9 165.2,33.1 169.3,33.7 173.4,30.5 177.6,31.3 181.7,26.0 185.8,20.7 190.0,34.0 194.1,35.2 198.2,36.6 202.4,40.3 206.5,40.4 210.6,36.5 214.8,34.2 218.9,51.4 223.1,54.2 227.2,53.0 231.3,49.0 235.5,56.8 239.6,53.5 243.7,38.5 247.9,60.4 252.0,61.7\" fill=\"none\" stroke=\"#D98A7B\" stroke-width=\"1.6\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"252.0\" cy=\"61.7\" r=\"2.6\" fill=\"#D98A7B\"/></svg>",
-            "caption": "Sits 0.77σ below its 50-day mean. In 40 past setups like today, it was higher 5 days later 55% of the time (median +0.7%, range -14.9% to +13.7%). Seasonally this window has averaged -1.2% over the next 10 days (8 years, 47% positive). Regime: range/transition, elevated vol."
+            "svg": "",
+            "caption": "Trading inside its recent range. Resistance 77,243.74."
           }
         ]
       }
