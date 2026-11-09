@@ -43,7 +43,7 @@ const KOP_SCENE = {
   pfc: { sky: ["#0c4a6e", "#38bdf8", "#e0f2fe"], hills: ["#94a3b8", 0.25, 20], marks: [["arc", 0.3, 1], ["eiffel", 0.72, 0.85], ["ferris", 0.5, 0.8]], bld: [["#efe6d2", "#e7dcc3", "#f3ecdc"], "slate"], water: ["river", "#2563eb"], props: ["lamps"], ground: ["cobble", "#9ca3af", "#7c838f"] },
 };
 function Kop(online = null) {
-  const GY = 304, LEN = 3400, GRAV = 1300, BOSS_AT = LEN - W, KS = 1.4;
+  const GT = 262, D0 = 276, D1 = 350, LEN = 3400, GRAV = 1300, BOSS_AT = LEN - W, KS = 1.4, CH = 15 * KS, WALL_T = 4, WALL_CD = 10;
   let OPT = {}; try { OPT = (online && online.opt) || JSON.parse(localStorage.getItem("arcade-sheet-kop") || "{}"); } catch (e) {}
   const team = KOP_TEAMS.find((t) => t.k === OPT.team) || KOP_TEAMS[0];
   const foeT = KOP_TEAMS.find((t) => t.k === OPT.opp && t.k !== team.k) || KOP_TEAMS.find((t) => t.k !== team.k);
@@ -52,23 +52,23 @@ function Kop(online = null) {
   const names = (Array.isArray(OPT.names) && OPT.names.length === 4 ? OPT.names : kopNames(team.k)).map((n, i) => String(n || kopNames(team.k)[i]).slice(0, 16));
   const host = !online || online.host, me = online ? online.me : 0;
   const humans = online ? online.players.slice(0, 4) : [{ id: 0, name: (window.ARC && ARC.getName()) || "YOU" }];
-  const nP = Math.max(size, humans.length);
+  const nP = Math.max(size, humans.length), LANE = [0, -24, 24, -12];
   const SKIN = ["#f1c27d", "#8d5524", "#e0ac69", "#c68642"], HAIR = ["#1f2937", "#111827", "#78350f", "#facc15"];
   const P = Array.from({ length: nP }, (_, i) => ({ i, human: i < humans.length ? humans[i] : null, name: names[i % 4], who: i < humans.length ? humans[i].name : "bot",
-    x: 60 + i * 26, y: GY, vx: 0, vy: 0, on: true, face: 1, ax: 1, ay: 0, crouch: false, cd: 0, wpn: "P", ammo: 0, lives: 3, gren: 3, inv: 2, dead: 0, out: false,
-    in: { mx: 0, my: 0, a: 0, b: 0, c: 0 }, lastB: 0, lastC: 0, run: 0, skin: SKIN[i % 4], hair: HAIR[i % 4], botT: 0 }));
+    x: 60 + i * 26, gy: 310 + LANE[i], z: 0, vz: 0, on: true, face: 1, ang: 0, cd: 0, wpn: "P", ammo: 0, lives: 3, hp: 3, gren: 3, inv: 2, dead: 0, out: false, wallT: 0,
+    in: { mx: 0, my: 0, a: 0, b: 0, c: 0, d: 0 }, lastB: 0, lastC: 0, lastD: 0, run: 0, skin: SKIN[i % 4], hair: HAIR[i % 4], botT: 0 }));
   const g = { id: "kop", own: true, score: 0, over: false, win: false, t: 0, msg: "", msgT: 0, cam: 0, sendT: 0, net: null, boss: null,
-    help: "arrows / W A S D run and aim · Space fire (hold) · Enter or X jump · E firecracker · ↓ crouch · beat the mascot-mech · Esc menu" };
-  const E = [], B = [], K = [], FX = [];
+    help: "arrows / W A S D walk (up and down the street too) · Space fire, it aims by itself (hold) · Enter or X jump · E firecracker · Q the wall · N music · Esc menu" };
+  const E = [], B = [], K = [], FX = [], WALL = [];
   let nid = 1, shake = 0;
   const say = (m, t = 1.6) => { g.msg = m; g.msgT = t; };
   say(`${away ? "AWAY IN" : "AT HOME IN"} ${place.city.toUpperCase()} · vs ${foeT.city.toUpperCase()}`, 3.2);
-  const PLAT = [], WAVES = [];
+  const OBS = [], SCAF = [], WAVES = [];
   for (let x = 380; x < BOSS_AT - 200; x += 170 + Math.floor(Math.random() * 140)) {
-    const r = Math.random();
-    if (r < 0.4) PLAT.push({ x, y: GY - 22, w: 26 + 26 * Math.floor(Math.random() * 2), k: "crate" });
-    else if (r < 0.7) PLAT.push({ x, y: GY - 74 - Math.floor(Math.random() * 30), w: 64, k: "balcony" });
-    else if (r < 0.82) PLAT.push({ x, y: GY - 34, w: 92, k: "bus" });
+    const r = Math.random(), r2 = Math.random();
+    if (r < 0.45) OBS.push({ x, w: 26 + 26 * Math.floor(r2 * 2), gy: D0 + 18 + Math.floor(Math.random() * (D1 - D0 - 24)), d: 14, h: 22, k: "crate" });
+    else if (r < 0.62) OBS.push({ x, w: 92, gy: D0 + 24 + Math.floor(r2 * 14), d: 22, h: 34, k: "bus" });
+    else if (r < 0.85) SCAF.push({ x, w: 60, h: 56 + Math.floor(r2 * 18) });
   }
   for (let x = 520; x < BOSS_AT - 60; x += 150 + Math.floor(Math.random() * 90)) {
     const r = Math.random(), n = 1 + Math.floor(Math.random() * (2 + diff));
@@ -76,19 +76,30 @@ function Kop(online = null) {
     if (Math.random() < 0.17) WAVES.push({ x: x + 60, kind: "van", n: 1, done: false });
   }
   WAVES.push({ x: 1600, kind: "van", n: 1, done: false });
-  const FOODX = [Math.floor(BOSS_AT * 0.33), Math.floor(BOSS_AT * 0.7)];
-  FOODX.forEach((x) => K.push({ x, y: GY - 10, k: "food", vy: 0 }));
+  [Math.floor(BOSS_AT * 0.33), Math.floor(BOSS_AT * 0.7)].forEach((x, i) => K.push({ x, gy: D0 + 24 + i * 30, z: 0, vz: 0, k: "food" }));
+  const blocked = (x, gy, z) => OBS.some((o) => x > o.x - 4 && x < o.x + o.w + 4 && gy <= o.gy + 2 && gy >= o.gy - o.d - 2 && z < o.h - 3);
+  const floorAt = (x, gy) => { let f = 0; for (const o of OBS) if (x > o.x - 3 && x < o.x + o.w + 3 && gy <= o.gy + 2 && gy >= o.gy - o.d - 2) f = Math.max(f, o.h); return f; };
+  const inObs = (x, gy, z) => OBS.find((o) => x > o.x && x < o.x + o.w && gy <= o.gy && gy >= o.gy - o.d && z < o.h);
+  function walk(a, nx, ngy) {
+    ngy = clamp(ngy, D0, D1);
+    if (!blocked(nx, ngy, a.z)) { a.x = nx; a.gy = ngy; } else if (!blocked(nx, a.gy, a.z)) a.x = nx; else if (!blocked(a.x, ngy, a.z)) a.gy = ngy; else return false;
+    return true;
+  }
+  function fall(a, dt) {
+    const f = floorAt(a.x, a.gy); a.vz -= GRAV * dt; a.z += a.vz * dt;
+    if (a.z <= f) { a.z = f; a.vz = 0; a.on = true; } else a.on = false;
+  }
   const FW = Math.ceil(W + LEN * 0.22), MW = Math.ceil(W + LEN * 0.55);
   const R = (() => { let s = 0; for (const ch of place.k) s = s * 31 + ch.charCodeAt(0); return () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff); })();
-  const far = pic(FW, 260, (x) => {
-    const sk = x.createLinearGradient(0, 0, 0, 240); sk.addColorStop(0, SCN.sky[0]); sk.addColorStop(0.6, SCN.sky[1]); sk.addColorStop(1, SCN.sky[2]);
-    x.fillStyle = sk; x.fillRect(0, 0, FW, 260);
-    if (SCN.sun) { const [sx, sy, sr, sc] = SCN.sun; for (const k of [0.25, 0.45, 1]) { x.globalAlpha = k === 1 ? 1 : 0.2; x.fillStyle = sc; x.beginPath(); x.arc(FW * sx * 0.5, sy, sr / k * (k === 1 ? 1 : 0.6), 0, 7); x.fill(); } x.globalAlpha = 1; }
-    x.fillStyle = "rgba(255,255,255,.55)"; for (let i = 0; i < 14; i++) { const cx0 = R() * FW, cy0 = 20 + R() * 90, cw = 30 + R() * 70; x.fillRect(cx0, cy0, cw, 3); x.fillRect(cx0 + 8, cy0 - 3, cw * 0.6, 3); }
-    const [hc, ha, hh] = SCN.hills; x.fillStyle = hc; x.beginPath(); x.moveTo(0, 240);
-    for (let i = 0; i <= FW; i += 8) x.lineTo(i, 236 - hh * (0.4 + ha * (0.5 + 0.5 * Math.sin(i / 97 + 1.3) * Math.sin(i / 41))) - R() * 3);
-    x.lineTo(FW, 240); x.fill();
-    for (let rep = 0; rep < 2; rep++) for (const [kind, fx, s, opt] of SCN.marks) landmark(x, kind, (fx + rep) * FW / 2, 236, s, opt);
+  const far = pic(FW, 240, (x) => {
+    const sk = x.createLinearGradient(0, 0, 0, 226); sk.addColorStop(0, SCN.sky[0]); sk.addColorStop(0.6, SCN.sky[1]); sk.addColorStop(1, SCN.sky[2]);
+    x.fillStyle = sk; x.fillRect(0, 0, FW, 240);
+    if (SCN.sun) { const [sx, sy, sr, sc] = SCN.sun; for (const k of [0.25, 0.45, 1]) { x.globalAlpha = k === 1 ? 1 : 0.2; x.fillStyle = sc; x.beginPath(); x.arc(FW * sx * 0.5, sy - 14, sr / k * (k === 1 ? 1 : 0.6), 0, 7); x.fill(); } x.globalAlpha = 1; }
+    x.fillStyle = "rgba(255,255,255,.55)"; for (let i = 0; i < 14; i++) { const cx0 = R() * FW, cy0 = 16 + R() * 80, cw = 30 + R() * 70; x.fillRect(cx0, cy0, cw, 3); x.fillRect(cx0 + 8, cy0 - 3, cw * 0.6, 3); }
+    const [hc, ha, hh] = SCN.hills; x.fillStyle = hc; x.beginPath(); x.moveTo(0, 226);
+    for (let i = 0; i <= FW; i += 8) x.lineTo(i, 222 - hh * (0.4 + ha * (0.5 + 0.5 * Math.sin(i / 97 + 1.3) * Math.sin(i / 41))) - R() * 3);
+    x.lineTo(FW, 226); x.fill();
+    for (let rep = 0; rep < 2; rep++) for (const [kind, fx, s, opt] of SCN.marks) landmark(x, kind, (fx + rep) * FW / 2, 222, s, opt);
   });
   function landmark(x, kind, px, py, s, opt) {
     const F = (c, a, b, w, h) => { x.fillStyle = c; x.fillRect(px + a * s, py - b * s, w * s, h * s); };
@@ -133,8 +144,8 @@ function Kop(online = null) {
     if (kind === "bunker") { F("#78716c", -80, 40, 160, 40); F("#57534e", -84, 44, 168, 6); for (let i = -70; i < 70; i += 30) F("#292524", i, 30, 20, 30); }
     if (kind === "ferris") { x.strokeStyle = "#f8fafc"; x.lineWidth = 1.5; x.beginPath(); x.arc(px, py - 60 * s, 40 * s, 0, 7); x.stroke(); for (let a = 0; a < 6.28; a += 0.52) { x.beginPath(); x.moveTo(px, py - 60 * s); x.lineTo(px + Math.cos(a) * 40 * s, py - 60 * s + Math.sin(a) * 40 * s); x.stroke(); F("#f43f5e", Math.cos(a) * 40 - 3, 60 - Math.sin(a) * 40 + 3, 6, 6); } F("#f8fafc", -3, 60, 6, 60); }
   }
-  const mid = pic(MW, 300, (x) => {
-    const [pal, roof] = SCN.bld, top = 168, base = 262, wy = SCN.water ? 268 : 300;
+  const mid = pic(MW, 270, (x) => {
+    const [pal, roof] = SCN.bld, base = 222;
     for (let bx = 0; bx < MW; ) {
       const w = 30 + Math.floor(R() * 34), h = 46 + Math.floor(R() * 52), y0 = base - h, c = pal[Math.floor(R() * pal.length)];
       x.fillStyle = c; x.fillRect(bx, y0, w, h);
@@ -154,7 +165,7 @@ function Kop(online = null) {
     }
     x.fillStyle = "rgba(0,0,0,.18)"; x.fillRect(0, base, MW, 6);
     if (SCN.water) {
-      const [kind, wc] = SCN.water; x.fillStyle = wc; x.fillRect(0, base + 6, MW, wy - base + 40);
+      const [kind, wc] = SCN.water; x.fillStyle = wc; x.fillRect(0, base + 6, MW, GT - base - 2);
       x.fillStyle = "rgba(255,255,255,.35)"; for (let i = 0; i < MW / 6; i++) x.fillRect(R() * MW, base + 10 + R() * 30, 4 + R() * 10, 1);
       if (SCN.props.includes("boats") || SCN.props.includes("yachts") || SCN.props.includes("barges")) for (let bx = 20; bx < MW; bx += 60 + R() * 90) {
         const yacht = SCN.props.includes("yachts"), barge = SCN.props.includes("barges"), bw = barge ? 60 : yacht ? 42 : 26;
@@ -169,78 +180,104 @@ function Kop(online = null) {
     if (SCN.props.includes("palms")) for (let bx = 30; bx < MW; bx += 70 + R() * 40) { x.fillStyle = "#78350f"; x.fillRect(bx, base - 40, 3, 46); x.fillStyle = "#15803d"; for (let a = 0; a < 6; a++) { x.save(); x.translate(bx + 1, base - 40); x.rotate(a * 1.05); x.fillRect(0, -2, 18, 4); x.restore(); } }
     if (SCN.props.includes("lamps")) for (let bx = 20; bx < MW; bx += 80) { x.fillStyle = "#1f2937"; x.fillRect(bx, base - 30, 2, 36); x.fillStyle = "#fde68a"; x.fillRect(bx - 2, base - 34, 6, 5); }
   });
-  function guy(px, py, face, ax, ay, crouch, kit, skin, hair, run, num, bandana) {
-    const h = crouch ? 16 : 24, t0 = py - h, leg = crouch ? 0 : run;
+  function guy(px, py, face, ang, kit, skin, hair, run, num, bandana, gun = true) {
+    const t0 = py - 24, leg = run;
     cx.save(); cx.translate(Math.round(px), py); cx.scale(face * KS, KS); cx.translate(0, -py);
     rect(-4, py - 6 + (leg > 0 ? -1 : 0), 3, 6, kit.c2); rect(1, py - 6 + (leg < 0 ? -1 : 0), 3, 6, kit.c2);
     rect(-5, py - 1, 4, 2, "#111827"); rect(1, py - 1, 4, 2, "#111827");
-    rect(-5, t0 + (crouch ? 9 : 13), 10, 5, kit.c2 === "#f8fafc" ? "#1f2937" : "#f8fafc");
-    rect(-5, t0 + 5, 10, crouch ? 5 : 9, kit.c1); rect(-5, t0 + 5, 10, 2, kit.c2);
+    rect(-5, t0 + 13, 10, 5, kit.c2 === "#f8fafc" ? "#1f2937" : "#f8fafc");
+    rect(-5, t0 + 5, 10, 9, kit.c1); rect(-5, t0 + 5, 10, 2, kit.c2);
     if (num !== undefined) txt(String(num), -2, t0 + 12, 5, kit.c2);
     rect(-3, t0, 7, 6, skin); rect(-3, t0 - 1, 7, 2, hair); rect(2, t0 + 2, 1, 1, "#111827");
     if (bandana) rect(-3, t0 + 3, 7, 2, bandana);
-    cx.save(); cx.translate(1, t0 + 8); cx.rotate(ax === 0 ? (ay < 0 ? -Math.PI / 2 : Math.PI / 2) : Math.atan2(ay, 1));
-    rect(0, -1, 10, 3, "#374151"); rect(0, -1, 4, 3, skin); cx.restore();
+    if (gun) { cx.save(); cx.translate(1, t0 + 8); cx.rotate(ang || 0); rect(0, -1, 10, 3, "#374151"); rect(0, -1, 4, 3, skin); cx.restore(); }
+    else { rect(-4, t0 + 12, 8, 3, skin); }
     cx.restore();
   }
+  const shadow = (sx, sgy, r = 9) => { cx.fillStyle = "rgba(0,0,0,.28)"; cx.beginPath(); cx.ellipse(sx, sgy, r, r * 0.32, 0, 0, 7); cx.fill(); };
   const TYPES = ["grunt", "lob", "sniper", "drone", "van", "boss"];
   const HP = { grunt: 1, lob: 2, sniper: 2, drone: 2, van: 14 + diff * 4, boss: 110 + diff * 40 };
-  function spawn(kind, x, y) {
-    const e = { id: nid++, t: kind, x, y: y ?? GY, vx: 0, vy: 0, hp: HP[kind] * (kind === "boss" ? Math.max(1, 0.7 + 0.3 * nP) : 1), face: -1, cd: 0.8 + Math.random(), on: true, st: 0, hit: 0 };
+  function spawn(kind, x, gy, z = 0) {
+    const e = { id: nid++, t: kind, x, gy: clamp(gy, D0 - 6, D1), z, vz: 0, hp: HP[kind] * (kind === "boss" ? Math.max(1, 0.7 + 0.3 * nP) : 1), face: -1, cd: 0.8 + Math.random(), on: true, st: 0, hit: 0, lane: 0 };
     e.max = e.hp; E.push(e); return e;
   }
   const alive = () => P.filter((p) => !p.out && p.dead <= 0);
-  const nearestP = (x, y) => { let b = null, bd = 1e9; for (const p of alive()) { const d = Math.hypot(p.x - x, p.y - 12 - y); if (d < bd) { bd = d; b = p; } } return b; };
-  function eshot(x, y, tx, ty, sp, kind = "b") { const a = Math.atan2(ty - y, tx - x); B.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, f: false, t: 0, k: kind, d: 1 }); }
-  function boom(x, y, r, dmg, friendly) {
-    FX.push({ k: "boom", x, y, r, t: 0.45 }); shake = Math.max(shake, r / 8); SFX.boom();
-    if (friendly) for (const e of E) { const [ex, ey] = [e.x, e.y - eh(e) / 2]; if (Math.hypot(ex - x, ey - y) < r + ew(e) / 2) hurtE(e, dmg); }
-    else for (const p of alive()) if (Math.hypot(p.x - x, p.y - 12 - y) < r) hurtP(p);
+  const nearestP = (x, gy) => { let b = null, bd = 1e9; for (const p of alive()) { const d = Math.hypot(p.x - x, (p.gy - gy) * 2); if (d < bd) { bd = d; b = p; } } return b; };
+  const ew = (e) => ({ van: 54, boss: 64, drone: 18 })[e.t] || 12 * KS, eh = (e) => ({ van: 30, boss: 96, drone: 10 })[e.t] || 24 * KS, ed = (e) => ({ van: 14, boss: 22, drone: 12 })[e.t] || 9;
+  const aimV = (fx, fg, fz, tx, tg, tz, sp) => { const dx = tx - fx, dg = tg - fg, dz = tz - fz, L = Math.hypot(dx, dg, dz) || 1; return [dx / L * sp, dg / L * sp, dz / L * sp]; };
+  function eshot(e, p, sp, kind = "b") {
+    const ox = e.x + e.face * 10, oz = e.z + eh(e) * 0.6, v = aimV(ox, e.gy, oz, p.x, p.gy, p.z + CH * 0.8, sp);
+    B.push({ x: ox, gy: e.gy, z: oz, vx: v[0], vg: v[1], vz: v[2], f: false, t: 0, k: kind, d: 1 });
   }
-  const ew = (e) => ({ van: 54, boss: 64, drone: 18 })[e.t] || 12 * KS, eh = (e) => ({ van: 30, boss: 90, drone: 10 })[e.t] || 24 * KS;
+  function boom(x, gy, z, r, dmg, friendly) {
+    FX.push({ k: "boom", x, gy, z, r, t: 0.45 }); shake = Math.max(shake, r / 8); SFX.boom();
+    const near = (a, h) => Math.hypot(a.x - x, (a.gy - gy) * 1.6, (a.z + h / 2 - z) * 0.5);
+    if (friendly) { for (const e of E) if (near(e, eh(e)) < r + ew(e) / 2) hurtE(e, dmg); }
+    else for (const p of alive()) if (near(p, 30) < r) hurtP(p);
+  }
   function hurtE(e, d) {
     if (e.hp <= 0) return; e.hp -= d; e.hit = 0.08;
     if (e.hp <= 0) {
       const pts = { grunt: 100, lob: 150, sniper: 200, drone: 200, van: 600, boss: 6000 }[e.t]; g.score += pts;
-      FX.push({ k: "pts", x: e.x, y: e.y - eh(e) - 4, s: "+" + pts, t: 0.9 });
-      if (e.t === "van" || e.t === "drone" || e.t === "boss") boom(e.x, e.y - eh(e) / 2, e.t === "boss" ? 60 : 30, 0, true); else { SFX.stomp(); FX.push({ k: "fly", x: e.x, y: e.y - 12, vx: rnd(-40, 80), vy: -220, t: 0.8, c: foeT.c1 }); }
-      if (e.t === "van" || Math.random() < 0.07) K.push({ x: e.x, y: e.y - 20, vy: -150, k: pick(["M", "S", "F"]) });
-      if (e.t === "boss") { g.win = true; g.over = false; g.endT = 2.5; say("VICTOIRE ! THE MASCOT-MECH IS DOWN", 4); SFX.win(); }
+      FX.push({ k: "pts", x: e.x, gy: e.gy, z: e.z + eh(e) + 4, s: "+" + pts, t: 0.9 });
+      if (e.t === "van" || e.t === "drone" || e.t === "boss") boom(e.x, e.gy, e.z + eh(e) / 2, e.t === "boss" ? 60 : 30, 0, true);
+      else { SFX.stomp(); FX.push({ k: "fly", x: e.x, gy: e.gy, z: e.z + 12, vx: rnd(-40, 80), vz: 220, t: 0.8, c: foeT.c1 }); }
+      if (e.t === "van" || Math.random() < 0.07) K.push({ x: e.x, gy: clamp(e.gy, D0, D1), z: e.z + 20, vz: 150, k: pick(["M", "S", "F"]) });
+      if (e.t === "boss") { g.win = true; g.endT = 2.5; say("VICTOIRE ! THE MASCOT-MECH IS DOWN", 4); SFX.win(); }
     }
   }
   function hurtP(p) {
     if (p.inv > 0 || p.dead > 0 || p.out) return;
-    p.lives--; p.dead = 1.6; p.wpn = "P"; p.ammo = 0; tone(160, 0.3, "sawtooth", 0.08, -100);
-    FX.push({ k: "fly", x: p.x, y: p.y - 12, vx: -p.face * 60, vy: -260, t: 0.9, c: team.c1 });
+    if (--p.hp > 0) { p.inv = 1; shake = Math.max(shake, 3); tone(260, 0.12, "square", 0.07, -120); FX.push({ k: "thud", x: p.x, gy: p.gy, z: p.z + 20, t: 0.25 }); return; }
+    p.hp = 3; p.lives--; p.dead = 1.6; p.wpn = "P"; p.ammo = 0; tone(160, 0.3, "sawtooth", 0.08, -100);
+    FX.push({ k: "fly", x: p.x, gy: p.gy, z: p.z + 12, vx: -p.face * 60, vz: 260, t: 0.9, c: team.c1 });
     if (p.lives <= 0) { p.out = true; say(`${p.name} IS OUT`, 1.6); }
   }
   const WPN = { P: { cd: 0.2, sp: 430, n: 1, d: 1 }, M: { cd: 0.075, sp: 470, n: 1, d: 1, ammo: 150 }, S: { cd: 0.3, sp: 400, n: 5, d: 1, ammo: 45 }, F: { cd: 0.45, sp: 300, n: 1, d: 5, ammo: 24 } };
-  function fire(p) {
-    const w = WPN[p.wpn]; p.cd = w.cd;
-    const len = Math.hypot(p.ax, p.ay) || 1, dx = p.ax / len, dy = p.ay / len, ox = p.x + dx * 11 * KS, oy = p.y - (p.crouch ? 9 : 16) * KS + dy * 8 * KS;
-    for (let i = 0; i < w.n; i++) {
-      const a = Math.atan2(dy, dx) + (w.n > 1 ? (i - (w.n - 1) / 2) * 0.16 : 0);
-      B.push({ x: ox, y: oy, vx: Math.cos(a) * w.sp, vy: Math.sin(a) * w.sp, f: true, t: 0, k: p.wpn === "F" ? "r" : "b", d: w.d, o: p.i });
+  function target(p) {
+    let best = null, bd = 1e9;
+    for (const e of E) {
+      if (e.hp <= 0) continue; const dx = e.x - p.x, dg = e.gy - p.gy;
+      if (dx * p.face < 4 || Math.abs(dx) > 340 || Math.abs(dg) > 80) continue;
+      const d = Math.abs(dx) + Math.abs(dg) * 2.5; if (d < bd) { bd = d; best = e; }
     }
-    if (p.wpn !== "P" && --p.ammo <= 0) { p.wpn = "P"; }
+    return best;
+  }
+  function fire(p) {
+    const w = WPN[p.wpn], t = target(p), ox = p.x + p.face * 11 * KS, oz = p.z + CH; p.cd = w.cd;
+    const v = t ? aimV(ox, p.gy, oz, t.x, t.gy, t.z + eh(t) * 0.5, w.sp) : [p.face * w.sp, 0, 0];
+    p.ang = Math.atan2(-v[2], Math.abs(v[0]) || 1);
+    for (let i = 0; i < w.n; i++) {
+      const s = w.n > 1 ? i - (w.n - 1) / 2 : 0;
+      B.push({ x: ox, gy: p.gy, z: oz, vx: v[0], vg: v[1] + s * 45, vz: v[2] + Math.abs(s) * 6, f: true, t: 0, k: p.wpn === "F" ? "r" : "b", d: w.d, o: p.i });
+    }
+    if (p.wpn !== "P" && --p.ammo <= 0) p.wpn = "P";
     tone(p.wpn === "F" ? 220 : 700 + p.i * 60, 0.05, "square", 0.025, -400);
   }
-  function grenade(p) { p.gren--; B.push({ x: p.x, y: p.y - 18, vx: p.face * 210 + p.vx * 0.4, vy: -260, f: true, t: 0, k: "g", d: 6, o: p.i }); }
+  function grenade(p) { p.gren--; B.push({ x: p.x, gy: p.gy, z: p.z + 22, vx: p.face * 210 + p.in.mx * 40, vg: p.in.my * 60, vz: 300, f: true, t: 0, k: "g", d: 6, o: p.i }); }
+  function raiseWall(p) {
+    p.wallT = WALL_CD; WALL.push({ x: p.x + p.face * 26, gy: clamp(p.gy, D0 + 14, D1 - 14), face: p.face, t: WALL_T, o: p.i });
+    say(`${p.name.toUpperCase()}: LE MUR !`, 1); tone(392, 0.08, "square", 0.06); tone(523, 0.12, "square", 0.06, 0, 0.08); noise(0.1, 0.08, 1200);
+  }
   function botThink(p, dt) {
-    const lead = Math.max(...alive().filter((q) => q.human).map((q) => q.x), g.cam + 120);
-    let tx = clamp(lead - 30 - p.i * 22, g.cam + 20, g.cam + W - 40);
-    let tgt = null, bd = 300;
-    for (const e of E) { if (e.hp <= 0 || e.x < g.cam - 10 || e.x > g.cam + W + 20) continue; const d = Math.hypot(e.x - p.x, (e.y - eh(e) / 2) - (p.y - 14)); if (d < bd) { bd = d; tgt = e; } }
-    p.in.mx = Math.abs(tx - p.x) > 10 ? Math.sign(tx - p.x) : 0; p.in.my = 0; p.in.a = 0;
+    const hs = alive().filter((q) => q.human), lead = hs.length ? hs.reduce((a, q) => (q.x > a.x ? q : a)) : null;
+    const tx = clamp((lead ? lead.x : g.cam + 120) - 30 - p.i * 22, g.cam + 20, g.cam + W - 40), tg = clamp((lead ? lead.gy : 312) + LANE[p.i % 4], D0 + 4, D1 - 4);
+    p.in.mx = Math.abs(tx - p.x) > 10 ? Math.sign(tx - p.x) : 0; p.in.my = Math.abs(tg - p.gy) > 6 ? Math.sign(tg - p.gy) : 0; p.in.a = 0;
+    let tgt = null, bd = 330;
+    for (const e of E) { if (e.hp <= 0 || e.x < g.cam - 10 || e.x > g.cam + W + 20) continue; const d = Math.hypot(e.x - p.x, (e.gy - p.gy) * 2); if (d < bd) { bd = d; tgt = e; } }
     if (tgt) {
-      const dx = tgt.x - p.x, dy = (tgt.y - eh(tgt) / 2) - (p.y - 14);
-      if (Math.abs(dy) > Math.abs(dx) * 0.6 && dy < 0) { p.in.my = -1; p.in.mx = Math.abs(dx) > 30 ? Math.sign(dx) : 0; }
-      else if (p.in.mx === 0 || Math.sign(dx) !== p.face) p.face = Math.sign(dx) || 1;
-      p.in.a = Math.abs(dy) < 30 || p.in.my < 0 ? 1 : 0;
+      const dx = tgt.x - p.x; if (!p.in.mx || Math.sign(dx) === p.in.mx) p.face = Math.sign(dx) || p.face;
+      p.in.a = Math.abs(tgt.gy - p.gy) < 80 ? 1 : 0;
+      if (Math.abs(tgt.gy - p.gy) >= 60) p.in.my = Math.sign(tgt.gy - p.gy);
       if ((tgt.t === "van" || tgt.t === "boss") && Math.abs(dx) < 150 && p.gren > 0 && (p.botT -= dt) <= 0) { p.botT = 4; p.in.c++; }
     }
-    for (const b of B) if (!b.f && Math.abs(b.x - p.x) < 50 && Math.abs(b.y - (p.y - 14)) < 18 && Math.sign(p.x - b.x) === Math.sign(b.vx) && p.on && Math.random() < 0.3) { p.in.b++; break; }
-    for (const q of PLAT) if (q.k === "crate" && p.on && p.in.mx > 0 && q.x - p.x > 0 && q.x - p.x < 18) p.in.b++;
+    let coming = 0;
+    for (const b of B) {
+      if (b.f || Math.abs(b.x - p.x) > 120 || Math.sign(p.x - b.x) !== Math.sign(b.vx)) continue; coming++;
+      if (Math.abs(b.x - p.x) < 60 && Math.abs(b.gy - p.gy) < 12) { if (p.on && Math.random() < 0.25) p.in.b++; else p.in.my = Math.sign(p.gy - b.gy) || 1; }
+    }
+    if (coming >= 2 && p.wallT <= 0 && Math.random() < 0.05) p.in.d++;
+    if (p.on && p.in.mx && blocked(p.x + p.in.mx * 12, p.gy, p.z)) p.in.b++;
   }
   function step(dt) {
     g.t += dt; g.msgT -= dt; shake = Math.max(0, shake - dt * 20);
@@ -251,113 +288,122 @@ function Kop(online = null) {
       const lead = Math.max(...live.map((p) => p.x)), back = Math.min(...live.map((p) => p.x));
       g.cam = clamp(Math.max(g.cam, Math.min(lead - 200, back - 16)), 0, BOSS_AT);
     }
-    if (g.cam >= BOSS_AT - 1 && !g.boss) { g.boss = spawn("boss", LEN - 70, GY); g.boss.st = 0; say(`THE ${foeT.city.toUpperCase()} MASCOT-MECH!`, 2.5); SFX.crowd(); }
+    if (g.cam >= BOSS_AT - 1 && !g.boss) { g.boss = spawn("boss", LEN - 70, 312); g.boss.st = 0; say(`THE ${foeT.city.toUpperCase()} MASCOT-MECH!`, 2.5); SFX.crowd(); }
     for (const w of WAVES) if (!w.done && g.cam + W + 30 > w.x) {
       w.done = true;
       for (let i = 0; i < w.n; i++) {
-        if (w.kind === "drone") spawn("drone", w.x + i * 30, 90 + Math.random() * 60);
-        else if (w.kind === "sniper") { const pl = PLAT.find((q) => q.k === "balcony" && q.x > g.cam + W * 0.5 && q.x < g.cam + W + 200); spawn(pl ? "sniper" : "grunt", pl ? pl.x + pl.w / 2 : w.x + i * 26, pl ? pl.y : GY); }
-        else spawn(w.kind, w.x + i * 26 + (w.kind === "van" ? 40 : 0), GY);
+        const lane = D0 + 10 + Math.random() * (D1 - D0 - 20);
+        if (w.kind === "drone") spawn("drone", w.x + i * 30, lane, 80 + Math.random() * 30);
+        else if (w.kind === "sniper") { const s = SCAF.find((q) => q.x > g.cam + W * 0.5 && q.x < g.cam + W + 200 && !q.used); if (s) { s.used = true; spawn("sniper", s.x + s.w / 2, D0 - 4, s.h); } else spawn("grunt", w.x + i * 26, lane); }
+        else spawn(w.kind, w.x + i * 26 + (w.kind === "van" ? 40 : 0), lane);
       }
     }
     for (const p of P) {
       if (p.out) continue;
-      if (p.dead > 0) { p.dead -= dt; if (p.dead <= 0) { p.x = g.cam + 60 + p.i * 20; p.y = 40; p.vy = 0; p.inv = 2; p.gren = Math.max(p.gren, 2); } continue; }
+      if (p.dead > 0) { p.dead -= dt; if (p.dead <= 0) { p.x = g.cam + 60 + p.i * 20; p.gy = clamp(312 + LANE[p.i % 4], D0, D1); p.z = 120; p.vz = 0; p.inv = 2; p.gren = Math.max(p.gren, 2); } continue; }
       if (!p.human) botThink(p, dt);
-      p.inv = Math.max(0, p.inv - dt); p.cd -= dt;
+      p.inv = Math.max(0, p.inv - dt); p.cd -= dt; p.wallT = Math.max(0, p.wallT - dt);
       const mx = p.in.mx, my = p.in.my;
-      p.crouch = p.on && my > 0.5;
-      p.vx = p.crouch ? 0 : mx * 118; if (mx) p.face = Math.sign(mx);
-      if (p.in.b > p.lastB) { p.lastB = p.in.b; if (p.on) { p.vy = -440; p.on = false; SFX.jump(); } }
+      if (mx) p.face = Math.sign(mx);
+      walk(p, p.x + mx * 118 * dt, p.gy + my * 82 * dt);
+      if (p.in.b > p.lastB) { p.lastB = p.in.b; if (p.on) { p.vz = 440; p.on = false; SFX.jump(); } }
       if (p.in.c > p.lastC) { p.lastC = p.in.c; if (p.gren > 0) grenade(p); }
-      if (my < -0.5) { p.ax = mx ? Math.sign(mx) : 0; p.ay = -1; } else if (my > 0.5 && !p.on) { p.ax = mx ? Math.sign(mx) : 0; p.ay = 1; } else { p.ax = p.face; p.ay = 0; }
-      if (!p.ax && !p.ay) p.ax = p.face;
-      if (p.in.a && p.cd <= 0) fire(p);
-      const py0 = p.y; p.vy = Math.min(800, p.vy + GRAV * dt); p.x += p.vx * dt; p.y += p.vy * dt; p.on = false;
-      if (p.y >= GY) { p.y = GY; p.vy = 0; p.on = true; }
-      for (const q of PLAT) if (p.vy >= 0 && py0 <= q.y + 1 && p.y >= q.y && p.x > q.x - 4 && p.x < q.x + q.w + 4) { p.y = q.y; p.vy = 0; p.on = true; }
-      p.x = clamp(p.x, g.cam + 8, Math.min(g.cam + W - 10, LEN - 10)); p.run = p.on && p.vx ? (Math.floor(g.t * 10) % 2 ? 1 : -1) : 0;
-      for (const k of K) if (!k.got && Math.abs(k.x - p.x) < 14 && Math.abs(k.y - (p.y - 10)) < 20) {
+      if (p.in.d > p.lastD) { p.lastD = p.in.d; if (p.wallT <= 0) raiseWall(p); }
+      if (p.in.a && p.cd <= 0) fire(p); else if (!p.in.a) p.ang *= 0.8;
+      fall(p, dt);
+      p.x = clamp(p.x, g.cam + 8, Math.min(g.cam + W - 10, LEN - 10)); p.run = p.on && (mx || my) ? (Math.floor(g.t * 10) % 2 ? 1 : -1) : 0;
+      for (const k of K) if (!k.got && Math.abs(k.x - p.x) < 16 && Math.abs(k.gy - p.gy) < 13 && p.z - k.z < 26) {
         k.got = true;
-        if (k.k === "food") { p.lives = Math.min(5, p.lives + 1); g.score += 500; say(`${team.food.toUpperCase()} ! +1 LIFE`, 1.6); SFX.coin(); }
+        if (k.k === "food") { p.lives = Math.min(5, p.lives + 1); p.hp = 3; g.score += 500; say(`${team.food.toUpperCase()} ! +1 LIFE, HEARTS FULL`, 1.6); SFX.coin(); }
         else { p.wpn = k.k; p.ammo = WPN[k.k].ammo; say({ M: "MITRAILLETTE!", S: "ÉVENTAIL!", F: "FUSÉE DE DÉTRESSE!" }[k.k], 1.2); tone(660, 0.08, "square", 0.06); tone(990, 0.12, "square", 0.06, 0, 0.08); }
       }
     }
+    for (const w of WALL) w.t -= dt;
+    for (let i = WALL.length - 1; i >= 0; i--) if (WALL[i].t <= 0) WALL.splice(i, 1);
     const rate = [1.4, 1, 0.75][diff];
     for (const e of E) {
       if (e.hp <= 0) continue;
       e.hit = Math.max(0, e.hit - dt); e.cd -= dt;
-      const p = nearestP(e.x, e.y - 12); if (!p) break;
-      const dx = p.x - e.x; e.face = Math.sign(dx) || -1;
+      const p = nearestP(e.x, e.gy); if (!p) break;
+      const dx = p.x - e.x, dg = p.gy - e.gy; e.face = Math.sign(dx) || -1;
       if (e.t === "grunt") {
-        const want = Math.abs(dx) > 150 ? Math.sign(dx) * 70 : Math.abs(dx) < 60 ? -Math.sign(dx) * 40 : 0;
-        e.vx = want; e.x += e.vx * dt; e.vy = Math.min(800, e.vy + GRAV * dt); e.y = Math.min(GY, e.y + e.vy * dt); if (e.y >= GY) e.vy = 0;
-        if (e.cd <= 0 && Math.abs(dx) < 300) { e.cd = rate * (1.3 + Math.random()); eshot(e.x + e.face * 10, e.y - 21, p.x, p.y - 18, 170); }
+        const want = Math.abs(dx) > 150 ? Math.sign(dx) * 70 : Math.abs(dx) < 60 ? -Math.sign(dx) * 40 : 0, lane = clamp(p.gy + ((e.id % 3) - 1) * 16, D0, D1);
+        walk(e, e.x + want * dt, e.gy + clamp(lane - e.gy, -1, 1) * 46 * dt); fall(e, dt);
+        if (e.cd <= 0 && Math.abs(dx) < 300 && Math.abs(dg) < 46) { e.cd = rate * (1.3 + Math.random()); eshot(e, p, 170); }
       } else if (e.t === "lob") {
-        if (e.cd <= 0 && Math.abs(dx) < 280) { e.cd = rate * (2 + Math.random()); const T = 0.9, vx = dx / T; B.push({ x: e.x, y: e.y - 20, vx, vy: -GRAV * T / 2 + (p.y - e.y) / T, f: false, t: 0, k: "bottle", d: 1 }); }
+        e.gy += clamp(p.gy - e.gy, -1, 1) * 20 * dt;
+        if (e.cd <= 0 && Math.abs(dx) < 280) {
+          e.cd = rate * (2 + Math.random()); const T = 0.9, z0 = e.z + 30;
+          B.push({ x: e.x, gy: e.gy, z: z0, vx: dx / T, vg: (p.gy - e.gy) / T, vz: (p.z - z0 + GRAV * T * T / 2) / T, f: false, t: 0, k: "bottle", d: 1 });
+        }
       } else if (e.t === "sniper") {
-        if (e.cd <= 0 && Math.abs(dx) < 340) { e.cd = rate * (1.6 + Math.random()); eshot(e.x, e.y - 22, p.x, p.y - 16, 210); }
+        if (e.cd <= 0 && Math.abs(dx) < 340) { e.cd = rate * (1.6 + Math.random()); eshot(e, p, 210); }
       } else if (e.t === "drone") {
-        e.x += (p.x + Math.sin(g.t + e.id) * 60 - e.x) * dt * 0.8; e.y = 80 + Math.sin(g.t * 2 + e.id) * 14 + (e.id % 3) * 16;
-        if (e.cd <= 0 && Math.abs(dx) < 60) { e.cd = rate * 1.6; B.push({ x: e.x, y: e.y + 4, vx: 0, vy: 40, f: false, t: 0, k: "bomb", d: 1 }); }
+        e.x += (p.x + Math.sin(g.t + e.id) * 60 - e.x) * dt * 0.8; e.gy += (p.gy - e.gy) * dt * 0.7; e.z = 84 + Math.sin(g.t * 2 + e.id) * 14 + (e.id % 3) * 12;
+        if (e.cd <= 0 && Math.abs(dx) < 50 && Math.abs(dg) < 20) { e.cd = rate * 1.6; B.push({ x: e.x, gy: e.gy, z: e.z - 4, vx: 0, vg: 0, vz: -40, f: false, t: 0, k: "bomb", d: 1 }); }
       } else if (e.t === "van") {
         e.x -= 85 * dt; if (e.x < g.cam - 80) e.hp = 0;
-        for (const q of alive()) if (Math.abs(q.x - e.x) < 30 && q.y > GY - 30) hurtP(q);
+        for (const q of alive()) if (Math.abs(q.x - e.x) < 30 && Math.abs(q.gy - e.gy) < 14 && q.z < 30) hurtP(q);
+        for (const w of WALL) if (Math.abs(w.x - e.x) < 32 && Math.abs(w.gy - e.gy) < 26 && w.t > 0) { w.t = 0; hurtE(e, 4); noise(0.15, 0.12, 700); }
       } else if (e.t === "boss") {
-        e.x = Math.min(e.x, LEN - 50); if ((e.st -= dt) <= 0) {
+        e.x = Math.min(e.x, LEN - 50); e.gy += clamp(p.gy - e.gy, -1, 1) * 18 * dt;
+        if ((e.st -= dt) <= 0) {
           const mv = Math.floor(Math.random() * 3); e.st = rate * (2.2 + Math.random());
-          if (mv === 0) { for (let i = -2; i <= 2; i++) { const a = Math.atan2(p.y - 14 - (e.y - 70), dx) + i * 0.2; B.push({ x: e.x - 24, y: e.y - 70, vx: Math.cos(a) * 190, vy: Math.sin(a) * 190, f: false, t: 0, k: "ball", d: 1 }); } tone(120, 0.2, "sawtooth", 0.08); }
-          else if (mv === 1) { e.vy = -520; e.vx = clamp(dx, -260, 120) * 1.1; e.jump = true; }
-          else { spawn("grunt", e.x - 40, GY); spawn("grunt", e.x + 20, GY); say("REINFORCEMENTS!", 1); }
+          if (mv === 0) { for (let i = -2; i <= 2; i++) { const v = aimV(e.x - 24, e.gy, e.z + 70, p.x, p.gy + i * 14, p.z + CH, 190); B.push({ x: e.x - 24, gy: e.gy, z: e.z + 70, vx: v[0], vg: v[1], vz: v[2], f: false, t: 0, k: "ball", d: 1 }); } tone(120, 0.2, "sawtooth", 0.08); }
+          else if (mv === 1) { e.vz = 520; e.vx = clamp(dx, -260, 120) * 1.1; e.jump = true; }
+          else { spawn("grunt", e.x - 40, e.gy - 20); spawn("grunt", e.x + 20, e.gy + 20); say("REINFORCEMENTS!", 1); }
         }
-        if (e.jump) { e.vy += GRAV * dt; e.x = clamp(e.x + e.vx * dt, BOSS_AT + 40, LEN - 40); e.y += e.vy * dt; if (e.y >= GY) { e.y = GY; e.jump = false; shake = 8; noise(0.3, 0.2, 400); for (const s of [-1, 1]) B.push({ x: e.x + s * 30, y: GY - 6, vx: s * 230, vy: 0, f: false, t: 0, k: "wave", d: 1 }); } }
-        for (const q of alive()) if (Math.abs(q.x - e.x) < 30 && q.y > e.y - 80) hurtP(q);
+        if (e.jump) { e.vz -= GRAV * dt; e.x = clamp(e.x + e.vx * dt, BOSS_AT + 40, LEN - 40); e.z += e.vz * dt; if (e.z <= 0) { e.z = 0; e.jump = false; shake = 8; noise(0.3, 0.2, 400); for (const s of [-1, 1]) B.push({ x: e.x + s * 30, gy: (D0 + D1) / 2, z: 0, vx: s * 230, vg: 0, vz: 0, f: false, t: 0, k: "wave", d: 1 }); } }
+        for (const q of alive()) if (Math.abs(q.x - e.x) < 30 && Math.abs(q.gy - e.gy) < 22 && q.z < e.z + 60) hurtP(q);
       }
     }
     for (let i = E.length - 1; i >= 0; i--) if (E[i].hp <= 0 || E[i].x < g.cam - 120) E.splice(i, 1);
     for (const b of B) {
       b.t += dt;
-      if (b.k === "g" || b.k === "bottle") b.vy += GRAV * dt;
-      b.x += b.vx * dt; b.y += b.vy * dt;
-      if (b.k === "g" && (b.y >= GY - 3 || b.t > 1.6)) { b.dead = true; boom(b.x, Math.min(b.y, GY - 6), 42, 6, true); continue; }
-      if (b.k === "bottle" && b.y >= GY - 2) { b.dead = true; FX.push({ k: "glass", x: b.x, y: GY - 2, t: 0.4 }); noise(0.06, 0.06, 3000); continue; }
-      if (b.k === "wave") { if (b.t > 2) b.dead = true; }
-      else if (b.x < g.cam - 20 || b.x > g.cam + W + 20 || b.y < -20 || b.y > H + 10) { b.dead = true; continue; }
+      if (b.k === "g" || b.k === "bottle") b.vz -= GRAV * dt; else if (b.k === "bomb") b.vz -= GRAV * 0.5 * dt;
+      b.x += b.vx * dt; b.gy += b.vg * dt; b.z += b.vz * dt;
+      if (b.k === "g") { if (b.z <= floorAt(b.x, b.gy) || b.t > 1.6) { b.dead = true; boom(b.x, b.gy, Math.max(0, b.z), 42, 6, true); } continue; }
+      if (b.k === "bottle" && b.z <= 0) { b.dead = true; FX.push({ k: "glass", x: b.x, gy: b.gy, z: 0, t: 0.4 }); noise(0.06, 0.06, 3000); for (const p of alive()) if (Math.abs(p.x - b.x) < 14 && Math.abs(p.gy - b.gy) < 10 && p.z < 10) hurtP(p); continue; }
+      if (b.k === "bomb" && b.z <= 0) { b.dead = true; boom(b.x, b.gy, 0, 18, 0, false); continue; }
+      if (b.k === "wave") { if (b.t > 2) b.dead = true; else for (const p of alive()) if (Math.abs(p.x - b.x) < 10 && p.z < 8) hurtP(p); continue; }
+      if (b.x < g.cam - 20 || b.x > g.cam + W + 20 || b.z < -2 || b.z > 320 || b.gy < D0 - 40 || b.gy > D1 + 30 || b.t > 3) { b.dead = true; continue; }
+      if (inObs(b.x, b.gy, b.z)) { b.dead = true; if (b.k === "r") boom(b.x, b.gy, b.z, 26, b.d, true); continue; }
       if (b.f) {
-        if (b.k === "g") continue;
-        for (const e of E) if (e.hp > 0 && Math.abs(b.x - e.x) < ew(e) / 2 + 2 && b.y < e.y + 2 && b.y > e.y - eh(e) - 2) { b.dead = true; if (b.k === "r") boom(b.x, b.y, 26, b.d, true); else hurtE(e, b.d); break; }
-        if (!b.dead) for (const q of PLAT) if (q.k === "crate" && b.x > q.x && b.x < q.x + q.w && b.y > q.y && b.y < GY) { b.dead = true; break; }
-      } else for (const p of alive()) {
-        const top = p.y - (p.crouch ? 14 : 24) * KS;
-        if (Math.abs(b.x - p.x) < 8 && b.y > top && b.y < p.y) { b.dead = true; hurtP(p); break; }
+        for (const e of E) if (e.hp > 0 && Math.abs(b.x - e.x) < ew(e) / 2 + 2 && Math.abs(b.gy - e.gy) < ed(e) && b.z > e.z - 2 && b.z < e.z + eh(e) + 2) { b.dead = true; if (b.k === "r") boom(b.x, b.gy, b.z, 26, b.d, true); else hurtE(e, b.d); break; }
+      } else {
+        for (const w of WALL) if (Math.abs(b.x - w.x) < 10 && Math.abs(b.gy - w.gy) < 26 && b.z < 50) { b.dead = true; FX.push({ k: "thud", x: b.x, gy: b.gy, z: b.z, t: 0.25 }); tone(140, 0.05, "square", 0.05); break; }
+        if (!b.dead) for (const p of alive()) if (Math.abs(b.x - p.x) < 8 && Math.abs(b.gy - p.gy) < 9 && b.z > p.z - 2 && b.z < p.z + 24 * KS) { b.dead = true; hurtP(p); break; }
       }
     }
     for (let i = B.length - 1; i >= 0; i--) if (B[i].dead) B.splice(i, 1);
-    for (const k of K) { if (k.vy !== undefined && !k.got) { k.vy += GRAV * 0.5 * dt; k.y = Math.min(GY - 10, k.y + k.vy * dt); } }
-    for (let i = FX.length - 1; i >= 0; i--) { const f = FX[i]; f.t -= dt; if (f.k === "fly") { f.vy += GRAV * dt; f.x += f.vx * dt; f.y += f.vy * dt; } if (f.t <= 0) FX.splice(i, 1); }
+    for (const k of K) if (!k.got && (k.z > 0 || k.vz > 0)) { k.vz -= GRAV * 0.5 * dt; k.z = Math.max(0, k.z + k.vz * dt); if (k.z === 0) k.vz = 0; }
+    for (let i = FX.length - 1; i >= 0; i--) { const f = FX[i]; f.t -= dt; if (f.k === "fly") { f.vz -= GRAV * dt; f.x += f.vx * dt; f.z += f.vz * dt; } if (f.t <= 0) FX.splice(i, 1); }
     if (!g.over && Math.random() < dt * 0.04) SFX.crowd();
   }
-  g.setSlot = (i, id, name) => { const p = P[i]; if (!p) return; p.human = { id, name }; p.who = name; p.lastB = p.in.b = 0; p.lastC = p.in.c = 0; };
-  g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (!p) return; p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.a = m.a ? 1 : 0; p.in.b = Math.max(p.in.b, +m.b || 0); p.in.c = Math.max(p.in.c, +m.c || 0); };
+  g.setSlot = (i, id, name) => { const p = P[i]; if (!p) return; p.human = { id, name }; p.who = name; p.lastB = p.in.b = 0; p.lastC = p.in.c = 0; p.lastD = p.in.d = 0; };
+  g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (!p) return; p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.a = m.a ? 1 : 0; p.in.b = Math.max(p.in.b, +m.b || 0); p.in.c = Math.max(p.in.c, +m.c || 0); p.in.d = Math.max(p.in.d, +m.d || 0); };
   g.netState = (id, m) => { if (!host) g.net = m; };
-  let myB = 0, myC = 0;
+  let myB = 0, myC = 0, myD = 0;
   const myHands = () => ({ mx: (held("ArrowRight", "KeyD") ? 1 : 0) - (held("ArrowLeft", "KeyA") ? 1 : 0), my: (held("ArrowDown", "KeyS") ? 1 : 0) - (held("ArrowUp", "KeyW") ? 1 : 0), a: held("Space") ? 1 : 0 });
   g.update = (dt) => {
     if (pressed("Enter", "KeyX")) myB++;
     if (pressed("KeyE", "ShiftLeft")) myC++;
+    if (pressed("KeyQ", "KeyF")) myD++;
     if (!host) {
       g.sendT -= dt;
-      if (g.sendT <= 0) { g.sendT = 0.05; online.send(Object.assign({ t: "in", b: myB, c: myC }, myHands())); }
+      if (g.sendT <= 0) { g.sendT = 0.05; online.send(Object.assign({ t: "in", b: myB, c: myC, d: myD }, myHands())); }
       const m = g.net; if (!m) return;
       const k = Math.min(1, dt * 14);
       g.cam += (m.cam - g.cam) * k;
-      m.P.forEach((q, i) => { const p = P[i]; if (!p) return; p.x += (q[0] - p.x) * k; p.y += (q[1] - p.y) * k; p.face = q[2]; p.ax = q[3]; p.ay = q[4]; p.crouch = !!q[5]; p.dead = q[6]; p.inv = q[7]; p.lives = q[8]; p.wpn = q[9]; p.gren = q[10]; p.out = !!q[11]; p.run = q[12]; });
+      m.P.forEach((q, i) => { const p = P[i]; if (!p) return; p.x += (q[0] - p.x) * k; p.gy += (q[1] - p.gy) * k; p.z += (q[2] - p.z) * k; p.face = q[3]; p.ang = q[4]; p.dead = q[5]; p.inv = q[6]; p.lives = q[7]; p.wpn = q[8]; p.gren = q[9]; p.out = !!q[10]; p.run = q[11]; p.wallT = q[12]; p.hp = q[13] ?? 3; });
       const seen = new Set();
-      for (const q of m.E) { seen.add(q[0]); let e = E.find((x) => x.id === q[0]); if (!e) { e = { id: q[0], x: q[2], y: q[3] }; E.push(e); } e.t = TYPES[q[1]]; e.x += (q[2] - e.x) * k; e.y += (q[3] - e.y) * k; e.face = q[4]; e.hp = q[5]; e.max = 1; e.hit = q[6]; }
+      for (const q of m.E) { seen.add(q[0]); let e = E.find((x) => x.id === q[0]); if (!e) { e = { id: q[0], x: q[2], gy: q[3], z: q[4] }; E.push(e); } e.t = TYPES[q[1]]; e.x += (q[2] - e.x) * k; e.gy += (q[3] - e.gy) * k; e.z += (q[4] - e.z) * k; e.face = q[5]; e.hp = q[6]; e.max = 1; e.hit = q[7]; }
       for (let i = E.length - 1; i >= 0; i--) if (!seen.has(E[i].id)) E.splice(i, 1);
-      if (m.B !== g.lastB) { B.length = 0; for (const q of m.B) B.push({ x: q[0], y: q[1], vx: q[2], vy: q[3], f: !!q[4], k: q[5] }); g.lastB = m.B; } else for (const b of B) { if (b.k === "g" || b.k === "bottle") b.vy += GRAV * dt; b.x += b.vx * dt; b.y += b.vy * dt; }
-      K.length = 0; for (const q of m.K) K.push({ x: q[0], y: q[1], k: q[2] });
-      if (m.fx) for (const f of m.fx) { FX.push({ k: "boom", x: f[0], y: f[1], r: f[2], t: 0.45 }); SFX.boom(); shake = Math.max(shake, f[2] / 8); }
+      if (m.B !== g.lastB) { B.length = 0; for (const q of m.B) B.push({ x: q[0], gy: q[1], z: q[2], vx: q[3], vg: q[4], vz: q[5], f: !!q[6], k: q[7] }); g.lastB = m.B; }
+      else for (const b of B) { if (b.k === "g" || b.k === "bottle") b.vz -= GRAV * dt; else if (b.k === "bomb") b.vz -= GRAV * 0.5 * dt; b.x += b.vx * dt; b.gy += b.vg * dt; b.z += b.vz * dt; }
+      K.length = 0; for (const q of m.K) K.push({ x: q[0], gy: q[1], z: q[2], k: q[3] });
+      WALL.length = 0; for (const q of m.W || []) WALL.push({ x: q[0], gy: q[1], face: q[2], t: q[3] });
+      if (m.fx) for (const f of m.fx) { FX.push({ k: "boom", x: f[0], gy: f[1], z: f[2], r: f[3], t: 0.45 }); SFX.boom(); shake = Math.max(shake, f[3] / 8); }
       m.fx = null;
       g.score = m.s; if (m.msg !== g.msg) { g.msg = m.msg; g.msgT = m.msgT; } g.boss = m.boss ? { hp: m.boss } : null;
       if (m.over && !g.over) { g.over = true; g.result = m.res; if (m.res === "VICTOIRE") SFX.win(); else SFX.over(); }
@@ -366,95 +412,117 @@ function Kop(online = null) {
       return;
     }
     const mine = P.find((p) => p.human && p.human.id === me);
-    if (mine) { Object.assign(mine.in, myHands()); mine.in.b = myB; mine.in.c = myC; }
+    if (mine) { Object.assign(mine.in, myHands()); mine.in.b = myB; mine.in.c = myC; mine.in.d = myD; }
     if (!g.over) step(dt);
     if (online) {
       g.sendT -= dt;
       if (g.sendT <= 0) {
         g.sendT = 0.05;
         const fx = FX.filter((f) => f.k === "boom" && !f.sent); fx.forEach((f) => { f.sent = true; });
-        online.send({ t: "st", cam: Math.round(g.cam),
-          P: P.map((p) => [Math.round(p.x), Math.round(p.y), p.face, p.ax, p.ay, p.crouch ? 1 : 0, +p.dead.toFixed(1), +p.inv.toFixed(1), p.lives, p.wpn, p.gren, p.out ? 1 : 0, p.run]),
-          E: E.filter((e) => e.hp > 0).map((e) => [e.id, TYPES.indexOf(e.t), Math.round(e.x), Math.round(e.y), e.face, +(e.hp / e.max).toFixed(2), e.hit > 0 ? 1 : 0]),
-          B: B.slice(0, 80).map((b) => [Math.round(b.x), Math.round(b.y), Math.round(b.vx), Math.round(b.vy), b.f ? 1 : 0, b.k]),
-          K: K.filter((k) => !k.got).map((k) => [Math.round(k.x), Math.round(k.y), k.k]), fx: fx.map((f) => [Math.round(f.x), Math.round(f.y), f.r]),
+        const r1 = (v) => Math.round(v);
+        online.send({ t: "st", cam: r1(g.cam),
+          P: P.map((p) => [r1(p.x), r1(p.gy), r1(p.z), p.face, +p.ang.toFixed(2), +p.dead.toFixed(1), +p.inv.toFixed(1), p.lives, p.wpn, p.gren, p.out ? 1 : 0, p.run, Math.ceil(p.wallT), p.hp]),
+          E: E.filter((e) => e.hp > 0).map((e) => [e.id, TYPES.indexOf(e.t), r1(e.x), r1(e.gy), r1(e.z), e.face, +(e.hp / e.max).toFixed(2), e.hit > 0 ? 1 : 0]),
+          B: B.slice(0, 80).map((b) => [r1(b.x), r1(b.gy), r1(b.z), r1(b.vx), r1(b.vg), r1(b.vz), b.f ? 1 : 0, b.k]),
+          K: K.filter((k) => !k.got).map((k) => [r1(k.x), r1(k.gy), r1(k.z), k.k]), W: WALL.map((w) => [r1(w.x), r1(w.gy), w.face, +w.t.toFixed(1)]),
+          fx: fx.map((f) => [r1(f.x), r1(f.gy), r1(f.z), f.r]),
           s: g.score, msg: g.msg, msgT: +g.msgT.toFixed(1), boss: g.boss && g.boss.hp > 0 ? +(g.boss.hp / g.boss.max).toFixed(2) : 0, over: g.over, res: g.result });
       }
     }
   };
   g.draw = () => {
-    const sx = (shake ? (Math.random() - 0.5) * shake : 0), cam = g.cam;
+    const sx = (shake ? (Math.random() - 0.5) * shake : 0), cam = g.cam, X = (x) => x - cam;
     cx.save(); cx.translate(sx, 0);
     rect(-4, 0, W + 8, H, SCN.sky[0]);
-    cx.drawImage(far, cam * 0.22 * 2, 0, W * 2, 520, 0, 0, W, 260);
-    cx.drawImage(mid, cam * 0.55 * 2, 0, W * 2, 600, 0, 0, W, 300);
+    cx.drawImage(far, cam * 0.22 * 2, 0, W * 2, 480, 0, 0, W, 240);
+    cx.drawImage(mid, cam * 0.55 * 2, 0, W * 2, 540, 0, 0, W, 270);
     const [gk, g1, g2] = SCN.ground;
-    rect(0, GY - 8, W, H - GY + 8, g1);
-    if (gk === "quay") { rect(0, GY - 8, W, 4, "#78716c"); for (let x = -(cam % 160); x < W; x += 160) { rect(x + 20, GY - 18, 10, 12, "#292524"); rect(x + 18, GY - 20, 14, 3, "#44403c"); } }
-    if (gk === "promenade") { for (let x = -(cam % 60); x < W; x += 60) { rect(x + 8, GY - 16, 14, 2, "#0284c7"); rect(x + 8, GY - 16, 2, 8, "#0284c7"); rect(x + 20, GY - 16, 2, 8, "#0284c7"); rect(x + 8, GY - 22, 2, 6, "#0284c7"); } }
-    const tw = gk === "brick" ? 18 : gk === "asphalt" ? 60 : 24, th = gk === "asphalt" ? 30 : 12;
-    for (let row = 0; GY + row * th < H; row++) for (let x = -((cam + row * tw / 2) % tw); x < W; x += tw) { rect(x, GY + row * th, tw - 1, th - 1, (row + Math.floor((x + cam) / tw)) % 3 ? g1 : g2); }
-    if (gk === "asphalt") for (let x = -(cam % 50); x < W; x += 50) rect(x, GY + 20, 24, 2, "#fde047");
-    for (const q of PLAT) {
-      const x0 = q.x - cam; if (x0 > W || x0 + q.w < 0) continue;
-      if (q.k === "crate") { rect(x0, q.y, q.w, GY - q.y, "#a16207"); rect(x0 + 2, q.y + 2, q.w - 4, GY - q.y - 4, "#ca8a04"); rect(x0, q.y + (GY - q.y) / 2, q.w, 2, "#78350f"); }
-      else if (q.k === "balcony") { rect(x0, q.y, q.w, 5, "#44403c"); for (let i = 2; i < q.w; i += 6) rect(x0 + i, q.y - 9, 1, 9, "#57534e"); rect(x0, q.y - 10, q.w, 2, "#57534e"); rect(x0 + 4, q.y + 5, 3, GY - q.y - 5, "#57534e"); rect(x0 + q.w - 7, q.y + 5, 3, GY - q.y - 5, "#57534e"); }
-      else { rect(x0, q.y, q.w, GY - q.y - 6, foeT.c2 === "#f8fafc" ? "#64748b" : foeT.c2); rect(x0 + 4, q.y + 4, q.w - 8, 8, "#93c5fd"); circ(x0 + 16, GY - 5, 5, "#111827"); circ(x0 + q.w - 16, GY - 5, 5, "#111827"); txt("BUS", x0 + q.w / 2, q.y + 22, 7, "#f8fafc", "center"); }
+    rect(0, GT, W, H - GT, g1);
+    if (gk === "quay") { rect(0, GT, W, 4, "#78716c"); for (let x = -(cam % 160); x < W; x += 160) { rect(x + 20, GT - 8, 10, 12, "#292524"); rect(x + 18, GT - 10, 14, 3, "#44403c"); } }
+    if (gk === "promenade") { for (let x = -(cam % 60); x < W; x += 60) { rect(x + 8, GT - 6, 14, 2, "#0284c7"); rect(x + 8, GT - 6, 2, 8, "#0284c7"); rect(x + 20, GT - 6, 2, 8, "#0284c7"); rect(x + 8, GT - 12, 2, 6, "#0284c7"); } }
+    const tw = gk === "brick" ? 18 : gk === "asphalt" ? 60 : 24;
+    for (let row = 0, y = GT + 4; y < H; row++) { const th = 8 + row * 2; for (let x = -((cam + row * tw / 2) % tw); x < W; x += tw) rect(x, y, tw - 1, th - 1, (row + Math.floor((x + cam) / tw)) % 3 ? g1 : g2); y += th; }
+    if (gk === "asphalt") for (let x = -(cam % 50); x < W; x += 50) rect(x, 314, 24, 2, "#fde047");
+    for (const s of SCAF) {
+      const x0 = X(s.x), by = D0 - 4; if (x0 > W || x0 + s.w < 0) continue;
+      rect(x0, by - s.h, 3, s.h, "#57534e"); rect(x0 + s.w - 3, by - s.h, 3, s.h, "#57534e"); rect(x0 + s.w / 2 - 1, by - s.h, 2, s.h, "#78716c");
+      for (let yy = by - s.h + 14; yy < by; yy += 16) rect(x0, yy, s.w, 2, "#78716c");
+      rect(x0 - 2, by - s.h - 3, s.w + 4, 4, "#a16207");
     }
-    for (const k of K) {
-      if (k.got) continue; const x0 = k.x - cam, bob = Math.sin(g.t * 5 + k.x) * 2;
-      if (k.k === "food") { rect(x0 - 8, k.y - 6 + bob, 16, 10, "#f8fafc"); rect(x0 - 6, k.y - 4 + bob, 12, 6, "#f97316"); txt(team.food, x0, k.y - 10 + bob, 7, "#fde68a", "center"); }
-      else { rect(x0 - 7, k.y - 7 + bob, 14, 14, "#1f2937"); rect(x0 - 6, k.y - 6 + bob, 12, 12, { M: "#dc2626", S: "#2563eb", F: "#f59e0b" }[k.k]); txt(k.k, x0, k.y + 3 + bob, 10, "#fff", "center"); }
-    }
+    const L = [];
+    for (const o of OBS) if (X(o.x) < W + 10 && X(o.x) + o.w > -10) L.push([o.gy, () => {
+      const x0 = X(o.x), top = o.gy - o.d - o.h;
+      if (o.k === "crate") { rect(x0, top, o.w, o.d, "#ca8a04"); rect(x0, o.gy - o.h, o.w, o.h, "#a16207"); rect(x0 + 2, o.gy - o.h + 2, o.w - 4, o.h - 4, "#ca8a04"); rect(x0, o.gy - o.h / 2, o.w, 2, "#78350f"); }
+      else { const c = foeT.c2 === "#f8fafc" ? "#64748b" : foeT.c2; rect(x0, top, o.w, o.d, "#94a3b8"); rect(x0, o.gy - o.h, o.w, o.h - 6, c); rect(x0 + 4, o.gy - o.h + 4, o.w - 8, 8, "#93c5fd"); circ(x0 + 16, o.gy - 5, 5, "#111827"); circ(x0 + o.w - 16, o.gy - 5, 5, "#111827"); txt("BUS", x0 + o.w / 2, o.gy - o.h + 22, 7, "#f8fafc", "center"); }
+    }]);
+    for (const k of K) if (!k.got) L.push([k.gy, () => {
+      const x0 = X(k.x), y = k.gy - k.z, bob = Math.sin(g.t * 5 + k.x) * 2; shadow(x0, k.gy, 7);
+      if (k.k === "food") { rect(x0 - 8, y - 12 + bob, 16, 10, "#f8fafc"); rect(x0 - 6, y - 10 + bob, 12, 6, "#f97316"); txt(team.food, x0, y - 16 + bob, 7, "#fde68a", "center"); }
+      else { rect(x0 - 7, y - 16 + bob, 14, 14, "#1f2937"); rect(x0 - 6, y - 15 + bob, 12, 12, { M: "#dc2626", S: "#2563eb", F: "#f59e0b" }[k.k]); txt(k.k, x0, y - 6 + bob, 10, "#fff", "center"); }
+    }]);
+    for (const w of WALL) for (const off of [-20, -10, 0, 10, 20]) L.push([w.gy + off, () => {
+      if (w.t < 1 && Math.floor(g.t * 10) % 2) return; const x0 = X(w.x), gy = w.gy + off; shadow(x0, gy, 8);
+      guy(x0 + off * 0.3, gy, w.face, 0, { c1: team.c1, c2: team.c2 }, SKIN[(off + 20) / 10 % 4], HAIR[(off + 20) / 10 % 4], 0, undefined, null, false);
+    }]);
     for (const e of E) {
-      if (e.hp <= 0 && !online) continue;
-      const x0 = e.x - cam; if (x0 < -80 || x0 > W + 80) continue;
-      if (e.hit > 0) cx.globalAlpha = 0.5;
-      if (e.t === "grunt" || e.t === "lob" || e.t === "sniper") guy(x0, e.y, e.face, 1, 0, false, { c1: foeT.c1, c2: foeT.c2 }, e.t === "lob" ? "#e0ac69" : "#c68642", "#111827", Math.floor(g.t * 8 + e.id) % 2 ? 1 : -1, undefined, foeT.c2);
-      else if (e.t === "drone") { rect(x0 - 9, e.y - 4, 18, 5, "#374151"); rect(x0 - 12, e.y - 7, 6, 2, "#9ca3af"); rect(x0 + 6, e.y - 7, 6, 2, "#9ca3af"); rect(x0 - 3, e.y + 1, 6, 3, foeT.c1); }
-      else if (e.t === "van") { rect(x0 - 27, e.y - 30, 54, 24, foeT.c1); rect(x0 - 27, e.y - 30, 54, 5, foeT.c2); rect(x0 - 27, e.y - 22, 14, 9, "#93c5fd"); circ(x0 - 15, e.y - 5, 5, "#111827"); circ(x0 + 15, e.y - 5, 5, "#111827"); txt(foeT.city.slice(0, 6).toUpperCase(), x0 + 4, e.y - 13, 7, foeT.c2, "center"); }
-      else if (e.t === "boss") {
-        rect(x0 - 26, e.y - 30, 12, 30, "#4b5563"); rect(x0 + 14, e.y - 30, 12, 30, "#4b5563"); rect(x0 - 30, e.y - 4, 18, 4, "#1f2937"); rect(x0 + 12, e.y - 4, 18, 4, "#1f2937");
-        rect(x0 - 30, e.y - 58, 60, 30, "#6b7280"); rect(x0 - 30, e.y - 58, 60, 6, foeT.c2); rect(x0 - 50, e.y - 72, 26, 8, "#374151");
-        circ(x0, e.y - 76, 22, foeT.c1); circ(x0 - 8, e.y - 80, 5, "#f8fafc"); circ(x0 + 8, e.y - 80, 5, "#f8fafc"); circ(x0 - 8 + e.face * 2, e.y - 80, 2, "#111827"); circ(x0 + 8 + e.face * 2, e.y - 80, 2, "#111827");
-        rect(x0 - 8, e.y - 68, 16, 4, "#7f1d1d"); rect(x0 - 22, e.y - 98, 44, 5, foeT.c2);
-      }
-      cx.globalAlpha = 1;
+      if (e.hp <= 0 && !online) continue; const x0 = X(e.x); if (x0 < -80 || x0 > W + 80) continue;
+      L.push([e.gy, () => {
+        const y = e.gy - e.z; shadow(x0, e.gy, e.t === "boss" ? 30 : e.t === "van" ? 28 : 9);
+        if (e.hit > 0) cx.globalAlpha = 0.5;
+        if (e.t === "grunt" || e.t === "lob" || e.t === "sniper") guy(x0, y, e.face, 0, { c1: foeT.c1, c2: foeT.c2 }, e.t === "lob" ? "#e0ac69" : "#c68642", "#111827", Math.floor(g.t * 8 + e.id) % 2 ? 1 : -1, undefined, foeT.c2);
+        else if (e.t === "drone") { rect(x0 - 9, y - 4, 18, 5, "#374151"); rect(x0 - 12, y - 7, 6, 2, "#9ca3af"); rect(x0 + 6, y - 7, 6, 2, "#9ca3af"); rect(x0 - 3, y + 1, 6, 3, foeT.c1); }
+        else if (e.t === "van") { rect(x0 - 27, y - 30, 54, 24, foeT.c1); rect(x0 - 27, y - 30, 54, 5, foeT.c2); rect(x0 - 27, y - 22, 14, 9, "#93c5fd"); circ(x0 - 15, y - 5, 5, "#111827"); circ(x0 + 15, y - 5, 5, "#111827"); txt(foeT.city.slice(0, 6).toUpperCase(), x0 + 4, y - 13, 7, foeT.c2, "center"); }
+        else if (e.t === "boss") {
+          rect(x0 - 26, y - 30, 12, 30, "#4b5563"); rect(x0 + 14, y - 30, 12, 30, "#4b5563"); rect(x0 - 30, y - 4, 18, 4, "#1f2937"); rect(x0 + 12, y - 4, 18, 4, "#1f2937");
+          rect(x0 - 30, y - 58, 60, 30, "#6b7280"); rect(x0 - 30, y - 58, 60, 6, foeT.c2); rect(x0 - 50, y - 72, 26, 8, "#374151");
+          circ(x0, y - 76, 22, foeT.c1); circ(x0 - 8, y - 80, 5, "#f8fafc"); circ(x0 + 8, y - 80, 5, "#f8fafc"); circ(x0 - 8 + e.face * 2, y - 80, 2, "#111827"); circ(x0 + 8 + e.face * 2, y - 80, 2, "#111827");
+          rect(x0 - 8, y - 68, 16, 4, "#7f1d1d"); rect(x0 - 22, y - 98, 44, 5, foeT.c2);
+        }
+        cx.globalAlpha = 1;
+      }]);
     }
     P.forEach((p, i) => {
       if (p.out || p.dead > 0) return;
-      if (p.inv > 0 && Math.floor(g.t * 14) % 2) cx.globalAlpha = 0.4;
-      guy(p.x - cam, p.y, p.face, p.ax * p.face, p.ay, p.crouch, { c1: team.c1, c2: team.c2 }, p.skin, p.hair, p.run, [10, 7, 9, 4][i], null);
-      cx.globalAlpha = 1;
-      txt(p.name.slice(0, 10), p.x - cam, p.y - (p.crouch ? 26 : 40), 7, p.human && p.human.id === me ? "#fde047" : "#e5e7eb", "center");
+      L.push([p.gy, () => {
+        const x0 = X(p.x), y = p.gy - p.z; shadow(x0, p.gy);
+        if (p.inv > 0 && Math.floor(g.t * 14) % 2) cx.globalAlpha = 0.4;
+        guy(x0, y, p.face, p.ang, { c1: team.c1, c2: team.c2 }, p.skin, p.hair, p.run, [10, 7, 9, 4][i], null);
+        cx.globalAlpha = 1;
+        txt(p.name.slice(0, 10), x0, y - 40, 7, p.human && p.human.id === me ? "#fde047" : "#e5e7eb", "center");
+      }]);
     });
+    L.sort((a, b) => a[0] - b[0]).forEach((d) => d[1]());
     for (const b of B) {
-      const x0 = b.x - cam;
-      if (b.k === "g") { rect(x0 - 2, b.y - 3, 4, 6, "#dc2626"); rect(x0 - 1, b.y - 5, 2, 2, "#fde047"); }
-      else if (b.k === "bottle") rect(x0 - 2, b.y - 3, 3, 6, "#15803d");
-      else if (b.k === "bomb") circ(x0, b.y, 3, "#111827");
-      else if (b.k === "wave") { rect(x0 - 8, b.y - 4, 16, 8, "rgba(250,204,21,.8)"); }
-      else if (b.k === "ball") circ(x0, b.y, 4, "#f97316");
-      else if (b.k === "r") { rect(x0 - 4, b.y - 2, 8, 4, "#f59e0b"); rect(x0 - 8 * Math.sign(b.vx || 1), b.y - 1, 4, 2, "#fde047"); }
-      else rect(x0 - 2, b.y - 1, 4, 2, b.f ? "#fde047" : "#f87171");
+      const x0 = X(b.x), y = b.gy - b.z;
+      if (b.k === "g" || b.k === "bottle" || b.k === "bomb") shadow(x0, b.gy, 3);
+      if (b.k === "g") { rect(x0 - 2, y - 3, 4, 6, "#dc2626"); rect(x0 - 1, y - 5, 2, 2, "#fde047"); }
+      else if (b.k === "bottle") rect(x0 - 2, y - 3, 3, 6, "#15803d");
+      else if (b.k === "bomb") circ(x0, y, 3, "#111827");
+      else if (b.k === "wave") { for (let gy = D0; gy <= D1; gy += 12) rect(x0 - 8, gy - 6, 16, 6, "rgba(250,204,21,.75)"); }
+      else if (b.k === "ball") circ(x0, y, 4, "#f97316");
+      else if (b.k === "r") { rect(x0 - 4, y - 2, 8, 4, "#f59e0b"); rect(x0 - 8 * Math.sign(b.vx || 1), y - 1, 4, 2, "#fde047"); }
+      else rect(x0 - 2, y - 1, 4, 2, b.f ? "#fde047" : "#f87171");
     }
     for (const f of FX) {
-      const x0 = f.x - cam;
-      if (f.k === "boom") { const k = 1 - f.t / 0.45; circ(x0, f.y, f.r * (0.4 + k * 0.7), `rgba(251,146,60,${1 - k})`); circ(x0, f.y, f.r * 0.5 * (1 - k), "rgba(254,240,138,.9)"); }
-      else if (f.k === "fly") { rect(x0 - 4, f.y - 8, 8, 14, f.c); }
-      else if (f.k === "pts") txt(f.s, x0, f.y - (0.9 - f.t) * 20, 9, "#fde047", "center");
-      else if (f.k === "glass") { rect(x0 - 4, f.y, 2, 2, "#86efac"); rect(x0 + 2, f.y - 1, 2, 2, "#86efac"); }
+      const x0 = X(f.x), y = f.gy - f.z;
+      if (f.k === "boom") { const k = 1 - f.t / 0.45; circ(x0, y, f.r * (0.4 + k * 0.7), `rgba(251,146,60,${1 - k})`); circ(x0, y, f.r * 0.5 * (1 - k), "rgba(254,240,138,.9)"); }
+      else if (f.k === "fly") rect(x0 - 4, y - 8, 8, 14, f.c);
+      else if (f.k === "pts") txt(f.s, x0, y - (0.9 - f.t) * 20, 9, "#fde047", "center");
+      else if (f.k === "glass") { rect(x0 - 4, y, 2, 2, "#86efac"); rect(x0 + 2, y - 1, 2, 2, "#86efac"); }
+      else if (f.k === "thud") { rect(x0 - 3, y - 3, 6, 6, "rgba(255,255,255,.8)"); }
     }
     cx.restore();
     P.forEach((p, i) => {
       const x0 = 6 + i * 118; rect(x0, 4, 112, 22, "rgba(5,7,13,.65)"); rect(x0, 4, 3, 22, team.c1);
       txt(p.name.slice(0, 11) + (p.human ? "" : " ·bot"), x0 + 6, 13, 7, p.human && p.human.id === me ? "#fde047" : "#e5e7eb");
-      txt(p.out ? "OUT" : "♥".repeat(Math.max(0, p.lives)) + `  ${p.wpn}  ✸${p.gren}`, x0 + 6, 23, 8, p.out ? "#f87171" : "#fca5a5");
+      if (p.out) txt("OUT", x0 + 6, 23, 8, "#f87171");
+      else { for (let h = 0; h < 3; h++) txt(h < p.hp ? "♥" : "♡", x0 + 6 + h * 8, 23, 8, h < p.hp ? "#f87171" : "#64748b"); txt(`×${p.lives}  ${p.wpn}  ✸${p.gren}`, x0 + 32, 23, 7, "#e5e7eb"); }
+      if (!p.out) txt(p.wallT > 0 ? `MUR ${Math.ceil(p.wallT)}` : "MUR ✓", x0 + 108, 23, 7, p.wallT > 0 ? "#94a3b8" : "#86efac", "right");
     });
     txt(String(g.score).padStart(6, "0"), W - 6, 40, 12, "#fde047", "right");
     rect(W / 2 - 60, 34, 120, 3, "rgba(255,255,255,.2)"); rect(W / 2 - 60, 34, 120 * clamp(g.cam / BOSS_AT, 0, 1), 3, team.c2 === "#f8fafc" ? team.c1 : team.c2);
     if (g.boss) { const fr = g.boss.max ? g.boss.hp / g.boss.max : g.boss.hp; rect(W / 2 - 100, 44, 200, 6, "#1f2937"); rect(W / 2 - 100, 44, 200 * clamp(fr, 0, 1), 6, "#ef4444"); txt("MASCOT-MECH", W / 2, 58, 8, "#fca5a5", "center"); }
-    if (g.msgT > 0 && g.msg) { rect(0, 116, W, 26, "rgba(5,7,13,.6)"); txt(g.msg, W / 2, 134, 13, "#fde047", "center"); }
+    if (g.msgT > 0 && g.msg) { rect(0, 110, W, 26, "rgba(5,7,13,.6)"); txt(g.msg, W / 2, 128, 13, "#fde047", "center"); }
     if (g.over) {
       rect(W / 2 - 150, 120, 300, 104, "rgba(5,7,13,.86)"); rect(W / 2 - 150, 120, 300, 4, g.result === "VICTOIRE" ? "#22c55e" : "#ef4444");
       txt(g.result === "VICTOIRE" ? "VICTOIRE !" : "DÉFAITE", W / 2, 152, 22, g.result === "VICTOIRE" ? "#86efac" : "#fca5a5", "center");
@@ -462,7 +530,8 @@ function Kop(online = null) {
       txt(online ? (window.againLine ? window.againLine() : "tap to play again") : window.TouchPad && TouchPad.on ? "tap: play again · ☰ menu" : "Space: play again · Esc menu", W / 2, 204, 9, "#a7b0c0", "center");
     }
   };
-  g.dbg = () => ({ cam: Math.round(g.cam), P: P.map((p) => [Math.round(p.x), Math.round(p.y), p.lives, p.wpn, !!p.human]), E: E.length, B: B.length, boss: !!g.boss, place: place.city, foe: foeT.city });
-  g.dbgSkip = (x) => { g.cam = Math.min(x, BOSS_AT); for (const p of P) p.x = g.cam + 60 + p.i * 20; for (const w of WAVES) if (w.x < g.cam) w.done = true; };
+  g.dbg = () => ({ cam: Math.round(g.cam), P: P.map((p) => [Math.round(p.x), Math.round(p.gy), p.lives, p.wpn, !!p.human, Math.round(p.z), Math.ceil(p.wallT), p.hp]), E: E.length, B: B.length, W: WALL.length, boss: !!g.boss, place: place.city, foe: foeT.city });
+  g.dbgShot = (i = 0) => { const p = P[i]; B.push({ x: p.x + p.face * 120, gy: p.gy, z: p.z + CH, vx: -p.face * 200, vg: 0, vz: 0, f: false, t: 0, k: "b", d: 1 }); };
+  g.dbgSkip = (x) => { g.cam = Math.min(x, BOSS_AT); for (const p of P) { p.x = g.cam + 60 + p.i * 20; p.z = 0; } for (const w of WAVES) if (w.x < g.cam) w.done = true; };
   return g;
 }

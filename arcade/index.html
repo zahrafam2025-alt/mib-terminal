@@ -25,6 +25,7 @@ button:hover { border-color:var(--a); }
    on the left only the sound, as an icon, and the best scores, thin; the list of games bigger") */
 #onlBtn, #nameBtn { display:none !important; }
 #snd { font-size:18px; padding:2px 10px; }
+#mus, #gMus { font-size:16px; } #mus { padding:2px 10px; } .mOff { opacity:.4; text-decoration:line-through; }
 /* 9 Nov (bug list: "add a pause button"; owner: "a reset button in every game: online every player must press it, with bots
    only you, after a small popup asking to confirm"): two small buttons in the game's corner (phones: next to ☰ and 🔊) */
 #gctl { position:absolute; top:50%; right:6px; transform:translateY(-50%); display:none; flex-direction:column; gap:6px; z-index:5; }   /* the right edge's middle: no game puts its score or map there */
@@ -49,9 +50,9 @@ button:hover { border-color:var(--a); }
 <body>
 <script src="/header.js" data-active="arcade" onerror="void 0"></script><div id="wrap">
   <div id="top"><b>MIB ARCADE</b><span class="help" style="margin:0">by MoonxZara</span><span class="help" id="rec"></span><span style="flex:1"></span>
-    <button id="onlBtn" title="play with friends">PLAY ONLINE</button><button id="snd" title="M">sound on</button><button id="pauseBtn" title="P">pause</button><button id="menuBtn" title="Esc">menu</button></div>
+    <button id="onlBtn" title="play with friends">PLAY ONLINE</button><button id="snd" title="M">sound on</button><button id="mus" title="music on or off (N)">♪</button><button id="pauseBtn" title="P">pause</button><button id="menuBtn" title="Esc">menu</button></div>
   <div id="screen" tabindex="0"><canvas id="c" width="960" height="720"></canvas><div id="focus">click here to play</div>
-    <div id="gctl"><button id="gPause" title="pause (P)">⏸</button><button id="gReset" title="restart the game (R)">⟲</button></div></div>
+    <div id="gctl"><button id="gPause" title="pause (P)">⏸</button><button id="gReset" title="restart the game (R)">⟲</button><button id="gMus" title="music on or off (N)">♪</button></div></div>
   <div id="rconf"><div><b id="rcT">Restart the game?</b><span id="rcS">Your current game is lost.</span><div class="row"><button id="rcNo">No</button><button class="yes" id="rcYes">Restart</button></div></div></div>
   <div class="help" id="help"></div><div class="help"><a href="sfx/CREDITS.txt" class="credlink" style="margin-left:14px">sound credits</a><dialog id="credDlg" style="max-width:min(640px,92vw);max-height:80vh;background:#141827;color:#e5e7eb;border:1px solid #26304a;border-radius:12px;padding:14px"><button type="button" onclick="this.closest('dialog').close()" style="float:right">✕ close</button><pre style="white-space:pre-wrap;font:12px Consolas,monospace;margin:30px 0 0"></pre></dialog><script>document.querySelectorAll(".credlink").forEach(function(a){a.onclick=function(e){e.preventDefault();var d=document.getElementById("credDlg");fetch(a.getAttribute("href")).then(function(r){return r.text()}).then(function(t){d.querySelector("pre").textContent=t;d.showModal()})}})</script></div>
 </div>
@@ -87,7 +88,7 @@ const held = (...c) => c.some((k) => keys.has(k)), pressed = (...c) => c.some((k
 let AC = null, master = null, sound = true;
 try { sound = localStorage.getItem("arcade-sound") !== "off"; } catch (e) {}
 function audioStart() {
-  if (typeof inMenu !== "undefined" && inMenu && menuOwn && sound && menuAudio.paused) menuAudio.play().catch(() => {});
+  if (typeof inMenu !== "undefined" && inMenu && menuOwn && sound && musicOn && menuAudio.paused) menuAudio.play().catch(() => {});
   if (AC) { if (AC.state === "suspended") AC.resume(); return; }
   try { AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = sound ? 0.5 : 0; master.connect(AC.destination); } catch (e) { AC = null; }
   if (song) music(cur ? cur.id : "menu");
@@ -128,6 +129,19 @@ const SONGS = {
 };
 const HARP = { Dm: "D4 F4 A4 D5 F5 A5 D6 F6", Bb: "A#3 D4 F4 A#4 D5 F5 A#5 D6", F: "F3 A3 C4 F4 A4 C5 F5 A5",
                C: "C4 E4 G4 C5 E5 G5 C6 E6", Gm: "G3 A#3 D4 G4 A#4 D5 G5 A#5", A: "A3 C#4 E4 A4 C#5 E5 A5 C#6" };
+SONGS.kop = { voices: [
+  { type: "square", vol: 0.035, unit: 0.14, notes: "D4 1 D4 1 F#4 2 A4 2 F#4 1 A4 1 B4 2 A4 2 F#4 2 - 2 G4 1 G4 1 B4 2 D5 2 B4 1 A4 1 A4 4 - 4 D5 2 C#5 1 B4 1 A4 2 F#4 2 G4 2 B4 2 A4 4 F#4 1 G4 1 A4 2 E4 2 F#4 1 E4 1 D4 4 - 4" },
+  { type: "triangle", vol: 0.07, unit: 0.14, notes: "D2 2 A2 2 D2 2 A2 2 D2 2 A2 2 D2 2 A2 2 G2 2 D3 2 G2 2 D3 2 A1 2 E2 2 A1 2 E2 2 D2 2 A2 2 D2 2 A2 2 G2 2 D3 2 A1 2 E2 2 D2 2 A2 2 A1 2 E2 2 D2 2 A2 2 D2 4" }] };
+let musicOn = (() => { try { return localStorage.getItem("arcade-music") !== "0"; } catch (e) { return true; } })();
+function setMusic(on) {
+  musicOn = on;
+  try { localStorage.setItem("arcade-music", on ? "1" : "0"); } catch (e) {}
+  if (!on) menuAudio.pause(); else if (inMenu && menuOwn && sound) menuAudio.play().catch(() => {});
+  paintMusic();
+}
+function paintMusic() {
+  for (const id of ["mus", "gMus"]) { const b = document.getElementById(id); if (b) { b.classList.toggle("mOff", !musicOn); b.title = musicOn ? "music on (N)" : "music off (N)"; } }
+}
 SONGS.menu = { voices: [
   { type: "triangle", vol: 0.07, ring: 0.65, unit: 0.105, notes: ["Dm", "Bb", "F", "C", "Dm", "Bb", "Gm", "A"]
       .map((c) => { const up = HARP[c].split(" "); return up.concat(up.slice().reverse()).map((n) => n + " 1").join(" "); }).join(" ") },
@@ -144,7 +158,7 @@ function music(id) {
   });
 }
 function musicPump() {
-  if (!AC || !sound) return;
+  if (!AC || !sound || !musicOn) return;
   for (const tr of tracks) {
     if (tr.at < AC.currentTime) tr.at = AC.currentTime + 0.05;
     while (tr.at < AC.currentTime + 0.3) {
@@ -161,7 +175,7 @@ menuAudio.addEventListener("canplay", () => { if (!menuOwn) { menuOwn = true; if
 if (location.protocol.startsWith("http") && ARC.music) menuAudio.src = "/arcade/menu-music";
 function ownMenu(on) {
   inMenu = on;
-  if (on && menuOwn && sound) menuAudio.play().catch(() => {});
+  if (on && menuOwn && sound && musicOn) menuAudio.play().catch(() => {});
   else menuAudio.pause();
 }
 let engine = null;
@@ -845,7 +859,7 @@ const GAMES = [
   { id: "goal", name: "GOAL RUSH", sub: "2 v 2 football, bots or online", make: () => Goal(), col: "#22c55e" },
   { id: "tennis", name: "RALLY RUMBLE", sub: "2 v 2 party tennis: items, bananas, bombs", make: () => Tennis(), col: "#f97316" },
   { id: "fight", name: "FIGHT CLUB", sub: "1 v 1 brawler, 13 crazy fighters", make: () => Fight(), col: "#e11d48" },
-  { id: "kop", name: "KOP COMMANDO", sub: "run & gun through Ligue 1 cities", make: () => Kop(), col: "#0ea5e9", quiet: true },
+  { id: "kop", name: "KOP COMMANDO", sub: "run & gun through Ligue 1 cities", make: () => Kop(), col: "#0ea5e9" },
   { id: "strike", name: "STRIKE & DEFUSE", sub: "3D tactical shooter, bots or LAN", href: ARC.page("strike"), col: "#eab308" },
   { id: "empire", name: "CORSICAN EMPIRE", sub: "build, gather, conquer: bots or LAN", href: ARC.page("empire"), col: "#38bdf8" },
 ];
@@ -854,7 +868,7 @@ const TOUCH_HELP = { blocks: "◀ ▶: move · ▼: faster · A: drop · B: turn
   snake: "the arrows on the left turn the snake", jump: "stick: run · A: jump, again in the air for a double jump", spa: "stick: steer · GAS, BRAKE and BOOST on the right",
   city: "stick: walk or drive the way you push · A: shoot · B: in or out of a car · WPN: next weapon · ☎ the ringing phone gives jobs", goal: "stick: run · A: shoot · B: tackle (a dash at the player with the ball) · ⟲ BALLE (top left): ball back to the centre",
   tennis: "stick: move · A: shot and serve · B: lob (over a player at the net) · C: your item, or a dive · first to 7",
-  kop: "stick: run and aim (up, diagonals, down = crouch) · A: fire (hold) · B: jump · C: firecracker · beat the rival mascot-mech",
+  kop: "stick: walk, up and down the street too · A: fire, it aims by itself (hold) · B: jump · C: firecracker · D: the free-kick wall · ♪ music",
   fight: "stick: walk, jump (up), crouch (down), walk away = block · A: punch (3 = combo) · B: kick · C: special · block then A/B: counter" };
 const helpOf = (g) => (window.TouchPad && TouchPad.on && TOUCH_HELP[g.id]) || g.help;
 function start(id) {
@@ -877,6 +891,7 @@ function saveScore() {
 }
 function tick(dt = STEP) {
   if (pressed("KeyM")) setSound(!sound);
+  if (pressed("KeyN")) setMusic(!musicOn);
   if (!cur) {
     menuT += dt;
     if (pressed("KeyO")) document.getElementById("onlBtn").click();
@@ -959,6 +974,9 @@ cv.addEventListener("click", (e) => {
 });
 focusEl.addEventListener("click", () => { audioStart(); screenEl.focus(); });
 document.getElementById("snd").onclick = () => { audioStart(); setSound(!sound); screenEl.focus(); };
+document.getElementById("mus").onclick = () => { audioStart(); setMusic(!musicOn); screenEl.focus(); };
+document.getElementById("gMus").onclick = (e) => { e.stopPropagation(); audioStart(); setMusic(!musicOn); screenEl.focus(); };
+paintMusic();
 document.getElementById("pauseBtn").onclick = () => { if (cur && cur.id !== "sumo") paused = !paused; screenEl.focus(); };
 document.getElementById("menuBtn").onclick = () => { menu(); screenEl.focus(); };
 const canPause = () => !!cur && cur.id !== "sumo" && !(ON && ON.live);
@@ -1481,6 +1499,7 @@ if (TouchPad.on) {
   const any = [bt("A", { right: 20, bottom: 48 }, 82, "Space"), bt("B", { right: 112, bottom: 20 }, 62, "Enter")];
   const wpn = bt("WPN", { right: 40, bottom: 150 }, 58, "KeyE");
   const cBtn = bt("C", { right: 34, bottom: 150 }, 62, "KeyE");
+  const dBtn = bt("D", { right: 116, bottom: 104 }, 54, "KeyQ");
   const gp = [bt("GAS", { right: 18, bottom: 40 }, 96, "ArrowUp"), bt("BRAKE", { right: 124, bottom: 24 }, 74, "ArrowDown"), bt("BOOST", { right: 32, bottom: 152 }, 70, "Space")];
   const dpad = [bt("▲", { left: 76, bottom: 122 }, 62, "ArrowUp"), bt("▼", { left: 76, bottom: 14 }, 62, "ArrowDown"),
     bt("◀", { left: 10, bottom: 68 }, 62, "ArrowLeft"), bt("▶", { left: 142, bottom: 68 }, 62, "ArrowRight")];
@@ -1489,6 +1508,7 @@ if (TouchPad.on) {
   const snd = TouchPad.soundButton(() => sound, (on) => { audioStart(); setSound(on); }, { right: 66, top: 12 });
   const pz = TouchPad.button("⏸", { right: 120, top: 12 }, 46, () => { audioStart(); togglePause(); }, null, pad);
   const rs = TouchPad.button("⟲", { right: 174, top: 12 }, 46, () => { audioStart(); askReset(); }, null, pad);
+  const ms = TouchPad.button("♪", { right: 228, top: 12 }, 46, () => { audioStart(); setMusic(!musicOn); }, null, pad);
   cv.addEventListener("click", () => { if (cur) TouchPad.full(); });
   const pq = []; let pqT = null;
   const pulse = (c) => { pq.push(c); if (!pqT) pqT = setInterval(() => { const n = pq.shift(); if (!n) { clearInterval(pqT); pqT = null; return; } const k = TouchPad.key(n); k.down(); setTimeout(k.up, 35); }, 60); };
@@ -1522,6 +1542,7 @@ if (TouchPad.on) {
     wpn.style.display = cur && cur.id === "city" ? "" : "none"; cBtn.style.display = cur && (cur.id === "fight" || cur.id === "tennis" || cur.id === "kop") ? "" : "none";
     esc.style.display = show ? "" : "none"; snd.textContent = sound ? "🔊" : "🔇";
     pz.style.display = show && canPause() ? "" : "none"; pz.textContent = paused ? "▶" : "⏸"; rs.style.display = show ? "" : "none";
+    ms.style.display = show ? "" : "none"; ms.style.opacity = musicOn ? "" : "0.4"; dBtn.style.display = cur && cur.id === "kop" ? "" : "none";
     pad.classList.toggle("port", innerHeight > innerWidth);
     document.body.classList.toggle("playing", show);
     document.body.classList.toggle("lpad", snake);
