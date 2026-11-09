@@ -426,6 +426,10 @@ function Fight(online = null) {
     if (g.freeze > 0 && g.after && g.phase !== "select") txt(`« ${g.after} »`, W / 2, 178, 11, "#f8fafc", "center");
     if (g.over && g.result) banner(["FIN DU COMBAT", ...g.result], online ? (window.againLine ? againLine() : "Tap to play again") : (window.TouchPad && TouchPad.on ? "Touche l'écran : revanche · ☰ : menu" : "Espace : revanche · Échap : menu"));
   };
+  g.h2h = () => {
+    if (!g.over || !F[0].human || !F[1].human || F[0].wins === F[1].wins) return null;
+    const w = F[0].wins > F[1].wins ? F[0] : F[1], l = w === F[0] ? F[1] : F[0]; return { w: [w.human.id], l: [l.human.id] };
+  };
   g.dbg = () => ({ phase: g.phase, f: F.map((f) => [Math.round(f.x), Math.round(f.hp), f.c, f.wins, f.st]) });
   return g;
 }

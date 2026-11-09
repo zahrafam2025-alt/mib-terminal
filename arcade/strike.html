@@ -1194,6 +1194,22 @@ function joinRoom(room) {
 }
 $("#bJoinX").onclick = () => { clearInterval(joinTimer); if (net) net.close(); net = null; showPanel("pMain"); };
 $("#bResume").onclick = () => hideMenu();
+(() => {
+  const st = document.createElement("style"); st.textContent = `#gbar{position:fixed;top:10px;right:10px;z-index:9;display:none;gap:8px}#gbar button{background:#b45309;border:1px solid #f59e0b;color:#fff;font:700 13px "Segoe UI",sans-serif;padding:6px 12px;border-radius:8px;cursor:pointer}`; document.head.appendChild(st);
+  const bar = document.createElement("div"); bar.id = "gbar"; bar.className = "notranslate"; bar.setAttribute("translate", "no");
+  bar.innerHTML = '<button id="gbP">⏸ Pause</button><button id="gbR">⟲ Restart</button>'; document.body.appendChild(bar);
+  if (window.TouchPad && TouchPad.on) bar.style.top = "64px";
+  const ingame = () => mode !== "menu" && $("#menu").classList.contains("hide");
+  $("#gbP").onclick = (e) => { e.stopPropagation(); showPanel("pPause"); };
+  $("#gbR").onclick = (e) => {
+    e.stopPropagation();
+    if (!(mode === "solo")) return;
+    if (!confirm(mode === "host" ? "Restart the game for everyone? This game is lost." : "Restart the game? Your current game is lost.")) return;
+    $("#bSolo").onclick();
+  };
+  setInterval(() => { bar.style.display = ingame() ? "flex" : "none"; $("#gbR").style.display = (mode === "solo") ? "" : "none"; }, 250);
+})();
+
 $("#bQuit").onclick = () => quit();
 function quit() { if (net) net.close(); net = null; mode = "menu"; W = null; ME = null; FX.buy = false; FX.msg = null; FX.feed = []; location.href = (window.ARC && ARC.page ? ARC.page("hub") : "/arcade") + "?sheet=strike"; }
 addEventListener("keydown", (e) => { if (e.code === "Escape" && FX.buy) closeBuy(); if (e.code === "Escape" && W && W.state === "done") quit(); });
@@ -1206,7 +1222,8 @@ function frame(now) {
 }
 function frameBody(dt) {
   if (W && mode !== "menu") {
-    if (mode === "solo" || mode === "host") { myTick(dt); hostTick(dt); hostNet(dt); if (W.state === "done" && mode === "solo") {} }
+    if (mode === "solo" && !$("#menu").classList.contains("hide")) { /* 10 Nov: paused (the menu is open) */ }
+    else if (mode === "solo" || mode === "host") { myTick(dt); hostTick(dt); hostNet(dt); }
     else if (mode === "guest") { myTick(dt); guestSmooth(dt); guestNet(dt); }
     if (W.state === "planted") { FX.beep = (FX.beep || 0) - dt; if (FX.beep <= 0) { FX.beep = W.charge.t < 5 ? 0.15 : W.charge.t < 15 ? 0.4 : 0.9; sound("beep", [W.charge.x, W.charge.y, W.charge.z]); } }
     if (ME && FX.buy && (!ME.alive || !inBuy(ME) || !buyTime())) closeBuy();

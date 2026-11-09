@@ -55,6 +55,14 @@
     for (let k = 0; k < 2; k++) { try { const r = await fetch(A.url("/api/arcade"), { cache: "no-store" }); if (r.ok) return await r.json(); } catch (e) {} if (!k) await A.pick(true); }
     return null;
   };
+  A.h2hPost = async (game, w, l) => {
+    await A.ready;
+    try { const r = await fetch(A.url("/api/arcade/h2h"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ game, w, l }) }); return r.ok ? await r.json() : null; } catch (e) { return null; }
+  };
+  A.h2h = async (game, names) => {
+    await A.ready;
+    try { const r = await fetch(A.url("/api/arcade/h2h?game=" + encodeURIComponent(game) + "&names=" + encodeURIComponent(names.slice(0, 8).join(","))), { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (e) { return null; }
+  };
   window.ARC = A;
   if (A.names && "serviceWorker" in navigator && location.protocol === "https:") addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
   document.addEventListener("DOMContentLoaded", () => {

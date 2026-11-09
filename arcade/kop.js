@@ -54,14 +54,17 @@ function Kop(online = null) {
   const humans = online ? online.players.slice(0, 4) : [{ id: 0, name: (window.ARC && ARC.getName()) || "YOU" }];
   const nP = Math.max(size, humans.length), LANE = [0, -24, 24, -12];
   const SKIN = ["#f1c27d", "#8d5524", "#e0ac69", "#c68642"], HAIR = ["#1f2937", "#111827", "#78350f", "#facc15"];
-  const P = Array.from({ length: nP }, (_, i) => ({ i, human: i < humans.length ? humans[i] : null, name: names[i % 4], who: i < humans.length ? humans[i].name : "bot",
-    x: 60 + i * 26, gy: 310 + LANE[i], z: 0, vz: 0, on: true, face: 1, ang: 0, cd: 0, wpn: "P", ammo: 0, lives: 3, hp: 3, gren: 3, inv: 2, dead: 0, out: false, wallT: 0,
+  const AGAINST = OPT.side === "against" && humans.length >= 2;
+  const P = Array.from({ length: nP }, (_, i) => ({ i, human: i < humans.length ? humans[i] : null, side: AGAINST && i < humans.length ? i % 2 : 0,
+    name: AGAINST && i < humans.length && i % 2 ? humans[i].name : names[i % 4], who: i < humans.length ? humans[i].name : "bot",
+    x: AGAINST && i < humans.length && i % 2 ? 400 - i * 10 : 60 + i * 26, gy: 310 + LANE[i], z: 0, vz: 0, on: true, face: AGAINST && i < humans.length && i % 2 ? -1 : 1, ang: 0, cd: 0, wpn: "P", ammo: 0, lives: 3, hp: 3, gren: 3, inv: 2, dead: 0, out: false, wallT: 0,
     in: { mx: 0, my: 0, a: 0, b: 0, c: 0, d: 0 }, lastB: 0, lastC: 0, lastD: 0, run: 0, skin: SKIN[i % 4], hair: HAIR[i % 4], botT: 0 }));
-  const g = { id: "kop", own: true, score: 0, over: false, win: false, t: 0, msg: "", msgT: 0, cam: 0, sendT: 0, net: null, boss: null,
+  const g = { id: "kop", own: true, score: 0, score0: 0, score1: 0, winSide: -1, over: false, win: false, t: 0, msg: "", msgT: 0, cam: 0, sendT: 0, net: null, boss: null,
     help: "arrows / W A S D walk (up and down the street too) · Space fire, it aims by itself (hold) · Enter or X jump · E firecracker · Q the wall · N music · Esc menu" };
   const E = [], B = [], K = [], FX = [], WALL = [];
   let nid = 1, shake = 0;
   const say = (m, t = 1.6) => { g.msg = m; g.msgT = t; };
+  const mySide = () => (P.find((p) => p.human && p.human.id === me) || { side: 0 }).side;
   say(`${away ? "AWAY IN" : "AT HOME IN"} ${place.city.toUpperCase()} · vs ${foeT.city.toUpperCase()}`, 3.2);
   const OBS = [], SCAF = [], WAVES = [];
   for (let x = 380; x < BOSS_AT - 200; x += 170 + Math.floor(Math.random() * 140)) {
@@ -201,8 +204,9 @@ function Kop(online = null) {
     const e = { id: nid++, t: kind, x, gy: clamp(gy, D0 - 6, D1), z, vz: 0, hp: HP[kind] * (kind === "boss" ? Math.max(1, 0.7 + 0.3 * nP) : 1), face: -1, cd: 0.8 + Math.random(), on: true, st: 0, hit: 0, lane: 0 };
     e.max = e.hp; E.push(e); return e;
   }
-  const alive = () => P.filter((p) => !p.out && p.dead <= 0);
-  const nearestP = (x, gy) => { let b = null, bd = 1e9; for (const p of alive()) { const d = Math.hypot(p.x - x, (p.gy - gy) * 2); if (d < bd) { bd = d; b = p; } } return b; };
+  const alive = () => P.filter((p) => !p.out && p.dead <= 0), alive0 = () => alive().filter((p) => !p.side), alive1 = () => alive().filter((p) => p.side);
+  const bs = (b) => b.s ?? (b.f ? 0 : 1);
+  const nearestP = (x, gy) => { let b = null, bd = 1e9; for (const p of alive0()) { const d = Math.hypot(p.x - x, (p.gy - gy) * 2); if (d < bd) { bd = d; b = p; } } return b; };
   const ew = (e) => ({ van: 54, boss: 64, drone: 18 })[e.t] || 12 * KS, eh = (e) => ({ van: 30, boss: 96, drone: 10 })[e.t] || 24 * KS, ed = (e) => ({ van: 14, boss: 22, drone: 12 })[e.t] || 9;
   const aimV = (fx, fg, fz, tx, tg, tz, sp) => { const dx = tx - fx, dg = tg - fg, dz = tz - fz, L = Math.hypot(dx, dg, dz) || 1; return [dx / L * sp, dg / L * sp, dz / L * sp]; };
   function eshot(e, p, sp, kind = "b") {
@@ -212,32 +216,35 @@ function Kop(online = null) {
   function boom(x, gy, z, r, dmg, friendly) {
     FX.push({ k: "boom", x, gy, z, r, t: 0.45 }); shake = Math.max(shake, r / 8); SFX.boom();
     const near = (a, h) => Math.hypot(a.x - x, (a.gy - gy) * 1.6, (a.z + h / 2 - z) * 0.5);
-    if (friendly) { for (const e of E) if (near(e, eh(e)) < r + ew(e) / 2) hurtE(e, dmg); }
-    else for (const p of alive()) if (near(p, 30) < r) hurtP(p);
+    if (friendly) { for (const e of E) if (near(e, eh(e)) < r + ew(e) / 2) hurtE(e, dmg); for (const p of alive1()) if (near(p, 30) < r) hurtP(p); }
+    else for (const p of alive0()) if (near(p, 30) < r) hurtP(p);
   }
   function hurtE(e, d) {
     if (e.hp <= 0) return; e.hp -= d; e.hit = 0.08;
     if (e.hp <= 0) {
-      const pts = { grunt: 100, lob: 150, sniper: 200, drone: 200, van: 600, boss: 6000 }[e.t]; g.score += pts;
+      const pts = { grunt: 100, lob: 150, sniper: 200, drone: 200, van: 600, boss: 6000 }[e.t]; g.score0 += pts;
       FX.push({ k: "pts", x: e.x, gy: e.gy, z: e.z + eh(e) + 4, s: "+" + pts, t: 0.9 });
       if (e.t === "van" || e.t === "drone" || e.t === "boss") boom(e.x, e.gy, e.z + eh(e) / 2, e.t === "boss" ? 60 : 30, 0, true);
       else { SFX.stomp(); FX.push({ k: "fly", x: e.x, gy: e.gy, z: e.z + 12, vx: rnd(-40, 80), vz: 220, t: 0.8, c: foeT.c1 }); }
       if (e.t === "van" || Math.random() < 0.07) K.push({ x: e.x, gy: clamp(e.gy, D0, D1), z: e.z + 20, vz: 150, k: pick(["M", "S", "F"]) });
-      if (e.t === "boss") { g.win = true; g.endT = 2.5; say("VICTOIRE ! THE MASCOT-MECH IS DOWN", 4); SFX.win(); }
+      if (e.t === "boss") { g.win = true; g.winSide = 0; g.endT = 2.5; say("VICTOIRE ! THE MASCOT-MECH IS DOWN", 4); SFX.win(); }
     }
   }
   function hurtP(p) {
     if (p.inv > 0 || p.dead > 0 || p.out) return;
+    if (p.side) g.score0 += 100; else g.score1 += 150;
     if (--p.hp > 0) { p.inv = 1; shake = Math.max(shake, 3); tone(260, 0.12, "square", 0.07, -120); FX.push({ k: "thud", x: p.x, gy: p.gy, z: p.z + 20, t: 0.25 }); return; }
     p.hp = 3; p.lives--; p.dead = 1.6; p.wpn = "P"; p.ammo = 0; tone(160, 0.3, "sawtooth", 0.08, -100);
     FX.push({ k: "fly", x: p.x, gy: p.gy, z: p.z + 12, vx: -p.face * 60, vz: 260, t: 0.9, c: team.c1 });
     if (p.lives <= 0) { p.out = true; say(`${p.name} IS OUT`, 1.6); }
   }
   const WPN = { P: { cd: 0.2, sp: 430, n: 1, d: 1 }, M: { cd: 0.075, sp: 470, n: 1, d: 1, ammo: 150 }, S: { cd: 0.3, sp: 400, n: 5, d: 1, ammo: 45 }, F: { cd: 0.45, sp: 300, n: 1, d: 5, ammo: 24 } };
+  const foesOf = (p) => (p.side ? alive0().map((q) => ({ x: q.x, gy: q.gy, z: q.z, h: 24 * KS, hp: 1 }))
+    : E.filter((e) => e.hp > 0).map((e) => ({ x: e.x, gy: e.gy, z: e.z, h: eh(e), hp: 1, t: e.t })).concat(alive1().map((q) => ({ x: q.x, gy: q.gy, z: q.z, h: 24 * KS, hp: 1 }))));
   function target(p) {
     let best = null, bd = 1e9;
-    for (const e of E) {
-      if (e.hp <= 0) continue; const dx = e.x - p.x, dg = e.gy - p.gy;
+    for (const e of foesOf(p)) {
+      const dx = e.x - p.x, dg = e.gy - p.gy;
       if (dx * p.face < 4 || Math.abs(dx) > 340 || Math.abs(dg) > 80) continue;
       const d = Math.abs(dx) + Math.abs(dg) * 2.5; if (d < bd) { bd = d; best = e; }
     }
@@ -245,26 +252,26 @@ function Kop(online = null) {
   }
   function fire(p) {
     const w = WPN[p.wpn], t = target(p), ox = p.x + p.face * 11 * KS, oz = p.z + CH; p.cd = w.cd;
-    const v = t ? aimV(ox, p.gy, oz, t.x, t.gy, t.z + eh(t) * 0.5, w.sp) : [p.face * w.sp, 0, 0];
+    const v = t ? aimV(ox, p.gy, oz, t.x, t.gy, t.z + t.h * 0.5, w.sp) : [p.face * w.sp, 0, 0];
     p.ang = Math.atan2(-v[2], Math.abs(v[0]) || 1);
     for (let i = 0; i < w.n; i++) {
       const s = w.n > 1 ? i - (w.n - 1) / 2 : 0;
-      B.push({ x: ox, gy: p.gy, z: oz, vx: v[0], vg: v[1] + s * 45, vz: v[2] + Math.abs(s) * 6, f: true, t: 0, k: p.wpn === "F" ? "r" : "b", d: w.d, o: p.i });
+      B.push({ x: ox, gy: p.gy, z: oz, vx: v[0], vg: v[1] + s * 45, vz: v[2] + Math.abs(s) * 6, f: !p.side, s: p.side, t: 0, k: p.wpn === "F" ? "r" : "b", d: w.d, o: p.i });
     }
     if (p.wpn !== "P" && --p.ammo <= 0) p.wpn = "P";
     tone(p.wpn === "F" ? 220 : 700 + p.i * 60, 0.05, "square", 0.025, -400);
   }
-  function grenade(p) { p.gren--; B.push({ x: p.x, gy: p.gy, z: p.z + 22, vx: p.face * 210 + p.in.mx * 40, vg: p.in.my * 60, vz: 300, f: true, t: 0, k: "g", d: 6, o: p.i }); }
+  function grenade(p) { p.gren--; B.push({ x: p.x, gy: p.gy, z: p.z + 22, vx: p.face * 210 + p.in.mx * 40, vg: p.in.my * 60, vz: 300, f: !p.side, s: p.side, t: 0, k: "g", d: 6, o: p.i }); }
   function raiseWall(p) {
-    p.wallT = WALL_CD; WALL.push({ x: p.x + p.face * 26, gy: clamp(p.gy, D0 + 14, D1 - 14), face: p.face, t: WALL_T, o: p.i });
+    p.wallT = WALL_CD; WALL.push({ x: p.x + p.face * 26, gy: clamp(p.gy, D0 + 14, D1 - 14), face: p.face, t: WALL_T, o: p.i, side: p.side });
     say(`${p.name.toUpperCase()}: LE MUR !`, 1); tone(392, 0.08, "square", 0.06); tone(523, 0.12, "square", 0.06, 0, 0.08); noise(0.1, 0.08, 1200);
   }
   function botThink(p, dt) {
-    const hs = alive().filter((q) => q.human), lead = hs.length ? hs.reduce((a, q) => (q.x > a.x ? q : a)) : null;
+    const hs = alive0().filter((q) => q.human), lead = hs.length ? hs.reduce((a, q) => (q.x > a.x ? q : a)) : null;
     const tx = clamp((lead ? lead.x : g.cam + 120) - 30 - p.i * 22, g.cam + 20, g.cam + W - 40), tg = clamp((lead ? lead.gy : 312) + LANE[p.i % 4], D0 + 4, D1 - 4);
     p.in.mx = Math.abs(tx - p.x) > 10 ? Math.sign(tx - p.x) : 0; p.in.my = Math.abs(tg - p.gy) > 6 ? Math.sign(tg - p.gy) : 0; p.in.a = 0;
     let tgt = null, bd = 330;
-    for (const e of E) { if (e.hp <= 0 || e.x < g.cam - 10 || e.x > g.cam + W + 20) continue; const d = Math.hypot(e.x - p.x, (e.gy - p.gy) * 2); if (d < bd) { bd = d; tgt = e; } }
+    for (const e of foesOf(p)) { if (e.x < g.cam - 10 || e.x > g.cam + W + 20) continue; const d = Math.hypot(e.x - p.x, (e.gy - p.gy) * 2); if (d < bd) { bd = d; tgt = e; } }
     if (tgt) {
       const dx = tgt.x - p.x; if (!p.in.mx || Math.sign(dx) === p.in.mx) p.face = Math.sign(dx) || p.face;
       p.in.a = Math.abs(tgt.gy - p.gy) < 80 ? 1 : 0;
@@ -273,7 +280,7 @@ function Kop(online = null) {
     }
     let coming = 0;
     for (const b of B) {
-      if (b.f || Math.abs(b.x - p.x) > 120 || Math.sign(p.x - b.x) !== Math.sign(b.vx)) continue; coming++;
+      if (bs(b) === p.side || Math.abs(b.x - p.x) > 120 || Math.sign(p.x - b.x) !== Math.sign(b.vx)) continue; coming++;
       if (Math.abs(b.x - p.x) < 60 && Math.abs(b.gy - p.gy) < 12) { if (p.on && Math.random() < 0.25) p.in.b++; else p.in.my = Math.sign(p.gy - b.gy) || 1; }
     }
     if (coming >= 2 && p.wallT <= 0 && Math.random() < 0.05) p.in.d++;
@@ -281,9 +288,9 @@ function Kop(online = null) {
   }
   function step(dt) {
     g.t += dt; g.msgT -= dt; shake = Math.max(0, shake - dt * 20);
-    const live = alive();
-    if (!g.over && P.filter((p) => p.human).every((p) => p.out)) { g.over = true; g.result = "DÉFAITE"; SFX.over(); }
-    if (g.endT !== undefined && (g.endT -= dt) <= 0 && !g.over) { g.over = true; g.result = "VICTOIRE"; g.score += P.reduce((s, p) => s + Math.max(0, p.lives) * 500, 0); }
+    const live = alive0().length ? alive0() : alive();
+    if (!g.over && P.filter((p) => p.human && !p.side).every((p) => p.out)) { g.over = true; g.winSide = 1; g.result = "DÉFAITE"; SFX.over(); }
+    if (g.endT !== undefined && (g.endT -= dt) <= 0 && !g.over) { g.over = true; g.result = "VICTOIRE"; g.score0 += P.reduce((s, p) => s + (p.side ? 0 : Math.max(0, p.lives) * 500), 0); }
     if (live.length) {
       const lead = Math.max(...live.map((p) => p.x)), back = Math.min(...live.map((p) => p.x));
       g.cam = clamp(Math.max(g.cam, Math.min(lead - 200, back - 16)), 0, BOSS_AT);
@@ -300,7 +307,7 @@ function Kop(online = null) {
     }
     for (const p of P) {
       if (p.out) continue;
-      if (p.dead > 0) { p.dead -= dt; if (p.dead <= 0) { p.x = g.cam + 60 + p.i * 20; p.gy = clamp(312 + LANE[p.i % 4], D0, D1); p.z = 120; p.vz = 0; p.inv = 2; p.gren = Math.max(p.gren, 2); } continue; }
+      if (p.dead > 0) { p.dead -= dt; if (p.dead <= 0) { p.x = p.side ? g.cam + W - 60 : g.cam + 60 + p.i * 20; p.gy = clamp(312 + LANE[p.i % 4], D0, D1); p.z = 120; p.vz = 0; p.inv = 2; p.gren = Math.max(p.gren, 2); } continue; }
       if (!p.human) botThink(p, dt);
       p.inv = Math.max(0, p.inv - dt); p.cd -= dt; p.wallT = Math.max(0, p.wallT - dt);
       const mx = p.in.mx, my = p.in.my;
@@ -314,7 +321,7 @@ function Kop(online = null) {
       p.x = clamp(p.x, g.cam + 8, Math.min(g.cam + W - 10, LEN - 10)); p.run = p.on && (mx || my) ? (Math.floor(g.t * 10) % 2 ? 1 : -1) : 0;
       for (const k of K) if (!k.got && Math.abs(k.x - p.x) < 16 && Math.abs(k.gy - p.gy) < 13 && p.z - k.z < 26) {
         k.got = true;
-        if (k.k === "food") { p.lives = Math.min(5, p.lives + 1); p.hp = 3; g.score += 500; say(`${team.food.toUpperCase()} ! +1 LIFE, HEARTS FULL`, 1.6); SFX.coin(); }
+        if (k.k === "food") { p.lives = Math.min(5, p.lives + 1); p.hp = 3; if (p.side) g.score1 += 500; else g.score0 += 500; say(`${team.food.toUpperCase()} ! +1 LIFE, HEARTS FULL`, 1.6); SFX.coin(); }
         else { p.wpn = k.k; p.ammo = WPN[k.k].ammo; say({ M: "MITRAILLETTE!", S: "ÉVENTAIL!", F: "FUSÉE DE DÉTRESSE!" }[k.k], 1.2); tone(660, 0.08, "square", 0.06); tone(990, 0.12, "square", 0.06, 0, 0.08); }
       }
     }
@@ -343,7 +350,7 @@ function Kop(online = null) {
         if (e.cd <= 0 && Math.abs(dx) < 50 && Math.abs(dg) < 20) { e.cd = rate * 1.6; B.push({ x: e.x, gy: e.gy, z: e.z - 4, vx: 0, vg: 0, vz: -40, f: false, t: 0, k: "bomb", d: 1 }); }
       } else if (e.t === "van") {
         e.x -= 85 * dt; if (e.x < g.cam - 80) e.hp = 0;
-        for (const q of alive()) if (Math.abs(q.x - e.x) < 30 && Math.abs(q.gy - e.gy) < 14 && q.z < 30) hurtP(q);
+        for (const q of alive0()) if (Math.abs(q.x - e.x) < 30 && Math.abs(q.gy - e.gy) < 14 && q.z < 30) hurtP(q);
         for (const w of WALL) if (Math.abs(w.x - e.x) < 32 && Math.abs(w.gy - e.gy) < 26 && w.t > 0) { w.t = 0; hurtE(e, 4); noise(0.15, 0.12, 700); }
       } else if (e.t === "boss") {
         e.x = Math.min(e.x, LEN - 50); e.gy += clamp(p.gy - e.gy, -1, 1) * 18 * dt;
@@ -354,7 +361,7 @@ function Kop(online = null) {
           else { spawn("grunt", e.x - 40, e.gy - 20); spawn("grunt", e.x + 20, e.gy + 20); say("REINFORCEMENTS!", 1); }
         }
         if (e.jump) { e.vz -= GRAV * dt; e.x = clamp(e.x + e.vx * dt, BOSS_AT + 40, LEN - 40); e.z += e.vz * dt; if (e.z <= 0) { e.z = 0; e.jump = false; shake = 8; noise(0.3, 0.2, 400); for (const s of [-1, 1]) B.push({ x: e.x + s * 30, gy: (D0 + D1) / 2, z: 0, vx: s * 230, vg: 0, vz: 0, f: false, t: 0, k: "wave", d: 1 }); } }
-        for (const q of alive()) if (Math.abs(q.x - e.x) < 30 && Math.abs(q.gy - e.gy) < 22 && q.z < e.z + 60) hurtP(q);
+        for (const q of alive0()) if (Math.abs(q.x - e.x) < 30 && Math.abs(q.gy - e.gy) < 22 && q.z < e.z + 60) hurtP(q);
       }
     }
     for (let i = E.length - 1; i >= 0; i--) if (E[i].hp <= 0 || E[i].x < g.cam - 120) E.splice(i, 1);
@@ -362,17 +369,18 @@ function Kop(online = null) {
       b.t += dt;
       if (b.k === "g" || b.k === "bottle") b.vz -= GRAV * dt; else if (b.k === "bomb") b.vz -= GRAV * 0.5 * dt;
       b.x += b.vx * dt; b.gy += b.vg * dt; b.z += b.vz * dt;
-      if (b.k === "g") { if (b.z <= floorAt(b.x, b.gy) || b.t > 1.6) { b.dead = true; boom(b.x, b.gy, Math.max(0, b.z), 42, 6, true); } continue; }
-      if (b.k === "bottle" && b.z <= 0) { b.dead = true; FX.push({ k: "glass", x: b.x, gy: b.gy, z: 0, t: 0.4 }); noise(0.06, 0.06, 3000); for (const p of alive()) if (Math.abs(p.x - b.x) < 14 && Math.abs(p.gy - b.gy) < 10 && p.z < 10) hurtP(p); continue; }
+      if (b.k === "g") { if (b.z <= floorAt(b.x, b.gy) || b.t > 1.6) { b.dead = true; boom(b.x, b.gy, Math.max(0, b.z), 42, 6, !!b.f); } continue; }
+      if (b.k === "bottle" && b.z <= 0) { b.dead = true; FX.push({ k: "glass", x: b.x, gy: b.gy, z: 0, t: 0.4 }); noise(0.06, 0.06, 3000); for (const p of alive0()) if (Math.abs(p.x - b.x) < 14 && Math.abs(p.gy - b.gy) < 10 && p.z < 10) hurtP(p); continue; }
       if (b.k === "bomb" && b.z <= 0) { b.dead = true; boom(b.x, b.gy, 0, 18, 0, false); continue; }
-      if (b.k === "wave") { if (b.t > 2) b.dead = true; else for (const p of alive()) if (Math.abs(p.x - b.x) < 10 && p.z < 8) hurtP(p); continue; }
+      if (b.k === "wave") { if (b.t > 2) b.dead = true; else for (const p of alive0()) if (Math.abs(p.x - b.x) < 10 && p.z < 8) hurtP(p); continue; }
       if (b.x < g.cam - 20 || b.x > g.cam + W + 20 || b.z < -2 || b.z > 320 || b.gy < D0 - 40 || b.gy > D1 + 30 || b.t > 3) { b.dead = true; continue; }
-      if (inObs(b.x, b.gy, b.z)) { b.dead = true; if (b.k === "r") boom(b.x, b.gy, b.z, 26, b.d, true); continue; }
+      if (inObs(b.x, b.gy, b.z)) { b.dead = true; if (b.k === "r") boom(b.x, b.gy, b.z, 26, b.d, !!b.f); continue; }
+      for (const w of WALL) if ((w.side || 0) !== bs(b) && Math.abs(b.x - w.x) < 10 && Math.abs(b.gy - w.gy) < 26 && b.z < 50) { b.dead = true; FX.push({ k: "thud", x: b.x, gy: b.gy, z: b.z, t: 0.25 }); tone(140, 0.05, "square", 0.05); break; }
+      if (b.dead) continue;
+      for (const p of alive()) if (p.side !== bs(b) && Math.abs(b.x - p.x) < 8 && Math.abs(b.gy - p.gy) < 9 && b.z > p.z - 2 && b.z < p.z + 24 * KS) { b.dead = true; if (b.k === "r") boom(b.x, b.gy, b.z, 26, b.d, !!b.f); else hurtP(p); break; }
+      if (b.dead) continue;
       if (b.f) {
         for (const e of E) if (e.hp > 0 && Math.abs(b.x - e.x) < ew(e) / 2 + 2 && Math.abs(b.gy - e.gy) < ed(e) && b.z > e.z - 2 && b.z < e.z + eh(e) + 2) { b.dead = true; if (b.k === "r") boom(b.x, b.gy, b.z, 26, b.d, true); else hurtE(e, b.d); break; }
-      } else {
-        for (const w of WALL) if (Math.abs(b.x - w.x) < 10 && Math.abs(b.gy - w.gy) < 26 && b.z < 50) { b.dead = true; FX.push({ k: "thud", x: b.x, gy: b.gy, z: b.z, t: 0.25 }); tone(140, 0.05, "square", 0.05); break; }
-        if (!b.dead) for (const p of alive()) if (Math.abs(b.x - p.x) < 8 && Math.abs(b.gy - p.gy) < 9 && b.z > p.z - 2 && b.z < p.z + 24 * KS) { b.dead = true; hurtP(p); break; }
       }
     }
     for (let i = B.length - 1; i >= 0; i--) if (B[i].dead) B.splice(i, 1);
@@ -399,13 +407,13 @@ function Kop(online = null) {
       const seen = new Set();
       for (const q of m.E) { seen.add(q[0]); let e = E.find((x) => x.id === q[0]); if (!e) { e = { id: q[0], x: q[2], gy: q[3], z: q[4] }; E.push(e); } e.t = TYPES[q[1]]; e.x += (q[2] - e.x) * k; e.gy += (q[3] - e.gy) * k; e.z += (q[4] - e.z) * k; e.face = q[5]; e.hp = q[6]; e.max = 1; e.hit = q[7]; }
       for (let i = E.length - 1; i >= 0; i--) if (!seen.has(E[i].id)) E.splice(i, 1);
-      if (m.B !== g.lastB) { B.length = 0; for (const q of m.B) B.push({ x: q[0], gy: q[1], z: q[2], vx: q[3], vg: q[4], vz: q[5], f: !!q[6], k: q[7] }); g.lastB = m.B; }
+      if (m.B !== g.lastB) { B.length = 0; for (const q of m.B) B.push({ x: q[0], gy: q[1], z: q[2], vx: q[3], vg: q[4], vz: q[5], f: !!q[6], k: q[7], s: q[8] }); g.lastB = m.B; }
       else for (const b of B) { if (b.k === "g" || b.k === "bottle") b.vz -= GRAV * dt; else if (b.k === "bomb") b.vz -= GRAV * 0.5 * dt; b.x += b.vx * dt; b.gy += b.vg * dt; b.z += b.vz * dt; }
       K.length = 0; for (const q of m.K) K.push({ x: q[0], gy: q[1], z: q[2], k: q[3] });
-      WALL.length = 0; for (const q of m.W || []) WALL.push({ x: q[0], gy: q[1], face: q[2], t: q[3] });
+      WALL.length = 0; for (const q of m.W || []) WALL.push({ x: q[0], gy: q[1], face: q[2], t: q[3], side: q[4] || 0 });
       if (m.fx) for (const f of m.fx) { FX.push({ k: "boom", x: f[0], gy: f[1], z: f[2], r: f[3], t: 0.45 }); SFX.boom(); shake = Math.max(shake, f[3] / 8); }
       m.fx = null;
-      g.score = m.s; if (m.msg !== g.msg) { g.msg = m.msg; g.msgT = m.msgT; } g.boss = m.boss ? { hp: m.boss } : null;
+      g.score0 = m.s; g.score1 = m.s1 || 0; g.winSide = m.ws ?? -1; g.score = mySide() ? g.score1 : g.score0; if (m.msg !== g.msg) { g.msg = m.msg; g.msgT = m.msgT; } g.boss = m.boss ? { hp: m.boss } : null;
       if (m.over && !g.over) { g.over = true; g.result = m.res; if (m.res === "VICTOIRE") SFX.win(); else SFX.over(); }
       g.t += dt; g.msgT -= dt; shake = Math.max(0, shake - dt * 20);
       for (let i = FX.length - 1; i >= 0; i--) { FX[i].t -= dt; if (FX[i].t <= 0) FX.splice(i, 1); }
@@ -414,6 +422,7 @@ function Kop(online = null) {
     const mine = P.find((p) => p.human && p.human.id === me);
     if (mine) { Object.assign(mine.in, myHands()); mine.in.b = myB; mine.in.c = myC; mine.in.d = myD; }
     if (!g.over) step(dt);
+    g.score = mySide() ? g.score1 : g.score0;
     if (online) {
       g.sendT -= dt;
       if (g.sendT <= 0) {
@@ -423,10 +432,10 @@ function Kop(online = null) {
         online.send({ t: "st", cam: r1(g.cam),
           P: P.map((p) => [r1(p.x), r1(p.gy), r1(p.z), p.face, +p.ang.toFixed(2), +p.dead.toFixed(1), +p.inv.toFixed(1), p.lives, p.wpn, p.gren, p.out ? 1 : 0, p.run, Math.ceil(p.wallT), p.hp]),
           E: E.filter((e) => e.hp > 0).map((e) => [e.id, TYPES.indexOf(e.t), r1(e.x), r1(e.gy), r1(e.z), e.face, +(e.hp / e.max).toFixed(2), e.hit > 0 ? 1 : 0]),
-          B: B.slice(0, 80).map((b) => [r1(b.x), r1(b.gy), r1(b.z), r1(b.vx), r1(b.vg), r1(b.vz), b.f ? 1 : 0, b.k]),
-          K: K.filter((k) => !k.got).map((k) => [r1(k.x), r1(k.gy), r1(k.z), k.k]), W: WALL.map((w) => [r1(w.x), r1(w.gy), w.face, +w.t.toFixed(1)]),
+          B: B.slice(0, 80).map((b) => [r1(b.x), r1(b.gy), r1(b.z), r1(b.vx), r1(b.vg), r1(b.vz), b.f ? 1 : 0, b.k, bs(b)]),
+          K: K.filter((k) => !k.got).map((k) => [r1(k.x), r1(k.gy), r1(k.z), k.k]), W: WALL.map((w) => [r1(w.x), r1(w.gy), w.face, +w.t.toFixed(1), w.side || 0]),
           fx: fx.map((f) => [r1(f.x), r1(f.gy), r1(f.z), f.r]),
-          s: g.score, msg: g.msg, msgT: +g.msgT.toFixed(1), boss: g.boss && g.boss.hp > 0 ? +(g.boss.hp / g.boss.max).toFixed(2) : 0, over: g.over, res: g.result });
+          s: g.score0, s1: g.score1, ws: g.winSide, msg: g.msg, msgT: +g.msgT.toFixed(1), boss: g.boss && g.boss.hp > 0 ? +(g.boss.hp / g.boss.max).toFixed(2) : 0, over: g.over, res: g.result });
       }
     }
   };
@@ -462,7 +471,7 @@ function Kop(online = null) {
     }]);
     for (const w of WALL) for (const off of [-20, -10, 0, 10, 20]) L.push([w.gy + off, () => {
       if (w.t < 1 && Math.floor(g.t * 10) % 2) return; const x0 = X(w.x), gy = w.gy + off; shadow(x0, gy, 8);
-      guy(x0 + off * 0.3, gy, w.face, 0, { c1: team.c1, c2: team.c2 }, SKIN[(off + 20) / 10 % 4], HAIR[(off + 20) / 10 % 4], 0, undefined, null, false);
+      guy(x0 + off * 0.3, gy, w.face, 0, w.side ? { c1: foeT.c1, c2: foeT.c2 } : { c1: team.c1, c2: team.c2 }, SKIN[(off + 20) / 10 % 4], HAIR[(off + 20) / 10 % 4], 0, undefined, null, false);
     }]);
     for (const e of E) {
       if (e.hp <= 0 && !online) continue; const x0 = X(e.x); if (x0 < -80 || x0 > W + 80) continue;
@@ -486,7 +495,7 @@ function Kop(online = null) {
       L.push([p.gy, () => {
         const x0 = X(p.x), y = p.gy - p.z; shadow(x0, p.gy);
         if (p.inv > 0 && Math.floor(g.t * 14) % 2) cx.globalAlpha = 0.4;
-        guy(x0, y, p.face, p.ang, { c1: team.c1, c2: team.c2 }, p.skin, p.hair, p.run, [10, 7, 9, 4][i], null);
+        guy(x0, y, p.face, p.ang, p.side ? { c1: foeT.c1, c2: foeT.c2 } : { c1: team.c1, c2: team.c2 }, p.skin, p.hair, p.run, [10, 7, 9, 4][i], p.side ? foeT.c2 : null);
         cx.globalAlpha = 1;
         txt(p.name.slice(0, 10), x0, y - 40, 7, p.human && p.human.id === me ? "#fde047" : "#e5e7eb", "center");
       }]);
@@ -513,8 +522,8 @@ function Kop(online = null) {
     }
     cx.restore();
     P.forEach((p, i) => {
-      const x0 = 6 + i * 118; rect(x0, 4, 112, 22, "rgba(5,7,13,.65)"); rect(x0, 4, 3, 22, team.c1);
-      txt(p.name.slice(0, 11) + (p.human ? "" : " ·bot"), x0 + 6, 13, 7, p.human && p.human.id === me ? "#fde047" : "#e5e7eb");
+      const x0 = 6 + i * 118; rect(x0, 4, 112, 22, "rgba(5,7,13,.65)"); rect(x0, 4, 3, 22, p.side ? foeT.c1 : team.c1);
+      txt(p.name.slice(0, 11) + (p.human ? (p.side ? " ·rival" : "") : " ·bot"), x0 + 6, 13, 7, p.human && p.human.id === me ? "#fde047" : "#e5e7eb");
       if (p.out) txt("OUT", x0 + 6, 23, 8, "#f87171");
       else { for (let h = 0; h < 3; h++) txt(h < p.hp ? "♥" : "♡", x0 + 6 + h * 8, 23, 8, h < p.hp ? "#f87171" : "#64748b"); txt(`×${p.lives}  ${p.wpn}  ✸${p.gren}`, x0 + 32, 23, 7, "#e5e7eb"); }
       if (!p.out) txt(p.wallT > 0 ? `MUR ${Math.ceil(p.wallT)}` : "MUR ✓", x0 + 108, 23, 7, p.wallT > 0 ? "#94a3b8" : "#86efac", "right");
@@ -525,10 +534,16 @@ function Kop(online = null) {
     if (g.msgT > 0 && g.msg) { rect(0, 110, W, 26, "rgba(5,7,13,.6)"); txt(g.msg, W / 2, 128, 13, "#fde047", "center"); }
     if (g.over) {
       rect(W / 2 - 150, 120, 300, 104, "rgba(5,7,13,.86)"); rect(W / 2 - 150, 120, 300, 4, g.result === "VICTOIRE" ? "#22c55e" : "#ef4444");
-      txt(g.result === "VICTOIRE" ? "VICTOIRE !" : "DÉFAITE", W / 2, 152, 22, g.result === "VICTOIRE" ? "#86efac" : "#fca5a5", "center");
+      const won = g.winSide >= 0 ? g.winSide === mySide() : g.result === "VICTOIRE";
+      txt(won ? "VICTOIRE !" : "DÉFAITE", W / 2, 152, 22, won ? "#86efac" : "#fca5a5", "center");
       txt(`${team.city} ${away ? "à" : "vs"} ${foeT.city} · score ${g.score}`, W / 2, 176, 10, "#e5e7eb", "center");
       txt(online ? (window.againLine ? window.againLine() : "tap to play again") : window.TouchPad && TouchPad.on ? "tap: play again · ☰ menu" : "Space: play again · Esc menu", W / 2, 204, 9, "#a7b0c0", "center");
     }
+  };
+  g.h2h = () => {
+    if (!AGAINST || !g.over || g.winSide < 0) return null;
+    const w = P.filter((p) => p.human && p.side === g.winSide).map((p) => p.human.id), l = P.filter((p) => p.human && p.side !== g.winSide).map((p) => p.human.id);
+    return w.length && l.length ? { w, l } : null;
   };
   g.dbg = () => ({ cam: Math.round(g.cam), P: P.map((p) => [Math.round(p.x), Math.round(p.gy), p.lives, p.wpn, !!p.human, Math.round(p.z), Math.ceil(p.wallT), p.hp]), E: E.length, B: B.length, W: WALL.length, boss: !!g.boss, place: place.city, foe: foeT.city });
   g.dbgShot = (i = 0) => { const p = P[i]; B.push({ x: p.x + p.face * 120, gy: p.gy, z: p.z + CH, vx: -p.face * 200, vg: 0, vz: 0, f: false, t: 0, k: "b", d: 1 }); };

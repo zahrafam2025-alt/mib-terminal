@@ -211,7 +211,7 @@ function City() {
     SFX.stomp();
   }
   function hurtPlayer(d) {
-    if (pl.dead > 0) return;
+    if (pl.dead > 0 || g.safe) return;
     const a = Math.min(pl.armor, d * 0.7); pl.armor -= a; pl.hp -= d - a;
     g.shake = Math.max(g.shake, 0.15);
     if (pl.hp <= 0) die("WASTED");
@@ -282,12 +282,13 @@ function City() {
         s.x += s.vx * dt / n; s.y += s.vy * dt / n;
         let hitIt = solidAt(s.x, s.y) ? "wall" : null;
         if (!hitIt) for (const p of peds) if (!p.down && p !== s.from && Math.abs(p.x - s.x) < 6 && Math.abs(p.y - s.y) < 6) { hitIt = p; break; }
-        if (!hitIt) for (const c of cars) if (c !== s.from && Math.abs(c.x - s.x) < 32 && Math.abs(c.y - s.y) < 32 && carHit(c, s.x, s.y)) { hitIt = c; break; }
-        if (!hitIt && s.owner !== pl && !pl.car && pl.dead <= 0 && Math.abs(pl.x - s.x) < 6 && Math.abs(pl.y - s.y) < 6) hitIt = "player";
+        const mate = g.together && s.owner === "net";
+        if (!hitIt) for (const c of cars) if (c !== s.from && !(mate && c === pl.car) && Math.abs(c.x - s.x) < 32 && Math.abs(c.y - s.y) < 32 && carHit(c, s.x, s.y)) { hitIt = c; break; }
+        if (!hitIt && s.owner !== pl && !mate && !pl.car && pl.dead <= 0 && Math.abs(pl.x - s.x) < 6 && Math.abs(pl.y - s.y) < 6) hitIt = "player";
         if (!hitIt) continue;
         s.dead = true;
         const byP = s.owner === pl;
-        if (s.kind !== "b") { explode(s.x - s.vx * dt / n, s.y - s.vy * dt / n, s.nuke ? 200 : s.kind === "shell" ? 80 : 70, s.nuke ? 420 : s.kind === "shell" ? 150 : 120, byP, s.nuke); break; }
+        if (s.kind !== "b") { g.safe = mate; explode(s.x - s.vx * dt / n, s.y - s.vy * dt / n, s.nuke ? 200 : s.kind === "shell" ? 80 : 70, s.nuke ? 420 : s.kind === "shell" ? 150 : 120, byP, s.nuke); g.safe = false; break; }
         if (hitIt === "wall") sparks(s.x, s.y, 3, "#e5e7eb");
         else if (hitIt === "player") hurtPlayer(s.dmg);
         else if (hitIt.ty) {

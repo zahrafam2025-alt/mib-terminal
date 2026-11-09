@@ -5,7 +5,10 @@ function Goal(online = null) {
   const host = !online || online.host, me = online ? online.me : 0;
   const humans = online ? online.players.slice(0, 4) : [{ id: 0, name: (window.ARC && ARC.getName()) || "YOU" }];
   const BOTN = ["Zizou", "Ronnie", "Leo", "Kylian", "Cristiano", "Thierry"];
-  const P = [0, 1, 2, 3].map((i) => ({ i, team: i % 2, human: i < humans.length ? humans[i] : null, name: i < humans.length ? humans[i].name : BOTN[i] + " (bot)",
+  let OPT = {}; try { OPT = (online && online.opt) || JSON.parse(localStorage.getItem("arcade-sheet-goal") || "{}"); } catch (e) {}
+  const ORDER = OPT.side === "together" && humans.length <= 2 ? [0, 2, 1, 3] : [0, 1, 2, 3], seat = [null, null, null, null];
+  humans.forEach((h, k) => { if (k < 4) seat[ORDER[k]] = h; });
+  const P = [0, 1, 2, 3].map((i) => ({ i, team: i % 2, human: seat[i], name: seat[i] ? seat[i].name : BOTN[i] + " (bot)",
     x: 0, y: 0, vx: 0, vy: 0, fx: i % 2 ? -1 : 1, fy: 0, stam: 1, kickT: 0, in: { mx: 0, my: 0, sp: false, k: 0, t: 0 }, lastK: 0, lastT: 0, dashT: 0, tackT: 0, dazed: 0 }));
   let stuckT = 0;
   const anc = { x: 0, y: 0, t: 0 };
@@ -123,7 +126,7 @@ function Goal(online = null) {
     g.result = [draw ? "A DRAW!" : `${NAMES[g.s[0] > g.s[1] ? 0 : 1]} WINS ${g.s[0]} : ${g.s[1]}`, P.map((p) => `${p.name} ${NAMES[p.team]}`).join(" · ")];
     if (won) SFX.win(); else SFX.over();
   }
-  g.setSlot = (i, id, name) => { const p = P[i]; if (!p) return; p.human = { id, name }; p.name = name; p.lastK = p.in.k = 0; };
+  g.setSlot = (i, id, name) => { const p = P[ORDER[i]]; if (!p) return; p.human = { id, name }; p.name = name; p.lastK = p.in.k = 0; };
   g.netInput = (id, m) => { const p = P.find((q) => q.human && q.human.id === id); if (p) { p.in.mx = clamp(+m.mx || 0, -1, 1); p.in.my = clamp(+m.my || 0, -1, 1); p.in.sp = !!m.sp; p.in.k = Math.max(p.in.k, +m.k || 0); p.in.t = Math.max(p.in.t, +m.tk || 0); if ((+m.rb || 0) > (p.lastRb || 0)) { p.lastRb = +m.rb; resetBall(); } } };
   g.netState = (id, m) => { if (!host) g.net = m; };
   let guestK = 0, guestT = 0, guestR = 0;
@@ -211,6 +214,11 @@ function Goal(online = null) {
     if (g.over && g.result) banner(["FULL TIME", ...g.result], online ? (window.againLine ? againLine() : "Tap to play again") : "Space play again · Esc menu");
   };
   g.tap = (x, y) => { const [bx, by, bw, bh] = BALL_BTN; if (x >= bx && x <= bx + bw && y >= by && y <= by + bh) { if (host) resetBall(); else guestR++; } };
+  g.h2h = () => {
+    if (!g.over || g.s[0] === g.s[1]) return null; const wt = g.s[0] > g.s[1] ? 0 : 1;
+    const w = P.filter((p) => p.human && p.team === wt).map((p) => p.human.id), l = P.filter((p) => p.human && p.team !== wt).map((p) => p.human.id);
+    return w.length && l.length ? { w, l } : null;
+  };
   g.dbg = () => ({ ball: [ball.x, ball.y, ball.vx, ball.vy].map((v) => Math.round(v)), p: P.map((p) => [Math.round(p.x), Math.round(p.y)]) });
   return g;
 }

@@ -28,8 +28,11 @@ button:hover { border-color:var(--a); }
 #mus, #gMus { font-size:16px; } #mus { padding:2px 10px; } .mOff { opacity:.4; text-decoration:line-through; }
 /* 9 Nov (bug list: "add a pause button"; owner: "a reset button in every game: online every player must press it, with bots
    only you, after a small popup asking to confirm"): two small buttons in the game's corner (phones: next to ☰ and 🔊) */
-#gctl { position:absolute; top:50%; right:6px; transform:translateY(-50%); display:none; flex-direction:column; gap:6px; z-index:5; }   /* the right edge's middle: no game puts its score or map there */
-#gctl button { background:rgba(13,16,32,.72); border-color:rgba(255,255,255,.18); font-size:15px; padding:3px 10px; }
+/* 10 Nov (owner: "the pause and reset buttons are not appearing in many games, they should be in all games!!!"): on a
+   computer they were small icons on the picture's edge. Now labelled buttons in the bar beside the game, in every game */
+#gctl { display:none; gap:6px; flex-wrap:wrap; }
+#gctl button { background:#b45309; border-color:#f59e0b; color:#fff; font-weight:700; font-size:13px; padding:5px 10px; }
+#gctl #gMus { background:#22283d; border-color:var(--line); }
 #rconf { position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.6); }
 #rconf > div { background:#141827; border:1px solid #fbbf24; border-radius:14px; padding:16px 18px; width:min(340px,88vw); color:#e5e7eb; font:15px/1.45 "Segoe UI", sans-serif; text-align:center; }
 #rconf b { display:block; font-size:17px; margin-bottom:4px; } #rconf .row { display:flex; gap:10px; justify-content:center; margin-top:14px; }
@@ -50,9 +53,9 @@ button:hover { border-color:var(--a); }
 <body>
 <script src="/header.js" data-active="arcade" onerror="void 0"></script><div id="wrap">
   <div id="top"><b>MIB ARCADE</b><span class="help" style="margin:0">by MoonxZara</span><span class="help" id="rec"></span><span style="flex:1"></span>
-    <button id="onlBtn" title="play with friends">PLAY ONLINE</button><button id="snd" title="M">sound on</button><button id="mus" title="music on or off (N)">♪</button><button id="pauseBtn" title="P">pause</button><button id="menuBtn" title="Esc">menu</button></div>
+    <button id="onlBtn" title="play with friends">PLAY ONLINE</button><span id="gctl"><button id="gPause" title="pause (P)">⏸ Pause</button><button id="gReset" title="restart the game (R)">⟲ Restart</button><button id="gMus" title="music on or off (N)">♪ Music</button></span><button id="snd" title="M">sound on</button><button id="mus" title="music on or off (N)">♪</button><button id="pauseBtn" title="P">pause</button><button id="menuBtn" title="Esc">menu</button></div>
   <div id="screen" tabindex="0"><canvas id="c" width="960" height="720"></canvas><div id="focus">click here to play</div>
-    <div id="gctl"><button id="gPause" title="pause (P)">⏸</button><button id="gReset" title="restart the game (R)">⟲</button><button id="gMus" title="music on or off (N)">♪</button></div></div>
+    </div>
   <div id="rconf"><div><b id="rcT">Restart the game?</b><span id="rcS">Your current game is lost.</span><div class="row"><button id="rcNo">No</button><button class="yes" id="rcYes">Restart</button></div></div></div>
   <div class="help" id="help"></div><div class="help"><a href="sfx/CREDITS.txt" class="credlink" style="margin-left:14px">sound credits</a><dialog id="credDlg" style="max-width:min(640px,92vw);max-height:80vh;background:#141827;color:#e5e7eb;border:1px solid #26304a;border-radius:12px;padding:14px"><button type="button" onclick="this.closest('dialog').close()" style="float:right">✕ close</button><pre style="white-space:pre-wrap;font:12px Consolas,monospace;margin:30px 0 0"></pre></dialog><script>document.querySelectorAll(".credlink").forEach(function(a){a.onclick=function(e){e.preventDefault();var d=document.getElementById("credDlg");fetch(a.getAttribute("href")).then(function(r){return r.text()}).then(function(t){d.querySelector("pre").textContent=t;d.showModal()})}})</script></div>
 </div>
@@ -572,7 +575,7 @@ function Jump() {
   g.netState = (from, m) => {
     if (m.x === undefined) return;
     g.remote.set(from, { x: m.x, y: m.y, face: m.face, on: m.on, ride: m.ride, over: m.over, col: m.col, t: performance.now() });
-    if (m.bonk && m.bonk.includes(g.net.me) && !g.over) { g.p.vy = Math.max(g.p.vy, 260); g.p.vx = -140 * g.p.face; g.msg = "BONKED BY " + g.net.name(from).toUpperCase(); g.msgT = 1.2; SFX.stomp(); }
+    if (m.bonk && m.bonk.includes(g.net.me) && !g.over && !g.together) { g.p.vy = Math.max(g.p.vy, 260); g.p.vx = -140 * g.p.face; g.msg = "BONKED BY " + g.net.name(from).toUpperCase(); g.msgT = 1.2; SFX.stomp(); }
   };
   g.netOut = () => ({ x: Math.round(g.p.x), y: Math.round(g.p.y), face: g.p.face, on: g.p.on, ride: g.ride ? g.ride.k : null, over: g.over, col: g.col, score: g.score, bonk: g.bonkQ.splice(0) });
   function gen() {
@@ -626,7 +629,7 @@ function Jump() {
       else g.over = true;
     });
     if (g.net) for (const [id, r] of g.remote) {
-      if (r.over || performance.now() - r.t > 1000 || Math.abs(r.x - p.x) > 14 || p.vy <= 0 || prevB > r.y + 4 || p.y + 24 < r.y) continue;
+      if (g.together || r.over || performance.now() - r.t > 1000 || Math.abs(r.x - p.x) > 14 || p.vy <= 0 || prevB > r.y + 4 || p.y + 24 < r.y) continue;
       p.y = r.y - 24; p.vy = -470; p.jumps = 1; g.stomps++; g.bonkQ.push(id); g.msg = "BONK! +50"; g.msgT = 0.8; SFX.stomp();
     }
     if (p.y > H + 40) g.over = true;
@@ -900,7 +903,7 @@ function tick(dt = STEP) {
     void n; void m;
   } else {
     if (pressed("Escape")) { menu(); hit.clear(); return; }
-    if (pressed("KeyP") && canPause()) paused = !paused;
+    if (pressed("KeyP") && canPause() && cur.id !== "sumo") togglePause();
     if (pressed("KeyR") && cur.id !== "goal" && cur.id !== "sumo" && cur.id !== "racer2") { askReset(); hit.clear(); return; }
     if (!paused) {
       if (!cur.over) cur.update(dt);
@@ -944,7 +947,7 @@ function draw() {
       ON.players.forEach((q, i) => { const c = NETCOL[i % 4]; rect(W / 2 - 92, H / 2 + 2 - n * 9 + i * 18, 10, 10, c); txt(`${q.name}${q.id === ON.me ? "  ← YOU" : ""}`, W / 2 - 74, H / 2 + 11 - n * 9 + i * 18, 12, q.id === ON.me ? "#fde047" : "#e5e7eb"); });
       cx.globalAlpha = 1;
     }
-    if (paused && document.getElementById("rconf").style.display !== "flex") banner(["PAUSED"], window.TouchPad && TouchPad.on ? "⏸ or a tap to continue · ☰ menu" : "P or ⏸ to continue · Esc menu");
+    if (paused && document.getElementById("rconf").style.display !== "flex") banner(pausedBy ? ["PAUSED", "by " + pausedBy] : ["PAUSED"], window.TouchPad && TouchPad.on ? "⏸ or a tap to continue · ☰ menu" : "P or ⏸ to continue · Esc menu");
     if (cur.over && !cur.race && !cur.own && !(ON && ON.live && ON.players.length > 1)) banner(["GAME OVER", `${cur.score}${cur.score > 0 && cur.score >= bestOf(cur.id) ? "  NEW BEST!" : ""}`], "Space play again · Esc menu");
   }
   focusEl.style.display = document.hasFocus() ? "none" : "flex";
@@ -979,8 +982,14 @@ document.getElementById("gMus").onclick = (e) => { e.stopPropagation(); audioSta
 paintMusic();
 document.getElementById("pauseBtn").onclick = () => { if (cur && cur.id !== "sumo") paused = !paused; screenEl.focus(); };
 document.getElementById("menuBtn").onclick = () => { menu(); screenEl.focus(); };
-const canPause = () => !!cur && cur.id !== "sumo" && !(ON && ON.live);
-function togglePause() { if (canPause()) paused = !paused; screenEl.focus(); }
+const canPause = () => !!cur;
+function togglePause() {
+  if (!canPause()) return;
+  paused = !paused; pausedBy = paused ? "" : null;
+  if (ON && ON.live) osend({ t: "pz", on: paused, name: (ON.players.find((q) => q.id === ON.me) || {}).name || "" });
+  screenEl.focus();
+}
+let pausedBy = null;
 function askReset() {
   if (!cur) return;
   if (ON && ON.live) { voteReset(); return; }
@@ -1016,9 +1025,9 @@ document.getElementById("gPause").onclick = (e) => { e.stopPropagation(); audioS
 document.getElementById("gReset").onclick = (e) => { e.stopPropagation(); audioStart(); askReset(); };
 setInterval(() => {
   const g = document.getElementById("gctl"), touch = window.TouchPad && TouchPad.on;
-  g.style.display = cur && !touch ? "flex" : "none";
+  g.style.display = cur && !touch ? "inline-flex" : "none";
   document.getElementById("gPause").style.display = canPause() ? "" : "none";
-  document.getElementById("gPause").textContent = paused ? "▶" : "⏸";
+  document.getElementById("gPause").textContent = paused ? "▶ Resume" : "⏸ Pause";
 }, 250);
 
 const HOSTED = new Set(["goal", "tennis", "fight", "kop"]);
@@ -1121,6 +1130,7 @@ function onMsg(m, from) {
     if (m.t === "late") { const q = ON.players.find((x) => x.id === from); if (q && ON.live) lateJoin(q); return; }
     if (m.t === "again" || m.t === "ready") { readyFrom(from); return; }
     if (m.t === "rv") { resetFrom(from); return; }
+    if (m.t === "pz") { ON.net.send("*", Object.assign({}, m, { from })); paused = !!m.on; pausedBy = m.on ? m.name || "a player" : null; return; }
     if (m.t === "watch") { if (ON.live) ON.watchT = Date.now(); if (!m.d) ON.net.send("*", Object.assign({}, m, { from })); return; }
     if (m.t === "st" || m.t === "fr" || m.t === "atk") { if (!m.d) ON.net.send("*", Object.assign({}, m, { from })); }
     else return;
@@ -1132,6 +1142,7 @@ function onMsg(m, from) {
   else if (m.t === "addcar") { if (ON.live && cur && cur.addRemote && m.id !== ON.me) cur.addRemote({ id: m.id, name: m.name }); }
   else if (m.t === "wait") { $o("oMsg").textContent = "A round is being played: you are in for the next one (the host presses START)."; }
   else if (m.t === "rq") { ON.rq = m; ON.rqAt = m.ids.length ? ON.rqAt || Date.now() : 0; drawReady(); if (m.ids.length && !ON.live) Net.note(readyText(), 2500); }
+  else if (m.t === "pz") { if (ON.live) { paused = !!m.on; pausedBy = m.on ? m.name || "a player" : null; } }
   else if (m.t === "rvs") { if (ON.live) Net.note(rvText(m.ids), 4000); }
   else if (m.t === "go") { if (m.players.some((q) => q.id === ON.me)) startOnline(m); else { if (cur) { engineSet(false); cur = null; } ON.live = false; ON.rq = null; ON.rqAt = 0; drawReady(); Net.note("This round started without you: watch it, then tap to join the next one", 5000); } }
   else if (m.t === "room") { if (ON.live) { ON.live = false; Math.random = realRandom; engineSet(false); cur = null; paused = false; showOnline("oRoom"); } }

@@ -283,6 +283,11 @@ function Tennis(online = null) {
     if (g.pause > 0 && !g.over) { txt(g.msg, 241, 191, 15, "rgba(0,0,0,.6)", "center"); txt(g.msg, 240, 190, 15, "#fde047", "center"); }
     if (g.over && g.result) banner(["GAME, SET, MATCH", ...g.result], online ? (window.againLine ? againLine() : "Tap to play again") : "Space play again · Esc menu");
   };
+  g.h2h = () => {
+    if (!g.over || g.s[0] === g.s[1]) return null; const wt = g.s[0] > g.s[1] ? 0 : 1;
+    const w = P.filter((p) => p.human && p.team === wt).map((p) => p.human.id), l = P.filter((p) => p.human && p.team !== wt).map((p) => p.human.id);
+    return w.length && l.length ? { w, l } : null;
+  };
   g.dbg = () => ({ ball: [ball.x, ball.y, ball.z].map((v) => Math.round(v)), held: ball.held, last: ball.last, rally, s: g.s.slice(), p: P.map((p) => [Math.round(p.x), Math.round(p.y), p.item]) });
   return g;
 }
