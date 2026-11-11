@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sports Arena · MIB Terminal</title>
-<meta name="description" content="Live football scores, league tables and transfer rumours, Formula 1 and NBA, with official highlight videos. Free, no account.">
+<meta name="description" content="Live football scores, league tables and transfer rumours, Formula 1, tennis, NBA and NFL, with official highlight videos. Free, no account.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="canonical" href="https://mibterminal.com/sports/">
@@ -22,7 +22,12 @@
                                      for the Champions League, FORMULA 1, NBA), through the MIB server; played in
                                      YouTube's privacy-enhanced player (youtube-nocookie.com) only when clicked
      Full live games are not free to stream legally, so the page shows official highlights only, never pirate streams.
-     Only headlines and links are shown; every story opens on its publisher's site. -->
+     Only headlines and links are shown; every story opens on its publisher's site.
+     12 Nov 2026 (owner: "add Tennis and any other most popular sport; colours, e.g. F1 drivers' numbers in their team
+     colour, some logos, visuals for football and NBA too"): Tennis (ATP/WTA matches, ranking: ESPN; highlights: Tennis
+     TV and WTA channels) and the NFL (ESPN; NFL channel). Team colours: ESPN (football, NBA, NFL; the NBA/NFL team lists
+     come through the MIB server), F1C below for F1. Each tab has its own accent colour (ACCENT). -->
+
 <style>
   :root {
     --bg: #060d1a; --panel: #0e1c33; --raised: #142642; --line: rgba(88,116,152,.28);
@@ -98,20 +103,57 @@
   #player .bar { display: flex; justify-content: space-between; gap: 10px; align-items: center; color: #e8ecf3; margin-top: 8px; font-size: 14px; }
   #player .bar a { color: var(--gold); } #player button { background: none; border: 1px solid rgba(255,255,255,.3); color: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; font: 600 14px var(--sans); }
   .src { color: var(--faint); font-size: 12px; margin-top: 30px; }
+  /* 12 Nov 2026 (owner: "colours, e.g. next to F1 drivers their number in their team colour, some logos, some visuals
+     in general for football and NBA too: a subtle extra touch") */
+  .tabs button { transition: background .15s, color .15s, border-color .15s; }
+  .tabs button:not(.on):hover, .chips button:not(.on):hover { color: var(--ink); border-color: var(--sport, var(--gold)); }
+  .chips button { display: inline-flex; align-items: center; gap: 7px; }
+  .chips img { width: 18px; height: 18px; object-fit: contain; }
+  .card { position: relative; overflow: hidden; }
+  .card::before { content: ""; position: absolute; left: 0; top: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--sport, var(--gold)), transparent 70%); opacity: .75; }
+  .card h2 > span::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 2px; background: var(--sport, var(--gold)); margin-right: 8px; vertical-align: 1px; }
+  .match.live { background: linear-gradient(90deg, rgba(232,90,94,.09), transparent 65%); margin: 0 -16px; padding: 8px 16px; }
+  .teams .tc { width: 3px; height: 18px; border-radius: 2px; flex: none; }
+  .teams img { width: 22px; height: 22px; }
+  .teams em { font: 500 11px var(--mono); font-style: normal; color: var(--faint); flex: none; }
+  .form { display: inline-flex; gap: 3px; margin-left: 4px; flex: none; }
+  .form i { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); opacity: .8; }
+  .form i.W { background: var(--up); } .form i.L { background: var(--live); }
+  .st small { display: block; font-size: 10px; color: var(--faint); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sets { display: grid; gap: 0 9px; grid-auto-flow: column; justify-content: end; font: 600 15px/1.55 var(--mono); color: var(--muted); }
+  .sets b { color: var(--ink); } .sets sup { font-size: 9px; margin-left: 1px; color: var(--faint); }
+  .tbl td.t div.z { box-shadow: inset 3px 0 0 var(--z); padding-left: 8px; }
+  .tbl tr:hover td { background: rgba(127,140,160,.07); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--faint); font-size: 12px; margin-top: 10px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .num { display: inline-grid; place-items: center; min-width: 28px; height: 21px; padding: 0 5px; border-radius: 6px; font: 800 12px var(--mono); flex: none; }
+  .tcol { display: inline-block; width: 4px; height: 16px; border-radius: 2px; vertical-align: -3px; margin-right: 8px; }
+  .flag { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; box-shadow: 0 0 0 1px var(--line); flex: none; }
+  .tbl td.n.m1 { color: #e9b949; font-weight: 800; } .tbl td.n.m2 { color: #b9c2cf; font-weight: 800; } .tbl td.n.m3 { color: #cd8a4f; font-weight: 800; }
+  :root[data-theme="light"] .tbl td.n.m1 { color: #b7810f; } :root[data-theme="light"] .tbl td.n.m2 { color: #7c8796; } :root[data-theme="light"] .tbl td.n.m3 { color: #a8632a; }
+  .pbar { height: 3px; border-radius: 2px; background: var(--raised); margin-top: 3px; width: 100%; }
+  .pbar i { display: block; height: 100%; border-radius: 2px; background: var(--sport, var(--gold)); }
+  .tbl td.pp { min-width: 74px; }
+  .tr { font: 700 10px var(--mono); margin-left: 4px; } .tr.up { color: var(--up); } .tr.dn { color: var(--live); }
+  .tourn { font: 700 13px var(--sans); color: var(--ink); margin: 14px 0 2px; display: flex; gap: 8px; align-items: baseline; }
+  .tourn:first-child { margin-top: 0; } .tourn small { color: var(--faint); font: 500 11px var(--mono); }
+  .vid { transition: transform .15s, border-color .15s; } .vid:hover { transform: translateY(-2px); border-color: var(--sport, var(--gold)); }
 </style>
 </head>
 <body>
 <script src="/header.js" data-active="sports"></script>
 <main>
   <h1>Sports <span>Arena</span></h1>
-  <p class="lede">Live scores, tables, transfer rumours and official highlights: football, Formula 1 and the NBA.</p>
+  <p class="lede">Live scores, tables, transfer rumours and official highlights: football, Formula 1, tennis, the NBA and the NFL.</p>
   <div class="tabs" role="tablist" aria-label="Sport">
     <button data-sport="football" role="tab">⚽ Football</button>
     <button data-sport="f1" role="tab">🏎 Formula 1</button>
+    <button data-sport="tennis" role="tab">🎾 Tennis</button>
     <button data-sport="nba" role="tab">🏀 NBA</button>
+    <button data-sport="nfl" role="tab">🏈 NFL</button>
   </div>
   <div id="view"></div>
-  <p class="src">Scores and tables: ESPN · F1 data: Jolpica · Rumours and news: BBC Sport, Sky Sports, Foot Mercato, ESPN (every story opens on its publisher's site) · Videos: the leagues' official YouTube channels. Full live games are not free to stream legally, so only official highlights are shown.</p>
+  <p class="src">Scores, tables, rankings, logos and flags: ESPN · F1 data: Jolpica (team colours approximate) · Rumours and news: BBC Sport, Sky Sports, Foot Mercato, ESPN (every story opens on its publisher's site) · Videos: the leagues' official YouTube channels. Full live games are not free to stream legally, so only official highlights are shown.</p>
 </main>
 <div id="player" role="dialog" aria-modal="true" aria-label="Video"><div class="box"><div id="frame"></div><div class="bar"><span id="ptitle"></span><span><a id="plink" href="#" target="_blank" rel="noopener">Watch on YouTube</a> &nbsp;<button id="pclose">Close ✕</button></span></div></div></div>
 <script>
@@ -119,14 +161,43 @@
   "use strict";
   var ESPN = "https://site.api.espn.com/apis", F1 = "https://api.jolpi.ca/ergast/f1/current";
   var LEAGUES = [
-    { k: "eng.1", n: "Premier League", yt: ["yt-pl"] },
-    { k: "esp.1", n: "LaLiga", yt: ["yt-uefa"] },
-    { k: "ita.1", n: "Serie A", yt: ["yt-uefa"] },
-    { k: "ger.1", n: "Bundesliga", yt: ["yt-uefa"] },
-    { k: "fra.1", n: "Ligue 1", yt: ["yt-l1"] },
-    { k: "uefa.champions", n: "Champions League", yt: ["yt-ucl", "yt-uefa"] },
-    { k: "uefa.europa", n: "Europa League", yt: ["yt-uefa"] }
+    { k: "eng.1", n: "Premier League", id: 23, yt: ["yt-pl"] },     // id = ESPN's league logo number
+    { k: "esp.1", n: "LaLiga", id: 15, yt: ["yt-uefa"] },
+    { k: "ita.1", n: "Serie A", id: 12, yt: ["yt-uefa"] },
+    { k: "ger.1", n: "Bundesliga", id: 10, yt: ["yt-uefa"] },
+    { k: "fra.1", n: "Ligue 1", id: 9, yt: ["yt-l1"] },
+    { k: "uefa.champions", n: "Champions League", id: 2, yt: ["yt-ucl", "yt-uefa"] },
+    { k: "uefa.europa", n: "Europa League", id: 2310, yt: ["yt-uefa"] }
   ];
+  // each sport's accent (the thin line on top of every card, the dots, the bars)
+  var ACCENT = { football: "#3cc48d", f1: "#e8302d", tennis: "#c8d94a", nba: "#f08a2c", nfl: "#4f8be8" };
+  // F1 team colours, approximated from the team liveries (edit here if a team changes colour); text on it is
+  // picked black or white automatically
+  var F1C = { mercedes: "#27F4D2", red_bull: "#3671C6", ferrari: "#E8002D", mclaren: "#FF8000", aston_martin: "#229971",
+    alpine: "#FF87BC", williams: "#64C4FF", rb: "#6692FF", audi: "#C0C0C8", sauber: "#52E252", haas: "#B6BABD", cadillac: "#D4AF37" };
+  // nationality (as Jolpica writes it) -> ESPN flag code
+  var NAT = { Italian: "ita", Dutch: "ned", British: "gbr", Monegasque: "mon", Australian: "aus", French: "fra", "New Zealander": "nzl",
+    Argentine: "arg", Argentinian: "arg", Brazilian: "bra", German: "ger", Spanish: "esp", Thai: "tha", Japanese: "jpn", Canadian: "can",
+    Finnish: "fin", Mexican: "mex", American: "usa", Danish: "den", Chinese: "chn", Swiss: "sui", Belgian: "bel", Austrian: "aut",
+    Polish: "pol", Estonian: "est", Swedish: "swe", Russian: "rus", Indian: "ind", Israeli: "isr", Colombian: "col" };
+  var light = function () { return document.documentElement.getAttribute("data-theme") === "light"; };
+  var leagueLogo = function (l) { return "https://a.espncdn.com/i/leaguelogos/soccer/" + (light() ? "500" : "500-dark") + "/" + l.id + ".png"; };
+  var hex = function (c) { c = String(c || "").replace(/^#+/, ""); return /^[0-9a-f]{6}$/i.test(c) ? "#" + c : ""; };
+  var inkOn = function (c) { c = hex(c); if (!c) return "#fff"; var n = parseInt(c.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255; return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#0b1220" : "#fff"; };
+  var flagImg = function (src, alt) { return src ? '<img class="flag" src="' + esc(safeUrl(src)) + '" alt="' + esc(alt || "") + '" title="' + esc(alt || "") + '" loading="lazy" onerror="this.remove()">' : ""; };
+  var natFlag = function (nat) { return NAT[nat] ? flagImg("https://a.espncdn.com/i/teamlogos/countries/500/" + NAT[nat] + ".png", nat) : ""; };
+  var medal = function (p) { p = +p; return p >= 1 && p <= 3 ? " m" + p : ""; };
+  var pbar = function (v, max, col) { var w = max > 0 ? Math.max(2, Math.round(100 * v / max)) : 0; return '<div class="pbar"><i style="width:' + w + "%" + (col ? ";background:" + col : "") + '"></i></div>'; };
+  // team colours for the standings (the scoreboard has them, the standings do not): one read per sport, kept for the visit
+  var colorCache = {};
+  var teamColors = function (path) {
+    // ESPN does not let browsers read its team lists, so they come through the MIB server (feeds "nba-teams", "nfl-teams")
+    if (!colorCache[path]) colorCache[path] = api().then(function (a) { return fetch(a + "/api/sports/feed?f=" + path.split("/")[1] + "-teams"); })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); }).then(function (x) { return JSON.parse(x); }).then(function (d) {
+      var m = {}; ((((d.sports || [])[0] || {}).leagues || [])[0] || { teams: [] }).teams.forEach(function (t) { m[t.team.id] = hex(t.team.color); }); return m;
+    }).catch(function () { return {}; });
+    return colorCache[path];
+  };
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   var safeUrl = function (u) { return /^https?:\/\//i.test(String(u || "")) ? String(u) : "#"; };
@@ -161,7 +232,7 @@
   };
 
   // ---------------------------------------------------------------- rendering helpers
-  var card = function (id, title, cls, note) { return '<section class="card ' + (cls || "") + '" id="' + id + '"><h2>' + esc(title) + (note ? "<small>" + esc(note) + "</small>" : "") + '</h2><div class="body"><p class="empty">Loading…</p></div></section>'; };
+  var card = function (id, title, cls, note) { return '<section class="card ' + (cls || "") + '" id="' + id + '"><h2><span>' + esc(title) + "</span>" + (note ? "<small>" + esc(note) + "</small>" : "") + '</h2><div class="body"><p class="empty">Loading…</p></div></section>'; };
   var fill = function (id, html) { var e = document.querySelector("#" + id + " .body"); if (e) e.innerHTML = html; };
   var newsList = function (items, n) {
     items = items.filter(function (x) { return x.title; }).slice(0, n || 10);
@@ -183,8 +254,13 @@
     return events.map(function (e) {
       var c = e.competitions[0], s = e.status.type, cs = c.competitors.slice().sort(function (a, b) { return a.homeAway === "home" ? -1 : 1; });
       var st = s.state === "in" ? (e.status.displayClock && e.status.displayClock !== "0:00" ? e.status.displayClock : s.shortDetail) : s.state === "post" ? s.shortDetail : when(e.date).replace(/^(\w+) (\d+) \w+,? /, "$1 ");
-      var row = function (t) { return '<div class="' + (t.winner ? "win" : "") + '">' + (t.team.logo ? '<img src="' + esc(safeUrl(t.team.logo)) + '" alt="" loading="lazy">' : "") + "<span>" + esc(t.team.shortDisplayName || t.team.displayName) + "</span></div>"; };
-      return '<div class="match"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(st) + '</div><div class="teams">' + cs.map(row).join("") + '</div><div class="sc">' + (s.state === "pre" ? "" : cs.map(function (t) { return esc(t.score); }).join("<br>")) + "</div></div>";
+      var row = function (t) {
+        var col = hex(t.team.color), rec = t.records && t.records[0] && t.records[0].summary;
+        var form = t.form && /^[WDL]{1,6}$/.test(t.form) ? '<span class="form" title="Last games: ' + esc(t.form) + '">' + t.form.split("").map(function (x) { return '<i class="' + x + '"></i>'; }).join("") + "</span>" : "";
+        return '<div class="' + (t.winner ? "win" : "") + '">' + (col ? '<i class="tc" style="background:' + col + '"></i>' : "") + (t.team.logo ? '<img src="' + esc(safeUrl(t.team.logo)) + '" alt="" loading="lazy">' : "")
+          + "<span>" + esc(t.team.shortDisplayName || t.team.displayName) + "</span>" + (rec && !form ? "<em>" + esc(rec) + "</em>" : "") + form + "</div>";
+      };
+      return '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(st) + '</div><div class="teams">' + cs.map(row).join("") + '</div><div class="sc">' + (s.state === "pre" ? "" : cs.map(function (t) { return esc(t.score); }).join("<br>")) + "</div></div>";
     }).join("");
   };
   var stat = function (entry, name) { var x = (entry.stats || []).filter(function (s) { return s.name === name; })[0]; return x ? x.displayValue : ""; };
@@ -196,7 +272,7 @@
   // ---------------------------------------------------------------- FOOTBALL
   function football() {
     var lg = LEAGUES.filter(function (l) { return l.k === ls("sports-league"); })[0] || LEAGUES[0];
-    $("#view").innerHTML = '<div class="chips" aria-label="League">' + LEAGUES.map(function (l) { return '<button data-lg="' + l.k + '" class="' + (l === lg ? "on" : "") + '">' + esc(l.n) + "</button>"; }).join("") + '</div><div class="grid">'
+    $("#view").innerHTML = '<div class="chips" aria-label="League">' + LEAGUES.map(function (l) { return '<button data-lg="' + l.k + '" class="' + (l === lg ? "on" : "") + '"><img src="' + leagueLogo(l) + '" alt="" onerror="this.remove()">' + esc(l.n) + "</button>"; }).join("") + '</div><div class="grid">'
       + card("fs", "Scores · " + lg.n, "w7", "times in your time zone") + card("ft", "Table", "w5")
       + card("fm", "Mercato · transfer rumours", "w6") + card("fn", "News · " + lg.n, "w6")
       + card("fv", "Highlights", "") + "</div>";
@@ -211,12 +287,14 @@
     getJSON(ESPN + "/v2/sports/soccer/" + lg.k + "/standings").then(function (d) {
       var groups = (d.children || []).filter(function (c) { return c.standings && c.standings.entries; });
       if (!groups.length) { fill("ft", '<p class="empty">No table for this competition right now.</p>'); return; }
+      var zones = {};   // the qualification / relegation zones ESPN marks (colour + meaning), shown as a strip and a legend
       fill("ft", groups.map(function (g) {
         var rows = g.standings.entries.slice().sort(function (a, b) { return (+stat(a, "rank") || 99) - (+stat(b, "rank") || 99); });
         return (groups.length > 1 ? '<p class="empty" style="margin:8px 0 0">' + esc(g.name) + "</p>" : "") + '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Club</th><th>P</th><th class="hs">W</th><th class="hs">D</th><th class="hs">L</th><th>GD</th><th>Pts</th></tr></thead><tbody>'
-          + rows.map(function (e, i) { var t = e.team, logo = t.logos && t.logos[0] ? t.logos[0].href : "";
-            return '<tr class="' + (i < 4 ? "top" : "") + '"><td class="n">' + esc(stat(e, "rank") || i + 1) + '</td><td class="t"><div>' + (logo ? '<img src="' + esc(safeUrl(logo)) + '" alt="" loading="lazy">' : "") + esc(t.shortDisplayName || t.displayName) + "</div></td><td>" + esc(stat(e, "gamesPlayed")) + '</td><td class="hs">' + esc(stat(e, "wins")) + '</td><td class="hs">' + esc(stat(e, "ties")) + '</td><td class="hs">' + esc(stat(e, "losses")) + "</td><td>" + esc(stat(e, "pointDifferential")) + '</td><td class="p">' + esc(stat(e, "points")) + "</td></tr>"; }).join("") + "</tbody></table>";
-      }).join(""));
+          + rows.map(function (e, i) { var t = e.team, logo = t.logos && t.logos[0] ? t.logos[0].href : "", z = e.note && hex(e.note.color);
+            if (z && e.note.description) zones[e.note.description] = z;
+            return '<tr><td class="n">' + esc(stat(e, "rank") || i + 1) + '</td><td class="t"><div' + (z ? ' class="z" style="--z:' + z + '"' : "") + ">" + (logo ? '<img src="' + esc(safeUrl(logo)) + '" alt="" loading="lazy">' : "") + esc(t.shortDisplayName || t.displayName) + "</div></td><td>" + esc(stat(e, "gamesPlayed")) + '</td><td class="hs">' + esc(stat(e, "wins")) + '</td><td class="hs">' + esc(stat(e, "ties")) + '</td><td class="hs">' + esc(stat(e, "losses")) + "</td><td>" + esc(stat(e, "pointDifferential")) + '</td><td class="p">' + esc(stat(e, "points")) + "</td></tr>"; }).join("") + "</tbody></table>";
+      }).join("") + (Object.keys(zones).length ? '<div class="legend">' + Object.keys(zones).map(function (k) { return '<span><i style="background:' + zones[k] + '"></i>' + esc(k) + "</span>"; }).join("") + "</div>" : ""));
     }).catch(function () { fill("ft", '<p class="empty">The table is unavailable right now.</p>'); });
     Promise.all([rss("transfers-sky", "Sky Sports Transfer Centre"), rss("transfers-fm", "Foot Mercato"),
       rss("football-bbc", "BBC Sport").then(function (l) { return l.filter(function (x) { return /gossip|transfer|signs?|bid|deal|loan|move/i.test(x.title); }); })])
@@ -234,65 +312,145 @@
       + card("rx", "F1 news", "w6") + card("rv", "Highlights", "w6") + "</div>";
     refreshers = [];
     var name = function (d) { return d.givenName + " " + d.familyName; };
+    var tcol = function (c) { return F1C[(c || {}).constructorId] || "#8a96a8"; };
+    // a driver: number in the team colour, the flag, the name
+    var drv = function (d, c) { var col = tcol(c); return '<div><span class="num" style="background:' + col + ";color:" + inkOn(col) + '">' + esc(d.permanentNumber || d.code || "") + "</span>" + natFlag(d.nationality) + "<span>" + esc(name(d)) + "</span></div>"; };
+    var team = function (c) { return c ? '<i class="tcol" style="background:' + tcol(c) + '"></i>' + esc(c.name) : ""; };
     getJSON(F1 + "/next.json").then(function (d) {
       var r = d.MRData.RaceTable.Races[0];
       if (!r) { fill("rn", '<p class="empty">The season is over. See you next year.</p>'); return; }
       var t = new Date(r.date + "T" + (r.time || "12:00:00Z"));
       var tick = function () { var s = Math.max(0, (t - Date.now()) / 1000), dd = Math.floor(s / 86400), hh = Math.floor(s % 86400 / 3600), mm = Math.floor(s % 3600 / 60); var e = $("#cd"); if (e) e.textContent = dd + "d " + hh + "h " + mm + "m"; };
-      fill("rn", '<div class="next"><b>' + esc(r.raceName) + '</b><span class="cd" id="cd"></span></div><p class="empty">' + esc(r.Circuit.circuitName) + ", " + esc(r.Circuit.Location.country) + " · round " + esc(r.round) + " · lights out " + esc(when(t)) + "</p>");
+      fill("rn", '<div class="next"><b>' + esc(r.raceName) + '</b><span class="cd" id="cd"></span></div><p class="empty">' + esc(r.Circuit.circuitName) + ", " + esc(r.Circuit.Location.country) + " · round " + esc(r.round) + " · lights out " + esc(when(t)) + "</p>"
+        // the weekend's sessions, in the visitor's time zone
+        + '<table class="tbl" style="margin-top:6px"><tbody>' + [["FirstPractice", "Practice 1"], ["SecondPractice", "Practice 2"], ["ThirdPractice", "Practice 3"], ["SprintQualifying", "Sprint qualifying"], ["SprintShootout", "Sprint shootout"], ["Sprint", "Sprint"], ["Qualifying", "Qualifying"]]
+          .filter(function (k) { return r[k[0]] && r[k[0]].date; }).map(function (k) { return [k[1], new Date(r[k[0]].date + "T" + (r[k[0]].time || "12:00:00Z"))]; })
+          .concat([["Race", t]]).sort(function (a, b) { return a[1] - b[1]; })
+          .map(function (x) { var past = x[1] < Date.now(); return '<tr style="' + (past ? "opacity:.5" : "") + '"><td class="t">' + (x[0] === "Race" ? "<b>🏁 Race</b>" : esc(x[0])) + "</td><td>" + esc(when(x[1])) + "</td></tr>"; }).join("") + "</tbody></table>");
       tick(); setInterval(tick, 30000);
     }).catch(function () { fill("rn", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(F1 + "/last/results.json").then(function (d) {
       var r = d.MRData.RaceTable.Races[0];
       fill("rl", '<p class="empty" style="margin-top:0">' + esc(r.raceName) + " · " + esc(when(r.date + "T" + (r.time || "12:00:00Z")).replace(/,? \d+:\d+.*/, "")) + '</p><table class="tbl"><thead><tr><th class="n">#</th><th class="t">Driver</th><th class="t hs">Team</th><th>Time</th><th>Pts</th></tr></thead><tbody>'
-        + r.Results.slice(0, 10).map(function (x) { return '<tr class="' + (+x.position <= 3 ? "top" : "") + '"><td class="n">' + esc(x.position) + '</td><td class="t">' + esc(name(x.Driver)) + '</td><td class="t hs">' + esc(x.Constructor.name) + "</td><td>" + esc(x.Time ? x.Time.time : x.status) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
+        + r.Results.slice(0, 10).map(function (x) { return '<tr><td class="n' + medal(x.position) + '">' + esc(x.position) + '</td><td class="t">' + drv(x.Driver, x.Constructor) + '</td><td class="t hs">' + team(x.Constructor) + "</td><td>" + esc(x.Time ? x.Time.time : x.status) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
     }).catch(function () { fill("rl", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(F1 + "/driverStandings.json").then(function (d) {
       var l = d.MRData.StandingsTable.StandingsLists[0];
       fill("rd", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Driver</th><th class="t hs">Team</th><th class="hs">Wins</th><th>Pts</th></tr></thead><tbody>'
-        + l.DriverStandings.map(function (x) { return '<tr class="' + (+x.position <= 3 ? "top" : "") + '"><td class="n">' + esc(x.position) + '</td><td class="t">' + esc(name(x.Driver)) + '</td><td class="t hs">' + esc((x.Constructors[0] || {}).name) + '</td><td class="hs">' + esc(x.wins) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
+        + l.DriverStandings.map(function (x, i, all) { var c = x.Constructors[x.Constructors.length - 1];   // the team they race for now
+          return '<tr><td class="n' + medal(x.position) + '">' + esc(x.position) + '</td><td class="t">' + drv(x.Driver, c) + '</td><td class="t hs">' + team(c) + '</td><td class="hs">' + esc(x.wins) + '</td><td class="p pp">' + esc(x.points) + pbar(+x.points, +all[0].points, tcol(c)) + "</td></tr>"; }).join("") + "</tbody></table>");
     }).catch(function () { fill("rd", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(F1 + "/constructorStandings.json").then(function (d) {
       var l = d.MRData.StandingsTable.StandingsLists[0];
       fill("rc", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Team</th><th class="hs">Wins</th><th>Pts</th></tr></thead><tbody>'
-        + l.ConstructorStandings.map(function (x) { return '<tr class="' + (+x.position <= 3 ? "top" : "") + '"><td class="n">' + esc(x.position) + '</td><td class="t">' + esc(x.Constructor.name) + '</td><td class="hs">' + esc(x.wins) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
+        + l.ConstructorStandings.map(function (x, i, all) { return '<tr><td class="n' + medal(x.position) + '">' + esc(x.position) + '</td><td class="t">' + team(x.Constructor) + '</td><td class="hs">' + esc(x.wins) + '</td><td class="p pp">' + esc(x.points) + pbar(+x.points, +all[0].points, tcol(x.Constructor)) + "</td></tr>"; }).join("") + "</tbody></table>");
     }).catch(function () { fill("rc", '<p class="empty">Unavailable right now.</p>'); });
     rss("f1-bbc", "BBC Sport").then(function (l) { fill("rx", newsList(l, 10)); });
     yt("yt-f1").then(function (l) { fill("rv", vids(l, 6)); });
   }
 
-  // ---------------------------------------------------------------- NBA
-  function nba() {
-    $("#view").innerHTML = '<div class="grid">' + card("ns", "Scores", "w7", "times in your time zone") + card("nn", "NBA news", "w5")
-      + card("ne", "Eastern Conference", "w6") + card("nw", "Western Conference", "w6") + card("nv", "Highlights", "") + "</div>";
+  // ---------------------------------------------------------------- NBA and NFL (same ESPN shapes)
+  // a conference table: team colour strip, logo, the playoff places (top `po`) in green
+  var confTable = function (c, colors, po, cols) {
+    var rows = c.standings.entries.slice().sort(function (a, b) { return (+stat(a, "playoffSeed") || 99) - (+stat(b, "playoffSeed") || 99); });
+    return '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Team</th>' + cols.map(function (k) { return "<th" + (k[2] ? ' class="hs"' : "") + ">" + k[0] + "</th>"; }).join("") + "</tr></thead><tbody>"
+      + rows.map(function (e, i) { var t = e.team, logo = t.logos && t.logos[0] ? t.logos[0].href : "", col = colors[t.id];
+        return '<tr class="' + (i < po ? "top" : "") + '"><td class="n">' + (i + 1) + '</td><td class="t"><div' + (col ? ' class="z" style="--z:' + col + '"' : "") + ">" + (logo ? '<img src="' + esc(safeUrl(logo)) + '" alt="" loading="lazy">' : "") + esc(t.shortDisplayName || t.displayName) + "</div></td>"
+          + cols.map(function (k) { return "<td" + (k[2] ? ' class="hs"' : "") + ">" + esc(stat(e, k[1])) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>";
+  };
+  // o: path, label, ids [scores, news, conference 1, conference 2, videos], conf names, match (which is conference 1),
+  //    po (play-off places), cols (table columns), yt, bbc (news fallback)
+  var usSport = function (o) {
+    $("#view").innerHTML = '<div class="grid">' + card(o.ids[0], "Scores", "w7", "times in your time zone") + card(o.ids[1], o.label + " news", "w5")
+      + card(o.ids[2], o.conf[0], "w6") + card(o.ids[3], o.conf[1], "w6") + card(o.ids[4], "Highlights", "") + "</div>";
     var scores = function () {
-      getJSON(ESPN + "/site/v2/sports/basketball/nba/scoreboard").then(function (d) {
-        var ev = d.events || []; fill("ns", scoreRows(ev));
+      getJSON(ESPN + "/site/v2/sports/" + o.path + "/scoreboard").then(function (d) {
+        var ev = d.events || []; fill(o.ids[0], scoreRows(ev));
+        var wk = d.week && d.week.number, h = document.querySelector("#" + o.ids[0] + " h2 > span");
+        if (wk && h) h.textContent = "Scores · week " + wk;
         if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
-      }).catch(function () { fill("ns", '<p class="empty">Scores are unavailable right now.</p>'); });
+      }).catch(function () { fill(o.ids[0], '<p class="empty">Scores are unavailable right now.</p>'); });
     };
     refreshers = [scores]; scores();
-    getJSON(ESPN + "/v2/sports/basketball/nba/standings").then(function (d) {
-      (d.children || []).forEach(function (c) {
-        var rows = c.standings.entries.slice().sort(function (a, b) { return (+stat(a, "playoffSeed") || 99) - (+stat(b, "playoffSeed") || 99); });
-        fill(/east/i.test(c.name) ? "ne" : "nw", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Team</th><th>W</th><th>L</th><th class="hs">PCT</th><th>GB</th><th class="hs">Strk</th></tr></thead><tbody>'
-          + rows.map(function (e, i) { var t = e.team, logo = t.logos && t.logos[0] ? t.logos[0].href : "";
-            return '<tr class="' + (i < 6 ? "top" : "") + '"><td class="n">' + (i + 1) + '</td><td class="t"><div>' + (logo ? '<img src="' + esc(safeUrl(logo)) + '" alt="" loading="lazy">' : "") + esc(t.shortDisplayName || t.displayName) + "</div></td><td>" + esc(stat(e, "wins")) + "</td><td>" + esc(stat(e, "losses")) + '</td><td class="hs">' + esc(stat(e, "winPercent")) + "</td><td>" + esc(stat(e, "gamesBehind")) + '</td><td class="hs">' + esc(stat(e, "streak")) + "</td></tr>"; }).join("") + "</tbody></table>");
-      });
-    }).catch(function () { fill("ne", '<p class="empty">Unavailable right now.</p>'); fill("nw", ""); });
-    getJSON(ESPN + "/site/v2/sports/basketball/nba/news?limit=12").then(function (d) {
-      fill("nn", newsList((d.articles || []).map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }), 10));
-    }).catch(function () { rss("nba-bbc", "BBC Sport").then(function (l) { fill("nn", newsList(l, 10)); }); });
-    yt("yt-nba").then(function (l) { fill("nv", vids(l, 8)); });
+    Promise.all([getJSON(ESPN + "/v2/sports/" + o.path + "/standings"), teamColors(o.path)]).then(function (r) {
+      (r[0].children || []).forEach(function (c) { fill(o.match.test(c.name) ? o.ids[2] : o.ids[3], confTable(c, r[1], o.po, o.cols)); });
+    }).catch(function () { fill(o.ids[2], '<p class="empty">Unavailable right now.</p>'); fill(o.ids[3], ""); });
+    getJSON(ESPN + "/site/v2/sports/" + o.path + "/news?limit=12").then(function (d) {
+      fill(o.ids[1], newsList((d.articles || []).map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }), 10));
+    }).catch(function () { rss(o.bbc, "BBC Sport").then(function (l) { fill(o.ids[1], newsList(l, 10)); }); });
+    yt(o.yt).then(function (l) { fill(o.ids[4], vids(l, 8)); });
+  };
+  function nba() {
+    usSport({ path: "basketball/nba", label: "NBA", ids: ["ns", "nn", "ne", "nw", "nv"], conf: ["Eastern Conference", "Western Conference"], match: /east/i, po: 6,
+      cols: [["W", "wins"], ["L", "losses"], ["PCT", "winPercent", 1], ["GB", "gamesBehind"], ["Strk", "streak", 1]], yt: "yt-nba", bbc: "nba-bbc" });
+  }
+  // 12 Nov 2026: the NFL (the top 7 of each conference make the play-offs)
+  function nfl() {
+    usSport({ path: "football/nfl", label: "NFL", ids: ["ls", "ln", "la", "lc", "lv"], conf: ["AFC", "NFC"], match: /american/i, po: 7,
+      cols: [["W", "wins"], ["L", "losses"], ["T", "ties", 1], ["PCT", "winPercent", 1], ["Diff", "differential", 1], ["Strk", "streak", 1]], yt: "yt-nfl", bbc: "nfl-bbc" });
+  }
+
+  // ---------------------------------------------------------------- TENNIS (12 Nov 2026)
+  // ATP or WTA: this week's tournaments (singles: live first, then the next 36 hours' order of play, then the last
+  // 30 hours' results), the world ranking, news, highlights (Tennis TV = the ATP Tour's own channel; the WTA's own)
+  function tennis() {
+    var tour = ls("sports-tour") === "wta" ? "wta" : "atp";
+    $("#view").innerHTML = '<div class="chips" aria-label="Tour">' + [["atp", "ATP · men"], ["wta", "WTA · women"]].map(function (t) { return '<button data-tour="' + t[0] + '" class="' + (t[0] === tour ? "on" : "") + '">' + t[1] + "</button>"; }).join("")
+      + '</div><div class="grid">' + card("tm", "Matches", "w7", "times in your time zone") + card("tr", "World ranking", "w5")
+      + card("tn", "Tennis news", "w6") + card("tv", "Highlights", "w6") + "</div>";
+    Array.prototype.forEach.call(document.querySelectorAll("[data-tour]"), function (b) { b.onclick = function () { ls("sports-tour", b.dataset.tour); tennis(); }; });
+    var player = function (p) {
+      var a = p.athlete || {}, f = a.flag || {}, seed = p.curatedRank && p.curatedRank.current;
+      return '<div class="' + (p.winner ? "win" : "") + '">' + flagImg(f.href, f.alt) + "<span>" + esc(a.displayName || "TBD") + "</span>" + (seed && seed < 99 ? "<em>(" + esc(seed) + ")</em>" : "") + "</div>";
+    };
+    var rnd = function (r) { r = String(r || ""); var m = r.match(/^Qualifying (\d)/i); return m ? "Qual. " + m[1] : /^quarter/i.test(r) ? "QF" : /^semi/i.test(r) ? "SF" : /^final$/i.test(r) ? "Final" : r.replace(/^Round (of )?/i, "R").replace(/Round Robin/i, "Groups"); };
+    var sets = function (p) { return (p.linescores || []).map(function (s) { var tag = s.winner ? "b" : "span"; return "<" + tag + ">" + esc(s.value == null ? "" : Math.round(s.value)) + (s.tiebreak != null ? "<sup>" + esc(s.tiebreak) + "</sup>" : "") + "</" + tag + ">"; }).join(""); };
+    var matches = function () {
+      var now = Date.now();
+      getJSON(ESPN + "/site/v2/sports/tennis/" + tour + "/scoreboard").then(function (d) {
+        var live = false, order = { "in": 0, pre: 1, post: 2 };
+        var html = (d.events || []).map(function (ev) {
+          var list = [];
+          (ev.groupings || []).forEach(function (g) { if (/singles/i.test((g.grouping && g.grouping.displayName) || "")) list = list.concat(g.competitions || []); });
+          list = list.filter(function (c) { var s = c.status.type.state, t = new Date(c.date).getTime();
+            return s === "in" || (s === "pre" && t - now < 36 * 3600e3) || (s === "post" && now - t < 30 * 3600e3); });
+          if (!list.length) return "";
+          list.sort(function (a, b) { var x = order[a.status.type.state], y = order[b.status.type.state]; return x !== y ? x - y : (x === 2 ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date)); });
+          return '<div class="tourn">' + esc(ev.name) + (ev.venue && ev.venue.displayName ? "<small>" + esc(ev.venue.displayName) + "</small>" : "") + "</div>" + list.slice(0, 12).map(function (c) {
+            var s = c.status.type, ps = (c.competitors || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+            if (s.state === "in") live = true;
+            var st = s.state === "in" ? "Live" : s.state === "post" ? (/retire|walkover/i.test(s.detail || "") ? s.shortDetail : "Final") : when(c.date).replace(/^(\w+) (\d+) \w+,? /, "$1 ");
+            return '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(st) + "<small>" + esc(rnd((c.round || {}).displayName)) + '</small></div><div class="teams">' + ps.map(player).join("")
+              + '</div><div class="sc">' + (s.state === "pre" ? "" : ps.map(function (p) { return '<div class="sets">' + sets(p) + "</div>"; }).join("")) + "</div></div>";
+          }).join("");
+        }).join("");
+        fill("tm", html || '<p class="empty">No matches today or tomorrow on the ' + tour.toUpperCase() + " tour.</p>");
+        if (live) schedule();
+      }).catch(function () { fill("tm", '<p class="empty">Matches are unavailable right now.</p>'); });
+    };
+    refreshers = [matches]; matches();
+    getJSON(ESPN + "/site/v2/sports/tennis/" + tour + "/rankings").then(function (d) {
+      var rk = (((d.rankings || [])[0] || {}).ranks || []).slice(0, 30);
+      if (!rk.length) throw new Error("none");
+      fill("tr", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Player</th><th>Pts</th></tr></thead><tbody>'
+        + rk.map(function (x) { var a = x.athlete || {}, mv = (+x.previous || 0) - (+x.current || 0);
+          var tr = x.previous && mv ? '<span class="tr ' + (mv > 0 ? "up" : "dn") + '" title="' + (mv > 0 ? "up " : "down ") + Math.abs(mv) + ' since last week">' + (mv > 0 ? "▲" : "▼") + Math.abs(mv) + "</span>" : "";
+          return '<tr><td class="n' + medal(x.current) + '">' + esc(x.current) + '</td><td class="t"><div>' + flagImg(a.flag, a.flagAltText) + "<span>" + esc(a.displayName) + "</span>" + tr + '</div></td><td class="p pp">' + esc(Math.round(x.points || 0).toLocaleString()) + pbar(+x.points, +rk[0].points) + "</td></tr>"; }).join("") + "</tbody></table>");
+    }).catch(function () { fill("tr", '<p class="empty">The ranking is unavailable right now.</p>'); });
+    getJSON(ESPN + "/site/v2/sports/tennis/" + tour + "/news?limit=12").then(function (d) {
+      fill("tn", newsList((d.articles || []).map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }), 10));
+    }).catch(function () { rss("tennis-bbc", "BBC Sport").then(function (l) { fill("tn", newsList(l, 10)); }); });
+    yt(tour === "wta" ? "yt-wta" : "yt-atp").then(function (l) { fill("tv", vids(l, 6)); });
   }
 
   // ---------------------------------------------------------------- tabs, player
-  var SPORTS = { football: football, f1: f1, nba: nba };
+  var SPORTS = { football: football, f1: f1, tennis: tennis, nba: nba, nfl: nfl };
   function show(s) {
     if (!SPORTS[s]) s = "football";
     ls("sports-tab", s); clearTimeout(timer);
     Array.prototype.forEach.call(document.querySelectorAll("[data-sport]"), function (b) { b.classList.toggle("on", b.dataset.sport === s); b.setAttribute("aria-selected", b.dataset.sport === s); });
     if (location.hash !== "#" + s) history.replaceState(null, "", "#" + s);
+    document.documentElement.style.setProperty("--sport", ACCENT[s] || "");
     SPORTS[s]();
   }
   Array.prototype.forEach.call(document.querySelectorAll("[data-sport]"), function (b) { b.onclick = function () { show(b.dataset.sport); }; });

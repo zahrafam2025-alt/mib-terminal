@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-11T05:02:03Z",
     "date": "2026-11-11",
-    "built_at": "2026-11-11 16:37 UTC",
+    "built_at": "2026-11-11 23:36 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -88,184 +88,184 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
-      "title": "Democrats could snarl Trump administration stakes in companies; Watch U.S. Steel CEO speak",
+      "title": "Scott Colom wins Mississippi Senate election over incumbent Republican Hyde-Smith",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/11/trump-company-equity-takes.html",
-      "at": "2026-11-11T16:36:37+00:00"
+      "url": "https://www.cnbc.com/2026/11/11/democrat-scott-colom-projected-to-win-mississippi-senate-election-over-incumbent-hyde-smith.html",
+      "at": "2026-11-11T23:31:37+00:00"
     },
     {
-      "title": "JetBlue unveils new first class seats to bring back profits",
+      "title": "Dow Jones Futures: Techs Tumble Late As Nvidia May Oust CEO Huang; AI Stocks Slide, But Not AMD",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/672e6ef4-2ba3-319b-b948-a356a7f1fcbe/dow-jones-futures%3A-techs.html?.tsrc=rss",
+      "at": "2026-11-11T23:28:21+00:00"
+    },
+    {
+      "title": "Nvidia prepares to oust Jensen Huang, WSJ reports — stock sinks",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/11/nvidia-jensen-huang-affair-employee.html",
+      "at": "2026-11-11T23:28:11+00:00"
+    },
+    {
+      "title": "Nasdaq Sell-Off: 2 Stocks to Buy on the Dip and Hold for 5 Years",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/investing/2026/11/11/nasdaq-sell-off-2-stocks-to-buy-on-the-dip-and-hold-for-5-years/?.tsrc=rss",
+      "at": "2026-11-11T23:26:02+00:00"
+    },
+    {
+      "title": "United Airlines moves to block AI agents from its platform over security concerns",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/11/united-airlines-ai-agents.html",
+      "at": "2026-11-11T23:16:15+00:00"
+    },
+    {
+      "title": "Which Long-Term Bond ETF Is the Better Buy: State Street’s SPLB or iShares’ TLT?",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/etfs/2026/11/11/which-long-term-bond-etf-is-the-better-buy-state-street-s-splb-or-ishares-tlt/?.tsrc=rss",
+      "at": "2026-11-11T23:15:01+00:00"
+    },
+    {
+      "title": "Stock Market Today, Nov. 11: Intel Climbs on Broader Chip Rally as AI Infrastructure Demand Lifts Semiconductor Stocks",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/11/stock-market-today-nov-11-intel-climbs-on-broader-chip-rally-as-ai-infrastructure-demand-lifts-semiconductor-stocks/?.tsrc=rss",
+      "at": "2026-11-11T23:04:34+00:00"
+    },
+    {
+      "title": "Analysis: Is Nvidia too big to fail? Its AI financing web raises the stakes",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/11/nvidia-jensen-huang-ai-financial-system-risk.html",
+      "at": "2026-11-11T22:59:33+00:00"
+    },
+    {
+      "title": "Feds arrest top official of healthcare company, alleging illegal drug importation",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/11/canarx-official-arrested-drug-importation.html",
+      "at": "2026-11-11T22:58:11+00:00"
+    },
+    {
+      "title": "Stock Market Today, Nov. 11: Advanced Micro Devices Jumps -- and Not Only Because of CoreWeave's Results",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/11/stock-market-today-nov-11-advanced-micro-devices-jumps-and-not-only-because-of-coreweave-s-results/?.tsrc=rss",
+      "at": "2026-11-11T22:52:34+00:00"
+    },
+    {
+      "title": "Jensen Huang affair in D.C.: Resignation calls and moves to tighten Nvidia China exports",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/11/nvidia-jensen-huang-congress-resign-ai-chips.html",
+      "at": "2026-11-11T22:46:29+00:00"
+    },
+    {
+      "title": "Jensen Huang’s Shattered Credibility",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/80125fba-5845-34fe-9803-74227d221b81/jensen-huang%E2%80%99s-shattered.html?.tsrc=rss",
+      "at": "2026-11-11T22:46:00+00:00"
+    },
+    {
+      "title": "Stock Market Today, Nov. 11: Stock Market Today, Nov. 11: Nasdaq Surges as CoreWeave's 25% Rally Reignites the AI Trade",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/11/stock-market-today-nov-11-stock-market-today-nov-11-nasdaq-surges-as-coreweave-s-25-rally-reignites-the-ai-trade/?.tsrc=rss",
+      "at": "2026-11-11T22:45:02+00:00"
+    },
+    {
+      "title": "Prediction: What Will 1 Bitcoin Be Worth in 2027?",
+      "src": "Yahoo Finance",
+      "url": "https://247wallst.com/investing/cryptocurrency/2026/11/11/prediction-what-will-1-bitcoin-be-worth-in-2027/?.tsrc=rss",
+      "at": "2026-11-11T22:44:27+00:00"
+    },
+    {
+      "title": "Why Gevo Stock Rocketed Higher Today",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/investing/2026/11/11/why-gevo-stock-rocketed-higher-today/?.tsrc=rss",
+      "at": "2026-11-11T22:43:40+00:00"
+    },
+    {
+      "title": "Which Gold ETF Is the Better Buy: iShares’ Gold Trust IAU or Sprott’s Gold Miners SGDM?",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/etfs/2026/11/11/which-gold-etf-is-the-better-buy-ishares-gold-trust-iau-or-sprott-s-gold-miners-sgdm/?.tsrc=rss",
+      "at": "2026-11-11T22:40:44+00:00"
+    },
+    {
+      "title": "Canada’s ambassador warns Trump tariffs are driving up costs, threatening U.S. investment",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/11/canada-ambassador-trump-tariffs-investments.html",
+      "at": "2026-11-11T22:30:57+00:00"
+    },
+    {
+      "title": "BC-Select Stock Indices",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/world-indices/articles/bc-select-stock-indices-223013753.html?.tsrc=rss",
+      "at": "2026-11-11T22:30:13+00:00"
+    },
+    {
+      "title": "Stock Market Today, Nov. 11: IREN Rises as AI Cloud Peers Rally on CoreWeave Results",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/11/stock-market-today-nov-11-iren-rises-as-ai-cloud-peers-rally-on-coreweave-results/?.tsrc=rss",
+      "at": "2026-11-11T22:25:01+00:00"
+    },
+    {
+      "title": "Stock Market Today, Nov. 11: SpaceX Shares Slip Amid Upcoming Starship Test Flight Jitters",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/11/stock-market-today-nov-11-spacex-shares-slip-amid-upcoming-starship-test-flight-jitters/?.tsrc=rss",
+      "at": "2026-11-11T22:23:03+00:00"
+    },
+    {
+      "title": "American Airlines brings fresh food back to NY-Chicago first class for first time since 2019",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/11/american-airlines-first-class-chicago-new-york.html",
+      "at": "2026-11-11T22:20:58+00:00"
+    },
+    {
+      "title": "Crypto Market Today, Nov. 11: 2. Bitcoin Climbs Back Above $74,000 as Wall Street's Crypto Outlook Begins to Shift",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/11/crypto-market-today-nov-11-2-bitcoin-climbs-back-above-usd74-000-as-wall-street-s-crypto-outlook-begins-to-shift/?.tsrc=rss",
+      "at": "2026-11-11T22:20:03+00:00"
+    },
+    {
+      "title": "Samsara Inc. (IOT) Outpaces Stock Market Gains: What You Should Know",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/samsara-inc-iot-outpaces-stock-221501573.html?.tsrc=rss",
+      "at": "2026-11-11T22:15:01+00:00"
+    },
+    {
+      "title": "ChargePoint Holdings, Inc. (CHPT) Beats Stock Market Upswing: What Investors Need to Know",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/chargepoint-holdings-inc-chpt-beats-221501890.html?.tsrc=rss",
+      "at": "2026-11-11T22:15:01+00:00"
+    },
+    {
+      "title": "BellRing Brands (BRBR) Stock Dips While Market Gains: Key Facts",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/bellring-brands-brbr-stock-dips-221501798.html?.tsrc=rss",
+      "at": "2026-11-11T22:15:01+00:00"
+    },
+    {
+      "title": "Stock Market Today, Nov. 11: CoreWeave Surges 25% on Beat-and-Raise Quarter",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/11/stock-market-today-nov-11-coreweave-surges-25-on-beat-and-raise-quarter/?.tsrc=rss",
+      "at": "2026-11-11T22:14:11+00:00"
+    },
+    {
+      "title": "Drug Makers or Biotech Bets: Which ETF Is the Better Buy, State Street’s XPH or First Trust’s FBT?",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/etfs/2026/11/11/drug-makers-or-biotech-bets-which-etf-is-the-better-buy-state-street-s-xph-or-first-trust-s-fbt/?.tsrc=rss",
+      "at": "2026-11-11T22:13:27+00:00"
+    },
+    {
+      "title": "JetBlue unveils new first-class seats to bring back profits",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/11/jetblue-ceo-premium.html",
-      "at": "2026-11-11T16:27:18+00:00"
+      "at": "2026-11-11T22:10:50+00:00"
     },
     {
-      "title": "Should You Sell or Hold XRP After a 25% Drop in a Month? We Asked 3 AI Models",
+      "title": "MSCI Drops Strategy From Its US Index: Will $2.8 Billion in Forced Selling Hit MSTR?",
       "src": "Yahoo Finance",
-      "url": "https://247wallst.com/investing/cryptocurrency/2026/11/11/should-you-sell-or-hold-xrp-after-a-25-drop-in-a-month-we-asked-3-ai-models/?.tsrc=rss",
-      "at": "2026-11-11T16:17:33+00:00"
+      "url": "https://beincrypto.com/msci-drops-strategy-us-index-selling/?.tsrc=rss",
+      "at": "2026-11-11T22:07:41+00:00"
     },
     {
-      "title": "Bessent moved to military base amid 'growing threats': Source",
+      "title": "Nasdaq gains more than 1% as CoreWeave spike revitalizes AI trade",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/11/us-iran-war-trump-hormuz-bessent-threats.html",
-      "at": "2026-11-11T16:17:02+00:00"
-    },
-    {
-      "title": "Why Bitcoin Is Still Underestimating the Quantum Threat: Algorand CEO",
-      "src": "Yahoo Finance",
-      "url": "https://www.coinage.media/2026/why-bitcoin-is-still-underestimating-the-quantum-threat-algorand-ceo?.tsrc=rss",
-      "at": "2026-11-11T16:17:00+00:00"
-    },
-    {
-      "title": "AI Spending Will Slow. GE Vernova Stock Can Rise Anyway.",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/0a60be01-c44e-3261-8966-1a6d0f9b9328/ai-spending-will-slow.-ge.html?.tsrc=rss",
-      "at": "2026-11-11T16:14:00+00:00"
-    },
-    {
-      "title": "CORRECTING and REPLACING Hedge Funds Shift Positioning in October Amid Sharp Rotation Out of Large Technology Stocks, Data Insights Reports",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/hedge-funds-shift-positioning-october-140000517.html?.tsrc=rss",
-      "at": "2026-11-11T16:10:00+00:00"
-    },
-    {
-      "title": "Firefly Stock Jumps After Earnings. The Wild Ride Continues.",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/ce155a95-f921-3ce0-ac33-035a5a66e2ce/firefly-stock-jumps-after.html?.tsrc=rss",
-      "at": "2026-11-11T16:10:00+00:00"
-    },
-    {
-      "title": "Why Did Take-Two Stock Move?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/ttwo/articles/624389/why-did-take-two-stock-move/2026-11-11?.tsrc=rss",
-      "at": "2026-11-11T16:05:17+00:00"
-    },
-    {
-      "title": "Winter is approaching, and this ski resort stock has found a bottom. How to trade it",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/11/winter-is-approaching-and-this-ski-resort-stock-has-found-a-bottom-how-to-trade-it-.html",
-      "at": "2026-11-11T16:00:59+00:00"
-    },
-    {
-      "title": "SpaceX Supplier Applied Aerospace & Defense Is Doing Just Fine. The Stock Isn’t.",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/90b6afb2-7fc7-3e73-a917-f3d81e7039c5/spacex-supplier-applied.html?.tsrc=rss",
-      "at": "2026-11-11T15:56:00+00:00"
-    },
-    {
-      "title": "The Dow Is Missing Out on the CoreWeave Earnings AI Rebound",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/0f13a4c7-1995-3729-b3ef-a062adff3c1a/the-dow-is-missing-out-on-the.html?.tsrc=rss",
-      "at": "2026-11-11T15:53:40+00:00"
-    },
-    {
-      "title": "CoreWeave CEO Intrator tells CNBC he has canceled his planned share sale program",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/11/coreweave-ceo-election-data-center-buildout.html",
-      "at": "2026-11-11T15:53:36+00:00"
-    },
-    {
-      "title": "What Sent Lennar Stock Lower On Tuesday?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/len/articles/624396/what-sent-lennar-stock-lower-on-tuesday/2026-11-11?.tsrc=rss",
-      "at": "2026-11-11T15:52:41+00:00"
-    },
-    {
-      "title": "Prediction: A Bear Market Is Coming: 3 Ways to Stay Ahead",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/11/prediction-a-bear-market-is-coming-3-ways-to-stay/?.tsrc=rss",
-      "at": "2026-11-11T15:50:00+00:00"
-    },
-    {
-      "title": "Jefferies Sees 53% Upside in Riot Platforms, and the Reason Has Nothing to Do With Bitcoin",
-      "src": "Yahoo Finance",
-      "url": "https://www.tikr.com/blog/jefferies-sees-53-upside-in-riot-platforms-and-the-reason-has-nothing-to-do-with-bitcoin?ref=yahoofinance&tlnk=yf-261111-jmg5q4p8&.tsrc=rss",
-      "at": "2026-11-11T15:49:39+00:00"
-    },
-    {
-      "title": "The Dates That Matter Most For Casey's Stock",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/casy/articles/624401/the-dates-that-matter-most-for-caseys-stock/2026-11-11?.tsrc=rss",
-      "at": "2026-11-11T15:46:27+00:00"
-    },
-    {
-      "title": "Mississippi Senate: Scott Colom leads Hyde-Smith by more than 3,000 votes",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/10/mississippi-senate-scott-colom-hyde-smith.html",
-      "at": "2026-11-11T15:46:05+00:00"
-    },
-    {
-      "title": "What Will Decide Vertex Stock Over The Next Six Months?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/vrtx/articles/624402/what-will-decide-vertex-stock-over-the-next-six-months/2026-11-11?.tsrc=rss",
-      "at": "2026-11-11T15:38:33+00:00"
-    },
-    {
-      "title": "3 Consumer Stocks to Buy in November and Hold for the Next 20 Years",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/11/3-consumer-stocks-to-buy-in-november-and-hold-for/?.tsrc=rss",
-      "at": "2026-11-11T15:35:00+00:00"
-    },
-    {
-      "title": "CoreWeave Earnings Reignite AI Trade, Sending Stocks Higher",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/eed8d29b-5b89-3599-a17f-0eecffc63360/coreweave-earnings-reignite.html?.tsrc=rss",
-      "at": "2026-11-11T15:31:40+00:00"
-    },
-    {
-      "title": "BC-Most Active Stocks",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/bc-most-active-stocks-153019828.html?.tsrc=rss",
-      "at": "2026-11-11T15:30:19+00:00"
-    },
-    {
-      "title": "JPMorgan upgrades this aerospace stock after earnings beat",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/11/jpmorgan-mercury-systems-upgrade.html",
-      "at": "2026-11-11T15:30:02+00:00"
-    },
-    {
-      "title": "FL woman gave her home and $1.5M in gold bars and bitcoin to fake federal agents. Now she lives with a friend",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/crypto/articles/fl-woman-gave-her-home-153000673.html?.tsrc=rss",
-      "at": "2026-11-11T15:30:00+00:00"
-    },
-    {
-      "title": "Stocks making the biggest moves Wednesday: CoreWeave, Nvidia, NextNav & more",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/11/stocks-moving-the-most-today-live-updates.html",
-      "at": "2026-11-11T15:29:06+00:00"
-    },
-    {
-      "title": "CoreWeave Revenue Climbs 168% to $3.66 Billion, Raises 2026 Guidance",
-      "src": "Yahoo Finance",
-      "url": "https://www.cryptoprowl.com/releases/coreweave-revenue-climbs-168-to-366-billion-raises-2026-guidance-7844?.tsrc=rss",
-      "at": "2026-11-11T15:29:00+00:00"
-    },
-    {
-      "title": "Stock Market Today: Nasdaq Jumps As CoreWeave Surges On Earnings; Nvidia, AMD Shares Bounce (Live Coverage)",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/2199baae-3d36-344b-b4d8-76ff24b7f5e9/stock-market-today%3A-nasdaq.html?.tsrc=rss",
-      "at": "2026-11-11T15:21:25+00:00"
-    },
-    {
-      "title": "WNBA Finals MVP Gabby Williams: 'Our existence is political'",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/11/gabby-williams-embraces-role-in-wnbas-political-and-cultural-debates-.html",
-      "at": "2026-11-11T15:20:59+00:00"
-    },
-    {
-      "title": "What Is Charles Schwab (SCHW) Signaling By Adding Solana, Avalanche And Chainlink?",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/crypto/articles/charles-schwab-schw-signaling-adding-151715734.html?.tsrc=rss",
-      "at": "2026-11-11T15:17:15+00:00"
-    },
-    {
-      "title": "Measles is surging in the U.S. — and outbreaks can cost millions",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/11/measles-outbreak-us-economic-cost.html",
-      "at": "2026-11-11T15:14:53+00:00"
+      "url": "https://www.cnbc.com/2026/11/10/stock-market-today-live-updates.html",
+      "at": "2026-11-11T21:22:14+00:00"
     }
   ],
   "footer": {
