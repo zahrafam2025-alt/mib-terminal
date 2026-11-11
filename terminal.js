@@ -212,7 +212,7 @@
   var API = window.MIB_CHAT_API || "https://mib-arcade.terminalmib.workers.dev";
   var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k) || ""; localStorage.setItem(k, v); } catch (e) { return ""; } };
   var cid = ls("arcade-cid"); if (!cid) { cid = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); ls("arcade-cid", cid); }
-  var day = (B.meta && B.meta.date) || new Date().toISOString().slice(0, 10), roomOf = { today: "brief-" + day, markets: "markets", crypto: "crypto", games: "games" };
+  var day = (B.meta && B.meta.date) || new Date().toISOString().slice(0, 10), roomOf = { today: "brief-" + day, markets: "markets", crypto: "crypto", games: "games", sports: "sports" };
   var room = "today", ws = null, tries = 0, msgs = [], online = 0, nameMode = !ls("arcade-name");
   var AVS = window.MIB_AV || [], myAv = function () { var i = +ls("mib-avatar"); return isNaN(i) ? -1 : i; };
   var col = function (n) { var h = 0; for (var i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) % 360; return "hsl(" + h + " 55% 45%)"; };

@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-11T05:02:03Z",
     "date": "2026-11-11",
-    "built_at": "2026-11-11 23:45 UTC",
+    "built_at": "2026-11-11 23:50 UTC",
     "demo": false,
     "tier": "public"
   },

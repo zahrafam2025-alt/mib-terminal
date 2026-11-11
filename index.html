@@ -30,10 +30,10 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="alternate" type="application/rss+xml" title="MIB Terminal — Daily Brief" href="/feed.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
-<link rel="stylesheet" href="terminal.css?v=202611112345">
+<link rel="stylesheet" href="terminal.css?v=202611112350">
 </head>
 <body>
-<script src="/header.js?v=202611112345" data-active="today"></script>
+<script src="/header.js?v=202611112350" data-active="today"></script>
 <div class="tape gut"><div class="in" id="tape"></div></div>
 
 <main class="gut"><div class="in">
@@ -68,12 +68,13 @@
   <section id="lounge"><h2>The Lounge</h2><p class="sub">Talk about the day with everyone reading it, then play a round together.</p>
     <div class="lounge">
       <div class="card chat">
-        <header><div class="rooms" id="rooms"><button class="on" data-room="today">Today's brief</button><button data-room="markets">Markets</button><button data-room="crypto">Crypto</button><button data-room="games">Games</button></div><span class="example" id="chatState">connecting…</span></header>
+        <header><div class="rooms" id="rooms"><button class="on" data-room="today">Today's brief</button><button data-room="markets">Markets</button><button data-room="crypto">Crypto</button><button data-room="games">Games</button><button data-room="sports">Sports</button></div><span class="example" id="chatState">connecting…</span></header>
         <div class="msgs" id="msgs" aria-live="polite"></div>
         <form class="send" id="send"><input id="msg" maxlength="280" placeholder="Say something about today's market…" autocomplete="off"><button class="btn" type="submit">Send</button></form>
       </div>
       <div class="card" style="display:grid;gap:12px;align-content:start">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="label">Play together</div><div style="color:var(--muted);font-size:14px">Up to 4 friends online, phones welcome.</div></div><a class="btn alt" href="/arcade/">Open arcade</a></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="label">Sports Arena</div><div style="color:var(--muted);font-size:14px">Live scores, tables and highlights: football, F1, tennis, NBA, NFL, UFC.</div></div><a class="btn alt" href="/sports/" style="white-space:nowrap">Open sports</a></div>
         <div id="here"></div>
         <div class="games" id="games"></div>
       </div>
@@ -85,8 +86,8 @@
 </div></main>
 
 <!-- the day's brief (concept/build.py, written by the daily run) and the prices feed; then the page -->
-<script src="data/brief.js?v=202611112345"></script>
-<script src="data/ticker.js?v=202611112345" onerror="void 0"></script>
-<script src="terminal.js?v=202611112345"></script>
+<script src="data/brief.js?v=202611112350"></script>
+<script src="data/ticker.js?v=202611112350" onerror="void 0"></script>
+<script src="terminal.js?v=202611112350"></script>
 </body>
 </html>
