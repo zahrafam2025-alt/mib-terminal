@@ -1,7 +1,7 @@
 /* MIB Terminal: the one menu bar of every page (2026-11-03, owner: "when clicking on a page a different menu is
    changing, not looking good at all"). The homepage, the week, the archive, the about pages and the arcade all load
    this file, so the bar is the same everywhere: Today · News · Money · Calendar · Deep dive · The Week · Archive ·
-   Arcade, and the gold Lounge. On the homepage the section links scroll; elsewhere they open the homepage there.
+   Arcade, Sports (11 Nov), and the gold Lounge. On the homepage the section links scroll; elsewhere they open the homepage there.
    <script src="/header.js" data-active="today|week|archive|arcade|page"></script>, first thing in <body>.
    2026-11-04 (owner's list): the bar stays on screen (fixed, not sticky), light/dark switch, Français (the browser's
    own translation through Google's page translator), your name and a funny avatar (shared with the arcade and the
@@ -87,7 +87,7 @@
   document.head.appendChild(css);
   var H = home ? "" : "/";
   var links = [["today", L("Today", "Aujourd'hui"), H + (home ? "#today" : "")], ["news", L("News", "Actus"), H + "#news"], ["money", L("Money", "Marchés"), H + "#money"], ["calendar", L("Calendar", "Agenda"), H + "#calendar"],
-    ["dives", L("Deep dive", "Analyses"), H + "#dives"], ["week", L("The Week", "La semaine"), "/weekly.html"], ["archive", L("Archive", "Archives"), "/archive/"], ["arcade", "Arcade", "/arcade/"], ["lounge", L("Lounge · chat & play", "Lounge · chat & jeux"), H + "#lounge"]];
+    ["dives", L("Deep dive", "Analyses"), H + "#dives"], ["week", L("The Week", "La semaine"), "/weekly.html"], ["archive", L("Archive", "Archives"), "/archive/"], ["arcade", "Arcade", "/arcade/"], ["sports", "Sports", "/sports/"], ["lounge", L("Lounge · chat & play", "Lounge · chat & jeux"), H + "#lounge"]];
   var bar = document.createElement("div"); bar.className = "mibbar notranslate"; bar.setAttribute("translate", "no");
   bar.innerHTML = '<div class="mb-in"><a class="mb-logo notranslate" translate="no" href="/" aria-label="MIB Terminal, home">MIB<i></i></a><nav aria-label="Site">'
     + links.map(function (l) { return '<a href="' + (l[2] || "/") + '" data-k="' + l[0] + '"' + (l[0] === "lounge" ? ' class="go"' : l[0] === active ? ' class="on"' : "") + ">" + l[1] + "</a>"; }).join("")

@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sports Arena · MIB Terminal</title>
+<meta name="description" content="Live football scores, league tables and transfer rumours, Formula 1 and NBA, with official highlight videos. Free, no account.">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://mibterminal.com/sports/">
+<meta property="og:title" content="Sports Arena · MIB Terminal">
+<meta property="og:url" content="https://mibterminal.com/sports/">
+<meta property="og:image" content="https://mibterminal.com/og.png">
+<!-- 11 Nov 2026 (owner: "a new tab in our MIB terminal, the sports arena: football games scoring, ranking of clubs,
+     mercato rumours; F1 similar; NBA; ideally video to watch the games if available freely").
+     Where the data comes from (all free, no key):
+       scores, tables, league news   ESPN's public site API (site.api.espn.com), read by the browser, refreshed every
+                                     minute while a game is live
+       F1 calendar, results, points  Jolpica (the open successor of the Ergast F1 API), read by the browser
+       transfer rumours, F1/NBA news BBC Sport, Sky Sports Transfer Centre, Foot Mercato: RSS, through the MIB server
+       videos                        the leagues' OWN YouTube channels (Premier League, Ligue 1, UEFA, CBS Sports Golazo
+                                     for the Champions League, FORMULA 1, NBA), through the MIB server; played in
+                                     YouTube's privacy-enhanced player (youtube-nocookie.com) only when clicked
+     Full live games are not free to stream legally, so the page shows official highlights only, never pirate streams.
+     Only headlines and links are shown; every story opens on its publisher's site. -->
+<style>
+  :root {
+    --bg: #060d1a; --panel: #0e1c33; --raised: #142642; --line: rgba(88,116,152,.28);
+    --ink: #f4f7fa; --muted: #96a8be; --faint: #6c819c;
+    --gold: #e9b949; --live: #e85a5e; --up: #3cc48d;
+    --sans: "Source Sans 3", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --head: Archivo, "Segoe UI", sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  :root[data-theme="light"] {
+    --bg: #f3f5f9; --panel: #ffffff; --raised: #eef1f6; --line: #e1e5ec;
+    --ink: #0f172a; --muted: #5b6474; --faint: #7a8496; --gold: #b7810f; --live: #d03b3b; --up: #0e9f5a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  main { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; }
+  h1 { font: 800 clamp(26px, 5vw, 38px)/1.1 var(--head); margin: 6px 0 4px; letter-spacing: .01em; }
+  h1 span { color: var(--gold); }
+  .lede { color: var(--muted); margin: 0 0 18px; max-width: 70ch; }
+  .tabs, .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .tabs::-webkit-scrollbar, .chips::-webkit-scrollbar { display: none; }
+  .tabs button, .chips button { flex: none; font: 700 15px var(--sans); color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; cursor: pointer; }
+  .tabs button.on { background: var(--gold); border-color: var(--gold); color: #1a1205; }
+  .chips { margin: 14px 0 4px; }
+  .chips button { font-size: 13px; padding: 6px 12px; }
+  .chips button.on { color: var(--ink); border-color: var(--gold); }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(12, 1fr); margin-top: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; grid-column: span 12; }
+  @media (min-width: 900px) { .w7 { grid-column: span 7; } .w5 { grid-column: span 5; } .w6 { grid-column: span 6; } }
+  .card h2 { font: 700 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; display: flex; justify-content: space-between; gap: 8px; }
+  .card h2 small { font: 500 11px var(--mono); letter-spacing: 0; text-transform: none; color: var(--faint); }
+  .empty { color: var(--faint); font-size: 14px; padding: 6px 0; }
+  /* scores */
+  .match { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+  .match:first-of-type { border-top: 0; }
+  .st { font: 600 12px var(--mono); color: var(--faint); text-align: center; }
+  .st.live { color: var(--live); } .st.live::before { content: "● "; }
+  .teams div { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .teams span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .teams img, .tbl img { width: 20px; height: 20px; object-fit: contain; flex: none; }
+  .teams .win { font-weight: 700; }
+  .sc { font: 700 16px var(--mono); text-align: right; line-height: 1.55; }
+  /* tables */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tbl th { font: 600 11px var(--mono); color: var(--faint); text-align: right; padding: 4px 6px; }
+  .tbl td { padding: 5px 6px; border-top: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  .tbl td.t, .tbl th.t { text-align: left; } .tbl td.t div { display: flex; gap: 8px; align-items: center; max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+  .tbl td.p { font-weight: 700; } .tbl td.n { color: var(--faint); width: 26px; }
+  .tbl tr.top td.n { color: var(--up); }
+  @media (max-width: 560px) { .tbl .hs { display: none; } }
+  /* headlines */
+  .news { list-style: none; margin: 0; padding: 0; }
+  .news li { padding: 8px 0; border-top: 1px solid var(--line); }
+  .news li:first-child { border-top: 0; }
+  .news a { text-decoration: none; font-weight: 600; } .news a:hover { color: var(--gold); }
+  .news small { display: block; color: var(--faint); font: 500 12px var(--mono); margin-top: 2px; }
+  /* videos */
+  .vids { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .vid { background: var(--raised); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; color: var(--ink); font: inherit; }
+  .vid .th { position: relative; aspect-ratio: 16/9; background: #000 center/cover no-repeat; }
+  .vid .th::after { content: "▶"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 34px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
+  .vid p { margin: 0; padding: 8px 10px 10px; font-size: 14px; font-weight: 600; line-height: 1.35; }
+  .vid small { display: block; color: var(--faint); font: 500 11px var(--mono); margin-top: 3px; }
+  .note { color: var(--faint); font-size: 13px; margin: 10px 0 0; }
+  .next { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+  .next b { font: 800 22px var(--head); } .next .cd { font: 700 18px var(--mono); color: var(--gold); }
+  /* player */
+  #player { position: fixed; inset: 0; z-index: 1100; background: rgba(3,6,12,.88); display: none; align-items: center; justify-content: center; padding: 16px; }
+  #player.on { display: flex; }
+  #player .box { width: min(1000px, 100%); }
+  #player iframe { width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 10px; background: #000; display: block; }
+  #player .bar { display: flex; justify-content: space-between; gap: 10px; align-items: center; color: #e8ecf3; margin-top: 8px; font-size: 14px; }
+  #player .bar a { color: var(--gold); } #player button { background: none; border: 1px solid rgba(255,255,255,.3); color: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; font: 600 14px var(--sans); }
+  .src { color: var(--faint); font-size: 12px; margin-top: 30px; }
+</style>
+</head>
+<body>
+<script src="/header.js" data-active="sports"></script>
+<main>
+  <h1>Sports <span>Arena</span></h1>
+  <p class="lede">Live scores, tables, transfer rumours and official highlights: football, Formula 1 and the NBA.</p>
+  <div class="tabs" role="tablist" aria-label="Sport">
+    <button data-sport="football" role="tab">⚽ Football</button>
+    <button data-sport="f1" role="tab">🏎 Formula 1</button>
+    <button data-sport="nba" role="tab">🏀 NBA</button>
+  </div>
+  <div id="view"></div>
+  <p class="src">Scores and tables: ESPN · F1 data: Jolpica · Rumours and news: BBC Sport, Sky Sports, Foot Mercato, ESPN (every story opens on its publisher's site) · Videos: the leagues' official YouTube channels. Full live games are not free to stream legally, so only official highlights are shown.</p>
+</main>
+<div id="player" role="dialog" aria-modal="true" aria-label="Video"><div class="box"><div id="frame"></div><div class="bar"><span id="ptitle"></span><span><a id="plink" href="#" target="_blank" rel="noopener">Watch on YouTube</a> &nbsp;<button id="pclose">Close ✕</button></span></div></div></div>
+<script>
+(function () {
+  "use strict";
+  var ESPN = "https://site.api.espn.com/apis", F1 = "https://api.jolpi.ca/ergast/f1/current";
+  var LEAGUES = [
+    { k: "eng.1", n: "Premier League", yt: ["yt-pl"] },
+    { k: "esp.1", n: "LaLiga", yt: ["yt-uefa"] },
+    { k: "ita.1", n: "Serie A", yt: ["yt-uefa"] },
+    { k: "ger.1", n: "Bundesliga", yt: ["yt-uefa"] },
+    { k: "fra.1", n: "Ligue 1", yt: ["yt-l1"] },
+    { k: "uefa.champions", n: "Champions League", yt: ["yt-ucl", "yt-uefa"] },
+    { k: "uefa.europa", n: "Europa League", yt: ["yt-uefa"] }
+  ];
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var safeUrl = function (u) { return /^https?:\/\//i.test(String(u || "")) ? String(u) : "#"; };
+  var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k) || ""; localStorage.setItem(k, v); } catch (e) { return ""; } };
+  var ago = function (d) { var t = new Date(d).getTime(); if (!t) return ""; var m = Math.round((Date.now() - t) / 60000); return m < 60 ? Math.max(1, m) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
+  var when = function (d) { var t = new Date(d); return isNaN(t) ? "" : t.toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
+  var getJSON = function (u) { return fetch(u, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
+  // the MIB server (header.js finds the live one); the page works without it, only rumours and videos need it
+  var api = function () { if (/^(127\.0\.0\.1|localhost)$/.test(location.hostname)) return Promise.resolve(location.origin);   // the local test server
+    return (window.MIB_API_READY || Promise.resolve()).then(function () { return window.MIB_SPORTS_API || window.MIB_CHAT_API || "https://mib-arcade.terminalmib.workers.dev"; }); };
+  var feed = function (key) {
+    return api().then(function (a) { return fetch(a + "/api/sports/feed?f=" + encodeURIComponent(key)); })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (x) { return new DOMParser().parseFromString(x, "application/xml"); });
+  };
+  var rss = function (key, src) {
+    return feed(key).then(function (doc) {
+      return Array.prototype.slice.call(doc.querySelectorAll("item")).map(function (it) {
+        var g = function (t) { var e = it.getElementsByTagName(t)[0]; return e ? e.textContent.trim() : ""; };
+        return { title: g("title"), link: g("link"), date: g("pubDate"), src: src };
+      });
+    }).catch(function () { return []; });
+  };
+  var yt = function (key) {
+    return feed(key).then(function (doc) {
+      return Array.prototype.slice.call(doc.getElementsByTagName("entry")).map(function (e) {
+        var g = function (t) { var x = e.getElementsByTagName(t)[0]; return x ? x.textContent.trim() : ""; };
+        var th = e.getElementsByTagName("media:thumbnail")[0], au = e.getElementsByTagName("author")[0];
+        return { id: g("yt:videoId"), title: g("title"), date: g("published"), thumb: th ? th.getAttribute("url") : "", ch: au ? (au.getElementsByTagName("name")[0] || {}).textContent : "" };
+      }).filter(function (v) { return /^[\w-]{6,20}$/.test(v.id) && !/#shorts/i.test(v.title); });
+    }).catch(function () { return []; });
+  };
+
+  // ---------------------------------------------------------------- rendering helpers
+  var card = function (id, title, cls, note) { return '<section class="card ' + (cls || "") + '" id="' + id + '"><h2>' + esc(title) + (note ? "<small>" + esc(note) + "</small>" : "") + '</h2><div class="body"><p class="empty">Loading…</p></div></section>'; };
+  var fill = function (id, html) { var e = document.querySelector("#" + id + " .body"); if (e) e.innerHTML = html; };
+  var newsList = function (items, n) {
+    items = items.filter(function (x) { return x.title; }).slice(0, n || 10);
+    if (!items.length) return '<p class="empty">Nothing right now.</p>';
+    return '<ul class="news">' + items.map(function (x) { return '<li><a href="' + esc(safeUrl(x.link)) + '" target="_blank" rel="noopener">' + esc(x.title) + "</a><small>" + esc(x.src) + (x.date ? " · " + esc(ago(x.date)) : "") + "</small></li>"; }).join("") + "</ul>";
+  };
+  var vids = function (list, n) {
+    var seen = {}; list = list.filter(function (v) { if (seen[v.id]) return false; seen[v.id] = 1; return true; })
+      .sort(function (a, b) { return new Date(b.date) - new Date(a.date); }).slice(0, n || 8);
+    if (!list.length) return '<p class="empty">No videos right now.</p>';
+    return '<div class="vids">' + list.map(function (v) {
+      return '<button class="vid" data-vid="' + esc(v.id) + '" data-title="' + esc(v.title) + '"><div class="th" style="background-image:url(\'' + esc(safeUrl(v.thumb)) + '\')"></div><p>' + esc(v.title) + "<small>" + esc(v.ch) + " · " + esc(ago(v.date)) + "</small></p></button>";
+    }).join("") + '</div><p class="note">Official highlights from the league\'s own channel. Some can only be watched on YouTube itself: use "Watch on YouTube" under the player.</p>';
+  };
+  var scoreRows = function (events) {
+    if (!events.length) return '<p class="empty">No games in this round.</p>';
+    var order = { "in": 0, pre: 1, post: 2 };
+    events = events.slice().sort(function (a, b) { var x = order[a.status.type.state], y = order[b.status.type.state]; return x !== y ? x - y : new Date(a.date) - new Date(b.date); });
+    return events.map(function (e) {
+      var c = e.competitions[0], s = e.status.type, cs = c.competitors.slice().sort(function (a, b) { return a.homeAway === "home" ? -1 : 1; });
+      var st = s.state === "in" ? (e.status.displayClock && e.status.displayClock !== "0:00" ? e.status.displayClock : s.shortDetail) : s.state === "post" ? s.shortDetail : when(e.date).replace(/^(\w+) (\d+) \w+,? /, "$1 ");
+      var row = function (t) { return '<div class="' + (t.winner ? "win" : "") + '">' + (t.team.logo ? '<img src="' + esc(safeUrl(t.team.logo)) + '" alt="" loading="lazy">' : "") + "<span>" + esc(t.team.shortDisplayName || t.team.displayName) + "</span></div>"; };
+      return '<div class="match"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(st) + '</div><div class="teams">' + cs.map(row).join("") + '</div><div class="sc">' + (s.state === "pre" ? "" : cs.map(function (t) { return esc(t.score); }).join("<br>")) + "</div></div>";
+    }).join("");
+  };
+  var stat = function (entry, name) { var x = (entry.stats || []).filter(function (s) { return s.name === name; })[0]; return x ? x.displayValue : ""; };
+
+  // ---------------------------------------------------------------- live refresh (only while something is live)
+  var timer = null, refreshers = [];
+  var schedule = function () { clearTimeout(timer); timer = setTimeout(function () { refreshers.forEach(function (f) { f(); }); }, 60000); };
+
+  // ---------------------------------------------------------------- FOOTBALL
+  function football() {
+    var lg = LEAGUES.filter(function (l) { return l.k === ls("sports-league"); })[0] || LEAGUES[0];
+    $("#view").innerHTML = '<div class="chips" aria-label="League">' + LEAGUES.map(function (l) { return '<button data-lg="' + l.k + '" class="' + (l === lg ? "on" : "") + '">' + esc(l.n) + "</button>"; }).join("") + '</div><div class="grid">'
+      + card("fs", "Scores · " + lg.n, "w7", "times in your time zone") + card("ft", "Table", "w5")
+      + card("fm", "Mercato · transfer rumours", "w6") + card("fn", "News · " + lg.n, "w6")
+      + card("fv", "Highlights", "") + "</div>";
+    Array.prototype.forEach.call(document.querySelectorAll("[data-lg]"), function (b) { b.onclick = function () { ls("sports-league", b.dataset.lg); football(); }; });
+    var scores = function () {
+      getJSON(ESPN + "/site/v2/sports/soccer/" + lg.k + "/scoreboard").then(function (d) {
+        var ev = d.events || []; fill("fs", scoreRows(ev));
+        if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
+      }).catch(function () { fill("fs", '<p class="empty">Scores are unavailable right now.</p>'); });
+    };
+    refreshers = [scores]; scores();
+    getJSON(ESPN + "/v2/sports/soccer/" + lg.k + "/standings").then(function (d) {
+      var groups = (d.children || []).filter(function (c) { return c.standings && c.standings.entries; });
+      if (!groups.length) { fill("ft", '<p class="empty">No table for this competition right now.</p>'); return; }
+      fill("ft", groups.map(function (g) {
+        var rows = g.standings.entries.slice().sort(function (a, b) { return (+stat(a, "rank") || 99) - (+stat(b, "rank") || 99); });
+        return (groups.length > 1 ? '<p class="empty" style="margin:8px 0 0">' + esc(g.name) + "</p>" : "") + '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Club</th><th>P</th><th class="hs">W</th><th class="hs">D</th><th class="hs">L</th><th>GD</th><th>Pts</th></tr></thead><tbody>'
+          + rows.map(function (e, i) { var t = e.team, logo = t.logos && t.logos[0] ? t.logos[0].href : "";
+            return '<tr class="' + (i < 4 ? "top" : "") + '"><td class="n">' + esc(stat(e, "rank") || i + 1) + '</td><td class="t"><div>' + (logo ? '<img src="' + esc(safeUrl(logo)) + '" alt="" loading="lazy">' : "") + esc(t.shortDisplayName || t.displayName) + "</div></td><td>" + esc(stat(e, "gamesPlayed")) + '</td><td class="hs">' + esc(stat(e, "wins")) + '</td><td class="hs">' + esc(stat(e, "ties")) + '</td><td class="hs">' + esc(stat(e, "losses")) + "</td><td>" + esc(stat(e, "pointDifferential")) + '</td><td class="p">' + esc(stat(e, "points")) + "</td></tr>"; }).join("") + "</tbody></table>";
+      }).join(""));
+    }).catch(function () { fill("ft", '<p class="empty">The table is unavailable right now.</p>'); });
+    Promise.all([rss("transfers-sky", "Sky Sports Transfer Centre"), rss("transfers-fm", "Foot Mercato"),
+      rss("football-bbc", "BBC Sport").then(function (l) { return l.filter(function (x) { return /gossip|transfer|signs?|bid|deal|loan|move/i.test(x.title); }); })])
+      .then(function (r) { var all = r[0].slice(0, 6).concat(r[2].slice(0, 3), r[1].slice(0, 5))   /* a balance of sources: English and French */.sort(function (a, b) { return new Date(b.date) - new Date(a.date); }); fill("fm", newsList(all, 14)); });
+    getJSON(ESPN + "/site/v2/sports/soccer/" + lg.k + "/news?limit=12").then(function (d) {
+      fill("fn", newsList((d.articles || []).map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }), 10));
+    }).catch(function () { fill("fn", '<p class="empty">News is unavailable right now.</p>'); });
+    Promise.all(lg.yt.map(yt)).then(function (r) { fill("fv", vids([].concat.apply([], r), 8)); });
+  }
+
+  // ---------------------------------------------------------------- F1
+  function f1() {
+    $("#view").innerHTML = '<div class="grid">' + card("rn", "Next race", "w6") + card("rl", "Last race", "w6")
+      + card("rd", "Drivers' championship", "w7") + card("rc", "Constructors", "w5")
+      + card("rx", "F1 news", "w6") + card("rv", "Highlights", "w6") + "</div>";
+    refreshers = [];
+    var name = function (d) { return d.givenName + " " + d.familyName; };
+    getJSON(F1 + "/next.json").then(function (d) {
+      var r = d.MRData.RaceTable.Races[0];
+      if (!r) { fill("rn", '<p class="empty">The season is over. See you next year.</p>'); return; }
+      var t = new Date(r.date + "T" + (r.time || "12:00:00Z"));
+      var tick = function () { var s = Math.max(0, (t - Date.now()) / 1000), dd = Math.floor(s / 86400), hh = Math.floor(s % 86400 / 3600), mm = Math.floor(s % 3600 / 60); var e = $("#cd"); if (e) e.textContent = dd + "d " + hh + "h " + mm + "m"; };
+      fill("rn", '<div class="next"><b>' + esc(r.raceName) + '</b><span class="cd" id="cd"></span></div><p class="empty">' + esc(r.Circuit.circuitName) + ", " + esc(r.Circuit.Location.country) + " · round " + esc(r.round) + " · lights out " + esc(when(t)) + "</p>");
+      tick(); setInterval(tick, 30000);
+    }).catch(function () { fill("rn", '<p class="empty">Unavailable right now.</p>'); });
+    getJSON(F1 + "/last/results.json").then(function (d) {
+      var r = d.MRData.RaceTable.Races[0];
+      fill("rl", '<p class="empty" style="margin-top:0">' + esc(r.raceName) + " · " + esc(when(r.date + "T" + (r.time || "12:00:00Z")).replace(/,? \d+:\d+.*/, "")) + '</p><table class="tbl"><thead><tr><th class="n">#</th><th class="t">Driver</th><th class="t hs">Team</th><th>Time</th><th>Pts</th></tr></thead><tbody>'
+        + r.Results.slice(0, 10).map(function (x) { return '<tr class="' + (+x.position <= 3 ? "top" : "") + '"><td class="n">' + esc(x.position) + '</td><td class="t">' + esc(name(x.Driver)) + '</td><td class="t hs">' + esc(x.Constructor.name) + "</td><td>" + esc(x.Time ? x.Time.time : x.status) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
+    }).catch(function () { fill("rl", '<p class="empty">Unavailable right now.</p>'); });
+    getJSON(F1 + "/driverStandings.json").then(function (d) {
+      var l = d.MRData.StandingsTable.StandingsLists[0];
+      fill("rd", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Driver</th><th class="t hs">Team</th><th class="hs">Wins</th><th>Pts</th></tr></thead><tbody>'
+        + l.DriverStandings.map(function (x) { return '<tr class="' + (+x.position <= 3 ? "top" : "") + '"><td class="n">' + esc(x.position) + '</td><td class="t">' + esc(name(x.Driver)) + '</td><td class="t hs">' + esc((x.Constructors[0] || {}).name) + '</td><td class="hs">' + esc(x.wins) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
+    }).catch(function () { fill("rd", '<p class="empty">Unavailable right now.</p>'); });
+    getJSON(F1 + "/constructorStandings.json").then(function (d) {
+      var l = d.MRData.StandingsTable.StandingsLists[0];
+      fill("rc", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Team</th><th class="hs">Wins</th><th>Pts</th></tr></thead><tbody>'
+        + l.ConstructorStandings.map(function (x) { return '<tr class="' + (+x.position <= 3 ? "top" : "") + '"><td class="n">' + esc(x.position) + '</td><td class="t">' + esc(x.Constructor.name) + '</td><td class="hs">' + esc(x.wins) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
+    }).catch(function () { fill("rc", '<p class="empty">Unavailable right now.</p>'); });
+    rss("f1-bbc", "BBC Sport").then(function (l) { fill("rx", newsList(l, 10)); });
+    yt("yt-f1").then(function (l) { fill("rv", vids(l, 6)); });
+  }
+
+  // ---------------------------------------------------------------- NBA
+  function nba() {
+    $("#view").innerHTML = '<div class="grid">' + card("ns", "Scores", "w7", "times in your time zone") + card("nn", "NBA news", "w5")
+      + card("ne", "Eastern Conference", "w6") + card("nw", "Western Conference", "w6") + card("nv", "Highlights", "") + "</div>";
+    var scores = function () {
+      getJSON(ESPN + "/site/v2/sports/basketball/nba/scoreboard").then(function (d) {
+        var ev = d.events || []; fill("ns", scoreRows(ev));
+        if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
+      }).catch(function () { fill("ns", '<p class="empty">Scores are unavailable right now.</p>'); });
+    };
+    refreshers = [scores]; scores();
+    getJSON(ESPN + "/v2/sports/basketball/nba/standings").then(function (d) {
+      (d.children || []).forEach(function (c) {
+        var rows = c.standings.entries.slice().sort(function (a, b) { return (+stat(a, "playoffSeed") || 99) - (+stat(b, "playoffSeed") || 99); });
+        fill(/east/i.test(c.name) ? "ne" : "nw", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Team</th><th>W</th><th>L</th><th class="hs">PCT</th><th>GB</th><th class="hs">Strk</th></tr></thead><tbody>'
+          + rows.map(function (e, i) { var t = e.team, logo = t.logos && t.logos[0] ? t.logos[0].href : "";
+            return '<tr class="' + (i < 6 ? "top" : "") + '"><td class="n">' + (i + 1) + '</td><td class="t"><div>' + (logo ? '<img src="' + esc(safeUrl(logo)) + '" alt="" loading="lazy">' : "") + esc(t.shortDisplayName || t.displayName) + "</div></td><td>" + esc(stat(e, "wins")) + "</td><td>" + esc(stat(e, "losses")) + '</td><td class="hs">' + esc(stat(e, "winPercent")) + "</td><td>" + esc(stat(e, "gamesBehind")) + '</td><td class="hs">' + esc(stat(e, "streak")) + "</td></tr>"; }).join("") + "</tbody></table>");
+      });
+    }).catch(function () { fill("ne", '<p class="empty">Unavailable right now.</p>'); fill("nw", ""); });
+    getJSON(ESPN + "/site/v2/sports/basketball/nba/news?limit=12").then(function (d) {
+      fill("nn", newsList((d.articles || []).map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }), 10));
+    }).catch(function () { rss("nba-bbc", "BBC Sport").then(function (l) { fill("nn", newsList(l, 10)); }); });
+    yt("yt-nba").then(function (l) { fill("nv", vids(l, 8)); });
+  }
+
+  // ---------------------------------------------------------------- tabs, player
+  var SPORTS = { football: football, f1: f1, nba: nba };
+  function show(s) {
+    if (!SPORTS[s]) s = "football";
+    ls("sports-tab", s); clearTimeout(timer);
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sport]"), function (b) { b.classList.toggle("on", b.dataset.sport === s); b.setAttribute("aria-selected", b.dataset.sport === s); });
+    if (location.hash !== "#" + s) history.replaceState(null, "", "#" + s);
+    SPORTS[s]();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-sport]"), function (b) { b.onclick = function () { show(b.dataset.sport); }; });
+  var player = $("#player");
+  var close = function () { player.classList.remove("on"); $("#frame").innerHTML = ""; };
+  document.addEventListener("click", function (e) {
+    var v = e.target.closest && e.target.closest("[data-vid]");
+    if (!v) return;
+    var id = v.dataset.vid; if (!/^[\w-]{6,20}$/.test(id)) return;
+    $("#frame").innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0" title="' + esc(v.dataset.title) + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+    $("#ptitle").textContent = v.dataset.title; $("#plink").href = "https://www.youtube.com/watch?v=" + id;
+    player.classList.add("on"); $("#pclose").focus();
+  });
+  $("#pclose").onclick = close;
+  player.addEventListener("click", function (e) { if (e.target === player) close(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && refreshers.length) refreshers.forEach(function (f) { f(); }); });
+  show((location.hash || "").slice(1) || ls("sports-tab") || "football");
+})();
+</script>
+</body>
+</html>
