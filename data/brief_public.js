@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-11T05:02:03Z",
     "date": "2026-11-11",
-    "built_at": "2026-11-11 23:36 UTC",
+    "built_at": "2026-11-11 23:45 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -87,6 +87,12 @@ window.MIB_BRIEF = {
     }
   ],
   "news": [
+    {
+      "title": "Nvidia’s Board Is Reportedly Preparing to Oust Jensen Huang. When Intel and McDonald’s Pushed Out CEOs Over Workplace Relationships, Shareholders Got Opposite Results",
+      "src": "Yahoo Finance",
+      "url": "https://247wallst.com/investing/2026/11/11/nvidias-board-is-reportedly-preparing-to-oust-jensen-huang-when-intel-and-mcdonalds-pushed-out-ceos-over-workplace-relationships-shareholders-got-opposite-results/?.tsrc=rss",
+      "at": "2026-11-11T23:34:19+00:00"
+    },
     {
       "title": "Scott Colom wins Mississippi Senate election over incumbent Republican Hyde-Smith",
       "src": "CNBC",
@@ -254,12 +260,6 @@ window.MIB_BRIEF = {
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/11/jetblue-ceo-premium.html",
       "at": "2026-11-11T22:10:50+00:00"
-    },
-    {
-      "title": "MSCI Drops Strategy From Its US Index: Will $2.8 Billion in Forced Selling Hit MSTR?",
-      "src": "Yahoo Finance",
-      "url": "https://beincrypto.com/msci-drops-strategy-us-index-selling/?.tsrc=rss",
-      "at": "2026-11-11T22:07:41+00:00"
     },
     {
       "title": "Nasdaq gains more than 1% as CoreWeave spike revitalizes AI trade",

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sports Arena · MIB Terminal</title>
-<meta name="description" content="Live football scores, league tables and transfer rumours, Formula 1, tennis, NBA and NFL, with official highlight videos. Free, no account.">
+<meta name="description" content="Live football scores, league tables and transfer rumours, Formula 1, tennis, NBA, NFL and UFC, with official highlight videos. Free, no account.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="canonical" href="https://mibterminal.com/sports/">
@@ -26,7 +26,8 @@
      12 Nov 2026 (owner: "add Tennis and any other most popular sport; colours, e.g. F1 drivers' numbers in their team
      colour, some logos, visuals for football and NBA too"): Tennis (ATP/WTA matches, ranking: ESPN; highlights: Tennis
      TV and WTA channels) and the NFL (ESPN; NFL channel). Team colours: ESPN (football, NBA, NFL; the NBA/NFL team lists
-     come through the MIB server), F1C below for F1. Each tab has its own accent colour (ACCENT). -->
+     come through the MIB server), F1C below for F1. Each tab has its own accent colour (ACCENT).
+     12 Nov 2026 (owner: "add UFC as well"): UFC tab (ESPN fight cards, results, rankings, news; UFC channel). -->
 
 <style>
   :root {
@@ -137,6 +138,9 @@
   .tr { font: 700 10px var(--mono); margin-left: 4px; } .tr.up { color: var(--up); } .tr.dn { color: var(--live); }
   .tourn { font: 700 13px var(--sans); color: var(--ink); margin: 14px 0 2px; display: flex; gap: 8px; align-items: baseline; }
   .tourn:first-child { margin-top: 0; } .tourn small { color: var(--faint); font: 500 11px var(--mono); }
+  .badge { display: inline-block; font: 700 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--sport, var(--gold)); border: 1px solid var(--sport, var(--gold)); border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
+  @media (max-width: 560px) { .badge { display: none; } }
+  .sel { font: 600 14px var(--sans); color: var(--ink); background: var(--raised); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin: 0 0 8px; max-width: 100%; }
   .vid { transition: transform .15s, border-color .15s; } .vid:hover { transform: translateY(-2px); border-color: var(--sport, var(--gold)); }
 </style>
 </head>
@@ -144,13 +148,14 @@
 <script src="/header.js" data-active="sports"></script>
 <main>
   <h1>Sports <span>Arena</span></h1>
-  <p class="lede">Live scores, tables, transfer rumours and official highlights: football, Formula 1, tennis, the NBA and the NFL.</p>
+  <p class="lede">Live scores, tables, transfer rumours and official highlights: football, Formula 1, tennis, the NBA, the NFL and the UFC.</p>
   <div class="tabs" role="tablist" aria-label="Sport">
     <button data-sport="football" role="tab">⚽ Football</button>
     <button data-sport="f1" role="tab">🏎 Formula 1</button>
     <button data-sport="tennis" role="tab">🎾 Tennis</button>
     <button data-sport="nba" role="tab">🏀 NBA</button>
     <button data-sport="nfl" role="tab">🏈 NFL</button>
+    <button data-sport="ufc" role="tab">🥊 UFC</button>
   </div>
   <div id="view"></div>
   <p class="src">Scores, tables, rankings, logos and flags: ESPN · F1 data: Jolpica (team colours approximate) · Rumours and news: BBC Sport, Sky Sports, Foot Mercato, ESPN (every story opens on its publisher's site) · Videos: the leagues' official YouTube channels. Full live games are not free to stream legally, so only official highlights are shown.</p>
@@ -170,7 +175,7 @@
     { k: "uefa.europa", n: "Europa League", id: 2310, yt: ["yt-uefa"] }
   ];
   // each sport's accent (the thin line on top of every card, the dots, the bars)
-  var ACCENT = { football: "#3cc48d", f1: "#e8302d", tennis: "#c8d94a", nba: "#f08a2c", nfl: "#4f8be8" };
+  var ACCENT = { football: "#3cc48d", f1: "#e8302d", tennis: "#c8d94a", nba: "#f08a2c", nfl: "#4f8be8", ufc: "#d4213d" };
   // F1 team colours, approximated from the team liveries (edit here if a team changes colour); text on it is
   // picked black or white automatically
   var F1C = { mercedes: "#27F4D2", red_bull: "#3671C6", ferrari: "#E8002D", mclaren: "#FF8000", aston_martin: "#229971",
@@ -443,8 +448,75 @@
     yt(tour === "wta" ? "yt-wta" : "yt-atp").then(function (l) { fill("tv", vids(l, 6)); });
   }
 
+  // ---------------------------------------------------------------- UFC (12 Nov 2026, owner: "add UFC as well")
+  // the next (or live) event's fight card, main event first; the last event's results; ESPN's pound-for-pound and
+  // division rankings (champion + top 10); news; highlights from the UFC's own channel
+  function ufc() {
+    $("#view").innerHTML = '<div class="grid">' + card("un", "Next event", "w7", "times in your time zone") + card("ul", "Last event", "w5")
+      + card("ur", "Rankings", "w6") + card("ux", "UFC news", "w6") + card("uv", "Highlights", "") + "</div>";
+    var U = ESPN + "/site/v2/sports/mma/ufc/";
+    var fighter = function (p) {
+      var a = p.athlete || {}, f = a.flag || {}, rec = p.records && p.records[0] && p.records[0].summary;
+      return '<div class="' + (p.winner ? "win" : "") + '">' + flagImg(f.href, f.alt) + "<span>" + esc(a.displayName || "TBA") + "</span>" + (rec ? "<em>" + esc(rec) + "</em>" : "") + "</div>";
+    };
+    // how a finished fight ended: "R2 3:10" (a stoppage) or "Decision" (went the full distance)
+    var ended = function (c) {
+      var st = c.status || {}, n = ((c.format || {}).regulation || {}).periods;
+      if (st.type && /draw/i.test(st.type.detail || "")) return "Draw";
+      return n && st.period === n && st.displayClock === "5:00" ? "Decision" : st.period ? "R" + st.period + " " + (st.displayClock || "") : "Final";
+    };
+    var fights = function (ev, results) {
+      var list = (ev.competitions || []).slice().reverse();   // ESPN lists the card from the first prelim to the main event
+      return list.map(function (c, i) {
+        var s = c.status.type, ps = (c.competitors || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+        var tag = i === 0 ? "Main event" : i === 1 ? "Co-main" : "";
+        var st = s.state === "in" ? "R" + (c.status.period || 1) + " " + (c.status.displayClock || "") : s.state === "post" ? ended(c) : when(c.date).replace(/^(\w+) (\d+) \w+,? /, "$1 ");
+        return '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(results ? (s.state === "post" ? ended(c) : st) : st)
+          + "<small>" + esc(tag || (c.type || {}).abbreviation || "") + '</small></div><div class="teams">' + ps.map(fighter).join("")
+          + '</div><div class="sc">' + (tag && !results ? '<span class="badge">' + esc((c.type || {}).abbreviation || "") + "</span>" : "") + (s.state === "post" ? ps.map(function (p) { return p.winner ? '<b style="color:var(--up)">W</b>' : '<span style="color:var(--faint)">L</span>'; }).join("<br>") : "") + "</div></div>";
+      }).join("");
+    };
+    var refresh = function () {
+      getJSON(U + "scoreboard").then(function (d) {
+        var ev = (d.events || [])[0];
+        if (!ev) { fill("un", '<p class="empty">No event scheduled right now.</p>'); return; }
+        var t = new Date(ev.date), live = ev.status && ev.status.type.state === "in";
+        var head = function () { var s = Math.max(0, (t - Date.now()) / 1000); return live ? '<span class="cd" style="color:var(--live)">● LIVE</span>' : s > 0 ? '<span class="cd" id="ucd">' + Math.floor(s / 86400) + "d " + Math.floor(s % 86400 / 3600) + "h " + Math.floor(s % 3600 / 60) + "m</span>" : ""; };
+        var venue = ev.competitions && ev.competitions[0] && ev.competitions[0].venue;
+        fill("un", '<div class="next"><b>' + esc(ev.name) + "</b>" + head() + '</div><p class="empty">' + (venue ? esc(venue.fullName || "") + (venue.address && venue.address.city ? ", " + esc(venue.address.city) : "") + " · " : "") + "first fight " + esc(when(t)) + "</p>" + fights(ev, false));
+        if (live) schedule();
+      }).catch(function () { fill("un", '<p class="empty">Unavailable right now.</p>'); });
+    };
+    refreshers = [refresh]; refresh();
+    // the last finished event: ESPN's scoreboard of the past 3 weeks, the latest one that is over
+    var ymd = function (ms) { return new Date(ms).toISOString().slice(0, 10).replace(/-/g, ""); };
+    getJSON(U + "scoreboard?dates=" + ymd(Date.now() - 21 * 864e5) + "-" + ymd(Date.now())).then(function (d) {
+      var done = (d.events || []).filter(function (e) { return e.status && e.status.type.state === "post"; }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+      if (!done.length) { fill("ul", '<p class="empty">No recent results.</p>'); return; }
+      fill("ul", '<div class="tourn">' + esc(done[0].name) + "<small>" + esc(when(done[0].date).replace(/,? \d+:\d+.*/, "")) + "</small></div>" + fights(done[0], true));
+    }).catch(function () { fill("ul", '<p class="empty">Unavailable right now.</p>'); });
+    getJSON(U + "rankings").then(function (d) {
+      var all = d.rankings || [], lists = all.filter(function (r) { return !/-champions$/.test(r.type); });
+      if (!lists.length) throw new Error("none");
+      var pick = lists.filter(function (r) { return r.type === ls("sports-ufc-rank"); })[0] || lists[0];
+      var short = function (r) { return r.name.replace(/ Division Rankings/, "").replace(/ Rankings$/, "").replace(/Pound for Pound/, "pound for pound"); };
+      var champ = all.filter(function (r) { return r.type === pick.type + "-champions"; })[0];
+      var row = function (x, belt) { var a = x.athlete || {};
+        return '<tr><td class="n' + (belt ? " m1" : "") + '">' + (belt ? "🏆" : esc(x.current)) + '</td><td class="t"><div>' + flagImg(a.flag, a.flagAltText) + "<span>" + esc(a.displayName) + "</span>" + (x.hasAccolade && !belt ? ' <span title="champion">🏆</span>' : "") + "</div></td><td>" + esc(x.recordSummary || "") + "</td></tr>"; };
+      fill("ur", '<select id="urs" class="sel" aria-label="Division">' + lists.map(function (r) { return '<option value="' + esc(r.type) + '"' + (r === pick ? " selected" : "") + ">" + esc(short(r)) + "</option>"; }).join("") + "</select>"
+        + '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Fighter</th><th>Record</th></tr></thead><tbody>'
+        // the champion on top, unless ESPN already lists them in the top 10 (then the 🏆 marks them there)
+        + (champ && champ.ranks[0] && !(pick.ranks || []).some(function (x) { return x.athlete && champ.ranks[0].athlete && x.athlete.id === champ.ranks[0].athlete.id; }) ? row(champ.ranks[0], true) : "") + (pick.ranks || []).map(function (x) { return row(x, false); }).join("") + "</tbody></table>");
+      var s = $("#urs"); if (s) s.onchange = function () { ls("sports-ufc-rank", s.value); ufc(); };
+    }).catch(function () { fill("ur", '<p class="empty">The rankings are unavailable right now.</p>'); });
+    getJSON(U + "news?limit=12").then(function (d) {
+      fill("ux", newsList((d.articles || []).map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }), 10));
+    }).catch(function () { fill("ux", '<p class="empty">News is unavailable right now.</p>'); });
+    yt("yt-ufc").then(function (l) { fill("uv", vids(l, 8)); });
+  }
+
   // ---------------------------------------------------------------- tabs, player
-  var SPORTS = { football: football, f1: f1, tennis: tennis, nba: nba, nfl: nfl };
+  var SPORTS = { football: football, f1: f1, tennis: tennis, nba: nba, nfl: nfl, ufc: ufc };
   function show(s) {
     if (!SPORTS[s]) s = "football";
     ls("sports-tab", s); clearTimeout(timer);
