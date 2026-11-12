@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-12T12:11:49Z",
     "date": "2026-11-12",
-    "built_at": "2026-11-12 21:43 UTC",
+    "built_at": "2026-11-12 21:52 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -94,6 +94,12 @@ window.MIB_BRIEF = {
       "src": "Yahoo Finance",
       "url": "https://finance.yahoo.com/markets/stocks/articles/asian-stocks-extend-gains-traders-025559054.html?.tsrc=rss",
       "at": "2026-11-12T21:36:42+00:00"
+    },
+    {
+      "title": "Stock Market Today: Nasdaq Drops; Nvidia Slumps After CEO's Exit With Earnings Report On Tap",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/b961f164-91b1-38c0-a2e1-5ab20b01108e/stock-market-today%3A-nasdaq.html?.tsrc=rss",
+      "at": "2026-11-12T21:34:42+00:00"
     },
     {
       "title": "Cerebras surges 18% after beating on quarterly revenue and announcing Microsoft deal",
@@ -238,12 +244,6 @@ window.MIB_BRIEF = {
       "src": "Yahoo Finance",
       "url": "https://beincrypto.com/bitcoin-200-day-moving-average-breakdown/?.tsrc=rss",
       "at": "2026-11-12T20:53:50+00:00"
-    },
-    {
-      "title": "XOP vs AMLP. Is a Midstream or Upstream Energy ETF the Better Buy as Oil Prices Stay High?",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/etfs/2026/11/12/xop-vs-amlp-is-a-midstream-or-upstream-energy-etf-the-better-buy-as-oil-prices-stay-high/?.tsrc=rss",
-      "at": "2026-11-12T20:50:02+00:00"
     },
     {
       "title": "Alice Huang tied to Nvidia’s biggest Chinese competitor",

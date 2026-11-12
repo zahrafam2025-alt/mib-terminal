@@ -71,6 +71,10 @@
   .match:first-of-type { border-top: 0; }
   .st { font: 600 12px var(--mono); color: var(--faint); text-align: center; }
   .st.live { color: var(--live); } .st.live::before { content: "● "; }
+  .st small { display: block; font-size: 10px; color: var(--faint); margin-top: 2px; white-space: nowrap; }
+  .dayh { font: 700 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--sport, var(--gold)); padding: 12px 0 4px; border-top: 1px solid var(--line); }
+  .body > .dayh:first-child { border-top: 0; padding-top: 0; }
+  .dayh + .match { border-top: 0; }
   .teams div { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .teams span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .teams img, .tbl img { width: 20px; height: 20px; object-fit: contain; flex: none; }
@@ -235,6 +239,18 @@
   var safeUrl = function (u) { return /^https?:\/\//i.test(String(u || "")) ? String(u) : "#"; };
   var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k) || ""; localStorage.setItem(k, v); } catch (e) { return ""; } };
   var ago = function (d) { var t = new Date(d).getTime(); if (!t) return ""; var m = Math.round((Date.now() - t) / 60000); return m < 60 ? Math.max(1, m) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
+  // 12 Nov 2026 (owner: "the calendar of games and results shows no dates nor times"): games are grouped under a
+  // date heading and every game shows its time, in the visitor's own language and time zone (no English-only
+  // text surgery on the date, which failed in French and Polish browsers)
+  var hhmm = function (d) { var t = new Date(d); return isNaN(t) ? "" : t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); };
+  var dayKey = function (d) { var t = new Date(d); return isNaN(t) ? "" : t.toDateString(); };
+  var dayHead = function (d) {
+    var t = new Date(d); if (isNaN(t)) return "";
+    var k = t.toDateString(), rel = k === new Date().toDateString() ? "Today · " : k === new Date(Date.now() - 864e5).toDateString() ? "Yesterday · "
+      : k === new Date(Date.now() + 864e5).toDateString() ? "Tomorrow · " : "";
+    return rel + t.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" });
+  };
+  var shortDay = function (d) { var t = new Date(d); return isNaN(t) ? "" : t.toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" }); };
   var when = function (d) { var t = new Date(d); return isNaN(t) ? "" : t.toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); };
   var getJSON = function (u) { return fetch(u, { cache: "no-store" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); };
   // the MIB server (header.js finds the live one); the page works without it, only rumours and videos need it
@@ -281,18 +297,21 @@
   };
   var scoreRows = function (events) {
     if (!events.length) return '<p class="empty">No games in this round.</p>';
-    var order = { "in": 0, pre: 1, post: 2 };
-    events = events.slice().sort(function (a, b) { var x = order[a.status.type.state], y = order[b.status.type.state]; return x !== y ? x - y : new Date(a.date) - new Date(b.date); });
+    events = events.slice().sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+    var lastDay = "";
     return events.map(function (e) {
       var c = e.competitions[0], s = e.status.type, cs = c.competitors.slice().sort(function (a, b) { return a.homeAway === "home" ? -1 : 1; });
-      var st = s.state === "in" ? (e.status.displayClock && e.status.displayClock !== "0:00" ? e.status.displayClock : s.shortDetail) : s.state === "post" ? s.shortDetail : when(e.date).replace(/^(\w+) (\d+) \w+,? /, "$1 ");
+      var head = dayKey(e.date) !== lastDay ? '<div class="dayh">' + esc(dayHead(e.date)) + "</div>" : "";
+      lastDay = dayKey(e.date);
+      var st = s.state === "in" ? esc(e.status.displayClock && e.status.displayClock !== "0:00" ? e.status.displayClock : s.shortDetail)
+        : s.state === "post" ? esc(s.shortDetail) + "<small>" + esc(hhmm(e.date)) + "</small>" : esc(hhmm(e.date));
       var row = function (t) {
         var col = hex(t.team.color), rec = t.records && t.records[0] && t.records[0].summary;
         var form = t.form && /^[WDL]{1,6}$/.test(t.form) ? '<span class="form" title="Last games: ' + esc(t.form) + '">' + t.form.split("").map(function (x) { return '<i class="' + x + '"></i>'; }).join("") + "</span>" : "";
         return '<div class="' + (t.winner ? "win" : "") + '">' + (col ? '<i class="tc" style="background:' + col + '"></i>' : "") + (t.team.logo ? '<img src="' + esc(safeUrl(t.team.logo)) + '" alt="" loading="lazy">' : "")
           + "<span>" + esc(t.team.shortDisplayName || t.team.displayName) + "</span>" + (rec && !form ? "<em>" + esc(rec) + "</em>" : "") + form + "</div>";
       };
-      return '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(st) + '</div><div class="teams">' + cs.map(row).join("") + '</div><div class="sc">' + (s.state === "pre" ? "" : cs.map(function (t) { return esc(t.score); }).join("<br>")) + "</div></div>";
+      return head + '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + st + '</div><div class="teams">' + cs.map(row).join("") + '</div><div class="sc">' + (s.state === "pre" ? "" : cs.map(function (t) { return esc(t.score); }).join("<br>")) + "</div></div>";
     }).join("");
   };
   var stat = function (entry, name) { var x = (entry.stats || []).filter(function (s) { return s.name === name; })[0]; return x ? x.displayValue : ""; };
@@ -334,16 +353,34 @@
   function football() {
     var lg = LEAGUES.filter(function (l) { return l.k === ls("sports-league"); })[0] || LEAGUES[0];
     $("#view").innerHTML = '<div class="chips" aria-label="League">' + LEAGUES.map(function (l) { return '<button data-lg="' + l.k + '" class="' + (l === lg ? "on" : "") + '"><img src="' + leagueLogo(l) + '" alt="" onerror="this.remove()">' + esc(l.n) + "</button>"; }).join("") + '</div><div class="grid">'
-      + card("fk", "France", "", "") + card("fs", "Scores · " + lg.n, "w7", "times in your time zone") + card("ft", "Table", "w5")
+      + card("fk", "France", "", "") + card("fs", "Results & fixtures · " + lg.n, "w7", "times in your time zone") + card("ft", "Table", "w5")
       + card("fm", "Mercato · transfer rumours", "w6") + card("fn", "News · " + lg.n, "w6")
       + card("fv", "Highlights", "") + "</div>";
     Array.prototype.forEach.call(document.querySelectorAll("[data-lg]"), function (b) { b.onclick = function () { ls("sports-league", b.dataset.lg); football(); }; });
     document.getElementById("fk").hidden = true;          // shown only when a followed team plays today
     var scores = function () {
-      getJSON(ESPN + "/site/v2/sports/soccer/" + lg.k + "/scoreboard").then(function (d) {
-        var ev = d.events || []; fill("fs", scoreRows(ev));
-        if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
-      }).catch(function () { fill("fs", '<p class="empty">Scores are unavailable right now.</p>'); });
+      // 12 Nov (owner: "the calendar of games and results shows no dates nor times"): the month's games (and next
+      // month's near its end), from which: the latest round's results (its last 4 days), anything live, and the next
+      // round (its first 5 days), each under its date. Works for leagues and cups alike (ESPN takes dates=YYYYMM).
+      var now = new Date(), ym = function (y, m) { return String(y) + ("0" + (m + 1)).slice(-2); };
+      var months = [ym(now.getFullYear(), now.getMonth())];
+      if (now.getDate() > 18) months.push(ym(now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear(), (now.getMonth() + 1) % 12));
+      Promise.all(months.map(function (m) { return getJSON(ESPN + "/site/v2/sports/soccer/" + lg.k + "/scoreboard?dates=" + m).then(function (d) { return d.events || []; }); }))
+        .then(function (r) {
+          var seen = {}, all = [].concat.apply([], r).filter(function (e) { if (seen[e.id]) return false; seen[e.id] = 1; return true; });
+          var t = function (e) { return new Date(e.date).getTime(); }, st = function (e) { return e.status.type.state; };
+          var done = all.filter(function (e) { return st(e) === "post"; }), todo = all.filter(function (e) { return st(e) === "pre"; });
+          var last = done.length ? Math.max.apply(null, done.map(t)) : 0, first = todo.length ? Math.min.apply(null, todo.map(t)) : 0;
+          var ev = all.filter(function (e) {
+            return st(e) === "in" || (st(e) === "post" && t(e) >= last - 4 * 864e5) || (st(e) === "pre" && t(e) <= first + 5 * 864e5);
+          });
+          if (!ev.length) return getJSON(ESPN + "/site/v2/sports/soccer/" + lg.k + "/scoreboard").then(function (d) { return d.events || []; });
+          return ev;
+        })
+        .then(function (ev) {
+          fill("fs", scoreRows(ev));
+          if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
+        }).catch(function () { fill("fs", '<p class="empty">Scores are unavailable right now.</p>'); });
     };
     refreshers = [scores, spotlight]; scores(); spotlight();
     getJSON(ESPN + "/v2/sports/soccer/" + lg.k + "/standings").then(function (d) {
@@ -393,7 +430,7 @@
     }).catch(function () { fill("rn", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(F1 + "/last/results.json").then(function (d) {
       var r = d.MRData.RaceTable.Races[0];
-      fill("rl", '<p class="empty" style="margin-top:0">' + esc(r.raceName) + " · " + esc(when(r.date + "T" + (r.time || "12:00:00Z")).replace(/,? \d+:\d+.*/, "")) + '</p><table class="tbl"><thead><tr><th class="n">#</th><th class="t">Driver</th><th class="t hs">Team</th><th>Time</th><th>Pts</th></tr></thead><tbody>'
+      fill("rl", '<p class="empty" style="margin-top:0">' + esc(r.raceName) + " · " + esc(shortDay(r.date + "T" + (r.time || "12:00:00Z"))) + '</p><table class="tbl"><thead><tr><th class="n">#</th><th class="t">Driver</th><th class="t hs">Team</th><th>Time</th><th>Pts</th></tr></thead><tbody>'
         + r.Results.slice(0, 10).map(function (x) { return '<tr><td class="n' + medal(x.position) + '">' + esc(x.position) + '</td><td class="t">' + drv(x.Driver, x.Constructor) + '</td><td class="t hs">' + team(x.Constructor) + "</td><td>" + esc(x.Time ? x.Time.time : x.status) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
     }).catch(function () { fill("rl", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(F1 + "/driverStandings.json").then(function (d) {
@@ -481,8 +518,8 @@
           return '<div class="tourn">' + esc(ev.name) + (ev.venue && ev.venue.displayName ? "<small>" + esc(ev.venue.displayName) + "</small>" : "") + "</div>" + list.slice(0, 12).map(function (c) {
             var s = c.status.type, ps = (c.competitors || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
             if (s.state === "in") live = true;
-            var st = s.state === "in" ? "Live" : s.state === "post" ? (/retire|walkover/i.test(s.detail || "") ? s.shortDetail : "Final") : when(c.date).replace(/^(\w+) (\d+) \w+,? /, "$1 ");
-            return '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(st) + "<small>" + esc(rnd((c.round || {}).displayName)) + '</small></div><div class="teams">' + ps.map(player).join("")
+            var st = s.state === "in" ? "Live" : s.state === "post" ? (/retire|walkover/i.test(s.detail || "") ? s.shortDetail : "Final") : hhmm(c.date);
+            return '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(st) + "<small>" + esc(shortDay(c.date)) + "</small><small>" + esc(rnd((c.round || {}).displayName)) + '</small></div><div class="teams">' + ps.map(player).join("")
               + '</div><div class="sc">' + (s.state === "pre" ? "" : ps.map(function (p) { return '<div class="sets">' + sets(p) + "</div>"; }).join("")) + "</div></div>";
           }).join("");
         }).join("");
@@ -527,7 +564,7 @@
       return list.map(function (c, i) {
         var s = c.status.type, ps = (c.competitors || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
         var tag = i === 0 ? "Main event" : i === 1 ? "Co-main" : "";
-        var st = s.state === "in" ? "R" + (c.status.period || 1) + " " + (c.status.displayClock || "") : s.state === "post" ? ended(c) : when(c.date).replace(/^(\w+) (\d+) \w+,? /, "$1 ");
+        var st = s.state === "in" ? "R" + (c.status.period || 1) + " " + (c.status.displayClock || "") : s.state === "post" ? ended(c) : hhmm(c.date);
         return '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + esc(results ? (s.state === "post" ? ended(c) : st) : st)
           + "<small>" + esc(tag || (c.type || {}).abbreviation || "") + '</small></div><div class="teams">' + ps.map(fighter).join("")
           + '</div><div class="sc">' + (tag && !results ? '<span class="badge">' + esc((c.type || {}).abbreviation || "") + "</span>" : "") + (s.state === "post" ? ps.map(function (p) { return p.winner ? '<b style="color:var(--up)">W</b>' : '<span style="color:var(--faint)">L</span>'; }).join("<br>") : "") + "</div></div>";
@@ -550,7 +587,7 @@
     getJSON(U + "scoreboard?dates=" + ymd(Date.now() - 21 * 864e5) + "-" + ymd(Date.now())).then(function (d) {
       var done = (d.events || []).filter(function (e) { return e.status && e.status.type.state === "post"; }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
       if (!done.length) { fill("ul", '<p class="empty">No recent results.</p>'); return; }
-      fill("ul", '<div class="tourn">' + esc(done[0].name) + "<small>" + esc(when(done[0].date).replace(/,? \d+:\d+.*/, "")) + "</small></div>" + fights(done[0], true));
+      fill("ul", '<div class="tourn">' + esc(done[0].name) + "<small>" + esc(shortDay(done[0].date)) + "</small></div>" + fights(done[0], true));
     }).catch(function () { fill("ul", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(U + "rankings").then(function (d) {
       var all = d.rankings || [], lists = all.filter(function (r) { return !/-champions$/.test(r.type); });
