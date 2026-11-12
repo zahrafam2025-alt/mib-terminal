@@ -27,7 +27,11 @@
      colour, some logos, visuals for football and NBA too"): Tennis (ATP/WTA matches, ranking: ESPN; highlights: Tennis
      TV and WTA channels) and the NFL (ESPN; NFL channel). Team colours: ESPN (football, NBA, NFL; the NBA/NFL team lists
      come through the MIB server), F1C below for F1. Each tab has its own accent colour (ACCENT).
-     12 Nov 2026 (owner: "add UFC as well"): UFC tab (ESPN fight cards, results, rankings, news; UFC channel). -->
+     12 Nov 2026 (owner: "add UFC as well"): UFC tab (ESPN fight cards, results, rankings, news; UFC channel).
+     12 Nov 2026 (owner: "Angers is translated by Colere; team names should not be translated; France plays Italy today,
+     I don't see it"): names are marked translate="no" (NOTR) for the site's French mode (Google Translate); a
+     spotlight for the followed national teams (FOLLOW, ESPN team ids) on top of Football, from ESPN's
+     all-competitions scoreboard; the Nations League joins the league chips. -->
 
 <style>
   :root {
@@ -141,6 +145,20 @@
   .badge { display: inline-block; font: 700 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--sport, var(--gold)); border: 1px solid var(--sport, var(--gold)); border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
   @media (max-width: 560px) { .badge { display: none; } }
   .sel { font: 600 14px var(--sans); color: var(--ink); background: var(--raised); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin: 0 0 8px; max-width: 100%; }
+  /* the followed team's spotlight (12 Nov) */
+  #fk[hidden] { display: none; }
+  .fk + .fk { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; }
+  .fk-c { margin: 0 0 6px; color: var(--muted); font: 600 12px var(--mono); letter-spacing: .04em; }
+  .fk-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+  .fk-t { display: flex; align-items: center; gap: 10px; font: 700 18px var(--head); min-width: 0; }
+  .fk-row .fk-t:last-child { flex-direction: row-reverse; text-align: right; }
+  .fk-t img { width: 40px; height: 40px; object-fit: contain; flex: none; }
+  .fk-t span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fk-s { text-align: center; } .fk-s b { display: block; font: 800 34px/1.1 var(--mono); }
+  .fk-s small { display: block; color: var(--faint); font: 600 12px var(--mono); } .fk-s small.lv { color: var(--live); } .fk-s small.lv::before { content: "● "; }
+  .fk-goals { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; font-size: 14px; color: var(--muted); }
+  .fk-goals li.h { grid-column: 1; } .fk-goals li.a { grid-column: 2; text-align: right; } .fk-goals b { color: var(--ink); }
+  @media (max-width: 560px) { .fk-t { font-size: 15px; } .fk-t img { width: 30px; height: 30px; } .fk-s b { font-size: 26px; } }
   .vid { transition: transform .15s, border-color .15s; } .vid:hover { transform: translateY(-2px); border-color: var(--sport, var(--gold)); }
 </style>
 </head>
@@ -172,8 +190,17 @@
     { k: "ger.1", n: "Bundesliga", id: 10, yt: ["yt-uefa"] },
     { k: "fra.1", n: "Ligue 1", id: 9, yt: ["yt-l1"] },
     { k: "uefa.champions", n: "Champions League", id: 2, yt: ["yt-ucl", "yt-uefa"] },
-    { k: "uefa.europa", n: "Europa League", id: 2310, yt: ["yt-uefa"] }
+    { k: "uefa.europa", n: "Europa League", id: 2310, yt: ["yt-uefa"] },
+    { k: "uefa.nations", n: "Nations League", id: 2395, yt: ["yt-uefa"] }    // 12 Nov: national teams
   ];
+  // 12 Nov 2026 (owner: "France is playing Italy today, I don't see it; France should have football key info like
+  // France-Italy playing now"): national teams followed in the spotlight on top of the Football tab, in ANY
+  // competition (ESPN's all-competitions scoreboard). ESPN team id -> name; add a line to follow another team.
+  var FOLLOW = { "478": "France" };
+  // 12 Nov 2026 (owner: "Angers is translated by Colère, which is BS; team names should not be translated"): the
+  // site's French mode runs Google Translate over the page; names are marked translate="no" (as header.js does)
+  var NOTR = ".teams, td.t, .tourn, .chips button, .next b, .num, .fk-t, .fk-goals b, #fk h2";
+  var noTr = function (root) { Array.prototype.forEach.call((root || document).querySelectorAll(NOTR), function (e) { e.setAttribute("translate", "no"); e.classList.add("notranslate"); }); };
   // each sport's accent (the thin line on top of every card, the dots, the bars)
   var ACCENT = { football: "#3cc48d", f1: "#e8302d", tennis: "#c8d94a", nba: "#f08a2c", nfl: "#4f8be8", ufc: "#d4213d" };
   // F1 team colours, approximated from the team liveries (edit here if a team changes colour); text on it is
@@ -238,7 +265,7 @@
 
   // ---------------------------------------------------------------- rendering helpers
   var card = function (id, title, cls, note) { return '<section class="card ' + (cls || "") + '" id="' + id + '"><h2><span>' + esc(title) + "</span>" + (note ? "<small>" + esc(note) + "</small>" : "") + '</h2><div class="body"><p class="empty">Loading…</p></div></section>'; };
-  var fill = function (id, html) { var e = document.querySelector("#" + id + " .body"); if (e) e.innerHTML = html; };
+  var fill = function (id, html) { var e = document.querySelector("#" + id + " .body"); if (e) { e.innerHTML = html; noTr(e); } };
   var newsList = function (items, n) {
     items = items.filter(function (x) { return x.title; }).slice(0, n || 10);
     if (!items.length) return '<p class="empty">Nothing right now.</p>';
@@ -275,20 +302,50 @@
   var schedule = function () { clearTimeout(timer); timer = setTimeout(function () { refreshers.forEach(function (f) { f(); }); }, 60000); };
 
   // ---------------------------------------------------------------- FOOTBALL
+  // the followed national teams' games today (live, upcoming or just finished), big, with the goals; the card is
+  // hidden on a day they do not play
+  var spotlight = function () {
+    var box = document.getElementById("fk");
+    if (!box) return;
+    getJSON(ESPN + "/site/v2/sports/soccer/all/scoreboard").then(function (d) {
+      var ev = (d.events || []).filter(function (e) { return ((e.competitions || [])[0] || { competitors: [] }).competitors.some(function (c) { return FOLLOW[c.team && c.team.id]; }); });
+      box.hidden = !ev.length;
+      if (!ev.length) return;
+      var who = ev.map(function (e) { return e.competitions[0].competitors.filter(function (c) { return FOLLOW[c.team.id]; }).map(function (c) { return FOLLOW[c.team.id]; })[0]; });
+      var h = box.querySelector("h2 > span"); if (h) h.textContent = who[0] + (ev.some(function (e) { return e.status.type.state === "in"; }) ? " · playing now" : " · today");
+      fill("fk", ev.map(function (e) {
+        var c = e.competitions[0], s = e.status.type, live = s.state === "in";
+        var cs = c.competitors.slice().sort(function (a, b) { return a.homeAway === "home" ? -1 : 1; });
+        var st = live ? (e.status.displayClock || s.shortDetail) : s.state === "post" ? s.shortDetail : when(e.date);
+        var team = function (t) { return '<div class="fk-t' + (t.winner ? " win" : "") + '">' + (t.team.logo ? '<img src="' + esc(safeUrl(t.team.logo)) + '" alt="">' : "") + "<span>" + esc(t.team.displayName) + "</span></div>"; };
+        var goals = (c.details || []).filter(function (x) { return x.scoringPlay; }).map(function (x) {
+          var a = (x.athletesInvolved || [])[0] || {}, home = x.team && x.team.id === cs[0].team.id;
+          return '<li class="' + (home ? "h" : "a") + '">⚽ <b>' + esc(a.displayName || "") + "</b> " + esc((x.clock || {}).displayValue || "") + (x.penaltyKick ? " (pen.)" : "") + (x.ownGoal ? " (o.g.)" : "") + "</li>";
+        }).join("");
+        var link = (e.links || []).filter(function (l) { return /match|gamecast|summary/i.test(l.href || ""); })[0] || (e.links || [])[0];
+        return '<div class="fk' + (live ? " live" : "") + '"><p class="fk-c">' + esc(c.altGameNote || "") + '</p><div class="fk-row">' + team(cs[0])
+          + '<div class="fk-s">' + (s.state === "pre" ? "<small>kick-off</small>" : '<b>' + esc(cs[0].score) + " – " + esc(cs[1].score) + "</b>") + '<small class="' + (live ? "lv" : "") + '">' + esc(st) + "</small></div>"
+          + team(cs[1]) + "</div>" + (goals ? '<ul class="fk-goals">' + goals + "</ul>" : "")
+          + (link ? '<p class="note" style="margin-top:6px"><a href="' + esc(safeUrl(link.href)) + '" target="_blank" rel="noopener">Match centre (ESPN) ↗</a></p>' : "") + "</div>";
+      }).join(""));
+      if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
+    }).catch(function () { box.hidden = true; });
+  };
   function football() {
     var lg = LEAGUES.filter(function (l) { return l.k === ls("sports-league"); })[0] || LEAGUES[0];
     $("#view").innerHTML = '<div class="chips" aria-label="League">' + LEAGUES.map(function (l) { return '<button data-lg="' + l.k + '" class="' + (l === lg ? "on" : "") + '"><img src="' + leagueLogo(l) + '" alt="" onerror="this.remove()">' + esc(l.n) + "</button>"; }).join("") + '</div><div class="grid">'
-      + card("fs", "Scores · " + lg.n, "w7", "times in your time zone") + card("ft", "Table", "w5")
+      + card("fk", "France", "", "") + card("fs", "Scores · " + lg.n, "w7", "times in your time zone") + card("ft", "Table", "w5")
       + card("fm", "Mercato · transfer rumours", "w6") + card("fn", "News · " + lg.n, "w6")
       + card("fv", "Highlights", "") + "</div>";
     Array.prototype.forEach.call(document.querySelectorAll("[data-lg]"), function (b) { b.onclick = function () { ls("sports-league", b.dataset.lg); football(); }; });
+    document.getElementById("fk").hidden = true;          // shown only when a followed team plays today
     var scores = function () {
       getJSON(ESPN + "/site/v2/sports/soccer/" + lg.k + "/scoreboard").then(function (d) {
         var ev = d.events || []; fill("fs", scoreRows(ev));
         if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
       }).catch(function () { fill("fs", '<p class="empty">Scores are unavailable right now.</p>'); });
     };
-    refreshers = [scores]; scores();
+    refreshers = [scores, spotlight]; scores(); spotlight();
     getJSON(ESPN + "/v2/sports/soccer/" + lg.k + "/standings").then(function (d) {
       var groups = (d.children || []).filter(function (c) { return c.standings && c.standings.entries; });
       if (!groups.length) { fill("ft", '<p class="empty">No table for this competition right now.</p>'); return; }
@@ -517,6 +574,7 @@
 
   // ---------------------------------------------------------------- tabs, player
   var SPORTS = { football: football, f1: f1, tennis: tennis, nba: nba, nfl: nfl, ufc: ufc };
+  if (window.MutationObserver) new MutationObserver(function () { noTr($("#view")); }).observe($("#view"), { childList: true, subtree: true });
   function show(s) {
     if (!SPORTS[s]) s = "football";
     ls("sports-tab", s); clearTimeout(timer);
