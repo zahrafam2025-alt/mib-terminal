@@ -31,7 +31,12 @@
      12 Nov 2026 (owner: "Angers is translated by Colere; team names should not be translated; France plays Italy today,
      I don't see it"): names are marked translate="no" (NOTR) for the site's French mode (Google Translate); a
      spotlight for the followed national teams (FOLLOW, ESPN team ids) on top of Football, from ESPN's
-     all-competitions scoreboard; the Nations League joins the league chips. -->
+     all-competitions scoreboard; the Nations League joins the league chips.
+     13 Nov 2026 (owner: "for each sport the main tab should be a summary of key highlights across all leagues,
+     divisions etc., the thing to know, then league by league as it is now"): Football "Overview" (default chip):
+     big games live/coming across all leagues ranked by importance, league leaders and their lead, results to know
+     (upset, leader dropping points, big win, goal fest, top clash), mercato, highlights. Tennis "Overview": both
+     tours. F1, NBA, NFL, UFC: a "Key facts" card on top built from the page's own data (factsBox). -->
 
 <style>
   :root {
@@ -149,6 +154,15 @@
   .badge { display: inline-block; font: 700 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--sport, var(--gold)); border: 1px solid var(--sport, var(--gold)); border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
   @media (max-width: 560px) { .badge { display: none; } }
   .sel { font: 600 14px var(--sans); color: var(--ink); background: var(--raised); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; margin: 0 0 8px; max-width: 100%; }
+  /* 13 Nov: overviews and key facts */
+  .facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .facts li { position: relative; padding-left: 16px; font-size: 15px; line-height: 1.4; }
+  .facts li::before { content: ""; position: absolute; left: 0; top: .5em; width: 7px; height: 7px; border-radius: 50%; background: var(--sport, var(--gold)); }
+  .facts b { color: var(--ink); } .facts small { color: var(--faint); }
+  .st img.lgl { display: block; width: 16px; height: 16px; object-fit: contain; margin: 4px auto 0; }
+  .st small.tag { color: var(--sport, var(--gold)); font-weight: 700; white-space: normal; overflow: visible; line-height: 1.2; }
+  .lead td { vertical-align: middle; }
+  .lead img { width: 18px; height: 18px; object-fit: contain; vertical-align: -4px; margin-right: 6px; }
   /* the followed team's spotlight (12 Nov) */
   #fk[hidden] { display: none; }
   .fk + .fk { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; }
@@ -170,7 +184,7 @@
 <script src="/header.js" data-active="sports"></script>
 <main>
   <h1>Sports <span>Arena</span></h1>
-  <p class="lede">Live scores, tables, transfer rumours and official highlights: football, Formula 1, tennis, the NBA, the NFL and the UFC.</p>
+  <p class="lede">The thing to know first, then league by league: live scores, tables, transfer rumours and official highlights for football, Formula 1, tennis, the NBA, the NFL and the UFC.</p>
   <div class="tabs" role="tablist" aria-label="Sport">
     <button data-sport="football" role="tab">⚽ Football</button>
     <button data-sport="f1" role="tab">🏎 Formula 1</button>
@@ -305,6 +319,8 @@
       lastDay = dayKey(e.date);
       var st = s.state === "in" ? esc(e.status.displayClock && e.status.displayClock !== "0:00" ? e.status.displayClock : s.shortDetail)
         : s.state === "post" ? esc(s.shortDetail) + "<small>" + esc(hhmm(e.date)) + "</small>" : esc(hhmm(e.date));
+      if (e._tag) st += '<small class="tag">' + esc(e._tag) + "</small>";                    // 13 Nov: overview
+      if (e._lg) st += '<img class="lgl" src="' + esc(leagueLogo(e._lg)) + '" alt="' + esc(e._lg.n) + '" title="' + esc(e._lg.n) + '" onerror="this.remove()">';
       var row = function (t) {
         var col = hex(t.team.color), rec = t.records && t.records[0] && t.records[0].summary;
         var form = t.form && /^[WDL]{1,6}$/.test(t.form) ? '<span class="form" title="Last games: ' + esc(t.form) + '">' + t.form.split("").map(function (x) { return '<i class="' + x + '"></i>'; }).join("") + "</span>" : "";
@@ -313,6 +329,24 @@
       };
       return head + '<div class="match' + (s.state === "in" ? " live" : "") + '"><div class="st' + (s.state === "in" ? " live" : "") + '">' + st + '</div><div class="teams">' + cs.map(row).join("") + '</div><div class="sc">' + (s.state === "pre" ? "" : cs.map(function (t) { return esc(t.score); }).join("<br>")) + "</div></div>";
     }).join("");
+  };
+  // 13 Nov 2026 (owner: "for each sport the main tab should be a summary of key highlights across all leagues,
+  // divisions etc.: the thing to know; then league by league as it is now"): a "Key facts" card, filled line by
+  // line as the page's own data arrives (keys sort the lines)
+  var factsBox = function (id) {
+    var f = {};
+    return function (k, html) { f[k] = html; fill(id, '<ul class="facts">' + Object.keys(f).sort().map(function (x) { return "<li>" + f[x] + "</li>"; }).join("") + "</ul>"); };
+  };
+  var ago2 = function (d) { var s = (new Date(d) - Date.now()) / 1000; if (isNaN(s)) return ""; var dd = Math.floor(Math.abs(s) / 86400), hh = Math.floor(Math.abs(s) % 86400 / 3600);
+    return s > 0 ? "in " + (dd ? dd + "d " : "") + hh + "h" : (dd ? dd + "d " : "") + hh + "h ago"; };
+  // a competition's games this month (+ last month early on, + next month late on): ESPN takes dates=YYYYMM
+  var monthEvents = function (path) {
+    var now = new Date(), y = now.getFullYear(), m = now.getMonth(), ym = function (yy, mm) { return String(yy) + ("0" + (mm + 1)).slice(-2); };
+    var months = [ym(y, m)];
+    if (now.getDate() > 18) months.push(m === 11 ? ym(y + 1, 0) : ym(y, m + 1));
+    if (now.getDate() < 8) months.push(m === 0 ? ym(y - 1, 11) : ym(y, m - 1));
+    return Promise.all(months.map(function (x) { return getJSON(ESPN + "/site/v2/sports/" + path + "/scoreboard?dates=" + x).then(function (d) { return d.events || []; }).catch(function () { return []; }); }))
+      .then(function (r) { var seen = {}; return [].concat.apply([], r).filter(function (e) { if (seen[e.id]) return false; seen[e.id] = 1; return true; }); });
   };
   var stat = function (entry, name) { var x = (entry.stats || []).filter(function (s) { return s.name === name; })[0]; return x ? x.displayValue : ""; };
 
@@ -350,9 +384,12 @@
       if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
     }).catch(function () { box.hidden = true; });
   };
+  var OVERVIEW = { k: "overview", n: "Overview" };
   function football() {
-    var lg = LEAGUES.filter(function (l) { return l.k === ls("sports-league"); })[0] || LEAGUES[0];
-    $("#view").innerHTML = '<div class="chips" aria-label="League">' + LEAGUES.map(function (l) { return '<button data-lg="' + l.k + '" class="' + (l === lg ? "on" : "") + '"><img src="' + leagueLogo(l) + '" alt="" onerror="this.remove()">' + esc(l.n) + "</button>"; }).join("") + '</div><div class="grid">'
+    var lg = LEAGUES.filter(function (l) { return l.k === ls("sports-league"); })[0] || OVERVIEW;
+    var chips = '<div class="chips" aria-label="League">' + [OVERVIEW].concat(LEAGUES).map(function (l) { return '<button data-lg="' + l.k + '" class="' + (l === lg ? "on" : "") + '">' + (l.id ? '<img src="' + leagueLogo(l) + '" alt="" onerror="this.remove()">' : "★ ") + esc(l.n) + "</button>"; }).join("") + "</div>";
+    if (lg === OVERVIEW) { footballOverview(chips); return; }
+    $("#view").innerHTML = chips + '<div class="grid">'
       + card("fk", "France", "", "") + card("fs", "Results & fixtures · " + lg.n, "w7", "times in your time zone") + card("ft", "Table", "w5")
       + card("fm", "Mercato · transfer rumours", "w6") + card("fn", "News · " + lg.n, "w6")
       + card("fv", "Highlights", "") + "</div>";
@@ -404,13 +441,87 @@
     Promise.all(lg.yt.map(yt)).then(function (r) { fill("fv", vids([].concat.apply([], r), 8)); });
   }
 
+  // 13 Nov 2026: Football's Overview, across every league on the page: the followed team, what is live and coming,
+  // each league's leader and lead, the results worth knowing (upsets, the leader dropping points, big wins), the
+  // mercato and the newest highlights
+  function footballOverview(chips) {
+    $("#view").innerHTML = chips + '<div class="grid">' + card("fk", "France", "", "") + card("ol", "Live & coming up · all leagues", "w7", "times in your time zone")
+      + card("ot", "League leaders", "w5") + card("ob", "Results to know", "w6", "last 7 days") + card("fm", "Mercato · transfer rumours", "w6")
+      + card("fv", "Highlights", "") + "</div>";
+    Array.prototype.forEach.call(document.querySelectorAll("[data-lg]"), function (b) { b.onclick = function () { ls("sports-league", b.dataset.lg); football(); }; });
+    document.getElementById("fk").hidden = true;
+    var leagues = LEAGUES, ranks = {};
+    var tablesP = Promise.all(leagues.filter(function (l) { return l.k !== "uefa.nations"; }).map(function (l) {
+      return getJSON(ESPN + "/v2/sports/soccer/" + l.k + "/standings").then(function (d) {
+        var g = (d.children || []).filter(function (c) { return c.standings && c.standings.entries; })[0];
+        if (!g) return null;
+        var rows = g.standings.entries.slice().sort(function (a, b) { return (+stat(a, "rank") || 99) - (+stat(b, "rank") || 99); });
+        ranks[l.k] = {}; rows.forEach(function (e, i) { ranks[l.k][e.team.id] = { r: +stat(e, "rank") || i + 1, n: rows.length }; });
+        return { l: l, rows: rows };
+      }).catch(function () { return null; });
+    }));
+    tablesP.then(function (r) {
+      r = r.filter(function (x) { return x && x.rows.length > 1; });
+      if (!r.length) { fill("ot", '<p class="empty">Unavailable right now.</p>'); return; }
+      fill("ot", '<table class="tbl lead"><thead><tr><th class="t">League</th><th class="t">Leader</th><th>Pts</th><th>Lead</th></tr></thead><tbody>' + r.map(function (x) {
+        var a = x.rows[0], b = x.rows[1], t = a.team, logo = t.logos && t.logos[0] ? t.logos[0].href : "", gap = (+stat(a, "points") || 0) - (+stat(b, "points") || 0);
+        return '<tr><td class="t"><img src="' + esc(leagueLogo(x.l)) + '" alt="" onerror="this.remove()">' + esc(x.l.n) + '</td><td class="t"><div>' + (logo ? '<img src="' + esc(safeUrl(logo)) + '" alt="">' : "") + esc(t.shortDisplayName || t.displayName)
+          + "</div></td><td class=\"p\">" + esc(stat(a, "points")) + "</td><td>" + (gap > 0 ? "+" + gap : gap === 0 ? "level" : gap) + "</td></tr>";
+      }).join("") + '</tbody></table><p class="note">Lead = points ahead of second place.</p>');
+    });
+    var live = function () {
+      Promise.all([Promise.all(leagues.map(function (l) { return monthEvents("soccer/" + l.k).then(function (ev) { ev.forEach(function (e) { e._lg = l; }); return ev; }); })), tablesP]).then(function (rr) {
+        var r = rr[0];                                     // the tables (ranks) are in by now
+        var all = [].concat.apply([], r), now = Date.now(), t = function (e) { return new Date(e.date).getTime(); }, st = function (e) { return e.status.type.state; };
+        var today = new Date().toDateString();
+        // only the games that matter: live and followed teams first, then by competition (Nations League: its top
+        // division, League A, only) and by how high both teams stand in their table
+        var W = { "uefa.champions": 30, "eng.1": 26, "esp.1": 25, "ita.1": 24, "ger.1": 24, "fra.1": 24, "uefa.europa": 18 };
+        var weight = function (e) {
+          var cs = e.competitions[0].competitors, rk = ranks[e._lg.k] || {}, note = e.competitions[0].altGameNote || "";
+          var w = e._lg.k === "uefa.nations" ? (/Group A\d/.test(note) ? 24 : 0) : (W[e._lg.k] || 10);
+          if (!w && !cs.some(function (c) { return FOLLOW[c.team.id]; })) return 0;
+          var top = cs.filter(function (c) { var x = rk[c.team.id]; return x && x.r <= 6; }).length;
+          return w + top * 8 + (st(e) === "in" ? 100 : 0) + (cs.some(function (c) { return FOLLOW[c.team.id]; }) ? 80 : 0);
+        };
+        var soon = all.filter(function (e) { return st(e) === "pre" && t(e) - now < 3 * 864e5; });
+        if (!soon.some(function (e) { return weight(e) > 0; })) soon = all.filter(function (e) { return st(e) === "pre"; }).sort(function (a, b) { return t(a) - t(b); }).slice(0, 40);
+        var ev = all.filter(function (e) { return st(e) === "in" || (st(e) === "post" && new Date(e.date).toDateString() === today); }).concat(soon)
+          .filter(function (e) { return weight(e) > 0; }).sort(function (a, b) { return weight(b) - weight(a); }).slice(0, 12);
+        fill("ol", ev.length ? scoreRows(ev) : '<p class="empty">No big games in the coming days.</p>');
+        if (all.some(function (e) { return st(e) === "in"; })) schedule();
+        // results to know: the last 7 days, tagged; ranks come from the league tables
+        tablesP.then(function () {
+          var res = all.filter(function (e) { return st(e) === "post" && now - t(e) < 7 * 864e5; }).map(function (e) {
+            var cs = e.competitions[0].competitors, a = cs[0], b = cs[1], ga = +a.score || 0, gb = +b.score || 0, rk = ranks[e._lg.k] || {};
+            var ra = (rk[a.team.id] || {}).r, rb = (rk[b.team.id] || {}).r, w = ga > gb ? a : gb > ga ? b : null, lo = w === a ? b : w === b ? a : null;
+            var rw = w && (rk[w.team.id] || {}).r, rl = lo && (rk[lo.team.id] || {}).r, score = 0, tag = "";
+            if (w && rw && rl && rw - rl >= 8) { tag = "Upset"; score = 50 + rw - rl; }
+            else if ((ra === 1 && ga <= gb) || (rb === 1 && gb <= ga)) { tag = ga === gb ? "Leader held" : "Leader beaten"; score = 40; }
+            else if (Math.abs(ga - gb) >= 3) { tag = "Big win"; score = 20 + Math.abs(ga - gb); }
+            else if (ga + gb >= 6) { tag = "Goal fest"; score = 15 + ga + gb; }
+            else if (ra && rb && ra <= 4 && rb <= 4) { tag = "Top-4 clash"; score = 10; }
+            e._tag = tag; e._score = score; return e;
+          }).filter(function (e) { return e._score > 0; }).sort(function (x, y) { return y._score - x._score; }).slice(0, 8);
+          fill("ob", res.length ? scoreRows(res) : '<p class="empty">Nothing out of the ordinary this week.</p>');
+        });
+      });
+    };
+    refreshers = [live, spotlight]; live(); spotlight();
+    Promise.all([rss("transfers-sky", "Sky Sports Transfer Centre"), rss("transfers-fm", "Foot Mercato"),
+      rss("football-bbc", "BBC Sport").then(function (l) { return l.filter(function (x) { return /gossip|transfer|signs?|bid|deal|loan|move/i.test(x.title); }); })])
+      .then(function (r) { var all = r[0].slice(0, 5).concat(r[2].slice(0, 3), r[1].slice(0, 4)).sort(function (a, b) { return new Date(b.date) - new Date(a.date); }); fill("fm", newsList(all, 10)); });
+    Promise.all(["yt-pl", "yt-l1", "yt-ucl", "yt-uefa"].map(yt)).then(function (r) { fill("fv", vids([].concat.apply([], r), 8)); });
+  }
+
   // ---------------------------------------------------------------- F1
   function f1() {
-    $("#view").innerHTML = '<div class="grid">' + card("rn", "Next race", "w6") + card("rl", "Last race", "w6")
+    $("#view").innerHTML = '<div class="grid">' + card("kf", "Key facts", "", "") + card("rn", "Next race", "w6") + card("rl", "Last race", "w6")
       + card("rd", "Drivers' championship", "w7") + card("rc", "Constructors", "w5")
       + card("rx", "F1 news", "w6") + card("rv", "Highlights", "w6") + "</div>";
     refreshers = [];
     var name = function (d) { return d.givenName + " " + d.familyName; };
+    var fact = factsBox("kf");
     var tcol = function (c) { return F1C[(c || {}).constructorId] || "#8a96a8"; };
     // a driver: number in the team colour, the flag, the name
     var drv = function (d, c) { var col = tcol(c); return '<div><span class="num" style="background:' + col + ";color:" + inkOn(col) + '">' + esc(d.permanentNumber || d.code || "") + "</span>" + natFlag(d.nationality) + "<span>" + esc(name(d)) + "</span></div>"; };
@@ -427,20 +538,24 @@
           .concat([["Race", t]]).sort(function (a, b) { return a[1] - b[1]; })
           .map(function (x) { var past = x[1] < Date.now(); return '<tr style="' + (past ? "opacity:.5" : "") + '"><td class="t">' + (x[0] === "Race" ? "<b>🏁 Race</b>" : esc(x[0])) + "</td><td>" + esc(when(x[1])) + "</td></tr>"; }).join("") + "</tbody></table>");
       tick(); setInterval(tick, 30000);
+      fact("3", "Next: <b>" + esc(r.raceName) + "</b> " + esc(ago2(t)) + " <small>(round " + esc(r.round) + ")</small>");
     }).catch(function () { fill("rn", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(F1 + "/last/results.json").then(function (d) {
-      var r = d.MRData.RaceTable.Races[0];
+      var r = d.MRData.RaceTable.Races[0], w = r.Results[0];
+      fact("2", "Last race: <b>" + esc(name(w.Driver)) + "</b> (" + esc(w.Constructor.name) + ") won the " + esc(r.raceName) + (r.Results[1] ? ", ahead of " + esc(name(r.Results[1].Driver)) : ""));
       fill("rl", '<p class="empty" style="margin-top:0">' + esc(r.raceName) + " · " + esc(shortDay(r.date + "T" + (r.time || "12:00:00Z"))) + '</p><table class="tbl"><thead><tr><th class="n">#</th><th class="t">Driver</th><th class="t hs">Team</th><th>Time</th><th>Pts</th></tr></thead><tbody>'
         + r.Results.slice(0, 10).map(function (x) { return '<tr><td class="n' + medal(x.position) + '">' + esc(x.position) + '</td><td class="t">' + drv(x.Driver, x.Constructor) + '</td><td class="t hs">' + team(x.Constructor) + "</td><td>" + esc(x.Time ? x.Time.time : x.status) + '</td><td class="p">' + esc(x.points) + "</td></tr>"; }).join("") + "</tbody></table>");
     }).catch(function () { fill("rl", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(F1 + "/driverStandings.json").then(function (d) {
-      var l = d.MRData.StandingsTable.StandingsLists[0];
+      var l = d.MRData.StandingsTable.StandingsLists[0], a = l.DriverStandings[0], b = l.DriverStandings[1];
+      if (a && b) fact("1", "Championship: <b>" + esc(name(a.Driver)) + "</b> leads with " + esc(a.points) + " pts, <b>" + (+a.points - +b.points) + "</b> ahead of " + esc(name(b.Driver)));
       fill("rd", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Driver</th><th class="t hs">Team</th><th class="hs">Wins</th><th>Pts</th></tr></thead><tbody>'
         + l.DriverStandings.map(function (x, i, all) { var c = x.Constructors[x.Constructors.length - 1];   // the team they race for now
           return '<tr><td class="n' + medal(x.position) + '">' + esc(x.position) + '</td><td class="t">' + drv(x.Driver, c) + '</td><td class="t hs">' + team(c) + '</td><td class="hs">' + esc(x.wins) + '</td><td class="p pp">' + esc(x.points) + pbar(+x.points, +all[0].points, tcol(c)) + "</td></tr>"; }).join("") + "</tbody></table>");
     }).catch(function () { fill("rd", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(F1 + "/constructorStandings.json").then(function (d) {
-      var l = d.MRData.StandingsTable.StandingsLists[0];
+      var l = d.MRData.StandingsTable.StandingsLists[0], a = l.ConstructorStandings[0], b = l.ConstructorStandings[1];
+      if (a && b) fact("4", "Constructors: <b>" + esc(a.Constructor.name) + "</b> lead " + esc(b.Constructor.name) + " by " + (+a.points - +b.points) + " pts");
       fill("rc", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Team</th><th class="hs">Wins</th><th>Pts</th></tr></thead><tbody>'
         + l.ConstructorStandings.map(function (x, i, all) { return '<tr><td class="n' + medal(x.position) + '">' + esc(x.position) + '</td><td class="t">' + team(x.Constructor) + '</td><td class="hs">' + esc(x.wins) + '</td><td class="p pp">' + esc(x.points) + pbar(+x.points, +all[0].points, tcol(x.Constructor)) + "</td></tr>"; }).join("") + "</tbody></table>");
     }).catch(function () { fill("rc", '<p class="empty">Unavailable right now.</p>'); });
@@ -460,19 +575,32 @@
   // o: path, label, ids [scores, news, conference 1, conference 2, videos], conf names, match (which is conference 1),
   //    po (play-off places), cols (table columns), yt, bbc (news fallback)
   var usSport = function (o) {
-    $("#view").innerHTML = '<div class="grid">' + card(o.ids[0], "Scores", "w7", "times in your time zone") + card(o.ids[1], o.label + " news", "w5")
+    $("#view").innerHTML = '<div class="grid">' + card("kf", "Key facts", "", "") + card(o.ids[0], "Scores", "w7", "times in your time zone") + card(o.ids[1], o.label + " news", "w5")
       + card(o.ids[2], o.conf[0], "w6") + card(o.ids[3], o.conf[1], "w6") + card(o.ids[4], "Highlights", "") + "</div>";
     var scores = function () {
       getJSON(ESPN + "/site/v2/sports/" + o.path + "/scoreboard").then(function (d) {
         var ev = d.events || []; fill(o.ids[0], scoreRows(ev));
+        var nLive = ev.filter(function (e) { return e.status.type.state === "in"; }).length, up = ev.filter(function (e) { return e.status.type.state === "pre"; }).sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+        fact("1", nLive ? "<b>" + nLive + " game" + (nLive > 1 ? "s" : "") + " live now</b>" : up.length ? "Next game: <b>" + esc(up[0].shortName || up[0].name) + "</b> " + esc(ago2(up[0].date)) + " <small>(" + esc(shortDay(up[0].date)) + " " + esc(hhmm(up[0].date)) + ")</small>" : "No game scheduled on this scoreboard");
         var wk = d.week && d.week.number, h = document.querySelector("#" + o.ids[0] + " h2 > span");
         if (wk && h) h.textContent = "Scores · week " + wk;
         if (ev.some(function (e) { return e.status.type.state === "in"; })) schedule();
       }).catch(function () { fill(o.ids[0], '<p class="empty">Scores are unavailable right now.</p>'); });
     };
+    var fact = factsBox("kf");
     refreshers = [scores]; scores();
     Promise.all([getJSON(ESPN + "/v2/sports/" + o.path + "/standings"), teamColors(o.path)]).then(function (r) {
       (r[0].children || []).forEach(function (c) { fill(o.match.test(c.name) ? o.ids[2] : o.ids[3], confTable(c, r[1], o.po, o.cols)); });
+      var every = [];
+      (r[0].children || []).forEach(function (c, i) {
+        var top = c.standings.entries.slice().sort(function (a, b) { return (+stat(a, "playoffSeed") || 99) - (+stat(b, "playoffSeed") || 99); })[0];
+        every = every.concat(c.standings.entries);
+        if (top) fact("2" + i, "Top of the " + esc(o.match.test(c.name) ? o.conf[0] : o.conf[1]) + ": <b>" + esc(top.team.displayName) + "</b> " + esc(stat(top, "wins")) + "-" + esc(stat(top, "losses")));
+      });
+      var hot = every.map(function (e) { var m = /^W(\d+)$/.exec(stat(e, "streak")); return { e: e, n: m ? +m[1] : 0 }; }).sort(function (a, b) { return b.n - a.n; })[0];
+      if (hot && hot.n >= 3) fact("3", "Hottest team: <b>" + esc(hot.e.team.displayName) + "</b>, " + hot.n + " wins in a row");
+      var cold = every.map(function (e) { var m = /^L(\d+)$/.exec(stat(e, "streak")); return { e: e, n: m ? +m[1] : 0 }; }).sort(function (a, b) { return b.n - a.n; })[0];
+      if (cold && cold.n >= 4) fact("4", "In trouble: <b>" + esc(cold.e.team.displayName) + "</b>, " + cold.n + " losses in a row");
     }).catch(function () { fill(o.ids[2], '<p class="empty">Unavailable right now.</p>'); fill(o.ids[3], ""); });
     getJSON(ESPN + "/site/v2/sports/" + o.path + "/news?limit=12").then(function (d) {
       fill(o.ids[1], newsList((d.articles || []).map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }), 10));
@@ -493,9 +621,11 @@
   // ATP or WTA: this week's tournaments (singles: live first, then the next 36 hours' order of play, then the last
   // 30 hours' results), the world ranking, news, highlights (Tennis TV = the ATP Tour's own channel; the WTA's own)
   function tennis() {
-    var tour = ls("sports-tour") === "wta" ? "wta" : "atp";
-    $("#view").innerHTML = '<div class="chips" aria-label="Tour">' + [["atp", "ATP · men"], ["wta", "WTA · women"]].map(function (t) { return '<button data-tour="' + t[0] + '" class="' + (t[0] === tour ? "on" : "") + '">' + t[1] + "</button>"; }).join("")
-      + '</div><div class="grid">' + card("tm", "Matches", "w7", "times in your time zone") + card("tr", "World ranking", "w5")
+    // 13 Nov: "Overview" (both tours, the default), then each tour as before
+    var tour = { atp: "atp", wta: "wta" }[ls("sports-tour")] || "all", tours = tour === "all" ? ["atp", "wta"] : [tour];
+    $("#view").innerHTML = '<div class="chips" aria-label="Tour">' + [["all", "★ Overview"], ["atp", "ATP · men"], ["wta", "WTA · women"]].map(function (t) { return '<button data-tour="' + t[0] + '" class="' + (t[0] === tour ? "on" : "") + '">' + t[1] + "</button>"; }).join("")
+      + '</div><div class="grid">' + card("tm", tour === "all" ? "Matches · ATP & WTA" : "Matches", "w7", "times in your time zone")
+      + (tour === "all" ? card("tr_atp", "ATP top 10", "w5") + card("tr_wta", "WTA top 10", "w5") : card("tr_" + tour, "World ranking", "w5"))
       + card("tn", "Tennis news", "w6") + card("tv", "Highlights", "w6") + "</div>";
     Array.prototype.forEach.call(document.querySelectorAll("[data-tour]"), function (b) { b.onclick = function () { ls("sports-tour", b.dataset.tour); tennis(); }; });
     var player = function (p) {
@@ -506,7 +636,8 @@
     var sets = function (p) { return (p.linescores || []).map(function (s) { var tag = s.winner ? "b" : "span"; return "<" + tag + ">" + esc(s.value == null ? "" : Math.round(s.value)) + (s.tiebreak != null ? "<sup>" + esc(s.tiebreak) + "</sup>" : "") + "</" + tag + ">"; }).join(""); };
     var matches = function () {
       var now = Date.now();
-      getJSON(ESPN + "/site/v2/sports/tennis/" + tour + "/scoreboard").then(function (d) {
+      Promise.all(tours.map(function (tt) { return getJSON(ESPN + "/site/v2/sports/tennis/" + tt + "/scoreboard").then(function (d) { (d.events || []).forEach(function (e) { e._tour = tt; }); return d.events || []; }).catch(function () { return []; }); })).then(function (r) {
+        var d = { events: [].concat.apply([], r) };
         var live = false, order = { "in": 0, pre: 1, post: 2 };
         var html = (d.events || []).map(function (ev) {
           var list = [];
@@ -515,7 +646,7 @@
             return s === "in" || (s === "pre" && t - now < 36 * 3600e3) || (s === "post" && now - t < 30 * 3600e3); });
           if (!list.length) return "";
           list.sort(function (a, b) { var x = order[a.status.type.state], y = order[b.status.type.state]; return x !== y ? x - y : (x === 2 ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date)); });
-          return '<div class="tourn">' + esc(ev.name) + (ev.venue && ev.venue.displayName ? "<small>" + esc(ev.venue.displayName) + "</small>" : "") + "</div>" + list.slice(0, 12).map(function (c) {
+          return '<div class="tourn">' + (tours.length > 1 ? esc(ev._tour.toUpperCase()) + " · " : "") + esc(ev.name) + (ev.venue && ev.venue.displayName ? "<small>" + esc(ev.venue.displayName) + "</small>" : "") + "</div>" + list.slice(0, tours.length > 1 ? 6 : 12).map(function (c) {
             var s = c.status.type, ps = (c.competitors || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
             if (s.state === "in") live = true;
             var st = s.state === "in" ? "Live" : s.state === "post" ? (/retire|walkover/i.test(s.detail || "") ? s.shortDetail : "Final") : hhmm(c.date);
@@ -523,32 +654,35 @@
               + '</div><div class="sc">' + (s.state === "pre" ? "" : ps.map(function (p) { return '<div class="sets">' + sets(p) + "</div>"; }).join("")) + "</div></div>";
           }).join("");
         }).join("");
-        fill("tm", html || '<p class="empty">No matches today or tomorrow on the ' + tour.toUpperCase() + " tour.</p>");
+        fill("tm", html || '<p class="empty">No matches today or tomorrow' + (tours.length > 1 ? "." : " on the " + tour.toUpperCase() + " tour.") + "</p>");
         if (live) schedule();
       }).catch(function () { fill("tm", '<p class="empty">Matches are unavailable right now.</p>'); });
     };
     refreshers = [matches]; matches();
-    getJSON(ESPN + "/site/v2/sports/tennis/" + tour + "/rankings").then(function (d) {
-      var rk = (((d.rankings || [])[0] || {}).ranks || []).slice(0, 30);
+    tours.forEach(function (tour) { getJSON(ESPN + "/site/v2/sports/tennis/" + tour + "/rankings").then(function (d) {
+      var rk = (((d.rankings || [])[0] || {}).ranks || []).slice(0, tours.length > 1 ? 10 : 30);
       if (!rk.length) throw new Error("none");
-      fill("tr", '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Player</th><th>Pts</th></tr></thead><tbody>'
+      fill("tr_" + tour, '<table class="tbl"><thead><tr><th class="n">#</th><th class="t">Player</th><th>Pts</th></tr></thead><tbody>'
         + rk.map(function (x) { var a = x.athlete || {}, mv = (+x.previous || 0) - (+x.current || 0);
           var tr = x.previous && mv ? '<span class="tr ' + (mv > 0 ? "up" : "dn") + '" title="' + (mv > 0 ? "up " : "down ") + Math.abs(mv) + ' since last week">' + (mv > 0 ? "▲" : "▼") + Math.abs(mv) + "</span>" : "";
           return '<tr><td class="n' + medal(x.current) + '">' + esc(x.current) + '</td><td class="t"><div>' + flagImg(a.flag, a.flagAltText) + "<span>" + esc(a.displayName) + "</span>" + tr + '</div></td><td class="p pp">' + esc(Math.round(x.points || 0).toLocaleString()) + pbar(+x.points, +rk[0].points) + "</td></tr>"; }).join("") + "</tbody></table>");
-    }).catch(function () { fill("tr", '<p class="empty">The ranking is unavailable right now.</p>'); });
-    getJSON(ESPN + "/site/v2/sports/tennis/" + tour + "/news?limit=12").then(function (d) {
-      fill("tn", newsList((d.articles || []).map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }), 10));
-    }).catch(function () { rss("tennis-bbc", "BBC Sport").then(function (l) { fill("tn", newsList(l, 10)); }); });
-    yt(tour === "wta" ? "yt-wta" : "yt-atp").then(function (l) { fill("tv", vids(l, 6)); });
+    }).catch(function () { fill("tr_" + tour, '<p class="empty">The ranking is unavailable right now.</p>'); }); });
+    Promise.all(tours.map(function (tt) { return getJSON(ESPN + "/site/v2/sports/tennis/" + tt + "/news?limit=12").then(function (d) { return d.articles || []; }).catch(function () { return []; }); })).then(function (r) {
+      var seen = {}, arts = [].concat.apply([], r).filter(function (a) { if (seen[a.headline]) return false; seen[a.headline] = 1; return true; });
+      if (!arts.length) return rss("tennis-bbc", "BBC Sport").then(function (l) { fill("tn", newsList(l, 10)); });
+      fill("tn", newsList(arts.map(function (a) { return { title: a.headline, link: a.links && a.links.web && a.links.web.href, date: a.published, src: "ESPN" }; }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); }), 10));
+    });
+    Promise.all(tours.map(function (tt) { return yt(tt === "wta" ? "yt-wta" : "yt-atp"); })).then(function (r) { fill("tv", vids([].concat.apply([], r), 6)); });
   }
 
   // ---------------------------------------------------------------- UFC (12 Nov 2026, owner: "add UFC as well")
   // the next (or live) event's fight card, main event first; the last event's results; ESPN's pound-for-pound and
   // division rankings (champion + top 10); news; highlights from the UFC's own channel
   function ufc() {
-    $("#view").innerHTML = '<div class="grid">' + card("un", "Next event", "w7", "times in your time zone") + card("ul", "Last event", "w5")
+    $("#view").innerHTML = '<div class="grid">' + card("kf", "Key facts", "", "") + card("un", "Next event", "w7", "times in your time zone") + card("ul", "Last event", "w5")
       + card("ur", "Rankings", "w6") + card("ux", "UFC news", "w6") + card("uv", "Highlights", "") + "</div>";
-    var U = ESPN + "/site/v2/sports/mma/ufc/";
+    var U = ESPN + "/site/v2/sports/mma/ufc/", fact = factsBox("kf");
+    var names = function (c) { return (c.competitors || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); }).map(function (p) { return (p.athlete || {}).displayName || "TBA"; }).join(" vs "); };
     var fighter = function (p) {
       var a = p.athlete || {}, f = a.flag || {}, rec = p.records && p.records[0] && p.records[0].summary;
       return '<div class="' + (p.winner ? "win" : "") + '">' + flagImg(f.href, f.alt) + "<span>" + esc(a.displayName || "TBA") + "</span>" + (rec ? "<em>" + esc(rec) + "</em>" : "") + "</div>";
@@ -577,6 +711,11 @@
         var t = new Date(ev.date), live = ev.status && ev.status.type.state === "in";
         var head = function () { var s = Math.max(0, (t - Date.now()) / 1000); return live ? '<span class="cd" style="color:var(--live)">● LIVE</span>' : s > 0 ? '<span class="cd" id="ucd">' + Math.floor(s / 86400) + "d " + Math.floor(s % 86400 / 3600) + "h " + Math.floor(s % 3600 / 60) + "m</span>" : ""; };
         var venue = ev.competitions && ev.competitions[0] && ev.competitions[0].venue;
+        var card0 = (ev.competitions || []).slice().reverse(), main = card0[0];
+        fact("1", (live ? "<b>Live now:</b> " : "Next: ") + "<b>" + esc(ev.name) + "</b> " + (live ? "" : esc(ago2(t))) + " <small>(" + esc(shortDay(t)) + ")</small>");
+        if (main) fact("2", "Main event: <b>" + esc(names(main)) + "</b> <small>" + esc((main.type || {}).abbreviation || "") + "</small>");
+        var five = card0.filter(function (c) { return (((c.format || {}).regulation || {}).periods || 3) >= 5; }).length;
+        if (five > 1) fact("3", five + " five-round fights on the card (main event and title fights)");
         fill("un", '<div class="next"><b>' + esc(ev.name) + "</b>" + head() + '</div><p class="empty">' + (venue ? esc(venue.fullName || "") + (venue.address && venue.address.city ? ", " + esc(venue.address.city) : "") + " · " : "") + "first fight " + esc(when(t)) + "</p>" + fights(ev, false));
         if (live) schedule();
       }).catch(function () { fill("un", '<p class="empty">Unavailable right now.</p>'); });
@@ -587,6 +726,8 @@
     getJSON(U + "scoreboard?dates=" + ymd(Date.now() - 21 * 864e5) + "-" + ymd(Date.now())).then(function (d) {
       var done = (d.events || []).filter(function (e) { return e.status && e.status.type.state === "post"; }).sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
       if (!done.length) { fill("ul", '<p class="empty">No recent results.</p>'); return; }
+      var m0 = (done[0].competitions || []).slice().reverse()[0], w0 = m0 && (m0.competitors || []).filter(function (p) { return p.winner; })[0];
+      if (w0) fact("4", "Last event (" + esc(done[0].name) + "): <b>" + esc((w0.athlete || {}).displayName) + "</b> won the main event, " + esc(ended(m0)));
       fill("ul", '<div class="tourn">' + esc(done[0].name) + "<small>" + esc(shortDay(done[0].date)) + "</small></div>" + fights(done[0], true));
     }).catch(function () { fill("ul", '<p class="empty">Unavailable right now.</p>'); });
     getJSON(U + "rankings").then(function (d) {
