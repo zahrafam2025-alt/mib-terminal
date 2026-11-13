@@ -56,6 +56,8 @@
     $("liveSrc").textContent = "Official figures from the US agencies via FRED (St. Louis Fed); forecasts from the ForexFactory calendar; prices delayed about 15 min. "
       + (n.by === "ai" ? "The note is written by AI from these figures only." : "The note is written from the figures.");
     sec.hidden = false;
+    window.MIB_LIVE_NEXT = nx[0] || null;                       // the hero's "What's next" when the brief's events are all out
+    if (window.MIB_HERO) try { window.MIB_HERO(); } catch (e) {}
 
     // the "Coming up" calendar: each result written into its event
     res.forEach(function (r) {

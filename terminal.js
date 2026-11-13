@@ -81,16 +81,25 @@
   var vx = Number((get("VIX") || {}).price || R.vix);
   if (vx) { if (vx > 20) h.push("the VIX fear gauge " + (vixJump ? "jumps to " : "sits above 20, at ") + vx.toFixed(1)); else if (vixJump) h.push("the VIX fear gauge is at " + vx.toFixed(1) + ", below 20"); }
   $("headline").textContent = h.length ? h.join(" while ").replace(/^./, function (c) { return c.toUpperCase(); }) + "." : (S.story || {}).lede || "";
-  var next = ((S.watchlist || {}).items || []).filter(function (e) { return e.impact === "high"; })[0] || ((S.watchlist || {}).items || [])[0];
+  // 13 Nov (owner: "fix the hero's What's next after the event is out"): only an event still to come (the time in the
+  // brief is UTC, "Fri 13 Nov 13:30 UTC"); when the brief has none left, the next one the live block knows (live.js
+  // sets MIB_LIVE_NEXT). An archived day keeps what it said that morning.
+  var wl = (S.watchlist || {}).items || [], yr0 = String((B.meta && B.meta.date) || new Date().getFullYear()).slice(0, 4);
+  var tOf = function (e) { var p = (e.when || "").split(" "), t = Date.parse(p[1] + " " + p[2] + " " + yr0 + " " + (p[3] || "00:00") + " UTC"); return isNaN(t) ? 9e15 : t; };
+  var fut = ARCHIVE ? wl : wl.filter(function (e) { return tOf(e) > Date.now(); });
+  var next = fut.filter(function (e) { return e.impact === "high"; })[0] || fut[0], L = !ARCHIVE && !next && window.MIB_LIVE_NEXT;
   var rows = [
     ["What happened", [spx && spx.pct != null ? "S&P 500 " + pct(spx.pct) + (ndx && ndx.pct != null ? ", Nasdaq 100 " + pct(ndx.pct) : "") : "",
       br != null ? (br < 50 ? "Only " : "") + br + "% of stocks rose: " + ((tape.observations || [])[1] || "a narrow move").replace(/^Leadership /, "leadership ") : ""].filter(Boolean).join(". ")],
     ["Why it matters", (S.story || {}).interpretation || ""],
-    ["What's next", next ? about(next.event)[0] + ", " + next.when + (next.consensus ? " (expected " + next.consensus + ")" : "") + ". " + (next.invalidates ? "If it surprises: " + next.invalidates + "." : "") : ""],
+    ["What's next", next ? about(next.event)[0] + ", " + next.when + (next.consensus ? " (expected " + next.consensus + ")" : "") + ". " + (next.invalidates ? "If it surprises: " + next.invalidates + "." : "")
+      : L ? L.name + ", " + new Date(L.t).toLocaleString("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " your time" + (L.forecast ? " (expected " + L.forecast + ")" : "") + "."
+      : !ARCHIVE && wl.length ? "This morning's releases are out: their results are under Since this morning, below." : ""],
   ];
   $("three").innerHTML = rows.filter(function (r) { return r[1]; }).map(function (r) { return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>"; }).join("");
   };
   hero();
+  window.MIB_HERO = hero;                                    // live.js calls it again once it knows the next release
   if (!ARCHIVE) { live(); setInterval(live, 60000); }
 
   // the stress gauge: a half circle from calm to stressed
