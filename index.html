@@ -30,10 +30,10 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="alternate" type="application/rss+xml" title="MIB Terminal — Daily Brief" href="/feed.xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
-<link rel="stylesheet" href="terminal.css?v=202611131705">
+<link rel="stylesheet" href="terminal.css?v=202611131728">
 </head>
 <body>
-<script src="/header.js?v=202611131705" data-active="today"></script>
+<script src="/header.js?v=202611131728" data-active="today"></script>
 <div class="tape gut"><div class="in" id="tape"></div></div>
 
 <main class="gut"><div class="in">
@@ -51,6 +51,15 @@
       <div class="card"><div class="label" style="margin-bottom:8px">Changed since yesterday</div><div class="chips" id="changed"></div></div>
     </div>
   </section>
+
+  <!-- 13 Nov 2026: updated through the day by the mib-live worker (live.js); hidden until it answers -->
+  <section id="latest" hidden><div class="card live">
+    <div class="lhead"><h2 style="margin:0">Since this morning</h2><span class="label" id="liveAt"></span></div>
+    <p class="lnote" id="liveHead"></p>
+    <dl class="three" id="liveNote" style="margin:0"></dl>
+    <div id="liveResults"></div><div id="liveMoves"></div><div id="liveNews"></div>
+    <p class="lsrc" id="liveSrc"></p>
+  </div></section>
 
   <section id="markets" style="margin-top:16px"><div class="board" id="board" aria-label="Markets now"></div></section>
 
@@ -86,8 +95,9 @@
 </div></main>
 
 <!-- the day's brief (concept/build.py, written by the daily run) and the prices feed; then the page -->
-<script src="data/brief.js?v=202611131705"></script>
-<script src="data/ticker.js?v=202611131705" onerror="void 0"></script>
-<script src="terminal.js?v=202611131705"></script>
+<script src="data/brief.js?v=202611131728"></script>
+<script src="data/ticker.js?v=202611131728" onerror="void 0"></script>
+<script src="terminal.js?v=202611131728"></script>
+<script src="live.js?v=202611131728"></script>
 </body>
 </html>

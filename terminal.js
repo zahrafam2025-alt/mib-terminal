@@ -150,7 +150,7 @@
   };
   $("cal").innerHTML = Object.keys(days).map(function (k) {
     return '<div class="day"><div class="dl">' + esc(k) + '</div><div class="ev">' + days[k].map(function (e) {
-      return '<details class="ev1"><summary><i class="imp" style="background:' + (impc[e.impact] || "var(--muted)") + '" title="' + esc(e.impact) + ' impact"></i><b>' + esc(about(e.event)[0]) + '<small class="evn">' + esc(about(e.event)[1]) + '</small></b><span class="tm">' + esc((e.when || "").split(" ").slice(3).join(" ")) + localTime(e) + (e.consensus ? " · expected " + esc(e.consensus) : "") + "</span></summary>"
+      return '<details class="ev1" data-ev="' + esc(e.event) + '" data-t="' + when(e) + '"><summary><i class="imp" style="background:' + (impc[e.impact] || "var(--muted)") + '" title="' + esc(e.impact) + ' impact"></i><b>' + esc(about(e.event)[0]) + '<small class="evn">' + esc(about(e.event)[1]) + '</small></b><span class="tm">' + esc((e.when || "").split(" ").slice(3).join(" ")) + localTime(e) + (e.consensus ? " · expected " + esc(e.consensus) : "") + "</span></summary>"
         + '<div class="body">' + (e.confirms ? "<span>As expected: " + esc(e.confirms) + "</span>" : "") + (e.invalidates ? "<span>Surprise: " + esc(e.invalidates) + "</span>" : "") + (!e.confirms && !e.invalidates ? "<span>" + esc(e.impact) + " impact</span>" : "") + remind(e) + "</div></details>";
     }).join("") + "</div></div>";
   }).join("") || '<p class="sub">No major event this week.</p>';

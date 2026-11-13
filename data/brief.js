@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-13T08:29:02Z",
     "date": "2026-11-13",
-    "built_at": "2026-11-13 17:05 UTC",
+    "built_at": "2026-11-13 17:28 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -84,6 +84,30 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
+      "title": "Stocks making the biggest moves midday: Nvidia, Cisco Systems, AMD, Steris, Modine & more",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/stocks-moving-the-most-today-live-updates.html",
+      "at": "2026-11-13T17:20:27+00:00"
+    },
+    {
+      "title": "How Apple became the safe ‘Costco’ of tech. Bernstein says keep buying",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/how-apple-became-the-safe-costco-of-tech-bernstein-says-keep-buying.html",
+      "at": "2026-11-13T17:07:48+00:00"
+    },
+    {
+      "title": "Bessent blames Lutnick’s Commerce as he slams Nvidia chip ‘leakage’ to China",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/us-inflation-outlook-federal-reserve-rate-hike.html",
+      "at": "2026-11-13T17:06:57+00:00"
+    },
+    {
+      "title": "The S&P 500 Has a “Pure Value” Version. RPV Gives Its Cheapest Stocks the Biggest Weights",
+      "src": "Yahoo Finance",
+      "url": "https://247wallst.com/investing/etf/2026/11/13/the-sp-500-has-a-pure-value-version-rpv-gives-its-cheapest-stocks-the-biggest-weights/?.tsrc=rss",
+      "at": "2026-11-13T17:03:02+00:00"
+    },
+    {
       "title": "MSCI Boots Strategy, and Trump picks his next crypto regulatory referees",
       "src": "Yahoo Finance",
       "url": "https://finance.yahoo.com/video/msci-boots-strategy-trump-picks-170000840.html?.tsrc=rss",
@@ -102,6 +126,18 @@ window.MIB_BRIEF = {
       "at": "2026-11-13T16:54:40+00:00"
     },
     {
+      "title": "Bitcoin Demand Dries Up as Miners Prepare to Dump 2,077 BTC: Is More Selling Pressure Coming for BTC?",
+      "src": "Yahoo Finance",
+      "url": "https://www.coinspeaker.com/bitcoin-demand-dries-up-as-miners-prepare-to-dump-2077-btc/?.tsrc=rss",
+      "at": "2026-11-13T16:53:50+00:00"
+    },
+    {
+      "title": "What Is Going On With Intel Stock After Its Earnings Call?",
+      "src": "Yahoo Finance",
+      "url": "https://www.trefis.com/stock/intc/articles/624926/what-is-going-on-with-intel-stock-after-its-earnings-call/2026-11-13?.tsrc=rss",
+      "at": "2026-11-13T16:53:15+00:00"
+    },
+    {
       "title": "Microsoft says email delivery and service availability 'improving' across more infrastructure",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/12/microsoft-outage-outlook-aws-google.html",
@@ -118,12 +154,6 @@ window.MIB_BRIEF = {
       "src": "Yahoo Finance",
       "url": "https://finance.yahoo.com/markets/stocks/articles/peer-discount-creates-compelling-opportunity-164546949.html?.tsrc=rss",
       "at": "2026-11-13T16:45:46+00:00"
-    },
-    {
-      "title": "How Apple became the safe ‘Costco’ of tech. Bernstein says keep buying",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/how-apple-became-the-safe-costco-of-tech-bernstein-says-keep-buying.html",
-      "at": "2026-11-13T16:41:27+00:00"
     },
     {
       "title": "Strategy Stocks Fall 3.64% as Bitcoin Breaks $70,000 Ahead of MSCI Exit",
@@ -180,12 +210,6 @@ window.MIB_BRIEF = {
       "at": "2026-11-13T16:22:17+00:00"
     },
     {
-      "title": "Stocks making the biggest moves Friday: Nvidia, Microsoft, Cerebras, Modine & more",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/stocks-moving-the-most-today-live-updates.html",
-      "at": "2026-11-13T16:17:01+00:00"
-    },
-    {
       "title": "Digi Power X Q3 Earnings Call Highlights",
       "src": "Yahoo Finance",
       "url": "https://www.marketbeat.com/instant-alerts/transcript-digi-power-x-q3-earnings-call-highlights-2026-11-13/?utm_source=yahoofinance&utm_medium=yahoofinance&.tsrc=rss",
@@ -222,18 +246,6 @@ window.MIB_BRIEF = {
       "at": "2026-11-13T16:03:51+00:00"
     },
     {
-      "title": "Bitcoin drops below $70K as dollar index hits 19-month high",
-      "src": "Yahoo Finance",
-      "url": "http://videos.coindesk.com/previews/o37iwRuj?.tsrc=rss",
-      "at": "2026-11-13T16:03:45+00:00"
-    },
-    {
-      "title": "Bessent blames Lutnick’s Commerce as he slams Nvidia chip ‘leakage’ to China",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/us-inflation-outlook-federal-reserve-rate-hike.html",
-      "at": "2026-11-13T16:03:42+00:00"
-    },
-    {
       "title": "Women are taking pay cuts and 'white-knuckling it' to manage menopause and work: 'I feel like I'm sitting on the sidelines'",
       "src": "CNBC",
       "url": "https://www.cnbc.com/make-it/2026/11/13/menopause-career-setbacks.html",
@@ -244,18 +256,6 @@ window.MIB_BRIEF = {
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/13/nvidia-scandal-lutnick-chip-sales.html",
       "at": "2026-11-13T15:49:11+00:00"
-    },
-    {
-      "title": "Nakamoto Reports Negative Q3 Revenue as Bitcoin Options Losses Rise",
-      "src": "Yahoo Finance",
-      "url": "https://www.cryptoprowl.com/releases/nakamoto-reports-negative-q3-revenue-as-bitcoin-options-losses-rise-7902?.tsrc=rss",
-      "at": "2026-11-13T15:47:00+00:00"
-    },
-    {
-      "title": "Goldman Sachs sees S&P 500 surging 14% to 8,700 in 2027",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/video/goldman-sachs-sees-sp-500-surging-14-to-8700-in-2027-154612391.html?.tsrc=rss",
-      "at": "2026-11-13T15:46:12+00:00"
     },
     {
       "title": "Wholesale prices rose 0.3% in October, putting annual rate at 6.5%, the highest in nearly four years",
