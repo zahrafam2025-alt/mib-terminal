@@ -153,3 +153,8 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
 .live .lhl a { color: var(--ink); }
 .live .lsrc { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
 .lres-cal { color: var(--ink); }
+/* the week's calendar (live.js): past days quieter, today marked */
+.day.past .dl, .ev1.done summary b { opacity: .8; }
+.day.today .dl { color: var(--ink); } .day .dl small { display: block; font: 700 11px var(--num); color: var(--warn); text-transform: uppercase; }
+.ev1 .tm .lverd { font: 700 10px var(--num); letter-spacing: .06em; text-transform: uppercase; border: 1px solid; border-radius: 999px; padding: 1px 7px; margin-left: 4px; }
+.ev1 .tm .lres-cal { font-weight: 700; }

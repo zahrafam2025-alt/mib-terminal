@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-13T08:29:02Z",
     "date": "2026-11-13",
-    "built_at": "2026-11-13 18:54 UTC",
+    "built_at": "2026-11-13 20:14 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -84,184 +84,184 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
-      "title": "Sector Update: Financial Stocks Higher Friday Afternoon",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/sector-financial-stocks-higher-friday-184112484.html?.tsrc=rss",
-      "at": "2026-11-13T18:41:12+00:00"
-    },
-    {
-      "title": "Why Sandisk Stock Is Falling Today",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/13/why-sandisk-stock-is-falling-today/?.tsrc=rss",
-      "at": "2026-11-13T18:40:02+00:00"
-    },
-    {
-      "title": "Fed Chair Warsh Wants Answers on AI Inflation—and Bitcoin May Feel the Impact",
-      "src": "Yahoo Finance",
-      "url": "https://decrypt.co/383259/fed-chair-warsh-wants-answers-ai-inflation-bitcoin?.tsrc=rss",
-      "at": "2026-11-13T18:36:02+00:00"
-    },
-    {
-      "title": "Why Bitcoin Is Falling Today",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/13/why-bitcoin-is-falling-today/?.tsrc=rss",
-      "at": "2026-11-13T18:35:02+00:00"
-    },
-    {
-      "title": "Lutnick faces questions over Nvidia spy scandal. His sons’ firm has deep ties to the chipmaker",
+      "title": "Hassett denies report he's leaving White House: 'Not true'",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/howard-lutnick-nvidia-jensen-huang-china-cantor-fitzgerald.html",
-      "at": "2026-11-13T18:32:47+00:00"
-    },
-    {
-      "title": "Stocks making the biggest moves Friday: Nvidia, Cisco Systems, AMD, Apple, Modine & more",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/stocks-moving-the-most-today-live-updates.html",
-      "at": "2026-11-13T18:32:17+00:00"
-    },
-    {
-      "title": "Should You Wait Before Buying Reddit Stock?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/rddt/articles/625021/should-you-wait-before-buying-reddit-stock/2026-11-13?.tsrc=rss",
-      "at": "2026-11-13T18:21:10+00:00"
-    },
-    {
-      "title": "Microsoft apologizes for massive outage that took down Outlook and other 365 services",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/12/microsoft-outage-outlook-aws-google.html",
-      "at": "2026-11-13T18:18:28+00:00"
-    },
-    {
-      "title": "The common theme driving stocks lower — plus, 3 trades and another we want to make",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/investingclub/2026/11/13/the-common-theme-driving-stocks-lower-plus-3-trades-and-another-we-want-to-make.html",
-      "at": "2026-11-13T18:11:33+00:00"
-    },
-    {
-      "title": "Stock Market Today: Nasdaq In Red As Nvidia Wipes Out $650 Billion; Applied Materials Sinks (Live Coverage)",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-nasdaq-in.html?.tsrc=rss",
-      "at": "2026-11-13T18:10:19+00:00"
-    },
-    {
-      "title": "Bitcoin falls as Strategy faces MSCI index shake-up",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/video/bitcoin-falls-as-strategy-faces-msci-index-shake-up-180934380.html?.tsrc=rss",
-      "at": "2026-11-13T18:09:34+00:00"
-    },
-    {
-      "title": "What Does Ralph Lauren Stock's Winning Streak Really Prove?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/rl/articles/624892/what-does-ralph-lauren-stocks-winning-streak-really-prove/2026-11-13?.tsrc=rss",
-      "at": "2026-11-13T18:01:18+00:00"
-    },
-    {
-      "title": "What Bitcoin Did Every Time It Fell to Its 200-Week Average",
-      "src": "Yahoo Finance",
-      "url": "https://247wallst.com/investing/cryptocurrency/2026/11/13/what-bitcoin-did-every-time-it-fell-to-its-200-week-average/?.tsrc=rss",
-      "at": "2026-11-13T17:59:43+00:00"
-    },
-    {
-      "title": "How Low Can First Solar Stock Go?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/fslr/articles/624933/how-low-can-first-solar-stock-go/2026-11-13?.tsrc=rss",
-      "at": "2026-11-13T17:54:41+00:00"
-    },
-    {
-      "title": "Veteran economist warns investors that Bitcoin’s worst may not be over",
-      "src": "Yahoo Finance",
-      "url": "https://www.thestreet.com/crypto/markets/veteran-economist-warns-bitcoins-worst-may-not-be-over?.tsrc=rss",
-      "at": "2026-11-13T17:48:48+00:00"
-    },
-    {
-      "title": "Can Dell Stock Fall 40%?",
-      "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/dell/articles/624937/can-dell-stock-fall-40/2026-11-13?.tsrc=rss",
-      "at": "2026-11-13T17:47:56+00:00"
-    },
-    {
-      "title": "Everyone's fighting for your wallet — but this premium travel card stands above the rest",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/select/amex-platinum-best-premium-travel-card/",
-      "at": "2026-11-13T17:44:07+00:00"
-    },
-    {
-      "title": "10-year Treasury yield moves to 5.17% as traders weigh producer price report",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/treasury-yields-fed-rates.html",
-      "at": "2026-11-13T17:39:48+00:00"
+      "url": "https://www.cnbc.com/2026/11/13/kevin-hassett-white-house-nec.html",
+      "at": "2026-11-13T20:14:28+00:00"
     },
     {
       "title": "Nasdaq falls on Friday as Nvidia keeps sliding, but major averages are up for week: Live updates",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/12/stock-market-today-live-updates.html",
-      "at": "2026-11-13T17:36:49+00:00"
+      "at": "2026-11-13T20:08:22+00:00"
     },
     {
-      "title": "Stock Market Midday, Nov. 13: Nasdaq Plunges as Nvidia Turmoil Deepens and Treasury Yields Hit 5%",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/stock-market-today/2026/11/13/stock-market-midday-nov-13-nasdaq-plunges-as-nvidia-turmoil-deepens-and-treasury-yields-hit-5/?.tsrc=rss",
-      "at": "2026-11-13T17:35:01+00:00"
-    },
-    {
-      "title": "Josh Brown: Nvidia Has No “Jensen Premium” to Lose. It’s Been Cheap for 3 Years",
-      "src": "Yahoo Finance",
-      "url": "https://www.tikr.com/blog/josh-brown-nvidia-has-no-jensen-premium-to-lose-its-been-cheap-for-3-years?ref=yahoofinance&tlnk=yf-261113-mm96c4vr&.tsrc=rss",
-      "at": "2026-11-13T17:31:28+00:00"
-    },
-    {
-      "title": "AST SpaceMobile Sinks 6%, Rocket Lab Down 5% as Space Stocks Give Back a Stellar Week",
-      "src": "Yahoo Finance",
-      "url": "https://www.tikr.com/blog/ast-spacemobile-sinks-6-rocket-lab-down-5-as-space-stocks-give-back-a-stellar-week?ref=yahoofinance&tlnk=yf-261113-q72jrjhc&.tsrc=rss",
-      "at": "2026-11-13T17:30:53+00:00"
-    },
-    {
-      "title": "Update: Sliding Chipmakers Push US Equity Indexes Lower While Producer Prices Growth Below Forecast",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/sliding-chipmakers-push-us-equity-172710666.html?.tsrc=rss",
-      "at": "2026-11-13T17:27:10+00:00"
-    },
-    {
-      "title": "Nasdaq Follow-Through Day Shows Some Power. Now What?",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/5d0c1944-df84-3056-922a-b0a58fd8a8ec/nasdaq-follow-through-day.html?.tsrc=rss",
-      "at": "2026-11-13T17:23:21+00:00"
-    },
-    {
-      "title": "Bitcoin Hits 12-Week Low as Fed Rate Fears Undo Most of Summer Rally",
-      "src": "Yahoo Finance",
-      "url": "https://decrypt.co/383231/bitcoin-hits-12-week-low-fed-rate-fears-undo-summer-rally?.tsrc=rss",
-      "at": "2026-11-13T17:22:54+00:00"
-    },
-    {
-      "title": "QURE Stock Rallies 17.5% in a Month: What Should Investors Do Now?",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/healthcare/articles/qure-stock-rallies-17-5-171600347.html?.tsrc=rss",
-      "at": "2026-11-13T17:16:00+00:00"
-    },
-    {
-      "title": "This drug wholesaler's transformation is paying off. Here's why the stock still looks attractive",
+      "title": "CFTC Chair Selig tells CNBC crypto industry is embracing agency rules as legislation hopes fade",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/mckesson-stock-specialty-growth-valuation.html",
-      "at": "2026-11-13T17:12:37+00:00"
+      "url": "https://www.cnbc.com/2026/11/13/cftc-chair-selig-crypto-industry-opting-into-agencys-crypto-rules-.html",
+      "at": "2026-11-13T20:07:30+00:00"
     },
     {
-      "title": "Bessent blames Lutnick’s Commerce as he slams Nvidia chip ‘leakage’ to China",
+      "title": "Supreme Court agrees to hear Robinhood challenge to IPO information omission lawsuit",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/us-inflation-outlook-federal-reserve-rate-hike.html",
-      "at": "2026-11-13T17:06:57+00:00"
+      "url": "https://www.cnbc.com/2026/11/13/robinhood-supreme-court-ipo-lawsuit.html",
+      "at": "2026-11-13T20:00:06+00:00"
+    },
+    {
+      "title": "First Merchants Corporation Announces Cash Dividend",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/first-merchants-corporation-announces-cash-200000430.html?.tsrc=rss",
+      "at": "2026-11-13T20:00:00+00:00"
+    },
+    {
+      "title": "Stock Market Today: Indexes Pare Losses; S&P's Worst Performer Sells Chips, And It's Not Nvidia (Live Coverage)",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
+      "at": "2026-11-13T19:55:51+00:00"
+    },
+    {
+      "title": "Nvidia hasn’t selected search firm for permanent Huang replacement, board tells CNBC",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/nvidia-huang-ceo-replacement-search.html",
+      "at": "2026-11-13T19:54:06+00:00"
     },
     {
       "title": "After Jensen Huang’s exit, what top financial advisors are doing with Nvidia: Exclusive CNBC poll",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/13/nvidia-stock-advisors-jensen-huang-exit-exclusive-poll.html",
-      "at": "2026-11-13T17:01:26+00:00"
+      "at": "2026-11-13T19:53:38+00:00"
     },
     {
-      "title": "Why the data center slowdown concern is overblown. Two stocks to buy amid the fear",
+      "title": "Goldman Sachs looks to cash in on Anthropic's IPO, twice. Here's how and who else wants to",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/data-center-slowdown-utility-stocks.html",
-      "at": "2026-11-13T16:54:40+00:00"
+      "url": "https://www.cnbc.com/investingclub/2026/11/13/goldman-sachs-looks-to-cash-in-on-anthropics-ipo-twice-heres-how-and-who-else-wants-to.html",
+      "at": "2026-11-13T19:45:35+00:00"
+    },
+    {
+      "title": "Nvidia turmoil reshuffles the AI trade. Winners, losers and what investors should watch",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/nvidia-ceo-exit-amd-broadcom-and-ai-trade-fallout-.html",
+      "at": "2026-11-13T19:38:00+00:00"
+    },
+    {
+      "title": "Investing.com’s stocks of the week",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/investing-com-stocks-week-193622777.html?.tsrc=rss",
+      "at": "2026-11-13T19:36:22+00:00"
+    },
+    {
+      "title": "Dormant Bitcoin Wallets Wake Up After 16 Years, Moving $6.9 Million",
+      "src": "Yahoo Finance",
+      "url": "https://decrypt.co/383264/dormant-bitcoin-wallets-wake-up-after-16-years?.tsrc=rss",
+      "at": "2026-11-13T19:36:03+00:00"
+    },
+    {
+      "title": "Twenty One Capital Made $1 Billion in Bitcoin Profit. 60% is Already Gone",
+      "src": "Yahoo Finance",
+      "url": "https://beincrypto.com/twenty-one-capital-bitcoin-profit-gone/?.tsrc=rss",
+      "at": "2026-11-13T19:34:41+00:00"
+    },
+    {
+      "title": "A trading strategy to ride out the Nvidia uncertainty and generate income in the process",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/a-trading-strategy-to-ride-out-the-nvidia-uncertainty-and-generate-income-in-the-process.html",
+      "at": "2026-11-13T19:30:36+00:00"
+    },
+    {
+      "title": "Can Bloom Energy Stock Jump 50%?",
+      "src": "Yahoo Finance",
+      "url": "https://www.trefis.com/stock/be/articles/624994/can-bloom-energy-stock-jump-50-2/2026-11-13?.tsrc=rss",
+      "at": "2026-11-13T19:26:20+00:00"
+    },
+    {
+      "title": "Could 10,000 XRP Make You a Millionaire by 2030?",
+      "src": "Yahoo Finance",
+      "url": "https://247wallst.com/investing/cryptocurrency/2026/11/13/could-10000-xrp-make-you-a-millionaire-by-2030/?.tsrc=rss",
+      "at": "2026-11-13T19:23:54+00:00"
+    },
+    {
+      "title": "Why You Should Think About Charter Communications Differently Now?",
+      "src": "Yahoo Finance",
+      "url": "https://www.trefis.com/stock/chtr/articles/625005/why-you-should-think-about-charter-communications-differently-now/2026-11-13?.tsrc=rss",
+      "at": "2026-11-13T19:16:11+00:00"
+    },
+    {
+      "title": "Twenty One Capital Q3 Earnings Call Highlights",
+      "src": "Yahoo Finance",
+      "url": "https://www.marketbeat.com/instant-alerts/transcript-twenty-one-capital-q3-earnings-call-highlights-2026-11-13/?utm_source=yahoofinance&utm_medium=yahoofinance&.tsrc=rss",
+      "at": "2026-11-13T19:15:15+00:00"
+    },
+    {
+      "title": "HPC Expansion Could Recast The Cipher Digital Stock Story",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/hpc-expansion-could-recast-cipher-191153689.html?.tsrc=rss",
+      "at": "2026-11-13T19:11:53+00:00"
+    },
+    {
+      "title": "Lutnick faces questions over Nvidia spy scandal. His sons’ firm has deep ties to the chipmaker",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/howard-lutnick-nvidia-jensen-huang-china-cantor-fitzgerald.html",
+      "at": "2026-11-13T19:11:13+00:00"
+    },
+    {
+      "title": "Update: US Equity Indexes Fall as Nvidia Debacle Hits Chipmakers, Long Treasury Yields Jump on 'Elevated' Producer Prices",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/us-equity-indexes-fall-nvidia-190946104.html?.tsrc=rss",
+      "at": "2026-11-13T19:09:46+00:00"
+    },
+    {
+      "title": "The Dow Is Flat. The Stock Market is Doing Better Than it Looks.",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/m/e87315be-b6d3-3782-8b82-97aa2ec16d8c/the-dow-is-flat.-the-stock.html?.tsrc=rss",
+      "at": "2026-11-13T19:06:13+00:00"
+    },
+    {
+      "title": "Retirees sometimes tap savings for one-off expenses. Here’s what advisors say to consider first",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/retirement-401k-ira-withdrawal-taxes.html",
+      "at": "2026-11-13T19:01:12+00:00"
+    },
+    {
+      "title": "Goldman Sachs sees upside for S&P 500 in 2027 — even as earnings growth slows",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/article/goldman-sachs-sees-upside-for-sp-500-in-2027--even-as-earnings-growth-slows-185627269.html?.tsrc=rss",
+      "at": "2026-11-13T18:56:27+00:00"
+    },
+    {
+      "title": "OpenAI launches ChatGPT Wallet, allowing its 'dots' AI agents to make purchases for users",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/2026/11/13/openai-chatgpt-wallet-dot-purchases.html",
+      "at": "2026-11-13T18:56:26+00:00"
+    },
+    {
+      "title": "Why ADI Global Distribution Stock Plunged This Week",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/coverage/market-movers/2026/11/13/why-adi-global-distribution-stock-plunged-this-week/?.tsrc=rss",
+      "at": "2026-11-13T18:55:02+00:00"
+    },
+    {
+      "title": "The Stock Market's Early Rally Fades as Wholesale Inflation Hits 6.5%",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/stock-markets-early-rally-fades-185155071.html?.tsrc=rss",
+      "at": "2026-11-13T18:51:55+00:00"
+    },
+    {
+      "title": "Update: Equities Fall Intraday as Nvidia Declines",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/equities-fall-intraday-nvidia-declines-184904960.html?.tsrc=rss",
+      "at": "2026-11-13T18:49:04+00:00"
+    },
+    {
+      "title": "Why Advanced Micro Devices Stock Is Down Today",
+      "src": "Yahoo Finance",
+      "url": "https://www.fool.com/investing/2026/11/13/why-advanced-micro-devices-is-down-today/?.tsrc=rss",
+      "at": "2026-11-13T18:45:02+00:00"
+    },
+    {
+      "title": "Sector Update: Financial Stocks Higher Friday Afternoon",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/sector-financial-stocks-higher-friday-184112484.html?.tsrc=rss",
+      "at": "2026-11-13T18:41:12+00:00"
     }
   ],
   "footer": {

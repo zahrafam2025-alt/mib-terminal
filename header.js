@@ -257,7 +257,9 @@
     window.dispatchEvent(new CustomEvent("mib-view", { detail: k }));
   };
   bar.addEventListener("click", function (e) {
-    var a = e.target.closest("nav a"); if (!a || !a.dataset.k || a.dataset.k === "week" || a.dataset.k === "archive" || a.dataset.k === "arcade") return;
+    // 13 Nov (owner: "sometimes when I tap Sports it doesn't load"): only links to a part of this page stay here; every
+    // other page (The Week, Archive, Arcade, Sports, any added later) opens normally. Sports used to fall through to Today.
+    var a = e.target.closest("nav a"); if (!a || !a.dataset.k || (a.getAttribute("href") || "").indexOf("#") < 0) return;
     e.preventDefault(); var k = keyOf(a.dataset.k); if (location.hash !== "#" + k) history.pushState(null, "", "#" + k); show(k);
   });
   addEventListener("hashchange", function () { show(keyOf(location.hash)); });
