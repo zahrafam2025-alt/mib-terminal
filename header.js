@@ -40,7 +40,12 @@
   window.MIB_AV = AV;
   // the theme: dark unless the viewer chose light (kept in this browser)
   document.documentElement.setAttribute("data-theme", ls("mib-theme") === "light" ? "light" : "dark");
-  var fr = ls("mib-lang") === "fr", L = function (en, f) { return fr ? f : en; };   // the bar and the pane have their own French
+  // 14 Nov (owner: "also add Italian"): English, Français, Italiano. The bar and the pane have their own words (L: English,
+  // French, and Italian from IT below, English when a phrase is missing); the rest of the page goes through Google's
+  // translator, as for French.
+  var lang = ls("mib-lang"); if (lang !== "fr" && lang !== "it") lang = "";
+  var fr = lang === "fr", IT = {" here": " qui", " invites you to ": " ti invita a ", "+ ": "+ ", "Add": "Aggiungi", "Add MIB to your home screen": "Aggiungi MIB alla schermata Home", "Archive": "Archivio", "Calendar": "Agenda", "Chat with everyone reading MIB": "Chatta con chi legge MIB", "Comment on today's brief…": "Commenta il brief di oggi…", "Deep dive": "Approfondimenti", "Games": "Giochi", "In your browser's menu (⋮), choose “Install app” or “Add to Home screen”.": "Nel menu del browser (⋮), scegli «Installa app» o «Aggiungi a schermata Home».", "Invite to play": "Invita a giocare", "Join": "Entra", "Just you for now.": "Per ora ci sei solo tu.", "Link copied: send it to a friend.": "Link copiato: invialo a un amico.", "Lounge": "Lounge", "Lounge · chat & play": "Lounge · chat e giochi", "Markets": "Mercati", "Money": "Mercati", "Name removed.": "Nome cancellato.", "News": "Notizie", "Next: ": "Avanti: ", "No comment on today's brief yet. Be the first.": "Ancora nessun commento sul brief di oggi. Inizia tu.", "Nobody has said anything here yet. Start it off.": "Qui non ha ancora scritto nessuno. Inizia tu.", "On iPhone: tap Share ⬆︎ at the bottom of Safari, then “Add to Home Screen”.": "Su iPhone: tocca Condividi ⬆︎ in fondo a Safari, poi «Aggiungi alla schermata Home».", "One tap to the market, the chat and the games.": "Il mercato, la chat e i giochi con un tocco.", "Online now": "Online ora", "Open the browser's menu <b>⋮</b>, then <b>“Install app”</b> or <b>“Add to Home screen”</b>.": "Apri il menu del browser <b>⋮</b>, poi <b>«Installa app»</b> o <b>«Aggiungi a schermata Home»</b>.", "Pick a name": "Scegli un nome", "Pick a name (a nickname, not your real name)": "Scegli un nome (un soprannome, non il tuo vero nome)", "Pick a name to chat (also your arcade name)": "Scegli un nome per chattare (vale anche per l'arcade)", "Play": "Gioca", "Privacy": "Privacy", "Saved.": "Salvato.", "Say something…": "Scrivi qualcosa…", "Send": "Invia", "Settings": "Impostazioni", "Tap <b>Share ⬆︎</b> at the bottom of the screen, then <b>“Add to Home Screen”</b>.": "Tocca <b>Condividi ⬆︎</b> in fondo allo schermo, poi <b>«Aggiungi alla schermata Home»</b>.", "The Week": "La settimana", "The market in 3 minutes, then chat and play together. Open it and add it to your home screen:": "Il mercato in 3 minuti, poi si chatta e si gioca insieme. Aprilo e aggiungilo alla schermata Home:", "Today": "Oggi", "Today's brief": "Il brief di oggi", "Turn your phone upright to read MIB": "Gira il telefono in verticale per leggere MIB", "You": "Tu", "Your name and avatar are used in the chat, the arcade and the scoreboards. Kept in this browser only.": "Nome e avatar servono per la chat, l'arcade e le classifiche. Restano solo in questo browser.", "connecting…": "connessione…", "not connected yet": "non ancora connesso", "one message every 3 s": "un messaggio ogni 3 s", "reconnecting…": "riconnessione…", "↗ Share with a friend": "↗ Condividi con un amico", "☀ Light mode": "☀ Modalità chiara", "☾ Dark mode": "☾ Modalità scura", "📲 Add to home screen": "📲 Aggiungi alla schermata Home", " visitors without a name": " visitatori senza nome", " visitor without a name": " visitatore senza nome"};
+  var L = function (en, f) { return fr ? f : lang === "it" ? (IT[en] || en) : en; };
   if (!document.querySelector('link[href*="fonts.googleapis.com/css2?family=Archivo"]')) {
     var f = document.createElement("link"); f.rel = "stylesheet";
     f.href = "https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap";
@@ -49,9 +54,9 @@
   if (!document.querySelector('link[rel="manifest"]')) { var mf = document.createElement("link"); mf.rel = "manifest"; mf.href = "/site.webmanifest"; document.head.appendChild(mf); }
   var css = document.createElement("style");
   css.textContent = [
-    ".mibbar,.mb-pane,.mb-add,.mb-invt{--mb-bg:#ffffff;--mb-ink:#0f172a;--mb-muted:#5b6474;--mb-raised:#eef1f6;--mb-line:#e1e5ec;--mb-brand:#e8a317;--mb-up:#0e9f5a}.mibbar{position:fixed;left:0;right:0;top:0;z-index:1000;background:var(--mb-bg);border-bottom:1px solid var(--mb-line);font:600 15px 'Source Sans 3','Segoe UI',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}",
-    "@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .mibbar,:root:not([data-theme=light]) .mb-pane,:root:not([data-theme=light]) .mb-add,:root:not([data-theme=light]) .mb-invt{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}}",
-    ":root[data-theme=dark] .mibbar,:root[data-theme=dark] .mb-pane,:root[data-theme=dark] .mb-add,:root[data-theme=dark] .mb-invt{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}",
+    ".mibbar,.mb-pane,.mb-add,.mb-invt,.mb-cd{--mb-bg:#ffffff;--mb-ink:#0f172a;--mb-muted:#5b6474;--mb-raised:#eef1f6;--mb-line:#e1e5ec;--mb-brand:#e8a317;--mb-up:#0e9f5a}.mibbar{position:fixed;left:0;right:0;top:0;z-index:1000;background:var(--mb-bg);border-bottom:1px solid var(--mb-line);font:600 15px 'Source Sans 3','Segoe UI',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px)}",
+    "@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .mibbar,:root:not([data-theme=light]) .mb-pane,:root:not([data-theme=light]) .mb-add,:root:not([data-theme=light]) .mb-invt,:root:not([data-theme=light]) .mb-cd{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}}",
+    ":root[data-theme=dark] .mibbar,:root[data-theme=dark] .mb-pane,:root[data-theme=dark] .mb-add,:root[data-theme=dark] .mb-invt,:root[data-theme=dark] .mb-cd{--mb-bg:#121826;--mb-ink:#e8ecf3;--mb-muted:#95a0b4;--mb-raised:#182033;--mb-line:#232c40;--mb-brand:#f5b53b;--mb-up:#3ecf8e}",
     "body{padding-top:calc(57px + env(safe-area-inset-top,0px)) !important}body.playing{padding-top:0 !important}",
     "html{scroll-padding-top:calc(70px + env(safe-area-inset-top,0px))}",
     ".mibbar .mb-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;height:56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));box-sizing:content-box}",
@@ -83,15 +88,25 @@
     "body{top:0 !important}.goog-te-banner-frame,iframe.skiptranslate,.skiptranslate>iframe,#goog-gt-tt,#goog-gt-vt,.goog-te-balloon-frame,.goog-tooltip,.goog-te-spinner-pos,.goog-te-gadget,#google_translate_element,.goog-logo-link,.VIpgJd-ZVi9od-ORHb-OEVmcd,.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,.VIpgJd-ZVi9od-xl07Ob-OEVmcd,.VIpgJd-yAWNEb-L7lbkb{display:none !important;visibility:hidden !important}",
     "font{background:none !important;box-shadow:none !important}.VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q{background:none !important;box-shadow:none !important}",
     "@media (max-width:640px){.mibbar .mb-me span{display:none}.mibbar .mb-me{padding-right:8px}}",
+    // 14 Nov: the chat on every page (the 💬 button)
+    ".mibbar .mb-chat{flex:none;border:1px solid var(--mb-line);background:var(--mb-raised);color:var(--mb-ink);border-radius:999px;width:38px;height:38px;font-size:18px;cursor:pointer;position:relative;padding:0}",
+    ".mb-cd{position:fixed;z-index:1002;top:calc(62px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));width:min(390px,calc(100vw - 24px));height:min(560px,calc(100vh - 80px));background:var(--mb-bg);color:var(--mb-ink);border:1px solid var(--mb-line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.3);display:flex;flex-direction:column;font:15px/1.4 'Source Sans 3',sans-serif;overflow:hidden}.mb-cd[hidden]{display:none}",
+    ".mb-cd header{display:flex;align-items:center;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--mb-line)}.mb-cd .rm{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1}.mb-cd .rm button{font:700 13px 'Source Sans 3',sans-serif;padding:6px 10px;border-radius:999px;border:1px solid var(--mb-line);background:var(--mb-raised);color:var(--mb-muted);white-space:nowrap;cursor:pointer}.mb-cd .rm button.on{background:var(--mb-brand);border-color:var(--mb-brand);color:#1a1205}",
+    ".mb-cd .x{background:none;border:0;color:var(--mb-muted);font-size:20px;cursor:pointer;padding:2px 6px}.mb-cd .st{font:600 11px 'JetBrains Mono',monospace;color:var(--mb-muted);padding:4px 12px 0}",
+    ".mb-cd .ms{flex:1;overflow:auto;padding:8px 12px;display:grid;gap:10px;align-content:start}.mb-cd .m{display:flex;gap:8px}.mb-cd .m .a{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--mb-raised);font-size:17px;flex:none}.mb-cd .m b{font-size:14px}.mb-cd .m small{color:var(--mb-muted);margin-left:6px;font-size:12px}.mb-cd .m p{margin:2px 0 0;white-space:pre-wrap;word-break:break-word}.mb-cd .m.mib .a{background:var(--mb-brand);color:#1a1205;font:800 13px Archivo,sans-serif}",
+    ".mb-cd form{display:flex;gap:6px;padding:10px;border-top:1px solid var(--mb-line)}.mb-cd input{flex:1;min-width:0;font:16px 'Source Sans 3',sans-serif;padding:9px 11px;border-radius:10px;border:1px solid var(--mb-line);background:var(--mb-raised);color:var(--mb-ink)}",
+    "body.playing .mb-cd,body.playing .mibbar .mb-chat{display:none}",
   ].join("\n");
   document.head.appendChild(css);
   var H = home ? "" : "/";
+  // 14 Nov (owner: "reorganise the menu order"): the market first (today, news, money, the calendar, the deep dives, the
+  // week, the archive), then the fun (Sports, Arcade), the gold Lounge last; the chat itself is the 💬 button
   var links = [["today", L("Today", "Aujourd'hui"), H + (home ? "#today" : "")], ["news", L("News", "Actus"), H + "#news"], ["money", L("Money", "Marchés"), H + "#money"], ["calendar", L("Calendar", "Agenda"), H + "#calendar"],
-    ["dives", L("Deep dive", "Analyses"), H + "#dives"], ["week", L("The Week", "La semaine"), "/weekly.html"], ["archive", L("Archive", "Archives"), "/archive/"], ["arcade", "Arcade", "/arcade/"], ["sports", "Sports", "/sports/"], ["lounge", L("Lounge · chat & play", "Lounge · chat & jeux"), H + "#lounge"]];
+    ["dives", L("Deep dive", "Analyses"), H + "#dives"], ["week", L("The Week", "La semaine"), "/weekly.html"], ["archive", L("Archive", "Archives"), "/archive/"], ["sports", "Sports", "/sports/"], ["arcade", "Arcade", "/arcade/"], ["lounge", L("Lounge · chat & play", "Lounge · chat & jeux"), H + "#lounge"]];
   var bar = document.createElement("div"); bar.className = "mibbar notranslate"; bar.setAttribute("translate", "no");
   bar.innerHTML = '<div class="mb-in"><a class="mb-logo notranslate" translate="no" href="/" aria-label="MIB Terminal, home">MIB<i></i></a><nav aria-label="Site">'
     + links.map(function (l) { return '<a href="' + (l[2] || "/") + '" data-k="' + l[0] + '"' + (l[0] === "lounge" ? ' class="go"' : l[0] === active ? ' class="on"' : "") + ">" + l[1] + "</a>"; }).join("")
-    + '</nav><button class="mb-me notranslate" translate="no" type="button" aria-haspopup="dialog" aria-label="Your name, who is online, settings"><b></b><span></span><i></i></button></div>';
+    + '</nav><button class="mb-chat notranslate" translate="no" type="button" aria-label="Chat" title="' + L("Chat with everyone reading MIB", "Discuter avec les lecteurs de MIB") + '">💬</button><button class="mb-me notranslate" translate="no" type="button" aria-haspopup="dialog" aria-label="Your name, who is online, settings"><b></b><span></span><i></i></button></div>';
   if (me && me.parentNode) me.parentNode.insertBefore(bar, me); else document.body.insertBefore(bar, document.body.firstChild);
 
   // ---- you: name, avatar; settings; who is online
@@ -113,12 +128,12 @@
       + '<div class="mb-av notranslate" translate="no">' + AV.map(function (e, i) { return '<button type="button" data-av="' + i + '"' + (i === a ? ' class="on"' : "") + ' aria-label="avatar ' + e + '">' + e + "</button>"; }).join("") + "</div>"
       + '<div class="mb-note">' + L("Your name and avatar are used in the chat, the arcade and the scoreboards. Kept in this browser only.", "Ton pseudo et ton avatar servent dans le chat, l'arcade et les classements. Gardés dans ce navigateur seulement.") + "</div>"
       + "<h4>" + L("Online now", "En ligne") + " · " + online + "</h4>"
-      + '<div class="mb-who">' + (who.length ? who.map(function (w) { return "<div><b>" + esc(AV[w.a] || "👤") + '</b><span class="notranslate" translate="no">' + esc(w.n) + "</span><small>" + esc((fr ? { today: "accueil", week: "la semaine", archive: "archives", arcade: "arcade", page: "le site" } : { today: "home", week: "the week", archive: "archive", arcade: "arcade", page: "reading" })[w.p] || "") + "</small>" + (w.id && w.id !== myId ? '<button class="mb-btn mb-inv" type="button" data-inv="' + esc(w.id) + '" title="' + L("Invite to play", "Inviter à jouer") + '">🎮</button>' : "") + "</div>"; }).join("")
+      + '<div class="mb-who">' + (who.length ? who.map(function (w) { return "<div><b>" + esc(AV[w.a] || "👤") + '</b><span class="notranslate" translate="no">' + esc(w.n) + "</span><small>" + esc((fr ? { today: "accueil", week: "la semaine", archive: "archives", arcade: "arcade", page: "le site" } : lang === "it" ? { today: "home", week: "la settimana", archive: "archivio", arcade: "arcade", page: "sul sito" } : { today: "home", week: "the week", archive: "archive", arcade: "arcade", page: "reading" })[w.p] || "") + "</small>" + (w.id && w.id !== myId ? '<button class="mb-btn mb-inv" type="button" data-inv="' + esc(w.id) + '" title="' + L("Invite to play", "Inviter à jouer") + '">🎮</button>' : "") + "</div>"; }).join("")
       + '<div class="mb-games" hidden>' + INV_GAMES.map(function (g) { return '<button class="mb-btn" type="button" data-ig="' + g[0] + '">' + g[1] + "</button>"; }).join("") + "</div>" : '<span class="mb-note">' + L("Just you for now.", "Rien que toi pour l'instant.") + "</span>") + (who.length && online > who.length ? '<span class="mb-note">' + L("+ ", "+ ") + (online - who.length) + L(online - who.length > 1 ? " visitors without a name" : " visitor without a name", online - who.length > 1 ? " visiteurs sans pseudo" : " visiteur sans pseudo") + "</span>" : "") + "</div>"
-      + '<div class="mb-row"><a class="mb-btn pri" href="/arcade/">' + L("Play", "Jouer") + '</a><a class="mb-btn" href="/#lounge">Chat</a></div>'
+      + '<div class="mb-row"><a class="mb-btn pri" href="/arcade/">' + L("Play", "Jouer") + '</a><button class="mb-btn" type="button" data-act="chat">💬 Chat</button></div>'
       + "<h4>" + L("Settings", "Réglages") + "</h4>"
       + '<div class="mb-row"><button class="mb-btn" type="button" data-act="theme">' + (dark() ? L("☀ Light mode", "☀ Mode clair") : L("☾ Dark mode", "☾ Mode sombre")) + '</button>'
-      + '<button class="mb-btn notranslate" translate="no" type="button" data-act="lang">' + (fr ? "🇬🇧 English" : "🇫🇷 Français") + "</button></div>"
+      + [["", "🇬🇧 English"], ["fr", "🇫🇷 Français"], ["it", "🇮🇹 Italiano"]].filter(function (x) { return x[0] !== lang; }).map(function (x) { return '<button class="mb-btn notranslate" translate="no" type="button" data-act="lang" data-l="' + x[0] + '">' + x[1] + "</button>"; }).join("") + "</div>"
       + '<div class="mb-row"><button class="mb-btn" type="button" data-act="install">' + L("📲 Add to home screen", "📲 Sur l'écran d'accueil") + '</button><button class="mb-btn" type="button" data-act="share">' + L("↗ Share with a friend", "↗ Partager avec un ami") + "</button></div>"
       + '<div class="mb-note" id="mbMsg"></div>'
       + '<div class="mb-row"><a class="mb-btn" href="/privacy.html">' + L("Privacy", "Confidentialité") + "</a></div>";
@@ -141,10 +156,8 @@
     var b = e.target.closest("[data-av],[data-act]"); if (!b) return;
     if (b.dataset.av !== undefined) { ls("mib-avatar", b.dataset.av); paintMe(); paintPane(); hello(); window.dispatchEvent(new CustomEvent("mib-me")); return; }
     var act = b.dataset.act;
-    if (act === "lang") {
-      if (fr) { ls("mib-lang", null); clearGt(); location.reload(); return; }
-      ls("mib-lang", "fr"); location.reload(); return;
-    }
+    if (act === "chat") { pane.hidden = true; openChat(); return; }
+    if (act === "lang") { var to = b.dataset.l || ""; clearGt(); ls("mib-lang", to || null); location.reload(); return; }
     if (act === "theme") { var t = dark() ? "light" : "dark"; document.documentElement.setAttribute("data-theme", t); ls("mib-theme", t); paintPane(); }
     if (act === "install") {
       if (deferred) { deferred.prompt(); deferred = null; return; }
@@ -162,17 +175,17 @@
   var clearGt = function () { var x = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"; document.cookie = x; document.cookie = x + "; domain=" + location.hostname; document.cookie = x + "; domain=." + location.hostname.replace(/^www\./, ""); };
   var pickFr = function (n) {
     var c = document.querySelector(".goog-te-combo");
-    if (!c || ![].some.call(c.options, function (o) { return o.value === "fr"; })) { if (n < 75) setTimeout(function () { pickFr(n + 1); }, 200); return; }
-    if (c.value !== "fr") { c.value = "fr"; c.dispatchEvent(new Event("change")); }
+    if (!c || ![].some.call(c.options, function (o) { return o.value === lang; })) { if (n < 75) setTimeout(function () { pickFr(n + 1); }, 200); return; }
+    if (c.value !== lang) { c.value = lang; c.dispatchEvent(new Event("change")); }
   };
   var translate = function () {
     if (window.google && google.translate && google.translate.TranslateElement) { pickFr(0); return; }
     if (document.getElementById("google_translate_element")) return;
     var box = document.createElement("div"); box.id = "google_translate_element"; document.body.appendChild(box);
-    window.mibTranslate = function () { try { new google.translate.TranslateElement({ pageLanguage: "en", includedLanguages: "fr", autoDisplay: false }, "google_translate_element"); } catch (e) { return; } pickFr(0); };
+    window.mibTranslate = function () { try { new google.translate.TranslateElement({ pageLanguage: "en", includedLanguages: "fr,it", autoDisplay: false }, "google_translate_element"); } catch (e) { return; } pickFr(0); };
     var sc = document.createElement("script"); sc.src = "https://translate.google.com/translate_a/element.js?cb=mibTranslate"; sc.async = true; document.head.appendChild(sc);
   };
-  if (fr) translate();
+  if (lang) translate();
   addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; });
   // ---- the home-screen invitation (4 Nov, owner: "sharing with a friend just opens the browser, it does not add the
   // icon to the home screen"): no website may put its icon there by itself, so a phone that is not using the installed
@@ -203,6 +216,81 @@
       e.target.closest("[data-add]").remove();
     });
   })();
+
+  // ---- the chat on every page (14 Nov, owner: "the chat button next to the user doesn't work, users should be able to
+  // leave comments from anywhere"): 💬 opens the Lounge's rooms over whatever page is open (the menu's Chat button used
+  // to switch the homepage to the Lounge under a pane that stayed open). The line to a room is open only while it shows.
+  var cd = null, cws = null, croom = ls("mib-chat-room") || "today", cmsgs = [], ctries = 0;
+  var briefDay = function () {
+    var d = window.MIB_BRIEF && window.MIB_BRIEF.meta && window.MIB_BRIEF.meta.date; if (d) return d;
+    var t = new Date();
+    for (var i = 0; i < 3 && /Sat|Sun/.test(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Warsaw", weekday: "short" }).format(t)); i++) t = new Date(t.getTime() - 86400000);
+    return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Warsaw", year: "numeric", month: "2-digit", day: "2-digit" }).format(t);
+  };
+  var CROOMS = function () { return [["today", L("Today's brief", "Le brief du jour"), "brief-" + briefDay()], ["markets", L("Markets", "Marchés"), "markets"], ["crypto", "Crypto", "crypto"], ["sports", "Sports", "sports"], ["games", L("Games", "Jeux"), "games"]]; };
+  var chatBtn = bar.querySelector(".mb-chat");
+  var cpaint = function () {
+    if (!cd) return; var box = cd.querySelector(".ms");
+    box.innerHTML = cmsgs.length ? cmsgs.map(function (m) {
+      var mib = m.n === "MIB";
+      return '<div class="m' + (mib ? " mib" : "") + '"><span class="a">' + esc(mib ? "MIB" : AV[m.a] || (m.n || "?")[0].toUpperCase()) + '</span><div><b class="notranslate" translate="no">' + esc(m.n) + "</b><small>"
+        + esc(new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })) + "</small><p" + (mib ? "" : ' class="notranslate" translate="no"') + ">" + esc(m.x) + "</p></div></div>";
+    }).join("") : '<p class="mb-note">' + (croom === "today" ? L("No comment on today's brief yet. Be the first.", "Pas encore de commentaire sur le brief du jour. Lance-toi.") : L("Nobody has said anything here yet. Start it off.", "Personne n'a encore rien dit ici. Lance la discussion.")) + "</p>";
+    box.scrollTop = 1e6;
+  };
+  var cform = function () {
+    var i = cd.querySelector("input"), b = cd.querySelector("form button"), nm = !name();
+    i.placeholder = nm ? L("Pick a name to chat (also your arcade name)", "Choisis un pseudo pour discuter (aussi pour l'arcade)") : croom === "today" ? L("Comment on today's brief…", "Commente le brief du jour…") : L("Say something…", "Dis quelque chose…");
+    i.maxLength = nm ? 16 : 280; b.textContent = nm ? L("Join", "Rejoindre") : L("Send", "Envoyer");
+  };
+  var cstate = function (t) { if (cd) cd.querySelector(".st").textContent = t; };
+  var cconnect = function () {
+    if (!cd || cd.hidden) return;
+    if (!window.MIB_API_DONE) { window.MIB_API_READY.then(function () { window.MIB_API_DONE = true; cconnect(); }); return; }
+    if (cws) { cws.onclose = null; try { cws.close(); } catch (e) {} }
+    var r = croom, rm = CROOMS().filter(function (x) { return x[0] === r; })[0] || CROOMS()[0];
+    cstate(L("connecting…", "connexion…"));
+    try { cws = new WebSocket(API.replace(/^http/, "ws") + "/chat?" + new URLSearchParams({ room: rm[2], name: name() || "Guest", cid: cid, a: String(av()) })); } catch (e) { return; }
+    cws.onmessage = function (e) {
+      var d; try { d = JSON.parse(e.data); } catch (x) { return; } if (r !== croom) return;
+      if (d.t === "hello" || d.t === "reload") { cmsgs = d.msgs || []; ctries = 0; cpaint(); cstate((d.online || 1) + L(" here", " ici")); }
+      else if (d.t === "msg") { cmsgs.push(d.m); if (cmsgs.length > 200) cmsgs.shift(); cpaint(); }
+      else if (d.t === "del") { cmsgs = cmsgs.filter(function (m) { return m.id !== d.id; }); cpaint(); }
+      else if (d.t === "online") cstate(d.n + L(" here", " ici"));
+      else if (d.t === "slow") cstate(L("one message every 3 s", "un message toutes les 3 s"));
+    };
+    cws.onclose = function () { cstate(L("reconnecting…", "reconnexion…")); if (++ctries >= 2 && window.MIB_FLIP) window.MIB_FLIP(); setTimeout(function () { if (r === croom && cd && !cd.hidden) cconnect(); }, Math.min(15000, 1500 * ctries)); };
+  };
+  var closeChat = function () { if (!cd) return; cd.hidden = true; if (cws) { cws.onclose = null; try { cws.close(); } catch (x) {} cws = null; } };
+  var openChat = function (room) {
+    if (room) { croom = room; ls("mib-chat-room", room); }
+    if (!cd) {
+      cd = document.createElement("div"); cd.className = "mb-cd"; cd.setAttribute("role", "dialog"); cd.setAttribute("aria-label", "Chat");
+      document.body.appendChild(cd);
+      cd.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (e.target.closest(".x")) { closeChat(); return; }
+        var b = e.target.closest("[data-r]"); if (!b || b.dataset.r === croom) return;
+        croom = b.dataset.r; ls("mib-chat-room", croom); [].forEach.call(cd.querySelectorAll("[data-r]"), function (x) { x.classList.toggle("on", x === b); }); cmsgs = []; cpaint(); cform(); cconnect();
+      });
+      cd.addEventListener("submit", function (e) {
+        e.preventDefault(); var i = cd.querySelector("input"), v = i.value.trim(); if (!v) return;
+        if (!name()) { var n = v.replace(/[^\p{L}\p{N} _.\-]/gu, "").trim().slice(0, 16); if (!n) return; ls("arcade-name", n); i.value = ""; paintMe(); hello(); cform(); cconnect(); window.dispatchEvent(new CustomEvent("mib-me")); return; }
+        if (cws && cws.readyState === 1) {
+          cws.send(JSON.stringify({ t: "say", x: v })); i.value = "";
+          var rm = (CROOMS().filter(function (x) { return x[0] === croom; })[0] || [])[2], rs = (ls("mib-rooms") || "").split(",").filter(Boolean);
+          if (rm && rs.indexOf(rm) < 0) { rs.push(rm); ls("mib-rooms", rs.slice(-40).join(",")); }
+        } else cstate(L("not connected yet", "pas encore connecté"));
+      });
+    }
+    cd.innerHTML = '<header><div class="rm">' + CROOMS().map(function (x) { return '<button type="button" data-r="' + x[0] + '"' + (x[0] === croom ? ' class="on"' : "") + ">" + esc(x[1]) + "</button>"; }).join("")
+      + '</div><button class="x" type="button" aria-label="close">✕</button></header><div class="st"></div><div class="ms"></div><form><input autocomplete="off"><button class="mb-btn pri" type="submit"></button></form>';
+    cd.hidden = false; pane.hidden = true; cmsgs = []; cpaint(); cform(); cconnect();
+    if (!name()) cd.querySelector("input").focus();
+  };
+  window.MIB_OPEN_CHAT = openChat;
+  chatBtn.addEventListener("click", function (e) { e.stopPropagation(); if (cd && !cd.hidden) closeChat(); else openChat(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeChat(); });
 
   // ---- presence: one light line to the chat server; it counts this visit (no cookie, nothing personal) and
   // says who is online. Your place shows only your chosen name, avatar and the page you are on.

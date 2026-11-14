@@ -3,7 +3,7 @@ window.MIB_BRIEF = {
   "meta": {
     "generated_at": "2026-11-13T08:29:02Z",
     "date": "2026-11-13",
-    "built_at": "2026-11-13 20:14 UTC",
+    "built_at": "2026-11-14 08:23 UTC",
     "demo": false,
     "tier": "public"
   },
@@ -84,184 +84,184 @@ window.MIB_BRIEF = {
   ],
   "news": [
     {
-      "title": "Hassett denies report he's leaving White House: 'Not true'",
+      "title": "China, US discuss tariffs, farm trade ahead of Xi-Trump meeting",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/kevin-hassett-white-house-nec.html",
-      "at": "2026-11-13T20:14:28+00:00"
+      "url": "https://www.cnbc.com/2026/11/14/china-us-tariffs-xi-trump-meeting.html",
+      "at": "2026-11-14T08:16:44+00:00"
     },
     {
-      "title": "Nasdaq falls on Friday as Nvidia keeps sliding, but major averages are up for week: Live updates",
+      "title": "Microsoft apologizes for massive outage that took down Outlook and other 365 services",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/12/stock-market-today-live-updates.html",
-      "at": "2026-11-13T20:08:22+00:00"
+      "url": "https://www.cnbc.com/2026/11/12/microsoft-outage-outlook-aws-google.html",
+      "at": "2026-11-14T08:11:28+00:00"
     },
     {
-      "title": "CFTC Chair Selig tells CNBC crypto industry is embracing agency rules as legislation hopes fade",
+      "title": "Twenty One Capital CEO Says ‘A Balance Sheet Is Not A Business’ After $1 Billion Bitcoin-Driven Gain",
+      "src": "Yahoo Finance",
+      "url": "https://stocktwits.com/news-articles/markets/equity/twenty-one-capital-ceo-balance-sheet-business-after-1-billion-bitcoin-profit/cNbPR6IR9Qh?.tsrc=rss",
+      "at": "2026-11-14T07:49:06+00:00"
+    },
+    {
+      "title": "Analysis: Companies love a ‘rockstar’ CEO. Until they depend on one",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/cftc-chair-selig-crypto-industry-opting-into-agencys-crypto-rules-.html",
-      "at": "2026-11-13T20:07:30+00:00"
+      "url": "https://www.cnbc.com/2026/11/14/nvidia-jensen-huang-ceo-succession-risk.html",
+      "at": "2026-11-14T07:08:45+00:00"
     },
     {
-      "title": "Supreme Court agrees to hear Robinhood challenge to IPO information omission lawsuit",
+      "title": "Strive CEO Says Bitcoin Could ‘Go To A Penny’ And The Company Would Still Survive Because It Has No Debt",
+      "src": "Yahoo Finance",
+      "url": "https://stocktwits.com/news-articles/markets/equity/strive-ceo-says-bitcoin-could-go-to-a-penny-and-the-company-would-still-survive-because-it-has-no-debt/cNbPG3NR9QQ?.tsrc=rss",
+      "at": "2026-11-14T06:40:19+00:00"
+    },
+    {
+      "title": "Bitcoin slides below $68,000 as Anthropic IPO frenzy drains market liquidity",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/crypto/articles/bitcoin-slides-below-68-000-061956476.html?.tsrc=rss",
+      "at": "2026-11-14T06:19:56+00:00"
+    },
+    {
+      "title": "Metaplanet Cuts 2026 Revenue Target 59%: Is the Bitcoin Playbook Running Dry?",
+      "src": "Yahoo Finance",
+      "url": "https://beincrypto.com/metaplanet-cuts-2026-revenue-forecast-mnav/?.tsrc=rss",
+      "at": "2026-11-14T06:15:28+00:00"
+    },
+    {
+      "title": "Ecuador wants to monetize its biodiversity — while still drilling for oil",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/robinhood-supreme-court-ipo-lawsuit.html",
-      "at": "2026-11-13T20:00:06+00:00"
+      "url": "https://www.cnbc.com/2026/11/14/ecuador-biodiversity-green-finance-oil.html",
+      "at": "2026-11-14T06:00:01+00:00"
     },
     {
-      "title": "First Merchants Corporation Announces Cash Dividend",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/first-merchants-corporation-announces-cash-200000430.html?.tsrc=rss",
-      "at": "2026-11-13T20:00:00+00:00"
-    },
-    {
-      "title": "Stock Market Today: Indexes Pare Losses; S&P's Worst Performer Sells Chips, And It's Not Nvidia (Live Coverage)",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/59c1380c-6194-35f8-be3b-4a6a3148bfa4/stock-market-today%3A-indexes.html?.tsrc=rss",
-      "at": "2026-11-13T19:55:51+00:00"
-    },
-    {
-      "title": "Nvidia hasn’t selected search firm for permanent Huang replacement, board tells CNBC",
+      "title": "FAA lifts ground stop after more than four hours, but flight cancellations will stretch into the weekend",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/nvidia-huang-ceo-replacement-search.html",
-      "at": "2026-11-13T19:54:06+00:00"
+      "url": "https://www.cnbc.com/2026/11/13/faa-ground-stop.html",
+      "at": "2026-11-14T05:08:24+00:00"
     },
     {
-      "title": "After Jensen Huang’s exit, what top financial advisors are doing with Nvidia: Exclusive CNBC poll",
+      "title": "How Index Removal Will Impact Strategy Stock Investors",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/index-removal-impact-strategy-stock-042405769.html?.tsrc=rss",
+      "at": "2026-11-14T04:24:05+00:00"
+    },
+    {
+      "title": "Should Ethereum Tax Its Apps to Prove Its Security Is Worth It?",
+      "src": "Yahoo Finance",
+      "url": "https://unchainedcrypto.com/should-ethereum-tax-its-apps-to-prove-its-security-is-worth-it/?.tsrc=rss",
+      "at": "2026-11-14T04:00:26+00:00"
+    },
+    {
+      "title": "Will Bitcoin Never Set Another All-Time High? Analysts Debate On X",
+      "src": "Yahoo Finance",
+      "url": "https://beincrypto.com/bitcoin-never-all-time-high-analyst-key-levels/?.tsrc=rss",
+      "at": "2026-11-14T04:00:00+00:00"
+    },
+    {
+      "title": "Crypto Market’s Nearly 6% Slide Costs Bulls $1 Billion in a Day",
+      "src": "Yahoo Finance",
+      "url": "https://beincrypto.com/bitcoin-below-68000-crypto-liquidations-bulls/?.tsrc=rss",
+      "at": "2026-11-14T03:35:48+00:00"
+    },
+    {
+      "title": "Hut 8 (HUT) Stock Looks Fully Priced On Beacon Point Lease News",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/hut-8-hut-stock-looks-031119663.html?.tsrc=rss",
+      "at": "2026-11-14T03:11:19+00:00"
+    },
+    {
+      "title": "Hyperliquid Whales Flip Bullish On Bitcoin After Two Weeks Of Shorts: Report",
+      "src": "Yahoo Finance",
+      "url": "https://stocktwits.com/news-articles/markets/cryptocurrency/hyperliquid-whales-flip-bullish-on-bitcoin-after-two-weeks-of-shorts-report/cNb2vZuR9Q4?.tsrc=rss",
+      "at": "2026-11-14T03:11:11+00:00"
+    },
+    {
+      "title": "Nakamoto Gets Extra Year on 60 Million USDT Kraken Loan; Derivatives Count Toward Collateral",
+      "src": "Yahoo Finance",
+      "url": "https://unchainedcrypto.com/nakamoto-gets-extra-year-on-60-million-usdt-kraken-loan-derivatives-count-toward-collateral/?.tsrc=rss",
+      "at": "2026-11-14T02:22:42+00:00"
+    },
+    {
+      "title": "HIVE Digital Technologies (TSX:HIVE) Stock Sees Fair Value Cut As Analysts Lower Targets",
+      "src": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/markets/stocks/articles/hive-digital-technologies-tsx-hive-021227341.html?.tsrc=rss",
+      "at": "2026-11-14T02:12:27+00:00"
+    },
+    {
+      "title": "Trump doesn’t plan to raise Nvidia, spy issue during China trip: U.S. officials",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/nvidia-stock-advisors-jensen-huang-exit-exclusive-poll.html",
-      "at": "2026-11-13T19:53:38+00:00"
+      "url": "https://www.cnbc.com/2026/11/13/trump-nvidia-huang-china.html",
+      "at": "2026-11-14T01:34:11+00:00"
     },
     {
-      "title": "Goldman Sachs looks to cash in on Anthropic's IPO, twice. Here's how and who else wants to",
+      "title": "Is There Any Reason To Invest In Edwards Lifesciences Stock?",
+      "src": "Yahoo Finance",
+      "url": "https://www.trefis.com/stock/ew/articles/624863/is-there-any-reason-to-invest-in-edwards-lifesciences-stock/2026-11-13?.tsrc=rss",
+      "at": "2026-11-14T01:20:00+00:00"
+    },
+    {
+      "title": "SpaceX launches Starship in key test flight of massive rocket",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/investingclub/2026/11/13/goldman-sachs-looks-to-cash-in-on-anthropics-ipo-twice-heres-how-and-who-else-wants-to.html",
-      "at": "2026-11-13T19:45:35+00:00"
+      "url": "https://www.cnbc.com/2026/11/13/spacex-launches-starship-in-key-test-flight-of-massive-rocket.html",
+      "at": "2026-11-14T01:18:51+00:00"
     },
     {
-      "title": "Nvidia turmoil reshuffles the AI trade. Winners, losers and what investors should watch",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/nvidia-ceo-exit-amd-broadcom-and-ai-trade-fallout-.html",
-      "at": "2026-11-13T19:38:00+00:00"
-    },
-    {
-      "title": "Investing.com’s stocks of the week",
+      "title": "Cathie Wood buys $15 million of popular AI stock",
       "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/investing-com-stocks-week-193622777.html?.tsrc=rss",
-      "at": "2026-11-13T19:36:22+00:00"
+      "url": "https://www.thestreet.com/investing/stocks/cathie-wood-buys-15-million-of-popular-ai-stock?.tsrc=rss",
+      "at": "2026-11-14T01:13:39+00:00"
     },
     {
-      "title": "Dormant Bitcoin Wallets Wake Up After 16 Years, Moving $6.9 Million",
+      "title": "Could You Have Held Glaukos Stock Through Its Falls?",
       "src": "Yahoo Finance",
-      "url": "https://decrypt.co/383264/dormant-bitcoin-wallets-wake-up-after-16-years?.tsrc=rss",
-      "at": "2026-11-13T19:36:03+00:00"
+      "url": "https://www.trefis.com/stock/gkos/articles/624885/could-you-have-held-glaukos-stock-through-its-falls/2026-11-13?.tsrc=rss",
+      "at": "2026-11-14T01:08:04+00:00"
     },
     {
-      "title": "Twenty One Capital Made $1 Billion in Bitcoin Profit. 60% is Already Gone",
+      "title": "Review & Preview: Moving On",
       "src": "Yahoo Finance",
-      "url": "https://beincrypto.com/twenty-one-capital-bitcoin-profit-gone/?.tsrc=rss",
-      "at": "2026-11-13T19:34:41+00:00"
+      "url": "https://finance.yahoo.com/m/aaf2f5e5-33ee-38f6-879e-ff5ff7d5599d/review-%26-preview%3A-moving-on.html?.tsrc=rss",
+      "at": "2026-11-14T00:55:00+00:00"
     },
     {
-      "title": "A trading strategy to ride out the Nvidia uncertainty and generate income in the process",
-      "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/a-trading-strategy-to-ride-out-the-nvidia-uncertainty-and-generate-income-in-the-process.html",
-      "at": "2026-11-13T19:30:36+00:00"
-    },
-    {
-      "title": "Can Bloom Energy Stock Jump 50%?",
+      "title": "Jensen Huang Just Resigned From Nvidia. A Study of 187 Forced CEO Exits Shows What Could Happen Next",
       "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/be/articles/624994/can-bloom-energy-stock-jump-50-2/2026-11-13?.tsrc=rss",
-      "at": "2026-11-13T19:26:20+00:00"
+      "url": "https://247wallst.com/investing/2026/11/13/jensen-huang-just-resigned-from-nvidia-a-study-of-187-forced-ceo-exits-shows-what-could-happen-next/?.tsrc=rss",
+      "at": "2026-11-14T00:47:00+00:00"
     },
     {
-      "title": "Could 10,000 XRP Make You a Millionaire by 2030?",
+      "title": "Dow Jones Futures: Market Rally Shaky As Nvidia Earnings, Anthropic IPO Loom; SpaceX Starship Flight 15 Booster Diverts.",
       "src": "Yahoo Finance",
-      "url": "https://247wallst.com/investing/cryptocurrency/2026/11/13/could-10000-xrp-make-you-a-millionaire-by-2030/?.tsrc=rss",
-      "at": "2026-11-13T19:23:54+00:00"
+      "url": "https://finance.yahoo.com/m/53e50dc8-f137-3f6c-bfd6-912334fef9f1/dow-jones-futures%3A-market.html?.tsrc=rss",
+      "at": "2026-11-14T00:41:41+00:00"
     },
     {
-      "title": "Why You Should Think About Charter Communications Differently Now?",
+      "title": "Can You Justify Buying Dynatrace Stock Today?",
       "src": "Yahoo Finance",
-      "url": "https://www.trefis.com/stock/chtr/articles/625005/why-you-should-think-about-charter-communications-differently-now/2026-11-13?.tsrc=rss",
-      "at": "2026-11-13T19:16:11+00:00"
+      "url": "https://www.trefis.com/stock/dt/articles/624866/can-you-justify-buying-dynatrace-stock-today/2026-11-13?.tsrc=rss",
+      "at": "2026-11-14T00:41:18+00:00"
     },
     {
-      "title": "Twenty One Capital Q3 Earnings Call Highlights",
-      "src": "Yahoo Finance",
-      "url": "https://www.marketbeat.com/instant-alerts/transcript-twenty-one-capital-q3-earnings-call-highlights-2026-11-13/?utm_source=yahoofinance&utm_medium=yahoofinance&.tsrc=rss",
-      "at": "2026-11-13T19:15:15+00:00"
-    },
-    {
-      "title": "HPC Expansion Could Recast The Cipher Digital Stock Story",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/hpc-expansion-could-recast-cipher-191153689.html?.tsrc=rss",
-      "at": "2026-11-13T19:11:53+00:00"
-    },
-    {
-      "title": "Lutnick faces questions over Nvidia spy scandal. His sons’ firm has deep ties to the chipmaker",
+      "title": "Lutnick faces questions over Nvidia spy scandal. His sons' firm has deep ties to the chipmaker",
       "src": "CNBC",
       "url": "https://www.cnbc.com/2026/11/13/howard-lutnick-nvidia-jensen-huang-china-cantor-fitzgerald.html",
-      "at": "2026-11-13T19:11:13+00:00"
+      "at": "2026-11-13T23:42:18+00:00"
     },
     {
-      "title": "Update: US Equity Indexes Fall as Nvidia Debacle Hits Chipmakers, Long Treasury Yields Jump on 'Elevated' Producer Prices",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/us-equity-indexes-fall-nvidia-190946104.html?.tsrc=rss",
-      "at": "2026-11-13T19:09:46+00:00"
-    },
-    {
-      "title": "The Dow Is Flat. The Stock Market is Doing Better Than it Looks.",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/m/e87315be-b6d3-3782-8b82-97aa2ec16d8c/the-dow-is-flat.-the-stock.html?.tsrc=rss",
-      "at": "2026-11-13T19:06:13+00:00"
-    },
-    {
-      "title": "Retirees sometimes tap savings for one-off expenses. Here’s what advisors say to consider first",
+      "title": "Rescues underway in New Orleans after a tanker hits a river cruise boat on the Mississippi River",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/retirement-401k-ira-withdrawal-taxes.html",
-      "at": "2026-11-13T19:01:12+00:00"
+      "url": "https://www.cnbc.com/2026/11/13/tanker-hits-cruise-boat-in-new-orleans-rescues-underway.html",
+      "at": "2026-11-13T22:31:41+00:00"
     },
     {
-      "title": "Goldman Sachs sees upside for S&P 500 in 2027 — even as earnings growth slows",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/article/goldman-sachs-sees-upside-for-sp-500-in-2027--even-as-earnings-growth-slows-185627269.html?.tsrc=rss",
-      "at": "2026-11-13T18:56:27+00:00"
-    },
-    {
-      "title": "OpenAI launches ChatGPT Wallet, allowing its 'dots' AI agents to make purchases for users",
+      "title": "Nvidia stock suffers longest weekly losing streak since 2012 as market value sinks by $1.7 trillion",
       "src": "CNBC",
-      "url": "https://www.cnbc.com/2026/11/13/openai-chatgpt-wallet-dot-purchases.html",
-      "at": "2026-11-13T18:56:26+00:00"
+      "url": "https://www.cnbc.com/2026/11/13/nvidia-stock-jensen-affair-ai.html",
+      "at": "2026-11-13T22:18:43+00:00"
     },
     {
-      "title": "Why ADI Global Distribution Stock Plunged This Week",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/coverage/market-movers/2026/11/13/why-adi-global-distribution-stock-plunged-this-week/?.tsrc=rss",
-      "at": "2026-11-13T18:55:02+00:00"
-    },
-    {
-      "title": "The Stock Market's Early Rally Fades as Wholesale Inflation Hits 6.5%",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/stock-markets-early-rally-fades-185155071.html?.tsrc=rss",
-      "at": "2026-11-13T18:51:55+00:00"
-    },
-    {
-      "title": "Update: Equities Fall Intraday as Nvidia Declines",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/equities-fall-intraday-nvidia-declines-184904960.html?.tsrc=rss",
-      "at": "2026-11-13T18:49:04+00:00"
-    },
-    {
-      "title": "Why Advanced Micro Devices Stock Is Down Today",
-      "src": "Yahoo Finance",
-      "url": "https://www.fool.com/investing/2026/11/13/why-advanced-micro-devices-is-down-today/?.tsrc=rss",
-      "at": "2026-11-13T18:45:02+00:00"
-    },
-    {
-      "title": "Sector Update: Financial Stocks Higher Friday Afternoon",
-      "src": "Yahoo Finance",
-      "url": "https://finance.yahoo.com/markets/stocks/articles/sector-financial-stocks-higher-friday-184112484.html?.tsrc=rss",
-      "at": "2026-11-13T18:41:12+00:00"
+      "title": "Hackers stole $6.3 billion from Binance—2 habits that take 'a few seconds' can help you avoid similar traps",
+      "src": "CNBC",
+      "url": "https://www.cnbc.com/make-it/2026/11/13/binance-hack-2-online-habits-that-can-help-you-avoid-scams-.html",
+      "at": "2026-11-13T22:06:55+00:00"
     }
   ],
   "footer": {
@@ -755,7 +755,7 @@ window.MIB_BRIEF = {
       ]
     ]
   },
-  "health_html": "<style>\n  .wk-fig { margin: 6px 0 30px; padding: 18px 6px;\n            background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);\n            border-radius: 14px; overflow: hidden; }\n  .wk-take { color: #96a8be; font: 400 15px/1.6 var(--sans);\n             margin: -14px 0 30px; }\n  .wk-health { display: flex; gap: 30px; align-items: center;\n               flex-wrap: wrap; margin: 4px 0 14px; padding: 20px;\n               background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);\n               border-radius: 16px; }\n  .wk-gauge { flex: 0 0 260px; }\n  .wk-pillars { flex: 1 1 340px; display: flex; flex-direction: column;\n                gap: 14px; }\n  .wk-pill-top { display: flex; justify-content: space-between;\n                 align-items: baseline; }\n  .wk-pill-name { color: #f4f7fa; font: 600 14px/1.3 var(--sans); }\n  .wk-pill-val { color: #e9b949; font: 700 15px/1 var(--mono); }\n  .wk-pill-track { height: 8px; border-radius: 6px; margin: 5px 0 4px;\n                   background: rgba(88,116,152,.28); overflow: hidden; }\n  .wk-pill-fill { height: 100%; border-radius: 6px;\n                  background: linear-gradient(90deg,#bf9534,#e9b949); }\n  .wk-pill-cap { color: #96a8be; font: 400 12px/1.4 var(--sans); }\n  .wk-drag { color: #f4f7fa; font: 400 15px/1.6 var(--sans) !important;\n             margin: 4px 0 14px; text-shadow: none !important; }\n  .wk-drag strong { color: #e85a5e; }\n  .wk-legend { margin: 4px 0 30px; padding: 14px 16px; background: rgba(14,28,51,.55);\n               border: 1px solid rgba(88,116,152,.28); border-radius: 12px; }\n  .wk-legend-h { color: #e9b949; font: 700 11px/1 var(--mono);\n                 letter-spacing: 2px; text-transform: uppercase;\n                 margin-bottom: 7px; }\n  .wk-legend-body { color: #96a8be; font: 400 14px/1.6 var(--sans) !important;\n                    margin: 0 0 10px; text-shadow: none !important; }\n  .wk-bands { display: flex; flex-wrap: wrap; gap: 7px; }\n  .wk-band { color: #96a8be; font: 400 12px/1 var(--sans);\n             background: rgba(88,116,152,.28); border-radius: 999px; padding: 5px 10px;\n             white-space: nowrap; }\n  .wk-band b { color: #f4f7fa; font-family: var(--mono); font-weight: 700; }\n  .wk-trans { display: flex; flex-direction: column; gap: 0;\n              margin: 4px 0 30px; }\n  .wk-tr { display: grid; grid-template-columns: 1fr auto 22px auto;\n           gap: 10px; align-items: center; padding: 11px 2px;\n           border-bottom: 1px dashed rgba(88,116,152,.28); }\n  .wk-tr-what { color: #96a8be; font: 400 14px/1.4 var(--sans); }\n  .wk-tr-a { color: #5b7292; font: 600 14px/1 var(--mono);\n             text-align: right; }\n  .wk-tr-arw { color: #e9b949; text-align: center; }\n  .wk-tr-b { color: #f4f7fa; font: 700 14px/1 var(--mono); }\n  @media (max-width: 640px) {\n    .wk-health { gap: 16px; } .wk-gauge { flex-basis: 100%; text-align: center; }\n  }\n</style><div class=\"mib-health-card\"><div class=\"wk-health\"><div class=\"wk-gauge\"><svg viewBox=\"0 0 260 208\" width=\"260\" role=\"img\">\n  <path d=\"M 34 150 A 96 96 0 0 1 226 150\" fill=\"none\" stroke=\"rgba(88,116,152,.28)\" stroke-width=\"14\" stroke-linecap=\"round\"/><path d=\"M 34.0 150.0 A 96 96 0 0 1 130.0 54.0\" fill=\"none\" stroke=\"#e9b949\" stroke-width=\"14\" stroke-linecap=\"round\"/>\n  <text x=\"130\" y=\"144\" text-anchor=\"middle\" fill=\"#f4f7fa\" font-family=\"var(--serif),Georgia,serif\" font-size=\"58\" font-weight=\"400\">50</text>\n  <text x=\"130\" y=\"172\" text-anchor=\"middle\" fill=\"#e9b949\" font-family=\"ui-monospace,Menlo,monospace\" font-size=\"13\" letter-spacing=\"3\">TIRING</text>\n</svg></div><div class=\"wk-pillars\"><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Participation</span><span class=\"wk-pill-val\">22</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:22%\"></div></div><div class=\"wk-pill-cap\">share of stocks actually rising</div></div><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Breadth</span><span class=\"wk-pill-val\">86</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:86%\"></div></div><div class=\"wk-pill-cap\">how often the broad market confirmed the index</div></div><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Leadership</span><span class=\"wk-pill-val\">25</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:25%\"></div></div><div class=\"wk-pill-cap\">how many names carry the upside</div></div><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Risk Appetite</span><span class=\"wk-pill-val\">64</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:64%\"></div></div><div class=\"wk-pill-cap\">offense vs defense, fear gauge, mood stability</div></div><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Cross Asset</span><span class=\"wk-pill-val\">55</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:55%\"></div></div><div class=\"wk-pill-cap\">are stocks, crypto and commodities telling one story?</div></div></div></div><p class=\"wk-drag\"><strong>Biggest drag:</strong> Participation — 16% of stocks rising at the start, 3% at the end (week average 41%), so the week&#x27;s gains rested on fewer and fewer stocks, and a narrow advance is the kind that breaks hard.</p><div class=\"wk-legend\"><div class=\"wk-legend-h\">How to read this</div><p class=\"wk-legend-body\">One score, 0–100, built from five things a healthy market needs at once. Higher means the advance is broader, calmer and better backed by the tape.</p><div class=\"wk-bands\"><span class=\"wk-band\"><b>70+</b> Healthy</span><span class=\"wk-band\"><b>55–69</b> Steady</span><span class=\"wk-band\"><b>40–54</b> Tiring</span><span class=\"wk-band\"><b>25–39</b> Divergent</span><span class=\"wk-band\"><b>&lt;25</b> Stressed</span></div></div></div>",
+  "health_html": "<style>\n  .wk-fig { margin: 6px 0 30px; padding: 18px 6px;\n            background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);\n            border-radius: 14px; overflow: hidden; }\n  .wk-take { color: #96a8be; font: 400 15px/1.6 var(--sans);\n             margin: -14px 0 30px; }\n  .wk-health { display: flex; gap: 30px; align-items: center;\n               flex-wrap: wrap; margin: 4px 0 14px; padding: 20px;\n               background: rgba(14,28,51,.55); border: 1px solid rgba(88,116,152,.28);\n               border-radius: 16px; }\n  .wk-gauge { flex: 0 0 260px; }\n  .wk-pillars { flex: 1 1 340px; display: flex; flex-direction: column;\n                gap: 14px; }\n  .wk-pill-top { display: flex; justify-content: space-between;\n                 align-items: baseline; }\n  .wk-pill-name { color: #f4f7fa; font: 600 14px/1.3 var(--sans); }\n  .wk-pill-val { color: #e9b949; font: 700 15px/1 var(--mono); }\n  .wk-pill-track { height: 8px; border-radius: 6px; margin: 5px 0 4px;\n                   background: rgba(88,116,152,.28); overflow: hidden; }\n  .wk-pill-fill { height: 100%; border-radius: 6px;\n                  background: linear-gradient(90deg,#bf9534,#e9b949); }\n  .wk-pill-cap { color: #96a8be; font: 400 12px/1.4 var(--sans); }\n  .wk-drag { color: #f4f7fa; font: 400 15px/1.6 var(--sans) !important;\n             margin: 4px 0 14px; text-shadow: none !important; }\n  .wk-drag strong { color: #e85a5e; }\n  .wk-legend { margin: 4px 0 30px; padding: 14px 16px; background: rgba(14,28,51,.55);\n               border: 1px solid rgba(88,116,152,.28); border-radius: 12px; }\n  .wk-legend-h { color: #e9b949; font: 700 11px/1 var(--mono);\n                 letter-spacing: 2px; text-transform: uppercase;\n                 margin-bottom: 7px; }\n  .wk-legend-body { color: #96a8be; font: 400 14px/1.6 var(--sans) !important;\n                    margin: 0 0 10px; text-shadow: none !important; }\n  .wk-bands { display: flex; flex-wrap: wrap; gap: 7px; }\n  .wk-band { color: #96a8be; font: 400 12px/1 var(--sans);\n             background: rgba(88,116,152,.28); border-radius: 999px; padding: 5px 10px;\n             white-space: nowrap; }\n  .wk-band b { color: #f4f7fa; font-family: var(--mono); font-weight: 700; }\n  .wk-trans { display: flex; flex-direction: column; gap: 0;\n              margin: 4px 0 30px; }\n  .wk-tr { display: grid; grid-template-columns: 1fr auto 22px auto;\n           gap: 10px; align-items: center; padding: 11px 2px;\n           border-bottom: 1px dashed rgba(88,116,152,.28); }\n  .wk-tr-what { color: #96a8be; font: 400 14px/1.4 var(--sans); }\n  .wk-tr-a { color: #5b7292; font: 600 14px/1 var(--mono);\n             text-align: right; }\n  .wk-tr-arw { color: #e9b949; text-align: center; }\n  .wk-tr-b { color: #f4f7fa; font: 700 14px/1 var(--mono); }\n  @media (max-width: 640px) {\n    .wk-health { gap: 16px; } .wk-gauge { flex-basis: 100%; text-align: center; }\n  }\n</style><div class=\"mib-health-card\"><div class=\"wk-health\"><div class=\"wk-gauge\"><svg viewBox=\"0 0 260 208\" width=\"260\" role=\"img\">\n  <path d=\"M 34 150 A 96 96 0 0 1 226 150\" fill=\"none\" stroke=\"rgba(88,116,152,.28)\" stroke-width=\"14\" stroke-linecap=\"round\"/><path d=\"M 34.0 150.0 A 96 96 0 0 1 133.0 54.0\" fill=\"none\" stroke=\"#e9b949\" stroke-width=\"14\" stroke-linecap=\"round\"/>\n  <text x=\"130\" y=\"144\" text-anchor=\"middle\" fill=\"#f4f7fa\" font-family=\"var(--serif),Georgia,serif\" font-size=\"58\" font-weight=\"400\">51</text>\n  <text x=\"130\" y=\"172\" text-anchor=\"middle\" fill=\"#e9b949\" font-family=\"ui-monospace,Menlo,monospace\" font-size=\"13\" letter-spacing=\"3\">TIRING</text>\n</svg></div><div class=\"wk-pillars\"><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Participation</span><span class=\"wk-pill-val\">24</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:24%\"></div></div><div class=\"wk-pill-cap\">share of stocks actually rising</div></div><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Breadth</span><span class=\"wk-pill-val\">83</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:83%\"></div></div><div class=\"wk-pill-cap\">how often the broad market confirmed the index</div></div><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Leadership</span><span class=\"wk-pill-val\">27</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:27%\"></div></div><div class=\"wk-pill-cap\">how many names carry the upside</div></div><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Risk Appetite</span><span class=\"wk-pill-val\">64</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:64%\"></div></div><div class=\"wk-pill-cap\">offense vs defense, fear gauge, mood stability</div></div><div class=\"wk-pill\"><div class=\"wk-pill-top\"><span class=\"wk-pill-name\">Cross Asset</span><span class=\"wk-pill-val\">55</span></div><div class=\"wk-pill-track\"><div class=\"wk-pill-fill\" style=\"width:55%\"></div></div><div class=\"wk-pill-cap\">are stocks, crypto and commodities telling one story?</div></div></div></div><p class=\"wk-drag\"><strong>Biggest drag:</strong> Participation — 70% of stocks rising at the start, 3% at the end (week average 45%), so the week&#x27;s gains rested on fewer and fewer stocks, and a narrow advance is the kind that breaks hard.</p><div class=\"wk-legend\"><div class=\"wk-legend-h\">How to read this</div><p class=\"wk-legend-body\">One score, 0–100, built from five things a healthy market needs at once. Higher means the advance is broader, calmer and better backed by the tape.</p><div class=\"wk-bands\"><span class=\"wk-band\"><b>70+</b> Healthy</span><span class=\"wk-band\"><b>55–69</b> Steady</span><span class=\"wk-band\"><b>40–54</b> Tiring</span><span class=\"wk-band\"><b>25–39</b> Divergent</span><span class=\"wk-band\"><b>&lt;25</b> Stressed</span></div></div></div>",
   "i18n_fr": {}
 };
 window.MIB_PROD = 1;
