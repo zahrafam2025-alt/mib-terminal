@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crypto · MIB Terminal</title>
+<meta name="description" content="Bitcoin, Ether and the main coins: prices in euros, 24 h and 7 day moves, market share, charts, the movers, crypto headlines, the dates that matter and plain-words notes for investors in Europe. Free, no account.">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://mibterminal.com/crypto/">
+<meta property="og:title" content="Crypto · MIB Terminal">
+<meta property="og:url" content="https://mibterminal.com/crypto/">
+<meta property="og:image" content="https://mibterminal.com/og.png">
+<!-- 14 Nov 2026 (owner: "i asked for a specific crypto tab"): the Crypto page, its own tab in the menu, built like the
+     Sports Arena (one self-contained page, everything read by the visitor's browser, nothing paid, no AI).
+     Where the data comes from (all free, no key):
+       prices, 24 h / 7 d moves, market caps, all-time highs,   CoinGecko's public API (api.coingecko.com), read by
+       the 7-day mini charts, the big chart, trending coins      the browser (it blocks servers, not browsers)
+       if CoinGecko is busy (it limits each visitor)             Binance's public 24 h tickers (prices + 24 h only)
+       market mood                                               alternative.me Crypto Fear & Greed index
+       bitcoin network dates (difficulty, halving estimate)      blockstream.info (computed from its blocks)
+       headlines                                                 CoinDesk, Cointelegraph, Decrypt, The Block RSS, through
+                                                                 the MIB server (feeds "crypto-*", cloudflare/mib-arcade);
+                                                                 until that server knows them, rss2json.com (free) reads them
+       the Fed's 2026 decision dates                             amis/calendar_truth.py (the Fed's published schedule)
+     Only headlines and links are shown; every story opens on its publisher's site. Not investment advice. -->
+
+<style>
+  :root {
+    --bg: #060d1a; --panel: #0e1c33; --raised: #142642; --line: rgba(88,116,152,.28);
+    --ink: #f4f7fa; --muted: #96a8be; --faint: #6c819c;
+    --gold: #e9b949; --live: #e85a5e; --up: #3cc48d; --btc: #f7931a;
+    --sans: "Source Sans 3", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --head: Archivo, "Segoe UI", sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  :root[data-theme="light"] {
+    --bg: #f3f5f9; --panel: #ffffff; --raised: #eef1f6; --line: #e1e5ec;
+    --ink: #0f172a; --muted: #5b6474; --faint: #7a8496; --gold: #b7810f; --live: #d03b3b; --up: #0e9f5a; --btc: #c96f00;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  main { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; }
+  h1 { font: 800 clamp(26px, 5vw, 38px)/1.1 var(--head); margin: 6px 0 4px; letter-spacing: .01em; }
+  h1 span { color: var(--gold); }
+  .lede { color: var(--muted); margin: 0 0 14px; max-width: 70ch; }
+  .top { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chips button { flex: none; font: 700 13px var(--sans); color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .chips button.on { background: var(--gold); border-color: var(--gold); color: #1a1205; }
+  .upd { font: 500 12px var(--mono); color: var(--faint); }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(12, 1fr); margin-top: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; grid-column: span 12; }
+  @media (min-width: 900px) { .w8 { grid-column: span 8; } .w4 { grid-column: span 4; } .w7 { grid-column: span 7; } .w5 { grid-column: span 5; } .w6 { grid-column: span 6; } }
+  .card h2 { font: 700 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .card h2 small { font: 500 11px var(--mono); letter-spacing: 0; text-transform: none; color: var(--faint); }
+  .empty { color: var(--faint); font-size: 14px; padding: 6px 0; margin: 0; }
+  .up { color: var(--up); } .dn { color: var(--live); }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  /* key facts */
+  .facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px 22px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .facts li { position: relative; padding-left: 16px; font-size: 15px; line-height: 1.4; }
+  .facts li::before { content: ""; position: absolute; left: 0; top: .5em; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+  .facts small { color: var(--faint); }
+  /* the two big tiles + market strip */
+  .heroes { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .heroes { grid-template-columns: 1fr 1fr; } }
+  .hero { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: end; cursor: pointer; text-align: left; font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .hero:hover, .hero.sel { border-color: var(--gold); }
+  .hero .nm { display: flex; gap: 8px; align-items: center; font: 700 15px var(--sans); color: var(--muted); grid-column: 1 / -1; }
+  .hero .nm img { width: 22px; height: 22px; }
+  .hero .px { font: 800 clamp(26px, 6vw, 34px)/1.1 var(--mono); }
+  .hero .ch { font: 600 13px var(--mono); }
+  .hero svg { width: 120px; height: 44px; }
+  .strip { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); margin-top: 16px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .stat small { display: block; font: 600 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+  .stat b { display: block; font: 700 19px var(--mono); margin-top: 2px; }
+  .stat span { font: 500 12px var(--mono); }
+  .domb { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 6px; gap: 2px; background: var(--raised); }
+  .domb i { display: block; height: 100%; }
+  /* coins table */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tbl th { font: 600 11px var(--mono); color: var(--faint); text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .tbl th:nth-child(1), .tbl th:nth-child(2) { text-align: left; }
+  .tbl td { padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .tbl tbody tr { cursor: pointer; } .tbl tbody tr:hover td { background: var(--raised); }
+  .tbl tbody tr.sel td { background: var(--raised); }
+  .tbl td.rk { color: var(--faint); font: 500 12px var(--mono); text-align: left; width: 28px; }
+  .tbl td.c { text-align: left; display: flex; align-items: center; gap: 8px; }
+  .tbl td.c img { width: 20px; height: 20px; flex: none; }
+  .tbl td.c b { font-weight: 700; } .tbl td.c small { color: var(--faint); font: 500 11px var(--mono); text-transform: uppercase; }
+  .tbl td svg { width: 90px; height: 28px; vertical-align: middle; }
+  .scroll { overflow-x: auto; }
+  @media (max-width: 640px) { .tbl .h7, .tbl .hsp, .tbl .hcap { display: none; } .tbl td.c small { display: none; } }
+  /* chart */
+  .ctop { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .ctop .cn { font: 700 18px var(--head); } .ctop .cp { font: 700 18px var(--mono); margin-left: 8px; } .ctop .cc { font: 600 13px var(--mono); margin-left: 6px; }
+  .chips.rng button { padding: 4px 10px; font-size: 12px; }
+  #chart { position: relative; height: 260px; touch-action: pan-y; }
+  #chart svg { display: block; width: 100%; height: 100%; }
+  #chart .tip { position: absolute; pointer-events: none; background: var(--raised); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; font: 600 12px var(--mono); white-space: nowrap; display: none; }
+  #chart .tip small { display: block; color: var(--faint); font-weight: 500; }
+  .gl { stroke: var(--line); stroke-width: 1; } .al { fill: var(--faint); font: 500 11px var(--mono); }
+  /* movers */
+  .mv { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+  .mv h3 { margin: 0 0 4px; font: 700 12px var(--mono); color: var(--faint); letter-spacing: .06em; text-transform: uppercase; }
+  .mvr { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .mvr span { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mvr img { width: 18px; height: 18px; flex: none; }
+  /* headlines */
+  .news { list-style: none; margin: 0; padding: 0; }
+  .news li { padding: 8px 0; border-top: 1px solid var(--line); }
+  .news li:first-child { border-top: 0; }
+  .news a { text-decoration: none; font-weight: 600; } .news a:hover { text-decoration: underline; }
+  .news small { display: block; color: var(--faint); font: 500 12px var(--mono); margin-top: 2px; }
+  .tag { display: inline-block; font: 700 10px var(--mono); letter-spacing: .06em; color: var(--gold); border: 1px solid var(--gold); border-radius: 5px; padding: 0 5px; margin-right: 6px; vertical-align: 1px; }
+  /* events */
+  .ev { list-style: none; margin: 0; padding: 0; }
+  .ev li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+  .ev li:first-child { border-top: 0; }
+  .ev .d { font: 700 12px/1.35 var(--mono); color: var(--gold); } .ev .d small { display: block; color: var(--faint); font-weight: 500; }
+  .ev b { display: block; } .ev p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+  /* fear & greed */
+  .fg { display: flex; gap: 16px; align-items: center; }
+  .fg .v { font: 800 40px/1 var(--mono); }
+  .fg .bar { flex: 1; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #e85a5e, #e9b949 50%, #3cc48d); position: relative; margin-top: 8px; }
+  .fg .bar i { position: absolute; top: -4px; width: 4px; height: 18px; border-radius: 2px; background: var(--ink); transform: translateX(-2px); }
+  /* notes */
+  .notes { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .notes li { background: var(--raised); border-radius: 10px; padding: 10px 12px; font-size: 15px; line-height: 1.45; }
+  .notes li > b:first-child { display: block; margin-bottom: 2px; }
+  .notes a { color: var(--gold); }
+  .src { color: var(--faint); font-size: 13px; margin-top: 22px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<script src="/header.js" data-active="crypto"></script>
+<main>
+  <h1>Crypto <span>Desk</span></h1>
+  <p class="lede">Bitcoin, Ether and the main coins in one look: the key facts first, then prices, the movers, the headlines, the dates that matter and plain-words notes for investors in Europe.</p>
+  <div class="top">
+    <div class="chips" id="cur" role="group" aria-label="Currency"><button data-c="eur">€ EUR</button><button data-c="usd">$ USD</button></div>
+    <span class="upd" id="upd"></span>
+  </div>
+
+  <div class="grid">
+    <section class="card" id="facts"><h2><span>The key facts</span><small id="factsn"></small></h2><div class="body"><p class="empty">Loading…</p></div></section>
+  </div>
+  <div class="heroes" id="heroes" style="margin-top:16px"></div>
+  <div class="strip" id="strip"></div>
+
+  <div class="grid">
+    <section class="card w8" id="chartc">
+      <div class="ctop"><div><span class="cn notranslate" translate="no" id="cn">Bitcoin</span><span class="cp num notranslate" translate="no" id="cp"></span><span class="cc num notranslate" translate="no" id="cc"></span></div>
+        <div class="chips rng" id="rng" role="group" aria-label="Chart period"><button data-d="1">24 h</button><button data-d="7">7 d</button><button data-d="30">30 d</button><button data-d="365">1 y</button></div></div>
+      <div id="chart"><p class="empty">Loading…</p></div>
+    </section>
+    <section class="card w4" id="mood"><h2><span>Market mood</span><small>Fear &amp; Greed index</small></h2><div class="body"><p class="empty">Loading…</p></div></section>
+
+    <section class="card" id="coins"><h2><span>The main coins</span><small>tap a coin for its chart · stablecoins and wrapped tokens left out</small></h2><div class="body"><p class="empty">Loading…</p></div></section>
+
+    <section class="card w6" id="movers"><h2><span>The movers</span><small>top 100 by size, last 24 h</small></h2><div class="body"><p class="empty">Loading…</p></div></section>
+    <section class="card w6" id="trend"><h2><span>Trending</span><small>most searched on CoinGecko</small></h2><div class="body"><p class="empty">Loading…</p></div></section>
+
+    <section class="card w7" id="news"><h2><span>Crypto headlines</span><small>CoinDesk · Cointelegraph · Decrypt · The Block</small></h2><div class="body"><p class="empty">Loading…</p></div></section>
+    <section class="card w5" id="events"><h2><span>Dates that matter</span><small>in your time zone</small></h2><div class="body"><p class="empty">Loading…</p></div></section>
+
+    <section class="card" id="notes"><h2><span>In plain words · for investors in Europe</span><small>general information, not advice</small></h2><div class="body"></div></section>
+  </div>
+  <p class="src">Prices, market caps, charts and trending coins: CoinGecko (Binance's public prices if CoinGecko is busy) · Market mood: alternative.me Crypto Fear &amp; Greed index · Bitcoin network: blockstream.info · Headlines: CoinDesk, Cointelegraph, Decrypt, The Block (every story opens on its publisher's site) · Fed dates: the Federal Reserve's published 2026 schedule. Prices can lag by a few minutes. Nothing here is investment advice: crypto prices can fall a long way, fast.</p>
+</main>
+<script>
+(function () {
+  "use strict";
+  var CG = "https://api.coingecko.com/api/v3";
+  // stablecoins and wrapped/staked copies: left out of the main coins and the movers (they track something else)
+  var STABLE = /^(usdt|usdc|dai|usde|fdusd|tusd|usds|pyusd|usd1|busd|eurc|eure|usdd|frax|gusd|usdp|rlusd|usdtb|bsc-usd|usd0|usdx|susde|susds|buidl|usyc|usdf|usdg|xaut|paxg|eurt|ustb)$/i;
+  var WRAP = /wrapped|staked|bridged|liquid staking|\bweth\b|wbtc|cbbtc|wsteth|weeth|wbeth|reth|jitosol|msol|binance-peg|coinbase wrapped|lbtc|solvbtc|clbtc|heloc|tokeni[sz]ed/i;
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var safeUrl = function (u) { return /^https?:\/\//i.test(String(u || "")) ? String(u) : "#"; };
+  var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k) || ""; localStorage.setItem(k, v); } catch (e) { return ""; } };
+  var NT = ' class="notranslate" translate="no"';
+  var getJSON = function (u, ms) {
+    var c = new AbortController(), t = setTimeout(function () { c.abort(); }, ms || 15000);
+    return fetch(u, { signal: c.signal }).then(function (r) { clearTimeout(t); if (!r.ok) throw new Error(r.status); return r.json(); });
+  };
+  // CoinGecko allows each visitor only a few calls a minute: answers are kept for this tab a little while, so reloading
+  // or switching back and forth does not use them up
+  var cg = function (path, ttl) {
+    var k = "mib-cg:" + path, c = null;
+    try { c = JSON.parse(sessionStorage.getItem(k) || "null"); } catch (e) {}
+    if (c && Date.now() - c.t < ttl) return Promise.resolve(c.d);
+    return getJSON(CG + path).then(function (d) { try { sessionStorage.setItem(k, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {} return d; });
+  };
+  var cur = ls("mib-crypto-cur") === "usd" ? "usd" : "eur";
+  var money = function (v, cmp) {
+    if (v == null || isNaN(v)) return "–";
+    var o = { style: "currency", currency: cur.toUpperCase() };
+    if (cmp) { o.notation = "compact"; o.maximumFractionDigits = 2; }
+    else o.maximumFractionDigits = v >= 1000 ? 0 : v >= 1 ? 2 : v >= 0.01 ? 4 : 8;
+    try { return new Intl.NumberFormat(undefined, o).format(v); } catch (e) { return (cur === "eur" ? "€" : "$") + v; }
+  };
+  var pct = function (v, d) { if (v == null || isNaN(v)) return "–"; return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d == null ? 1 : d) + "%"; };
+  var cls = function (v) { return v > 0 ? "up" : v < 0 ? "dn" : ""; };
+  var pc = function (v) { return '<span class="num ' + cls(v) + '"' + ' translate="no">' + pct(v) + "</span>"; };
+  var ago = function (d) { var t = new Date(d).getTime(); if (!t) return ""; var m = Math.round((Date.now() - t) / 60000); return m < 60 ? Math.max(1, m) + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
+  var dfmt = function (t, o) { try { return new Date(t).toLocaleString([], o); } catch (e) { return new Date(t).toISOString(); } };
+  var fill = function (id, html) { var e = document.querySelector("#" + id + " .body"); if (e) e.innerHTML = html; };
+  var spark = function (arr, cssCls) {
+    arr = (arr || []).filter(function (x) { return x != null; });
+    if (arr.length < 2) return "";
+    var step = Math.max(1, Math.floor(arr.length / 60)), p = [];
+    for (var i = 0; i < arr.length; i += step) p.push(arr[i]);
+    p.push(arr[arr.length - 1]);
+    var mn = Math.min.apply(null, p), mx = Math.max.apply(null, p), r = mx - mn || 1;
+    var pts = p.map(function (v, i) { return (i * 100 / (p.length - 1)).toFixed(1) + "," + (28 - 2 - (v - mn) / r * 24).toFixed(1); }).join(" ");
+    return '<svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts + '" fill="none" stroke="var(--' + (cssCls === "dn" ? "live" : "up") + ')" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>';
+  };
+
+  // ------------------------------------------------------------------ data
+  var M = { coins: [], global: null, fallback: false, at: 0 };
+  var core = function (c) { return !STABLE.test(c.symbol || "") && !WRAP.test((c.name || "") + " " + (c.id || "")); };
+  var loadMarkets = function () {
+    var q = "vs_currency=" + cur + "&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=24h,7d";
+    return Promise.all([cg("/coins/markets?" + q, 60000), cg("/global", 60000).catch(function () { return null; })])
+      .then(function (r) { M.coins = r[0] || []; M.global = r[1] && r[1].data; M.fallback = false; M.at = Date.now(); })
+      .catch(function () { return binance(); });
+  };
+  // CoinGecko busy (it limits each visitor) -> Binance's public 24 h prices for the biggest coins
+  var BN = [["bitcoin", "Bitcoin", "BTC"], ["ethereum", "Ethereum", "ETH"], ["ripple", "XRP", "XRP"], ["binancecoin", "BNB", "BNB"], ["solana", "Solana", "SOL"],
+    ["dogecoin", "Dogecoin", "DOGE"], ["cardano", "Cardano", "ADA"], ["tron", "TRON", "TRX"], ["chainlink", "Chainlink", "LINK"], ["avalanche-2", "Avalanche", "AVAX"]];
+  var binance = function () {
+    var q = cur === "eur" ? "EUR" : "USDT";
+    var syms = BN.map(function (b) { return b[2] + q; });
+    return getJSON("https://api.binance.com/api/v3/ticker/24hr?symbols=" + encodeURIComponent(JSON.stringify(syms))).then(function (a) {
+      var by = {}; a.forEach(function (t) { by[t.symbol] = t; });
+      M.coins = BN.filter(function (b) { return by[b[2] + q]; }).map(function (b, i) { var t = by[b[2] + q];
+        return { id: b[0], name: b[1], symbol: b[2].toLowerCase(), current_price: +t.lastPrice, price_change_percentage_24h_in_currency: +t.priceChangePercent, market_cap_rank: i + 1 }; });
+      M.global = null; M.fallback = true; M.at = Date.now();
+    }).catch(function () { M.coins = []; M.fallback = true; });
+  };
+
+  // ------------------------------------------------------------------ rendering
+  var byId = function (id) { for (var i = 0; i < M.coins.length; i++) if (M.coins[i].id === id) return M.coins[i]; return null; };
+  var sel = ls("mib-crypto-coin") || "bitcoin", days = +ls("mib-crypto-days") || 7;
+  if ([1, 7, 30, 365].indexOf(days) < 0) days = 7;
+  var ch24 = function (c) { return c.price_change_percentage_24h_in_currency != null ? c.price_change_percentage_24h_in_currency : c.price_change_percentage_24h; };
+  var ch7 = function (c) { return c.price_change_percentage_7d_in_currency; };
+  var img = function (c, cl) { return c.image ? '<img src="' + esc(safeUrl(c.image)) + '" alt="" loading="lazy"' + (cl ? ' class="' + cl + '"' : "") + ' onerror="this.remove()">' : ""; };
+
+  var renderFacts = function () {
+    var b = byId("bitcoin"), e = byId("ethereum"), g = M.global, f = [];
+    if (!M.coins.length) { fill("facts", '<p class="empty">Prices could not be loaded just now (the free price services may be busy). Try again in a minute.</p>'); return; }
+    if (b) f.push("<b" + NT + ">Bitcoin</b> is at <b class=\"num notranslate\" translate=\"no\">" + money(b.current_price) + "</b>, " + pc(ch24(b)) + " in 24 h" + (ch7(b) != null ? ", " + pc(ch7(b)) + " over 7 days" : "") + ".");
+    if (e) f.push("<b" + NT + ">Ether</b> is at <b class=\"num notranslate\" translate=\"no\">" + money(e.current_price) + "</b>, " + pc(ch24(e)) + " in 24 h" + (ch7(e) != null ? ", " + pc(ch7(e)) + " over 7 days" : "") + ".");
+    if (g) {
+      var tot = g.total_market_cap && g.total_market_cap[cur], d = g.market_cap_change_percentage_24h_usd;
+      if (tot) f.push("All crypto together is worth <b class=\"num notranslate\" translate=\"no\">" + money(tot, true) + "</b>, " + pc(d) + " in 24 h.");
+      if (g.market_cap_percentage) f.push("Bitcoin is <b class=\"num notranslate\" translate=\"no\">" + g.market_cap_percentage.btc.toFixed(1) + "%</b> of the whole crypto market (its \"dominance\"); Ether <span class=\"num notranslate\" translate=\"no\">" + g.market_cap_percentage.eth.toFixed(1) + "%</span>.");
+    }
+    if (b && b.ath) f.push("Bitcoin is <b class=\"num notranslate\" translate=\"no\">" + Math.abs(b.ath_change_percentage).toFixed(1) + "%</b> below its record of <span class=\"num notranslate\" translate=\"no\">" + money(b.ath) + "</span> (" + esc(dfmt(b.ath_date, { day: "numeric", month: "short", year: "numeric" })) + ").");
+    var top = M.coins.filter(core).slice(0, 20), up = top.filter(function (c) { return ch24(c) > 0; }).length;
+    if (top.length >= 10) {
+      var best = top.slice().sort(function (x, y) { return ch24(y) - ch24(x); })[0], worst = top.slice().sort(function (x, y) { return ch24(x) - ch24(y); })[0];
+      f.push("<b class=\"num\" translate=\"no\">" + up + " of " + top.length + "</b> of the biggest coins are up today. Best: <b" + NT + ">" + esc(best.name) + "</b> " + pc(ch24(best)) + "; weakest: <b" + NT + ">" + esc(worst.name) + "</b> " + pc(ch24(worst)) + ".");
+    }
+    if (FG) f.push("Market mood: <b>" + esc(FG.now.value_classification) + "</b> (<span class=\"num\" translate=\"no\">" + FG.now.value + "/100</span>" + (FG.week ? ", a week ago " + esc(FG.week.value_classification.toLowerCase()) + " " + FG.week.value : "") + ").");
+    if (M.fallback) f.push("<small>CoinGecko is busy for your connection, so the prices come from Binance (24 h moves only). The rest fills in when it answers again.</small>");
+    fill("facts", '<ul class="facts">' + f.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>");
+  };
+
+  var renderHeroes = function () {
+    var h = ["bitcoin", "ethereum"].map(byId).filter(Boolean);
+    $("#heroes").innerHTML = h.map(function (c) {
+      var s7 = ch7(c);
+      return '<button class="hero' + (c.id === sel ? " sel" : "") + '" data-id="' + esc(c.id) + '" type="button"><span class="nm notranslate" translate="no">' + img(c) + esc(c.name) + " · " + esc(String(c.symbol).toUpperCase()) + "</span>"
+        + '<span><span class="px num notranslate" translate="no">' + money(c.current_price) + '</span><br><span class="ch">' + pc(ch24(c)) + ' <small style="color:var(--faint)">24 h</small>' + (s7 != null ? " &nbsp;" + pc(s7) + ' <small style="color:var(--faint)">7 d</small>' : "") + "</span></span>"
+        + (c.sparkline_in_7d ? spark(c.sparkline_in_7d.price, cls(s7)) : "<span></span>") + "</button>";
+    }).join("");
+  };
+
+  var renderStrip = function () {
+    var g = M.global;
+    if (!g) { $("#strip").innerHTML = ""; return; }
+    var tot = g.total_market_cap[cur], vol = g.total_volume[cur], btc = g.market_cap_percentage.btc, eth = g.market_cap_percentage.eth;
+    var st = 0; M.coins.forEach(function (c) { if (STABLE.test(c.symbol || "")) st += c.market_cap || 0; });
+    var stp = tot ? st / tot * 100 : 0;
+    $("#strip").innerHTML = [
+      ["Total crypto value", money(tot, true), pc(g.market_cap_change_percentage_24h_usd) + ' <span style="color:var(--faint)">24 h</span>'],
+      ["Traded in 24 h", money(vol, true), ""],
+      ["Bitcoin dominance", btc.toFixed(1) + "%", '<div class="domb" aria-hidden="true"><i style="width:' + btc + '%;background:var(--btc)"></i><i style="width:' + eth + '%;background:#7b8cde"></i><i style="flex:1"></i></div>'],
+      ["Ether's share", eth.toFixed(1) + "%", ""],
+      ["Stablecoins' share", stp ? stp.toFixed(1) + "%" : "–", '<span style="color:var(--faint)">of all crypto (top 100)</span>']
+    ].map(function (s) { return '<div class="stat"><small>' + s[0] + '</small><b class="notranslate" translate="no">' + s[1] + "</b>" + (s[2] ? "<span>" + s[2] + "</span>" : "") + "</div>"; }).join("");
+  };
+
+  var renderCoins = function () {
+    var list = M.coins.filter(core).slice(0, 15);
+    if (!list.length) { fill("coins", '<p class="empty">Prices could not be loaded just now. Try again in a minute.</p>'); return; }
+    fill("coins", '<div class="scroll"><table class="tbl"><thead><tr><th>#</th><th>Coin</th><th>Price</th><th>24 h</th><th class="h7">7 d</th><th class="hcap">Market cap</th><th class="hsp">Last 7 days</th></tr></thead><tbody>'
+      + list.map(function (c) {
+        return '<tr data-id="' + esc(c.id) + '"' + (c.id === sel ? ' class="sel"' : "") + '><td class="rk">' + (c.market_cap_rank || "") + '</td><td class="c notranslate" translate="no">' + img(c) + "<b>" + esc(c.name) + "</b><small>" + esc(c.symbol) + "</small></td>"
+          + '<td class="num notranslate" translate="no">' + money(c.current_price) + "</td><td>" + pc(ch24(c)) + '</td><td class="h7">' + pc(ch7(c)) + '</td><td class="hcap num notranslate" translate="no">' + money(c.market_cap, true) + '</td><td class="hsp">' + (c.sparkline_in_7d ? spark(c.sparkline_in_7d.price, cls(ch7(c))) : "") + "</td></tr>";
+      }).join("") + "</tbody></table></div>");
+  };
+
+  var renderMovers = function () {
+    var l = M.coins.filter(core).filter(function (c) { return ch24(c) != null; });
+    if (l.length < 10) { fill("movers", '<p class="empty">' + (M.fallback ? "The movers need CoinGecko, which is busy for your connection just now." : "No data just now.") + "</p>"); return; }
+    var row = function (c) { return '<div class="mvr"><span class="notranslate" translate="no">' + img(c) + "<b>" + esc(String(c.symbol).toUpperCase()) + '</b> <small style="color:var(--faint)">' + esc(c.name) + "</small></span>" + pc(ch24(c)) + "</div>"; };
+    var g = l.slice().sort(function (a, b) { return ch24(b) - ch24(a); }).slice(0, 6), d = l.slice().sort(function (a, b) { return ch24(a) - ch24(b); }).slice(0, 6);
+    fill("movers", '<div class="mv"><div><h3>Up most</h3>' + g.map(row).join("") + '</div><div><h3>Down most</h3>' + d.map(row).join("") + "</div></div>");
+  };
+
+  var loadTrending = function () {
+    return cg("/search/trending", 600000).then(function (t) {
+      var l = (t.coins || []).slice(0, 8).map(function (x) { return x.item; });
+      if (!l.length) throw new Error("none");
+      fill("trend", l.map(function (c) {
+        var p = c.data && c.data.price_change_percentage_24h ? c.data.price_change_percentage_24h[cur] : null;
+        return '<div class="mvr"><span class="notranslate" translate="no">' + (c.thumb ? '<img src="' + esc(safeUrl(c.thumb)) + '" alt="" loading="lazy" onerror="this.remove()">' : "") + "<b>" + esc(c.symbol) + '</b> <small style="color:var(--faint)">' + esc(c.name) + (c.market_cap_rank ? " · #" + c.market_cap_rank : "") + "</small></span>" + (p != null ? pc(p) : "") + "</div>";
+      }).join("") + '<p class="empty" style="margin-top:6px">Trending means people are looking it up, not that it is a good buy: small coins swing hard both ways.</p>');
+    }).catch(function () { fill("trend", '<p class="empty">The trending list is not available just now.</p>'); });
+  };
+
+  // ------------------------------------------------------------------ the big chart (one coin, one line, hover for values)
+  var CH = { pts: [], id: "" };
+  var loadChart = function (retry) {
+    var c = byId(sel) || byId("bitcoin") || { id: sel, name: sel };
+    $("#cn").textContent = c.name || sel;
+    Array.prototype.forEach.call(document.querySelectorAll("#rng button"), function (b) { b.classList.toggle("on", +b.dataset.d === days); });
+    var key = c.id + "|" + days + "|" + cur;
+    CH.id = key;
+    // CoinGecko first; if it is busy, Binance's public candles for the same coin (closing prices)
+    var iv = ({ 1: ["15m", 96], 7: ["1h", 168], 30: ["4h", 180], 365: ["1d", 365] })[days];
+    var bn = function () { return getJSON("https://api.binance.com/api/v3/klines?symbol=" + encodeURIComponent(String(c.symbol || "").toUpperCase() + (cur === "eur" ? "EUR" : "USDT")) + "&interval=" + iv[0] + "&limit=" + iv[1])
+      .then(function (k) { if (!k.length) throw new Error("none"); return { prices: k.map(function (x) { return [Math.min(x[6], Date.now()), +x[4]]; }) }; }); };
+    return cg("/coins/" + encodeURIComponent(c.id) + "/market_chart?vs_currency=" + cur + "&days=" + days, days === 1 ? 120000 : 600000).catch(bn).then(function (d) {
+      if (CH.id !== key) return;
+      CH.pts = (d.prices || []).filter(function (p) { return p && p[1] != null; });
+      drawChart();
+    }).catch(function () {
+      if (CH.id !== key) return;
+      CH.pts = [];
+      $("#chart").innerHTML = '<p class="empty">' + (retry ? "The chart could not be loaded just now (CoinGecko limits how often each visitor can ask). It tries again with the next price update." : "Loading… (CoinGecko is busy, trying again in a few seconds)") + "</p>";
+      if (!retry) setTimeout(function () { if (CH.id === key) loadChart(true); }, 20000);
+      $("#cp").textContent = c.current_price != null ? money(c.current_price) : ""; $("#cc").innerHTML = "";
+    });
+  };
+  var drawChart = function () {
+    var el = $("#chart"), p = CH.pts;
+    if (p.length < 2) { el.innerHTML = '<p class="empty">No chart data.</p>'; return; }
+    var W = Math.max(280, el.clientWidth), H = el.clientHeight || 260, L = 6, R = 64, T = 10, B = 24;
+    var mn = Infinity, mx = -Infinity; p.forEach(function (x) { if (x[1] < mn) mn = x[1]; if (x[1] > mx) mx = x[1]; });
+    var pad = (mx - mn) * 0.08 || mx * 0.01; mn -= pad; mx += pad;
+    var t0 = p[0][0], t1 = p[p.length - 1][0];
+    var X = function (t) { return L + (t - t0) / (t1 - t0 || 1) * (W - L - R); }, Y = function (v) { return T + (1 - (v - mn) / (mx - mn)) * (H - T - B); };
+    var first = p[0][1], last = p[p.length - 1][1], chg = (last / first - 1) * 100, col = chg >= 0 ? "var(--up)" : "var(--live)";
+    $("#cp").textContent = money(last); $("#cc").innerHTML = pc(chg) + ' <small style="color:var(--faint)">' + ({ 1: "24 h", 7: "7 d", 30: "30 d", 365: "1 y" })[days] + "</small>";
+    var line = p.map(function (x, i) { return (i ? "L" : "M") + X(x[0]).toFixed(1) + " " + Y(x[1]).toFixed(1); }).join("");
+    var area = line + "L" + X(t1).toFixed(1) + " " + (H - B) + "L" + X(t0).toFixed(1) + " " + (H - B) + "Z";
+    var g = "";
+    for (var i = 0; i <= 3; i++) { var v = mn + (mx - mn) * (i + 0.5) / 4, y = Y(v); g += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '"/><text class="al" x="' + (W - R + 6) + '" y="' + (y + 4).toFixed(1) + '">' + esc(money(v, v >= 100000)) + "</text>"; }
+    var n = W < 500 ? 3 : 5, fo = days === 1 ? { hour: "2-digit", minute: "2-digit" } : days === 365 ? { month: "short", year: "2-digit" } : { day: "numeric", month: "short" };
+    for (i = 0; i < n; i++) { var t = t0 + (t1 - t0) * (i + 0.5) / n; g += '<text class="al" text-anchor="middle" x="' + X(t).toFixed(1) + '" y="' + (H - 6) + '">' + esc(dfmt(t, fo)) + "</text>"; }
+    el.innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Price chart"><defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="' + (chg >= 0 ? "#3cc48d" : "#e85a5e") + '" stop-opacity=".22"/><stop offset="1" stop-color="' + (chg >= 0 ? "#3cc48d" : "#e85a5e") + '" stop-opacity="0"/></linearGradient></defs>'
+      + g + '<path d="' + area + '" fill="url(#ga)"/><path d="' + line + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round"/>'
+      + '<line id="cx" class="gl" y1="' + T + '" y2="' + (H - B) + '" style="display:none;stroke:var(--muted)"/><circle id="cd" r="5" fill="' + col + '" stroke="var(--panel)" stroke-width="2" style="display:none"/></svg><div class="tip notranslate" translate="no"></div>';
+    var svg = el.querySelector("svg"), tip = el.querySelector(".tip"), cx = el.querySelector("#cx"), cd = el.querySelector("#cd");
+    var move = function (ev) {
+      var r = svg.getBoundingClientRect(), x = (ev.clientX - r.left) * W / r.width, t = t0 + (x - L) / (W - L - R) * (t1 - t0);
+      var lo = 0, hi = p.length - 1; while (hi - lo > 1) { var m = (lo + hi) >> 1; if (p[m][0] < t) lo = m; else hi = m; }
+      var k = Math.abs(p[lo][0] - t) < Math.abs(p[hi][0] - t) ? lo : hi, px = X(p[k][0]), py = Y(p[k][1]);
+      cx.setAttribute("x1", px); cx.setAttribute("x2", px); cx.style.display = ""; cd.setAttribute("cx", px); cd.setAttribute("cy", py); cd.style.display = "";
+      tip.innerHTML = esc(money(p[k][1])) + "<small>" + esc(dfmt(p[k][0], days <= 7 ? { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short", year: "numeric" })) + "</small>";
+      tip.style.display = "block";
+      var tx = px * r.width / W, tw = tip.offsetWidth; tip.style.left = Math.min(Math.max(0, tx - tw / 2), r.width - tw) + "px"; tip.style.top = Math.max(0, py * r.height / H - 52) + "px";
+    };
+    var out = function () { tip.style.display = "none"; cx.style.display = "none"; cd.style.display = "none"; };
+    svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move); svg.addEventListener("pointerleave", out);
+  };
+
+  // ------------------------------------------------------------------ market mood
+  var FG = null;
+  var loadMood = function () {
+    return getJSON("https://api.alternative.me/fng/?limit=8").then(function (d) {
+      var a = d.data || []; if (!a.length) throw new Error("none");
+      FG = { now: a[0], day: a[1], week: a[7] };
+      var v = +a[0].value, word = v < 25 ? "Investors are very nervous: prices have been falling or swinging, and many are selling. Panics have sometimes been followed by rebounds, sometimes by more falls." : v < 45 ? "Investors are cautious. Mood often turns before prices do, in either direction." : v <= 55 ? "Neither fear nor greed: a calm market." : v <= 75 ? "Investors are confident. Buying because everyone else is buying is how people end up buying near the top." : "Euphoria. Very greedy markets have often been followed by sharp drops; this is when risk is highest.";
+      fill("mood", '<div class="fg"><div class="v notranslate" translate="no">' + v + '</div><div style="flex:1"><b>' + esc(a[0].value_classification) + '</b><div class="bar"><i style="left:' + v + '%"></i></div></div></div>'
+        + '<p style="margin:12px 0 4px;font-size:15px">' + word + "</p>"
+        + '<p class="empty notranslate" translate="no">' + (a[1] ? "Yesterday " + a[1].value + " · " : "") + (a[7] ? "a week ago " + a[7].value : "") + "</p>"
+        + '<p class="empty">0 = extreme fear, 100 = extreme greed; built by alternative.me from bitcoin\'s price swings, volume, social media and searches.</p>');
+    }).catch(function () { fill("mood", '<p class="empty">The mood index is not available just now.</p>'); });
+  };
+
+  // ------------------------------------------------------------------ headlines (RSS: the MIB server first, rss2json if it does not know the feed yet)
+  var FEEDS = [["crypto-coindesk", "https://www.coindesk.com/arc/outboundfeeds/rss/", "CoinDesk"], ["crypto-ct", "https://cointelegraph.com/rss", "Cointelegraph"],
+    ["crypto-decrypt", "https://decrypt.co/feed", "Decrypt"], ["crypto-theblock", "https://www.theblock.co/rss.xml", "The Block"]];
+  var api = function () { if (/^(127\.0\.0\.1|localhost)$/.test(location.hostname)) return Promise.resolve(location.origin);   // the local test server
+    return (window.MIB_API_READY || Promise.resolve()).then(function () { return window.MIB_CHAT_API || "https://mib-arcade.terminalmib.workers.dev"; }); };
+  var viaMib = function (f) {
+    return api().then(function (a) { return fetch(a + "/api/sports/feed?f=" + encodeURIComponent(f[0])); })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (x) {
+        var doc = new DOMParser().parseFromString(x, "application/xml");
+        var items = Array.prototype.slice.call(doc.querySelectorAll("item")).map(function (it) {
+          var g = function (t) { var e = it.getElementsByTagName(t)[0]; return e ? e.textContent.trim() : ""; };
+          return { title: g("title"), link: g("link"), date: g("pubDate"), src: f[2] };
+        });
+        if (!items.length) throw new Error("empty"); return items;
+      });
+  };
+  var viaRss2json = function (f) {
+    return getJSON("https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(f[1])).then(function (d) {
+      if (d.status !== "ok") throw new Error("rss2json");
+      return (d.items || []).map(function (i) { return { title: i.title, link: i.link, date: (i.pubDate || "").replace(" ", "T") + (/Z|[+-]\d\d:?\d\d$/.test(i.pubDate || "") ? "" : "Z"), src: f[2] }; });
+    });
+  };
+  var CRYPTOWORD = /crypto|bitcoin|btc|ether|eth|token|coin|blockchain|defi|nft|web3|solana|sol|xrp|ripple|stablecoin|tether|usdt|usdc|binance|exchange|wallet|mining|miner|etf|saylor|strategy|memecoin|airdrop|on-chain|onchain|hack|polymarket|prediction market/i;
+  var EU = /\b(EU|Europe|European|MiCA|ESMA|ECB|euro|eurozone|France|French|Germany|German|Poland|Polish|Spain|Italy|Netherlands|Dutch|DAC8|BaFin|AMF)\b/;
+  var loadNews = function () {
+    return Promise.all(FEEDS.map(function (f) { return viaMib(f).catch(function () { return viaRss2json(f); }).catch(function () { return []; }); })).then(function (all) {
+      var seen = {}, l = [].concat.apply([], all).filter(function (x) {
+        var k = String(x.title || "").toLowerCase().replace(/\W+/g, " ").trim().slice(0, 60);
+        if (!x.title || !k || seen[k]) return false; seen[k] = 1; return true;
+      });
+      l.forEach(function (x) { x.t = new Date(x.date).getTime() || 0; x.title = x.title.replace(/<[^>]+>/g, ""); });
+      // Decrypt also writes about AI and tech: only its crypto stories
+      l = l.filter(function (x) { return x.src !== "Decrypt" || CRYPTOWORD.test(x.title); });
+      l.sort(function (a, b) { return b.t - a.t; });
+      if (!l.length) { fill("news", '<p class="empty">The headlines are not available just now.</p>'); return; }
+      fill("news", '<ul class="news">' + l.slice(0, 14).map(function (x) {
+        return '<li>' + (EU.test(x.title) ? '<span class="tag">EUROPE</span>' : "") + '<a href="' + esc(safeUrl(x.link)) + '" target="_blank" rel="noopener">' + esc(x.title) + '</a><small><span class="notranslate" translate="no">' + esc(x.src) + "</span>" + (x.t ? " · " + ago(x.t) : "") + "</small></li>";
+      }).join("") + "</ul>");
+    });
+  };
+
+  // ------------------------------------------------------------------ dates that matter (each one computed or from an official schedule; nothing guessed)
+  var FOMC = ["2026-01-28T19:00:00Z", "2026-03-18T18:00:00Z", "2026-04-29T18:00:00Z", "2026-06-17T18:00:00Z", "2026-07-29T18:00:00Z", "2026-09-16T18:00:00Z", "2026-10-28T18:00:00Z", "2026-12-09T19:00:00Z"];
+  var lastFriday = function (y, m) { var d = new Date(Date.UTC(y, m + 1, 0, 8, 0)); while (d.getUTCDay() !== 5) d.setUTCDate(d.getUTCDate() - 1); return d; };
+  var loadEvents = function () {
+    var now = Date.now(), ev = [];
+    FOMC.forEach(function (d) { var t = Date.parse(d); if (t > now - 36e5) ev.push({ t: t, time: true, h: "US Fed interest-rate decision", p: "The Fed's rate and its outlook move the dollar, shares and crypto. A cut usually helps riskier assets; a surprise in either direction can swing bitcoin several percent." }); });
+    var n = new Date(); for (var i = 0, k = 0; i < 4 && k < 2; i++) {
+      var y = n.getUTCFullYear(), m = n.getUTCMonth() + i; y += Math.floor(m / 12); m %= 12;
+      var lf = lastFriday(y, m); if (lf.getTime() < now) continue; k++;
+      var q = m % 3 === 2;
+      ev.push({ t: lf.getTime(), time: true, h: (q ? "Quarterly" : "Monthly") + " bitcoin and ether options expiry", p: "Large batches of bitcoin and ether options on Deribit, the biggest crypto options exchange, settle on the last Friday of the month at 08:00 UTC" + (q ? "; the quarter-end one is the biggest" : "") + ". Prices are often jumpy around it." });
+    }
+    ev.push({ t: Date.UTC(2027, 0, 1), time: false, h: "EU tax reporting: first year of data complete", p: "Under the EU's DAC8 rules, crypto platforms record their users' transactions from 1 January 2026 and report them to tax authorities in 2027. Keep your own records of buys and sells." });
+    var draw = function () {
+      ev.sort(function (a, b) { return a.t - b.t; });
+      fill("events", '<ul class="ev">' + ev.map(function (e) {
+        return '<li><div class="d notranslate" translate="no">' + (e.approx ? "≈ " : "") + esc(dfmt(e.t, e.approx ? { month: "short", year: "numeric" } : { weekday: "short", day: "numeric", month: "short" })) + (e.time ? "<small>" + esc(dfmt(e.t, { hour: "2-digit", minute: "2-digit" })) + "</small>" : !e.approx ? "<small>" + new Date(e.t).getFullYear() + "</small>" : "") + "</div><div><b>" + esc(e.h) + "</b><p>" + e.p + "</p></div></li>";
+      }).join("") + "</ul>");
+    };
+    draw();
+    var BS = "https://blockstream.info/api";
+    var txt = function (u) { var c = new AbortController(), t = setTimeout(function () { c.abort(); }, 10000); return fetch(u, { signal: c.signal }).then(function (r) { clearTimeout(t); if (!r.ok) throw new Error(r.status); return r.text(); }); };
+    var stamp = function (hash) { return getJSON(BS + "/block/" + hash.trim()).then(function (b) { return b.timestamp * 1000; }); };
+    // the next adjustment from blockstream.info's blocks: the average block time since the last one sets both the
+    // expected date and the expected change (shown only once 50+ blocks make the average meaningful)
+    var net = txt(BS + "/blocks/tip/height").then(function (h) {
+        h = +h; var start = Math.floor(h / 2016) * 2016, done = h - start;
+        if (done < 50) return [{ estimatedRetargetDate: Date.now() + (start + 2016 - h) * 600000, difficultyChange: null }, h];
+        return Promise.all([txt(BS + "/block-height/" + start).then(stamp), txt(BS + "/blocks/tip/hash").then(stamp)]).then(function (t) {
+          var avg = (t[1] - t[0]) / done;   // ms per block since the last adjustment
+          return [{ estimatedRetargetDate: Date.now() + (start + 2016 - h) * avg, difficultyChange: (600000 / avg - 1) * 100 }, h];
+        }).catch(function () { return [null, h]; });
+      }).catch(function () { return [null, null]; });
+    return net.then(function (r) {
+      var da = r[0], h = +r[1];
+      if (da && da.estimatedRetargetDate) ev.push({ t: da.estimatedRetargetDate, time: true, approx: false, h: "Bitcoin mining difficulty adjustment", p: "Every 2,016 blocks the network re-tunes how hard mining is" + (da.difficultyChange != null ? ": expected change <b class=\"num notranslate\" translate=\"no\">" + pct(da.difficultyChange) + "</b>" : "") + ". It matters to miners' profits more than to the price (an estimate; the exact time depends on blocks)." });
+      if (h > 0 && h < 1050000) { var left = 1050000 - h; ev.push({ t: now + left * 600000, approx: true, h: "Next bitcoin halving (estimate)", p: "At block 1,050,000 the reward for mining a block halves, so fewer new bitcoins are created. <span class=\"num notranslate\" translate=\"no\">" + left.toLocaleString() + "</span> blocks to go (about 10 minutes each). Past halvings came before big rises, but that is history, not a promise." }); }
+      draw();
+    });
+  };
+
+  // ------------------------------------------------------------------ plain words for investors in Europe (general information, kept short)
+  var renderNotes = function () {
+    var b = byId("bitcoin"), dd = b && b.ath_change_percentage != null ? Math.abs(b.ath_change_percentage) : null;
+    var n = [
+      ["It can fall a long way, fast", "Bitcoin has lost more than 70% of its value several times (2018, 2022) before recovering; smaller coins often never came back." + (dd != null ? " Right now it is <b class=\"num notranslate\" translate=\"no\">" + dd.toFixed(0) + "%</b> below its record." : "") + " Only put in money you could lose without changing your life."],
+      ["Use a platform licensed in the EU", "Since 30 December 2024 the EU's MiCA rules require crypto firms serving Europeans to be authorised, and the transition periods ended by 1 July 2026. Check a platform on <a href=\"https://www.esma.europa.eu/esmas-activities/digital-finance-and-innovation/markets-crypto-assets-regulation-mica\" target=\"_blank\" rel=\"noopener\">ESMA's MiCA register</a> before sending money."],
+      ["Taxes: platforms now report", "Under the EU's DAC8 rules, platforms collect your transaction details from 2026 and pass them to tax authorities. Gains are usually taxable, but rates and rules differ by country: keep a record of every buy, sell and swap."],
+      ["Not a bank account", "Crypto held on a platform is not covered by the €100,000 deposit guarantee that protects bank savings. Exchanges can fail (FTX, 2022). Stablecoins are meant to hold their value, but they are not deposits either."],
+      ["Scams look like opportunities", "Nobody genuine will ever ask for your recovery phrase. \"Guaranteed\" returns, celebrity endorsements and pressure to act now are red flags. National regulators (AMF, BaFin, KNF, CONSOB…) publish warning lists of unauthorised firms."],
+      ["Small and steady beats all-in", "Many people who invest in crypto put in a small share of their savings and buy regular fixed amounts rather than trying to time the market. Fees and spreads add up: compare them before you choose a platform."]
+    ];
+    fill("notes", '<ul class="notes">' + n.map(function (x) { return "<li><b>" + x[0] + "</b>" + x[1] + "</li>"; }).join("") + "</ul>"
+      + '<p class="empty" style="margin-top:10px">General information only, not investment, tax or legal advice. For your situation, ask an independent adviser authorised in your country.</p>');
+  };
+
+  // ------------------------------------------------------------------ wiring
+  var renderAll = function () {
+    renderFacts(); renderHeroes(); renderStrip(); renderCoins(); renderMovers(); renderNotes();
+    $("#upd").textContent = M.at ? "Updated " + dfmt(M.at, { hour: "2-digit", minute: "2-digit" }) + (M.fallback ? " · Binance prices" : "") : "";
+  };
+  var refresh = function () { return loadMarkets().then(renderAll); };
+  var pick = function (id) { if (!id || id === sel) return; sel = id; ls("mib-crypto-coin", id); renderHeroes(); renderCoins(); loadChart();
+    var c = $("#chartc"), top = c ? c.getBoundingClientRect().top : 0; if (c && (top < 0 || top > innerHeight * .6)) c.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest("[data-id]"); if (t && (t.classList.contains("hero") || t.tagName === "TR")) pick(t.dataset.id);
+    var r = e.target.closest && e.target.closest("#rng button"); if (r) { days = +r.dataset.d; ls("mib-crypto-days", String(days)); loadChart(); }
+    var c = e.target.closest && e.target.closest("#cur button"); if (c && c.dataset.c !== cur) { cur = c.dataset.c; ls("mib-crypto-cur", cur); setCur(); refresh().then(function () { loadChart(); loadTrending(); }); }
+  });
+  var setCur = function () { Array.prototype.forEach.call(document.querySelectorAll("#cur button"), function (b) { b.classList.toggle("on", b.dataset.c === cur); }); };
+  setCur();
+  var rt; addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { if (CH.pts.length) drawChart(); }, 150); });
+  renderNotes();
+  refresh().then(function () { loadChart(); });
+  loadMood().then(renderFacts);
+  // CoinGecko limits each visitor to a few calls a minute: the slower parts wait a moment
+  setTimeout(loadTrending, 1500);
+  loadNews(); loadEvents();
+  // prices again every 2 minutes while the page is on screen (the chart every 10)
+  var tick = 0;
+  setInterval(function () { if (document.hidden) return; tick++; refresh().then(function () { if (tick % 5 === 0 || !CH.pts.length) loadChart(); }); }, 120000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && Date.now() - M.at > 120000) refresh(); });
+})();
+</script>
+</body>
+</html>

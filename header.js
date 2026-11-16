@@ -101,7 +101,7 @@
   var H = home ? "" : "/";
   // 14 Nov (owner: "reorganise the menu order"): the market first (today, news, money, the calendar, the deep dives, the
   // week, the archive), then the fun (Sports, Arcade), the gold Lounge last; the chat itself is the 💬 button
-  var links = [["today", L("Today", "Aujourd'hui"), H + (home ? "#today" : "")], ["news", L("News", "Actus"), H + "#news"], ["money", L("Money", "Marchés"), H + "#money"], ["calendar", L("Calendar", "Agenda"), H + "#calendar"],
+  var links = [["today", L("Today", "Aujourd'hui"), H + (home ? "#today" : "")], ["news", L("News", "Actus"), H + "#news"], ["money", L("Money", "Marchés"), H + "#money"], ["crypto", "Crypto", "/crypto/"], ["calendar", L("Calendar", "Agenda"), H + "#calendar"],
     ["dives", L("Deep dive", "Analyses"), H + "#dives"], ["week", L("The Week", "La semaine"), "/weekly.html"], ["archive", L("Archive", "Archives"), "/archive/"], ["sports", "Sports", "/sports/"], ["arcade", "Arcade", "/arcade/"], ["lounge", L("Lounge · chat & play", "Lounge · chat & jeux"), H + "#lounge"]];
   var bar = document.createElement("div"); bar.className = "mibbar notranslate"; bar.setAttribute("translate", "no");
   bar.innerHTML = '<div class="mb-in"><a class="mb-logo notranslate" translate="no" href="/" aria-label="MIB Terminal, home">MIB<i></i></a><nav aria-label="Site">'
